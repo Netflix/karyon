@@ -1,0 +1,50 @@
+// Establish version and status
+ext.githubProjectName = rootProject.name // Change if github project name is not the same as the root project's name
+
+buildscript {
+    repositories { mavenCentral() }
+    apply from: file('gradle/buildscript.gradle'), to: buildscript 
+}
+
+allprojects {
+    repositories { mavenCentral() }
+}
+
+apply from: file('gradle/convention.gradle')
+apply from: file('gradle/maven.gradle')
+apply from: file('gradle/check.gradle')
+apply from: file('gradle/license.gradle')
+apply from: file('gradle/release.gradle')
+
+subprojects {
+    group = "com.netflix.${githubProjectName}" // TEMPLATE: Set to organization of project
+
+    dependencies {
+        compile 'org.slf4j:slf4j-api:1.6.4'
+        compile 'com.netflix.servo:servo-core:0.4.32'
+        compile 'com.google.guava:guava:11.0.2'
+        compile 'com.netflix.archaius:archaius-core:0.5.4'
+        compile 'javax.ws.rs:jsr311-api:1.1.1'
+        compile 'com.netflix.governator:governator:1.0.4'
+        compile 'com.google.inject.extensions:guice-servlet:3.0'
+        compile 'javax.servlet:servlet-api:2.5'
+        compile 'commons-collections:commons-collections:3.2.1'
+        testCompile 'junit:junit:4.10'
+        testCompile 'log4j:log4j:1.2.16'
+        testCompile 'org.mortbay.jetty:jetty:6.1H.22'
+    }
+}
+
+project(':karyon-core') {
+    dependencies {
+        compile 'com.netflix.governator:governator:1.0.4'
+    }
+}
+
+project(':karyon-server') {
+    dependencies {
+        compile project(':karyon-core')
+        compile 'com.netflix.netflix-commons:netflix-statistics:0.1.0'
+        compile 'com.netflix.eureka:eureka-client:1.1.73'
+    }
+}
