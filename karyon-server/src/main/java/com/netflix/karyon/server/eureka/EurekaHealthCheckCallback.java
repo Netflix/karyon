@@ -28,7 +28,7 @@ public class EurekaHealthCheckCallback implements HealthCheckCallback {
     public boolean isHealthy() {
         if (null != healthCheckHandler) {
             int healthStatus = healthCheckHandler.checkHealth();
-            return healthStatus > 200 && healthStatus < 300;
+            return healthStatus >= 200 && healthStatus < 300;
         }
         return true;
     }
