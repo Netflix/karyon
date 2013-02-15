@@ -9,13 +9,10 @@ import com.netflix.appinfo.InstanceInfo;
 import com.netflix.appinfo.MyDataCenterInstanceConfig;
 import com.netflix.discovery.DefaultEurekaClientConfig;
 import com.netflix.discovery.DiscoveryManager;
-import com.netflix.governator.annotations.AutoBind;
 import com.netflix.governator.annotations.AutoBindSingleton;
 import com.netflix.governator.annotations.Configuration;
-import com.netflix.karyon.lifecycle.KaryonAutoBindProvider;
 import com.netflix.karyon.server.utils.KaryonUtils;
 import com.netflix.karyon.spi.PropertyNames;
-import org.apache.commons.configuration.AbstractConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,12 +38,7 @@ public class EurekaHandler {
 
     protected static final Logger logger = LoggerFactory.getLogger(EurekaHandler.class);
 
-    @Inject
     private EurekaHealthCheckCallback eurekaHealthCheckCallback;
-
-    @AutoBind(KaryonAutoBindProvider.ARCHIAUS_CONFIG_NAME)
-    @Inject
-    private AbstractConfiguration archaiusConfig;
 
     @Configuration(
             value = EUREKA_PROPERTIES_NAME_PREFIX_PROP_NAME,
@@ -60,6 +52,11 @@ public class EurekaHandler {
     )
     private String datacenterType;
 
+    @Inject
+    public EurekaHandler(EurekaHealthCheckCallback eurekaHealthCheckCallback) {
+        this.eurekaHealthCheckCallback = eurekaHealthCheckCallback;
+    }
+
     @PostConstruct
     public void postConfig() {
         if (!eurekaNamespace.endsWith(".")) {
@@ -68,7 +65,7 @@ public class EurekaHandler {
     }
 
     public void register() {
-        if (!KaryonUtils.isCoreComponentEnabled(archaiusConfig, PropertyNames.EUREKA_COMPONENT_NAME)) {
+        if (!KaryonUtils.isCoreComponentEnabled(PropertyNames.EUREKA_COMPONENT_NAME)) {
             logger.info("Eureka is disabled, skipping instance's eureka registration.");
             return;
         }
@@ -102,7 +99,7 @@ public class EurekaHandler {
     }
 
     public void markAsUp() {
-        if (!KaryonUtils.isCoreComponentEnabled(archaiusConfig, PropertyNames.EUREKA_COMPONENT_NAME)) {
+        if (!KaryonUtils.isCoreComponentEnabled(PropertyNames.EUREKA_COMPONENT_NAME)) {
             logger.info("Eureka is disabled, skipping instance's eureka update to up.");
             return;
         }
@@ -111,7 +108,7 @@ public class EurekaHandler {
     }
 
     public void markAsDown() {
-        if (!KaryonUtils.isCoreComponentEnabled(archaiusConfig, PropertyNames.EUREKA_COMPONENT_NAME)) {
+        if (!KaryonUtils.isCoreComponentEnabled(PropertyNames.EUREKA_COMPONENT_NAME)) {
             logger.info("Eureka is disabled, skipping instance's eureka update to down.");
             return;
         }

@@ -45,14 +45,19 @@ public class ServerInitializer implements Closeable {
 
     private static final Logger logger = LoggerFactory.getLogger(ServerInitializer.class);
 
-    @Inject
     private EurekaHandler eurekaHandler;
 
-    @Inject
     private ApplicationFinder applicationFinder;
 
-    @Inject
     private ComponentFinder componentFinder;
+
+    @Inject
+    public ServerInitializer(EurekaHandler eurekaHandler, ApplicationFinder applicationFinder,
+                             ComponentFinder componentFinder) {
+        this.eurekaHandler = eurekaHandler;
+        this.applicationFinder = applicationFinder;
+        this.componentFinder = componentFinder;
+    }
 
     /**
      * Initializes karyon which is to instantiate applications and components defined in the classpath.

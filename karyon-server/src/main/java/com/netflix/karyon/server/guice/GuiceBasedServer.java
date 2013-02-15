@@ -73,7 +73,7 @@ public class GuiceBasedServer extends GuiceServletContextListener {
         try {
             server.start();
         } catch (Exception e) {
-            logger.error("Error while starting karyon server.", e);
+            logger.error("Error while starting karyon.", e);
             throw Throwables.propagate(e);
         }
     }
@@ -83,7 +83,7 @@ public class GuiceBasedServer extends GuiceServletContextListener {
         try {
             server.close();
         } catch (IOException e) {
-            logger.error("Error while stopping karyon server.", e);
+            logger.error("Error while stopping karyon.", e);
             throw Throwables.propagate(e);
         }
     }

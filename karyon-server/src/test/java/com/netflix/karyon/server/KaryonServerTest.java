@@ -18,6 +18,7 @@ package com.netflix.karyon.server;
 
 import com.netflix.config.ConfigurationManager;
 import com.netflix.karyon.spi.PropertyNames;
+import com.test.HealthCheckGuy;
 import com.test.RegistrationSequence;
 import com.test.TestApplication;
 import com.test.TestComponent;
@@ -61,11 +62,21 @@ public class KaryonServerTest {
 
     @Test
     public void testOnlyAnnotatedComponent() throws Exception {
-        ConfigurationManager.getConfigInstance().setProperty(PropertyNames.DISABLE_APPLICATION_DISCOVERY_PROP_NAME, true);
+        ConfigurationManager.getConfigInstance().setProperty(PropertyNames.DISABLE_APPLICATION_DISCOVERY_PROP_NAME,
+                true);
 
         startServer();
         Assert.assertTrue("Component not initialized.", RegistrationSequence.contains(TestComponent.class));
         Assert.assertFalse("Application initialized.", RegistrationSequence.contains(TestApplication.class));
+    }
+
+    @Test
+    public void testHealthCheck() throws Exception {
+        ConfigurationManager.getConfigInstance().setProperty(PropertyNames.HEALTH_CHECK_HANDLER_CLASS_PROP_NAME,
+                HealthCheckGuy.class.getName());
+
+        startServer();
+        Assert.assertTrue("Health check handler not initialized.", RegistrationSequence.contains(HealthCheckGuy.class));
     }
 
     @Test

@@ -18,14 +18,15 @@ package com.netflix.karyon.finder;
 
 import com.google.common.base.Throwables;
 import com.google.inject.Inject;
-import com.netflix.governator.annotations.AutoBind;
 import com.netflix.governator.annotations.Configuration;
 import com.netflix.governator.lifecycle.ClasspathScanner;
-import com.netflix.karyon.lifecycle.KaryonAutoBindProvider;
+import com.netflix.karyon.spi.Application;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nullable;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Set;
 
 import static com.netflix.karyon.spi.PropertyNames.DISABLE_APPLICATION_DISCOVERY_PROP_NAME;
@@ -37,10 +38,6 @@ import static com.netflix.karyon.spi.PropertyNames.EXPLICIT_APPLICATION_CLASS_PR
 public class ApplicationFinder {
 
     private static final Logger logger = LoggerFactory.getLogger(ApplicationFinder.class);
-
-    @AutoBind(KaryonAutoBindProvider.APPLICATION_SCANNER_NAME)
-    @Inject
-    private ClasspathScanner scanner;
 
     @Configuration(
             value = DISABLE_APPLICATION_DISCOVERY_PROP_NAME,
@@ -54,6 +51,13 @@ public class ApplicationFinder {
     )
     private String explicitAppClassName;
 
+    private ClasspathScanner scanner;
+
+    @Inject
+    public ApplicationFinder(ClasspathScanner scanner) {
+        this.scanner = scanner;
+    }
+
     @Nullable
     public Class<?> findApplication() {
 
@@ -61,14 +65,27 @@ public class ApplicationFinder {
             return null;
         }
 
-        Set<Class<?>> applications = scanner.getClasses();
-        if (null == applications || applications.isEmpty()) {
+        Set<Class<?>> potentialApps = scanner.getClasses();
+        if (null == potentialApps || potentialApps.isEmpty()) {
             logger.info(
                     "No application classes (Annotated with @Application) found. It is fine if you do not use the annotation model for applications.");
             return null;
         }
 
-        if (applications.size() > 1) {
+        potentialApps = new HashSet<Class<?>>(potentialApps);
+        for (Iterator<Class<?>> iterator = potentialApps.iterator(); iterator.hasNext(); ) {
+            Class<?> potentialApp = iterator.next();
+            if (!potentialApp.isAnnotationPresent(Application.class)) {
+                iterator.remove();
+            }
+        }
+
+        if (potentialApps.isEmpty()) {// If everything got removed.
+            logger.info( "No application classes (Annotated with @Application) found. It is fine if you do not use the annotation model for applications.");
+            return null;
+        }
+
+        if (potentialApps.size() > 1) {
             if (null != explicitAppClassName) {
                 try {
                     return Class.forName(explicitAppClassName);
@@ -81,9 +98,9 @@ public class ApplicationFinder {
                 logger.warn(String.format("More than one application classes found in the classpath. Classnames: %s. " +
                                           "Only the first application will be instantiated. In order to avoid this random selection,"
                                           + "set a property with name: %s and value as the application class name of the desired"
-                                          + "application to be used.", applications, EXPLICIT_APPLICATION_CLASS_PROP_NAME));
+                                          + "application to be used.", potentialApps, EXPLICIT_APPLICATION_CLASS_PROP_NAME));
             }
         }
-        return applications.iterator().next();
+        return potentialApps.iterator().next();
     }
 }

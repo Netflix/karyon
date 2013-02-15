@@ -17,6 +17,7 @@ public class EurekaIntegrationTest {
 
     @Before
     public void setUp() throws Exception {
+        System.setProperty(PropertyNames.SERVER_BOOTSTRAP_BASE_PACKAGES_OVERRIDE, "com.test");
         System.setProperty(PropertyNames.KARYON_PROPERTIES_PREFIX + PropertyNames.EUREKA_COMPONENT_NAME + ".disable", "false");
         System.setProperty("eureka.name", EurekaResourceMock.EUREKA_KARYON_APP_NAME);
         System.setProperty("eureka.shouldUseDns", "false");

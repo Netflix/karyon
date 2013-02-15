@@ -23,5 +23,7 @@ public class PropertyNames {
 
     public static final String SERVER_BOOTSTRAP_BASE_PACKAGES_OVERRIDE = KARYON_PROPERTIES_PREFIX + "server.base.packages";
 
+    public static final String HEALTH_CHECK_HANDLER_CLASS_PROP_NAME = KARYON_PROPERTIES_PREFIX + "health.check.handler.classname";
+
     public static final String EUREKA_COMPONENT_NAME = "eureka";
 }

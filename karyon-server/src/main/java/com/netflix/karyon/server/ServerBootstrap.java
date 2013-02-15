@@ -16,19 +16,25 @@
 
 package com.netflix.karyon.server;
 
-import com.google.inject.TypeLiteral;
+import com.google.common.collect.Lists;
+import com.google.inject.Inject;
 import com.netflix.config.ConfigurationManager;
-import com.netflix.governator.annotations.AutoBind;
+import com.netflix.governator.annotations.AutoBindSingleton;
 import com.netflix.governator.configuration.ArchaiusConfigurationProvider;
-import com.netflix.governator.guice.AutoBindProvider;
 import com.netflix.governator.guice.BootstrapBinder;
 import com.netflix.governator.guice.BootstrapModule;
 import com.netflix.governator.guice.LifecycleInjector;
 import com.netflix.governator.guice.LifecycleInjectorBuilder;
-import com.netflix.karyon.lifecycle.KaryonAutoBindProvider;
+import com.netflix.governator.lifecycle.ClasspathScanner;
+import com.netflix.karyon.spi.Application;
+import com.netflix.karyon.spi.Component;
+import com.netflix.karyon.spi.HealthCheckHandler;
 import com.netflix.karyon.spi.PropertyNames;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nullable;
+import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -42,8 +48,6 @@ import java.util.List;
  * This class creates a {@link LifecycleInjector} for governator to be used by {@link KaryonServer} to create a guice
  * injector. The injector is created with the following components:
  * <ul>
- <li>A {@link BootstrapModule} which binds {@link KaryonAutoBindProvider} for custom {@link AutoBind} annotations inside
- karyon.</li>
  <li>Configures base packages for governator classpath scanning as "com.netflix" and any extra packages as specified
  by a property {@link PropertyNames#SERVER_BOOTSTRAP_BASE_PACKAGES_OVERRIDE} as a comman separated list of packages to
  scan by governator.</li>
@@ -70,6 +74,8 @@ import java.util.List;
  */
 public class ServerBootstrap {
 
+    private static final Logger logger = LoggerFactory.getLogger(ServerBootstrap.class);
+
     LifecycleInjectorBuilder bootstrap() {
         List<String> allBasePackages = new ArrayList<String>();
         allBasePackages.add("com.netflix");
@@ -79,7 +85,17 @@ public class ServerBootstrap {
             allBasePackages.addAll(basePackages);
         }
 
-        return LifecycleInjector.builder().usingBasePackages(allBasePackages).withBootstrapModule(new BootstrapModuleImpl(allBasePackages));
+        // TODO: Replace with governator native call when fix for https://github.com/Netflix/governator/issues/43 is available
+        List<Class<? extends Annotation>> annotations = Lists.newArrayList();
+        annotations.add(AutoBindSingleton.class);
+        annotations.add(Inject.class);
+        annotations.add(javax.inject.Inject.class);
+        annotations.add(Application.class);
+        annotations.add(Component.class);
+        ClasspathScanner scanner = new ClasspathScanner(basePackages, annotations);
+
+        return LifecycleInjector.builder().usingBasePackages(allBasePackages).usingClasspathScanner(
+                scanner).withBootstrapModule(new BootstrapModuleImpl());
     }
 
     /**
@@ -125,20 +141,52 @@ public class ServerBootstrap {
 
     private class BootstrapModuleImpl implements BootstrapModule {
 
-        private final Collection<String> basePackages;
-
-        public BootstrapModuleImpl(Collection<String> basePackages) {
-            this.basePackages = basePackages;
-        }
-
         @Override
         public void configure(BootstrapBinder binder) {
-            TypeLiteral<AutoBindProvider<AutoBind>> typeLiteral = new TypeLiteral<AutoBindProvider<AutoBind>>(){};
-            binder.bind(typeLiteral).toInstance(new KaryonAutoBindProvider(basePackages));
+
+            bindHealthCheckHandler(binder);
 
             binder.bindConfigurationProvider().to(ArchaiusConfigurationProvider.class);
 
             configureBootstrapBinder(binder);
+        }
+
+        @SuppressWarnings("unchecked")
+        private void bindHealthCheckHandler(BootstrapBinder binder) {
+            String healthCheckHandlerClass = ConfigurationManager.getConfigInstance()
+                                                .getString(PropertyNames.HEALTH_CHECK_HANDLER_CLASS_PROP_NAME);
+            boolean bound = false;
+            if (null != healthCheckHandlerClass) {
+                Class<? extends HealthCheckHandler> handlerClass = null;
+                try {
+                    Class<?> aClass = Class.forName(healthCheckHandlerClass);
+                    if (HealthCheckHandler.class.isAssignableFrom(aClass)) {
+                        binder.bind(HealthCheckHandler.class).to((Class<? extends HealthCheckHandler>) aClass);
+                        bound = true;
+                    } else {
+                        logger.warn(String.format(
+                                "Health check handler %s specified does not implement %s. This handler will not be registered with karyon.",
+                                healthCheckHandlerClass, HealthCheckHandler.class.getName()));
+                    }
+                } catch (ClassNotFoundException e) {
+                    logger.error(String.format(
+                            "Handler class %s specified as property %s can not be found. This handler will not be registered with karyon.",
+                            handlerClass, PropertyNames.HEALTH_CHECK_HANDLER_CLASS_PROP_NAME), e);
+                }
+            } else {
+                logger.info("No health check handler defined. This means your application can not provide meaningful health state to external entities. " +
+                            "It is highly recommended that you provide an implementation of " + HealthCheckHandler.class.getName() +
+                            " and specify the fully qualified class name of the implementation in the property " + PropertyNames.HEALTH_CHECK_HANDLER_CLASS_PROP_NAME);
+            }
+
+            if(!bound) {
+                binder.bind(HealthCheckHandler.class).toInstance(new HealthCheckHandler() {
+                    @Override
+                    public int checkHealth() {
+                        return 200;
+                    }
+                });
+            }
         }
     }
 }

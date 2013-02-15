@@ -17,11 +17,10 @@
 package com.netflix.karyon.finder;
 
 import com.google.inject.Inject;
-import com.netflix.governator.annotations.AutoBind;
+import com.netflix.config.ConfigurationManager;
 import com.netflix.governator.lifecycle.ClasspathScanner;
-import com.netflix.karyon.lifecycle.KaryonAutoBindProvider;
+import com.netflix.karyon.spi.Component;
 import com.netflix.karyon.spi.PropertyNames;
-import org.apache.commons.configuration.AbstractConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,17 +36,17 @@ public class ComponentFinder {
 
     private static final Logger logger = LoggerFactory.getLogger(ComponentFinder.class);
 
-    @AutoBind(KaryonAutoBindProvider.COMPONENT_SCANNER_NAME)
-    @Inject
     private ClasspathScanner scanner;
 
-    @AutoBind(KaryonAutoBindProvider.ARCHIAUS_CONFIG_NAME)
     @Inject
-    private AbstractConfiguration archaiusConfig;
+    public ComponentFinder(ClasspathScanner scanner) {
+        this.scanner = scanner;
+    }
 
     public Set<Class<?>> findComponents() {
 
-        List<Object> componentClassNames = archaiusConfig.getList(PropertyNames.EXPLICIT_COMPONENT_CLASSES_PROP_NAME);
+        List<Object> componentClassNames =
+                ConfigurationManager.getConfigInstance().getList(PropertyNames.EXPLICIT_COMPONENT_CLASSES_PROP_NAME);
 
         Set<Class<?>> toReturn = new HashSet<Class<?>>();
 
@@ -61,18 +60,22 @@ public class ComponentFinder {
                             componentClassName, PropertyNames.EXPLICIT_COMPONENT_CLASSES_PROP_NAME));
                 }
             }
-
-            // TODO: See if we need to toggle between strategies here.
             return toReturn;
         }
 
-        Set<Class<?>> components = scanner.getClasses();
-        if (null == components || components.isEmpty()) {
+        Set<Class<?>> potentialMatches = scanner.getClasses();
+        if (null == potentialMatches || potentialMatches.isEmpty()) {
             logger.info(
                     "No component classes (Annotated with @Component) found. It is fine if you do not use the annotation model for components or you do not have any.");
             return Collections.emptySet();
         }
 
-        return components;
+        for (Class<?> potentialMatch : potentialMatches) {
+            if (potentialMatch.isAnnotationPresent(Component.class)) {
+                toReturn.add(potentialMatch);
+            }
+        }
+
+        return toReturn;
     }
 }

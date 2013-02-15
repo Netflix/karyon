@@ -1,7 +1,7 @@
 package com.netflix.karyon.server.utils;
 
+import com.netflix.config.ConfigurationManager;
 import com.netflix.karyon.spi.PropertyNames;
-import org.apache.commons.configuration.AbstractConfiguration;
 
 /**
  * Utility methods for karyon
@@ -15,12 +15,13 @@ public class KaryonUtils {
      * {@link com.netflix.karyon.spi.PropertyNames#KARYON_PROPERTIES_PREFIX}.[component_name].disable with the value
      * set to true for disabling. By default all core components are enabled.
      *
+     *
      * @param componentName Name of the component for which the flag is to be retrieved.
      *
      * @return <code>true</code> if the component is enabled.
      */
-    public static boolean isCoreComponentEnabled(AbstractConfiguration archaiusConfig, String componentName) {
-        return !archaiusConfig.getBoolean(getPropname(componentName), false);
+    public static boolean isCoreComponentEnabled(String componentName) {
+        return !ConfigurationManager.getConfigInstance().getBoolean(getPropname(componentName), false);
     }
 
     private static String getPropname(String componentName) {

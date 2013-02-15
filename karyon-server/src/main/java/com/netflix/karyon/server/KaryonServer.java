@@ -19,6 +19,7 @@ package com.netflix.karyon.server;
 import com.google.common.base.Throwables;
 import com.google.common.io.Closeables;
 import com.google.inject.Injector;
+import com.netflix.config.ConfigurationManager;
 import com.netflix.governator.guice.LifecycleInjectorBuilder;
 import com.netflix.governator.lifecycle.LifecycleManager;
 import com.netflix.karyon.server.lifecycle.ServerInitializer;
@@ -40,9 +41,9 @@ import java.io.IOException;
  <li>Call {@link com.netflix.karyon.server.KaryonServer#initialize()} at startup to bootstrap <a href="https://github.com/Netflix/governator/">Governator</a>.
  The bootstrapping is done via {@link ServerBootstrap}. One can customize various aspects of governator bootstrapping
  by providing an extension to {@link ServerBootstrap} and overriding various methods therein. In such a case, fully
- qualified, custom bootstrap class name, must be specified as a <b>system property</b>
- {@link com.netflix.karyon.spi.PropertyNames#SERVER_BOOTSTRAP_CLASS_OVERRIDE}. Such a class must also have a no-arg
- public constructor.</li>
+ qualified, custom bootstrap class name, must be specified as a property
+ {@link com.netflix.karyon.spi.PropertyNames#SERVER_BOOTSTRAP_CLASS_OVERRIDE} available to archaius. Such a class must
+ also have a no-arg public constructor.</li>
  <li>Call {@link com.netflix.karyon.server.KaryonServer#start()} to initialize the karyon environment and hence
  initializing all classes annotated with {@link com.netflix.karyon.spi.Application} and {@link com.netflix.karyon.spi.Component}</li>
  <li>Call {@link com.netflix.karyon.server.KaryonServer#close()} at shutdown or to stop the server. This will cause
@@ -61,6 +62,28 @@ import java.io.IOException;
  * The integration with eureka can be disabled by specifying a property
  * {@link com.netflix.karyon.spi.PropertyNames#KARYON_PROPERTIES_PREFIX}.{@link PropertyNames#EUREKA_COMPONENT_NAME}.disable
  * set to <code>false</code> and accessible to <a href="https://github.com/Netflix/archaius">archaius</a>
+ *
+ * <h2>Archaius Integration</h2>
+ * As such <a href="https://github.com/Netflix/archaius/">Archaius</a> requires minimal integration and works out of the
+ * box however, karyon does one additional step of loading the configuration from properties file located in the
+ * classpath. The properties loading is done by calling {@link ConfigurationManager#loadCascadedPropertiesFromResources(String)}
+ * with the name of the config as returned by {@link com.netflix.config.DeploymentContext#getApplicationId()} from the
+ * deployment context configured in archaius.
+ * For the above to work correctly, one must provide a property with name "archaius.deployment.applicationId" to
+ * archaius before karyon is initialized i.e. before calling {@link com.netflix.karyon.server.KaryonServer#initialize()}.
+ * The value of the property must be the name of the application. By doing the above, archaius loads all properties
+ * defined in properties file(s) having the names:
+ *
+ * [application_name].properties
+ * [application_name]-[environement].properties
+ *
+ * The environment above is as retrieved from {@link com.netflix.config.DeploymentContext#getApplicationId()} from the
+ * deployment context configured in archaius. This can be set by a property "archaius.deployment.environment"
+ *
+ * NOTE: The above property names are valid if the default deployment context is used for archaius.
+ *
+ * If any customization is required in archaius, one should do the same before calling
+ * {@link com.netflix.karyon.server.KaryonServer#initialize()}.
  *
  * <h2>Example</h2>
  * One can create a very simple server using karyon as:
@@ -116,8 +139,24 @@ public class KaryonServer implements Closeable {
             return injector;
         }
 
+        String appId = ConfigurationManager.getDeploymentContext().getApplicationId();
+
+        if (null != appId) {
+            try {
+                ConfigurationManager.loadCascadedPropertiesFromResources(appId);
+            } catch (IOException e) {
+                logger.error(String.format(
+                        "Failed to load properties for application id: %s and environment: %s. This is ok, if you do not have application level properties.",
+                        appId,
+                        ConfigurationManager.getDeploymentContext().getDeploymentEnvironment()), e);
+            }
+        } else {
+            logger.warn(
+                    "Application identifier not defined, skipping application level properties loading. You must set a property 'archaius.deployment.applicationId' to be able to load application level properties.");
+        }
+
         ServerBootstrap bootstrap;
-        String bootstrapClassName = System.getProperty(PropertyNames.SERVER_BOOTSTRAP_CLASS_OVERRIDE);
+        String bootstrapClassName = ConfigurationManager.getConfigInstance().getString( PropertyNames.SERVER_BOOTSTRAP_CLASS_OVERRIDE);
         if (null == bootstrapClassName) {
             bootstrap = new ServerBootstrap();
         } else {
@@ -157,12 +196,12 @@ public class KaryonServer implements Closeable {
      */
     @Override
     public void close() throws IOException {
-        logger.info("Shutting down karyon server.");
+        logger.info("Shutting down karyon.");
         if (null != initializer) {
             initializer.close();
         }
         Closeables.closeQuietly(lifecycleManager);
-        logger.info("Successfully shut down karyon server.");
+        logger.info("Successfully shut down karyon.");
     }
 
     private ServerBootstrap instantiateBootstrapClass(String bootstrapClassName) {
