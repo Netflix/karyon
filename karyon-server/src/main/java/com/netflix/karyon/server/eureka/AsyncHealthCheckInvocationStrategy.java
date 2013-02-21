@@ -26,7 +26,11 @@ import java.util.concurrent.atomic.AtomicReference;
  * value is as configured by the property{@link PropertyNames#HEALTH_CHECK_TIMEOUT_DEFAULT_MILLIS} milliseconds. <p/>
  *
  * <h3>Threading model</h3>
- *
+ * This class uses exactly one thread to perform the health check. There is no queue used for any concurrent health
+ * check requests. Any concurrent health check requests blocks (for the configured timeout) and wait for the single
+ * execution to finish after which the same result is returned. This is useful in providing an SLA for the healthcheck
+ * and does not create a queuing point which may result in unnecessary tuning and memory overheads.
+ * 
  * @author Nitesh Kant (nkant@netflix.com)
  */
 @Singleton
