@@ -21,49 +21,12 @@ public class EurekaResourceMock {
     public static final String EUREKA_API_BASE_PATH = "/discovery/v2/";
     public static final String EUREKA_SERVICE_URL = "http://localhost:" + EUREKA_PORT + EUREKA_API_BASE_PATH;
     private Server server;
+    public MockHandler handler;
 
     public void start() {
         server = new Server(EUREKA_PORT);
-        server.setHandler(new AbstractHandler() {
-
-            private AtomicBoolean appRegistered = new AtomicBoolean();
-
-            @Override
-            public void handle(String target, HttpServletRequest request, HttpServletResponse response, int dispatch)
-                    throws IOException, ServletException {
-                String pathInfo = request.getPathInfo();
-                System.out.println("Eureka resource mock, received request on path: " + pathInfo);
-                if (null != pathInfo && pathInfo.startsWith(EUREKA_API_BASE_PATH)) {
-                    pathInfo = pathInfo.substring(EUREKA_API_BASE_PATH.length());
-                    if (pathInfo.startsWith("apps/" + EUREKA_KARYON_APP_NAME)) {
-                        if (request.getMethod().equals("PUT")) {
-                            appRegistered.set(true);
-                        } else if (request.getMethod().equals("DELETE")) {
-                            appRegistered.set(false);
-                        } else {
-                            sendOkResponseWithContent((Request) request, response, CannedResponses.testApp());
-                        }
-                    } else if (pathInfo.startsWith("apps")) {
-                        if (appRegistered.get()) {
-                            sendOkResponseWithContent((Request) request, response, CannedResponses.testApp());
-                        } else {
-                            sendOkResponseWithContent((Request) request, response, CannedResponses.apps());
-                        }
-                    }
-                } else {
-                    response.sendError(HttpServletResponse.SC_NOT_FOUND, "Request path: " + pathInfo + " not supported by eureka resource mock.");
-                }
-            }
-
-            private void sendOkResponseWithContent(Request request, HttpServletResponse response, String content) throws IOException {
-                response.setContentType("application/xml");
-                response.setStatus(HttpServletResponse.SC_OK);
-                response.getWriter().println(content);
-                response.getWriter().flush();
-                request.setHandled(true);
-                System.out.println("Eureka resource mock, sent response for request path: " + request.getPathInfo());
-            }
-        });
+        handler = new MockHandler();
+        server.setHandler(handler);
         try {
             server.start();
         } catch (Exception e) {
@@ -106,7 +69,7 @@ public class EurekaResourceMock {
                                              "        </metadata>\n" +
                                              "      </dataCenterInfo>\n" +
                                              "      <leaseInfo>\n" +
-                                             "        <renewalIntervalInSecs>30</renewalIntervalInSecs>\n" +
+                                             "        <renewalIntervalInSecs>1</renewalIntervalInSecs>\n" +
                                              "        <durationInSecs>90</durationInSecs>\n" +
                                              "        <registrationTimestamp>1360619077753</registrationTimestamp>\n" +
                                              "        <lastRenewalTimestamp>1360619077753</lastRenewalTimestamp>\n" +
@@ -166,7 +129,7 @@ public class EurekaResourceMock {
                    "        </metadata>\n" +
                    "      </dataCenterInfo>\n" +
                    "      <leaseInfo>\n" +
-                   "        <renewalIntervalInSecs>30</renewalIntervalInSecs>\n" +
+                   "        <renewalIntervalInSecs>1</renewalIntervalInSecs>\n" +
                    "        <durationInSecs>90</durationInSecs>\n" +
                    "        <registrationTimestamp>1360619077753</registrationTimestamp>\n" +
                    "        <lastRenewalTimestamp>1360619077753</lastRenewalTimestamp>\n" +
@@ -186,6 +149,54 @@ public class EurekaResourceMock {
                    "    </instance>\n" +
                    "  </application>\n" +
                    "</applications>";
+        }
+    }
+
+    public class MockHandler extends AbstractHandler {
+
+        public AtomicBoolean appRegistered = new AtomicBoolean();
+
+        @Override
+        public void handle(String target, HttpServletRequest request, HttpServletResponse response, int dispatch)
+                throws IOException, ServletException {
+            String pathInfo = request.getPathInfo();
+            System.out.println(
+                    "Eureka resource mock, received request on path: " + pathInfo + ". HTTP method: |" + request
+                            .getMethod() + "|");
+            if (null != pathInfo && pathInfo.startsWith(EUREKA_API_BASE_PATH)) {
+                pathInfo = pathInfo.substring(EUREKA_API_BASE_PATH.length());
+                if (pathInfo.startsWith("apps/" + EUREKA_KARYON_APP_NAME)) {
+                    if (request.getMethod().equals("PUT") || request.getMethod().equals("POST")) {
+                        appRegistered.set(true);
+                        ((Request) request).setHandled(true);
+                    } else if (request.getMethod().equals("DELETE")) {
+                        appRegistered.set(false);
+                        ((Request) request).setHandled(true);
+                        System.out.println("Sent response for DELETE");
+                    } else {
+                        sendOkResponseWithContent((Request) request, response, CannedResponses.testApp());
+                    }
+                } else if (pathInfo.startsWith("apps")) {
+                    if (appRegistered.get()) {
+                        sendOkResponseWithContent((Request) request, response, CannedResponses.testApp());
+                    } else {
+                        sendOkResponseWithContent((Request) request, response, CannedResponses.apps());
+                    }
+                }
+            } else {
+                response.sendError(HttpServletResponse.SC_NOT_FOUND,
+                        "Request path: " + pathInfo + " not supported by eureka resource mock.");
+            }
+        }
+
+        private void sendOkResponseWithContent(Request request, HttpServletResponse response, String content)
+                throws IOException {
+            response.setContentType("application/xml");
+            response.setStatus(HttpServletResponse.SC_OK);
+            response.getWriter().println(content);
+            response.getWriter().flush();
+            request.setHandled(true);
+            System.out.println("Eureka resource mock, sent response for request path: " + request.getPathInfo());
         }
     }
 }

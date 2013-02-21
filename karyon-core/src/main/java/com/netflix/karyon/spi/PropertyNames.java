@@ -26,4 +26,12 @@ public class PropertyNames {
     public static final String HEALTH_CHECK_HANDLER_CLASS_PROP_NAME = KARYON_PROPERTIES_PREFIX + "health.check.handler.classname";
 
     public static final String EUREKA_COMPONENT_NAME = "eureka";
+
+    public static final String DISABLE_EUREKA_INTEGRATION = KARYON_PROPERTIES_PREFIX + EUREKA_COMPONENT_NAME + ".disable";
+
+    public static final String HEALTH_CHECK_STRATEGY = KARYON_PROPERTIES_PREFIX + "health.check.strategy";
+
+    public static final String HEALTH_CHECK_TIMEOUT_MILLIS = KARYON_PROPERTIES_PREFIX + "health.check.timeout.ms";
+
+    public static final String HEALTH_CHECK_TIMEOUT_DEFAULT_MILLIS = KARYON_PROPERTIES_PREFIX + "health.check.default.timeout.ms";
 }

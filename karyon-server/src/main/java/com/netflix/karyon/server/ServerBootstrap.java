@@ -26,6 +26,8 @@ import com.netflix.governator.guice.BootstrapModule;
 import com.netflix.governator.guice.LifecycleInjector;
 import com.netflix.governator.guice.LifecycleInjectorBuilder;
 import com.netflix.governator.lifecycle.ClasspathScanner;
+import com.netflix.karyon.server.eureka.AsyncHealthCheckInvocationStrategy;
+import com.netflix.karyon.server.eureka.HealthCheckInvocationStrategy;
 import com.netflix.karyon.spi.Application;
 import com.netflix.karyon.spi.Component;
 import com.netflix.karyon.spi.HealthCheckHandler;
@@ -144,6 +146,8 @@ public class ServerBootstrap {
         @Override
         public void configure(BootstrapBinder binder) {
 
+            bindHealthCheckStrategy(binder);
+
             bindHealthCheckHandler(binder);
 
             binder.bindConfigurationProvider().to(ArchaiusConfigurationProvider.class);
@@ -151,33 +155,26 @@ public class ServerBootstrap {
             configureBootstrapBinder(binder);
         }
 
-        @SuppressWarnings("unchecked")
-        private void bindHealthCheckHandler(BootstrapBinder binder) {
-            String healthCheckHandlerClass = ConfigurationManager.getConfigInstance()
-                                                .getString(PropertyNames.HEALTH_CHECK_HANDLER_CLASS_PROP_NAME);
-            boolean bound = false;
-            if (null != healthCheckHandlerClass) {
-                Class<? extends HealthCheckHandler> handlerClass = null;
-                try {
-                    Class<?> aClass = Class.forName(healthCheckHandlerClass);
-                    if (HealthCheckHandler.class.isAssignableFrom(aClass)) {
-                        binder.bind(HealthCheckHandler.class).to((Class<? extends HealthCheckHandler>) aClass);
-                        bound = true;
-                    } else {
-                        logger.warn(String.format(
-                                "Health check handler %s specified does not implement %s. This handler will not be registered with karyon.",
-                                healthCheckHandlerClass, HealthCheckHandler.class.getName()));
-                    }
-                } catch (ClassNotFoundException e) {
-                    logger.error(String.format(
-                            "Handler class %s specified as property %s can not be found. This handler will not be registered with karyon.",
-                            handlerClass, PropertyNames.HEALTH_CHECK_HANDLER_CLASS_PROP_NAME), e);
-                }
-            } else {
-                logger.info("No health check handler defined. This means your application can not provide meaningful health state to external entities. " +
-                            "It is highly recommended that you provide an implementation of " + HealthCheckHandler.class.getName() +
-                            " and specify the fully qualified class name of the implementation in the property " + PropertyNames.HEALTH_CHECK_HANDLER_CLASS_PROP_NAME);
+        private void bindHealthCheckStrategy(BootstrapBinder binder) {
+            boolean bound = bindACustomClass(binder, PropertyNames.HEALTH_CHECK_STRATEGY,
+                    HealthCheckHandler.class,
+                    "No health check invocation strategy specified, using the default strategy %s. In order to override " +
+                    "this behavior you provide an implementation of %s and specify the fully qualified class name of " +
+                    "the implementation in the property %s", AsyncHealthCheckInvocationStrategy.class.getName(),
+                    HealthCheckInvocationStrategy.class.getName(), PropertyNames.HEALTH_CHECK_STRATEGY);
+
+            if(!bound) {
+                binder.bind(HealthCheckInvocationStrategy.class).to(AsyncHealthCheckInvocationStrategy.class);
             }
+        }
+
+        private void bindHealthCheckHandler(BootstrapBinder binder) {
+            boolean bound = bindACustomClass(binder, PropertyNames.HEALTH_CHECK_HANDLER_CLASS_PROP_NAME,
+                    HealthCheckHandler.class,
+                    "No health check handler defined. This means your application can not provide meaningful health " +
+                    "state to external entities. It is highly recommended that you provide an implementation of %s and " +
+                    "specify the fully qualified class name of the implementation in the property %s",
+                    HealthCheckHandler.class.getName(), PropertyNames.HEALTH_CHECK_HANDLER_CLASS_PROP_NAME);
 
             if(!bound) {
                 binder.bind(HealthCheckHandler.class).toInstance(new HealthCheckHandler() {
@@ -187,6 +184,34 @@ public class ServerBootstrap {
                     }
                 });
             }
+        }
+
+        @SuppressWarnings("unchecked")
+        private <T> boolean bindACustomClass(BootstrapBinder binder, String customClassPropName, Class<T> bindTo,
+                                             String propertNotFoundErrMsg, Object... arguments) {
+            boolean bound = false;
+            String customClassName = ConfigurationManager.getConfigInstance().getString(customClassPropName);
+            if (null != customClassName) {
+                Class<? extends T> customClass = null;
+                try {
+                    Class<?> aClass = Class.forName(customClassName);
+                    if (bindTo.isAssignableFrom(aClass)) {
+                        binder.bind(bindTo).to((Class<? extends T>) aClass);
+                        bound = true;
+                    } else {
+                        logger.warn(String.format("Binding for %s failed, %s can not be assigned to %s.",
+                                bindTo.getName(), customClassName, bindTo.getName()));
+                    }
+                } catch (ClassNotFoundException e) {
+                    logger.error(
+                            String.format("Binding for %s failed, class %s specified as property %s can not be found.",
+                                    bindTo.getName(), customClass, customClassPropName), e);
+                }
+            } else {
+                logger.info(String.format(propertNotFoundErrMsg, arguments));
+            }
+
+            return bound;
         }
     }
 }

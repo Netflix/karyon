@@ -16,10 +16,13 @@
 
 package com.netflix.karyon.server;
 
+import com.google.inject.Injector;
 import com.netflix.config.ConfigurationManager;
+import com.netflix.karyon.server.eureka.EurekaHealthCheckCallback;
 import com.netflix.karyon.spi.PropertyNames;
 import com.test.HealthCheckGuy;
 import com.test.RegistrationSequence;
+import com.test.RogueHealthCheck;
 import com.test.TestApplication;
 import com.test.TestComponent;
 import com.testmulti.TestApplication2;
@@ -39,7 +42,7 @@ public class KaryonServerTest {
     @Before
     public void setUp() throws Exception {
         System.setProperty(PropertyNames.SERVER_BOOTSTRAP_BASE_PACKAGES_OVERRIDE, "com.test");
-        System.setProperty(PropertyNames.KARYON_PROPERTIES_PREFIX + PropertyNames.EUREKA_COMPONENT_NAME + ".disable", "true");
+        System.setProperty(PropertyNames.DISABLE_EUREKA_INTEGRATION, "true");
     }
 
     @After
@@ -80,6 +83,26 @@ public class KaryonServerTest {
     }
 
     @Test
+    public void testHealthCheckTimeout() throws Exception {
+        ConfigurationManager.getConfigInstance().setProperty(PropertyNames.HEALTH_CHECK_HANDLER_CLASS_PROP_NAME,
+                RogueHealthCheck.class.getName());
+
+        Injector injector = startServer();
+        EurekaHealthCheckCallback eurekaHealthCheckCallback = injector.getInstance(EurekaHealthCheckCallback.class);
+        Assert.assertFalse("Health check did not timeout.", eurekaHealthCheckCallback.isHealthy());
+    }
+
+    @Test
+    public void testHealthCheckSuccess() throws Exception {
+        ConfigurationManager.getConfigInstance().setProperty(PropertyNames.HEALTH_CHECK_HANDLER_CLASS_PROP_NAME,
+                HealthCheckGuy.class.getName());
+
+        Injector injector = startServer();
+        EurekaHealthCheckCallback eurekaHealthCheckCallback = injector.getInstance(EurekaHealthCheckCallback.class);
+        Assert.assertTrue("Health check failed.", eurekaHealthCheckCallback.isHealthy());
+    }
+
+    @Test
     public void testMultipleApps() throws Exception {
         ConfigurationManager.getConfigInstance().setProperty(PropertyNames.SERVER_BOOTSTRAP_BASE_PACKAGES_OVERRIDE, "com.test,com.testmulti");
         ConfigurationManager.getConfigInstance().setProperty(PropertyNames.EXPLICIT_APPLICATION_CLASS_PROP_NAME,
@@ -94,9 +117,10 @@ public class KaryonServerTest {
         Assert.assertFalse("Application 2 initialized.", RegistrationSequence.contains(TestApplication2.class));
     }
 
-    private void startServer() throws Exception {
+    private Injector startServer() throws Exception {
         server = new KaryonServer() { };
-        server.initialize();
+        Injector injector = server.initialize();
         server.start();
+        return injector;
     }
 }

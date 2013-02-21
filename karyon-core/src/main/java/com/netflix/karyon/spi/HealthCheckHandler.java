@@ -16,5 +16,12 @@ package com.netflix.karyon.spi;
  */
 public interface HealthCheckHandler {
 
+    /**
+     * Checks the health of the application and returns a status code, which can be directly consumed as a HTTP status
+     * code. <br/>
+     * <b>Kayon considers any status code &gt;= 200 and &lt; 300 as healthy.</b>
+     *
+     * @return The health status of the application.
+     */
     int checkHealth();
 }

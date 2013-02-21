@@ -23,8 +23,7 @@ import static com.netflix.karyon.spi.PropertyNames.EUREKA_PROPERTIES_NAME_PREFIX
 
 /**
  * A handler for integrating with <a href="https://github.com/Netflix/eureka/">Eureka</a>. This handler can be disabled
- * by setting a property {@link PropertyNames#KARYON_PROPERTIES_PREFIX}.{@link PropertyNames#EUREKA_COMPONENT_NAME}.disabled
- * as <code>true</code>. <br/>
+ * by setting a property {@link PropertyNames#DISABLE_EUREKA_INTEGRATION} as <code>true</code>. <br/>
  * If enabled, this class registers the application with eureka as a cloud instance iff the value of the property
  * {@link PropertyNames#EUREKA_DATACENTER_TYPE_PROP_NAME} is set to {@link DataCenterInfo.Name#Amazon} or
  * {@link DataCenterInfo.Name#Netflix}. In such a case, this class uses {@link CloudInstanceConfig} to register with
@@ -39,6 +38,7 @@ public class EurekaHandler {
     protected static final Logger logger = LoggerFactory.getLogger(EurekaHandler.class);
 
     private EurekaHealthCheckCallback eurekaHealthCheckCallback;
+    private HealthCheckInvocationStrategy healthCheckInvocationStrategy;
 
     @Configuration(
             value = EUREKA_PROPERTIES_NAME_PREFIX_PROP_NAME,
@@ -53,8 +53,10 @@ public class EurekaHandler {
     private String datacenterType;
 
     @Inject
-    public EurekaHandler(EurekaHealthCheckCallback eurekaHealthCheckCallback) {
+    public EurekaHandler(EurekaHealthCheckCallback eurekaHealthCheckCallback,
+                         HealthCheckInvocationStrategy healthCheckInvocationStrategy) {
         this.eurekaHealthCheckCallback = eurekaHealthCheckCallback;
+        this.healthCheckInvocationStrategy = healthCheckInvocationStrategy;
     }
 
     @PostConstruct
@@ -113,6 +115,14 @@ public class EurekaHandler {
             return;
         }
 
-        ApplicationInfoManager.getInstance().setInstanceStatus(InstanceInfo.InstanceStatus.DOWN);
+        DiscoveryManager.getInstance().shutdownComponent();
+        if (AsyncHealthCheckInvocationStrategy.class.isAssignableFrom(healthCheckInvocationStrategy.getClass())) {
+            try {
+                ((AsyncHealthCheckInvocationStrategy) healthCheckInvocationStrategy).stop();
+            } catch (InterruptedException e) {
+                Thread.interrupted(); // reset the interrupted status
+                logger.error("Interrupted while stopping the async health check invocation strategy. Ignoring.", e);
+            }
+        }
     }
 }
