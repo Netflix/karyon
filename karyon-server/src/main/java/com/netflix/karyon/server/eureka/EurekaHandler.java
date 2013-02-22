@@ -97,6 +97,8 @@ public class EurekaHandler {
         }
 
         DiscoveryManager.getInstance().initComponent(eurekaInstanceConfig, new DefaultEurekaClientConfig(eurekaNamespace));
+        // We always register the callback with eureka, the handler inturn checks if the unification is enabled, if yes,
+        // the underlying handler is used else returns healthy.
         DiscoveryManager.getInstance().getDiscoveryClient().registerHealthCheckCallback(eurekaHealthCheckCallback);
     }
 

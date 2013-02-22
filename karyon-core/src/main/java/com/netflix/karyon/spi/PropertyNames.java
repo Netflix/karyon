@@ -34,4 +34,6 @@ public class PropertyNames {
     public static final String HEALTH_CHECK_TIMEOUT_MILLIS = KARYON_PROPERTIES_PREFIX + "health.check.timeout.ms";
 
     public static final String HEALTH_CHECK_TIMEOUT_DEFAULT_MILLIS = KARYON_PROPERTIES_PREFIX + "health.check.default.timeout.ms";
+
+    public static final String UNIFY_HEALTHCHECK_WITH_EUREKA = KARYON_PROPERTIES_PREFIX + "unify.health.check.with.eureka";
 }

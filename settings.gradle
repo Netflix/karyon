@@ -1,2 +1,2 @@
 rootProject.name='karyon'
-include 'karyon-core','karyon-server'
+include 'karyon-core','karyon-server','karyon-admin'

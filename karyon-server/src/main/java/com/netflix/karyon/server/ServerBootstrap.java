@@ -179,7 +179,7 @@ public class ServerBootstrap {
             if(!bound) {
                 binder.bind(HealthCheckHandler.class).toInstance(new HealthCheckHandler() {
                     @Override
-                    public int checkHealth() {
+                    public int getStatus() {
                         return 200;
                     }
                 });

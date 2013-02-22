@@ -113,7 +113,7 @@ public class AsyncHealthCheckInvocationStrategy implements HealthCheckInvocation
                     if (alwaysUnhealthy) {
                         return 500;
                     }
-                    return healthCheckHandler.checkHealth();
+                    return healthCheckHandler.getStatus();
                 }
             });
         }

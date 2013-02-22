@@ -23,6 +23,6 @@ public class SyncHealthCheckInvocationStrategy implements HealthCheckInvocationS
 
     @Override
     public int invokeCheck() throws TimeoutException {
-        return handler.checkHealth();
+        return handler.getStatus();
     }
 }

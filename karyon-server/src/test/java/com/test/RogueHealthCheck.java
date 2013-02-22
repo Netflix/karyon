@@ -15,7 +15,7 @@ public class RogueHealthCheck implements HealthCheckHandler {
     }
 
     @Override
-    public int checkHealth() {
+    public int getStatus() {
         try {
             Thread.sleep(60000);
         } catch (InterruptedException e) {
