@@ -42,7 +42,7 @@ import java.io.IOException;
      &lt;/filter-mapping&gt;
 
      &lt;listener&gt;
-         &lt;listener-class&gt;com.netflix.karyon.server.guice.GuiceBasedServer&lt;/listener-class&gt;
+         &lt;listener-class&gt;com.netflix.karyon.server.guice.KaryonGuiceContextListener&lt;/listener-class&gt;
      &lt;/listener&gt;
 
  </PRE>
@@ -51,14 +51,14 @@ import java.io.IOException;
  * @author Jordan Zimmerman
  */
 @SuppressWarnings("unused")
-public class GuiceBasedServer extends GuiceServletContextListener {
+public class KaryonGuiceContextListener extends GuiceServletContextListener {
 
-    protected static final Logger logger = LoggerFactory.getLogger(GuiceBasedServer.class);
+    protected static final Logger logger = LoggerFactory.getLogger(KaryonGuiceContextListener.class);
 
     private final KaryonServer server;
 
     @SuppressWarnings("unused")
-    public GuiceBasedServer() {
+    public KaryonGuiceContextListener() {
         server = new KaryonServer();
     }
 
