@@ -30,7 +30,7 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * @author Nitesh Kant (nkant@netflix.com)
+ * @author Nitesh Kant
  */
 public class ComponentFinder {
 
@@ -72,7 +72,19 @@ public class ComponentFinder {
 
         for (Class<?> potentialMatch : potentialMatches) {
             if (potentialMatch.isAnnotationPresent(Component.class)) {
-                toReturn.add(potentialMatch);
+                Component componentAnnotation = potentialMatch.getAnnotation(Component.class);
+                String disableProperty = componentAnnotation.disableProperty();
+                if (null == disableProperty || disableProperty.isEmpty()) {
+                    disableProperty = PropertyNames.COMPONENT_DISABLE_PROP_PEFIX + potentialMatch.getName();
+                }
+
+                boolean disable = ConfigurationManager.getConfigInstance().getBoolean(disableProperty, false);
+                if (!disable) {
+                    toReturn.add(potentialMatch);
+                } else {
+                    logger.info(String.format("Discovered component %s, you can disable this component from getting discovered by setting a property %s to true",
+                                              potentialMatch.getName(), disableProperty));
+                }
             }
         }
 

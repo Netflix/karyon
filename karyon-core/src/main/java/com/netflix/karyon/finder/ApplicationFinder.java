@@ -33,7 +33,7 @@ import static com.netflix.karyon.spi.PropertyNames.DISABLE_APPLICATION_DISCOVERY
 import static com.netflix.karyon.spi.PropertyNames.EXPLICIT_APPLICATION_CLASS_PROP_NAME;
 
 /**
- * @author Nitesh Kant (nkant@netflix.com)
+ * @author Nitesh Kant
  */
 public class ApplicationFinder {
 

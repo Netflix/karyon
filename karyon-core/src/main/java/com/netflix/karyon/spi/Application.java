@@ -33,7 +33,7 @@ import java.lang.annotation.Target;
  *
  * All governated classes will be instantiated when karyon initializes.
  *
- * @author Nitesh Kant (nkant@netflix.com)
+ * @author Nitesh Kant
  */
 @Documented
 @Retention(RetentionPolicy.RUNTIME)

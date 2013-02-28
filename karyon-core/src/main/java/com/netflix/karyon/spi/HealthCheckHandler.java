@@ -10,7 +10,7 @@ package com.netflix.karyon.spi;
  * By default, karyon uses this handler to also feed health status to eureka. If this is not desired, one should set a
  * dynamic property with name {@link PropertyNames#UNIFY_HEALTHCHECK_WITH_EUREKA} to <code>false</code>.
  *
- * @author Nitesh Kant (nkant@netflix.com)
+ * @author Nitesh Kant
  */
 public interface HealthCheckHandler {
 

@@ -3,7 +3,7 @@ package com.netflix.karyon.spi;
 /**
  * A set of property names that Karyon uses.
  *
- * @author Nitesh Kant (nkant@netflix.com)
+ * @author Nitesh Kant
  */
 public class PropertyNames {
 
@@ -18,6 +18,8 @@ public class PropertyNames {
     public static final String EUREKA_DATACENTER_TYPE_PROP_NAME = KARYON_PROPERTIES_PREFIX + "eureka.datacenter.type";
 
     public static final String EXPLICIT_COMPONENT_CLASSES_PROP_NAME = KARYON_PROPERTIES_PREFIX + "component.classes";
+
+    public static final String COMPONENT_DISABLE_PROP_PEFIX = KARYON_PROPERTIES_PREFIX + "component.disable.";
 
     public static final String SERVER_BOOTSTRAP_CLASS_OVERRIDE = KARYON_PROPERTIES_PREFIX + "server.bootstrap.class";
 
