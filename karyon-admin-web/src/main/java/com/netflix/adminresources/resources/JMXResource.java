@@ -131,10 +131,19 @@ public class JMXResource {
         return response;
     }
 
-    private class MbeanData {
+    private static class MbeanData {
 
         private String displayName;
         private Map<String, String> attributes;
 
+        @SuppressWarnings("unused")
+        public String getDisplayName() {
+            return displayName;
+        }
+
+        @SuppressWarnings("unused")
+        public Map<String, String> getAttributes() {
+            return attributes;
+        }
     }
 }
