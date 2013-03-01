@@ -49,8 +49,9 @@ project(':karyon-extensions') {
 project(':karyon-admin') {
     dependencies {
         compile project(':karyon-core')
-        compile 'org.mortbay.jetty:jetty:6.1.22'
+        compile 'org.eclipse.jetty:jetty-server:7.6.2.v20120308'
+        compile 'org.eclipse.jetty:jetty-servlet:7.6.2.v20120308'
         compile 'com.sun.jersey.contribs:jersey-guice:1.17'
-        compile 'com.sun.jersey:jersey-server:1.17'
+        compile 'com.google.code.gson:gson:2.2.2'
     }
 }

@@ -1,5 +1,6 @@
 package com.netflix.adminresources;
 
+import com.google.inject.Singleton;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,7 +18,9 @@ import java.util.regex.Pattern;
  * A {@link Filter} implementation to capture request details like remote host, HTTP method and request URI
  * 
  * @author pkamath
+ * @author Nitesh Kant
  */
+@Singleton
 public class LoggingFilter implements Filter {
 
     private static final Logger logger = LoggerFactory.getLogger(LoggingFilter.class);

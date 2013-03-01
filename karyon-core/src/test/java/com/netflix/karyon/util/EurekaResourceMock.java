@@ -152,7 +152,7 @@ public class EurekaResourceMock {
         }
     }
 
-    public class MockHandler extends AbstractHandler {
+    public static class MockHandler extends AbstractHandler {
 
         public AtomicBoolean appRegistered = new AtomicBoolean();
 

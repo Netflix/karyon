@@ -142,6 +142,8 @@ public class KaryonServer implements Closeable {
 
         if (null != appId) {
             try {
+                logger.info(String.format("Loading application properties with app id: %s and environment: %s", appId,
+                                          ConfigurationManager.getDeploymentContext().getDeploymentEnvironment()));
                 ConfigurationManager.loadCascadedPropertiesFromResources(appId);
             } catch (IOException e) {
                 logger.error(String.format(

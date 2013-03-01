@@ -1,2 +1,2 @@
 rootProject.name='karyon'
-include 'karyon-core','karyon-extensions', 'karyon-admin'
+include 'karyon-core','karyon-extensions', 'karyon-admin', 'karyon-examples:hello-netflix-oss'

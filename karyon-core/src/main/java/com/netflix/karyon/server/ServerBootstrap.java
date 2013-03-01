@@ -17,6 +17,8 @@
 package com.netflix.karyon.server;
 
 import com.google.common.collect.Lists;
+import com.google.inject.AbstractModule;
+import com.google.inject.Binder;
 import com.netflix.config.ConfigurationManager;
 import com.netflix.governator.configuration.ArchaiusConfigurationProvider;
 import com.netflix.governator.guice.BootstrapBinder;
@@ -57,7 +59,7 @@ import java.util.List;
  *
  * The default behavior of bootstrapping can be extended by extending this class and overriding the following as needed:
  * <ul>
- <li>{@link ServerBootstrap#configureBootstrapBinder(com.netflix.governator.guice.BootstrapBinder)}: Callback to configure
+ <li>{@link ServerBootstrap#configureBinder}: Callback to configure
  {@link BootstrapBinder} before returning from {@link BootstrapModule#configure(com.netflix.governator.guice.BootstrapBinder)}</li>
  <li>{@link ServerBootstrap#beforeInjectorCreation(com.netflix.governator.guice.LifecycleInjectorBuilder)}: A callback
  before creating the {@link com.google.inject.Injector} from {@link LifecycleInjectorBuilder} provided by this class
@@ -88,9 +90,10 @@ public class ServerBootstrap {
         List<Class<? extends Annotation>> annotations = Lists.newArrayList();
         annotations.add(Application.class);
         annotations.add(Component.class);
-        ClasspathScanner scanner = LifecycleInjector.createStandardClasspathScanner(basePackages, annotations);
+        ClasspathScanner scanner = LifecycleInjector.createStandardClasspathScanner(allBasePackages, annotations);
         return LifecycleInjector.builder().usingBasePackages(allBasePackages).usingClasspathScanner(
-                scanner).withBootstrapModule(new BootstrapModuleImpl());
+                scanner).withBootstrapModule(new KaryonBootstrapModule()).withModules(
+                new KaryonGuiceModule());
     }
 
     /**
@@ -106,13 +109,12 @@ public class ServerBootstrap {
     }
 
     /**
-     * Callback to configure {@link BootstrapBinder} before returning from
-     * {@link BootstrapModule#configure(com.netflix.governator.guice.BootstrapBinder)}.
+     * Callback to configure {@link Binder} before returning from {@link com.google.inject.Module#configure(Binder)}.
      * Default implementation does nothing, so the overridden methods do not need to call super.
      *
-     * @param bootstrapBinder The bootstrap binder as passed to {@link BootstrapModule#configure(com.netflix.governator.guice.BootstrapBinder)}
+     * @param binder The binder as passed to the guice module used by karyon.
      */
-    protected void configureBootstrapBinder(@SuppressWarnings("unused") BootstrapBinder bootstrapBinder) {
+    protected void configureBinder(@SuppressWarnings("unused") Binder binder) {
         // No op by default
     }
 
@@ -134,21 +136,27 @@ public class ServerBootstrap {
         return toReturn;
     }
 
-    private class BootstrapModuleImpl implements BootstrapModule {
+    private static class KaryonBootstrapModule implements BootstrapModule {
 
         @Override
         public void configure(BootstrapBinder binder) {
-
-            bindHealthCheckStrategy(binder);
-
-            bindHealthCheckHandler(binder);
-
             binder.bindConfigurationProvider().to(ArchaiusConfigurationProvider.class);
+        }
+    }
 
-            configureBootstrapBinder(binder);
+    private class KaryonGuiceModule extends AbstractModule {
+
+        @Override
+        public void configure() {
+
+            bindHealthCheckStrategy(binder());
+
+            bindHealthCheckHandler(binder());
+
+            configureBinder(binder());
         }
 
-        private void bindHealthCheckStrategy(BootstrapBinder binder) {
+        private void bindHealthCheckStrategy(Binder binder) {
             boolean bound = bindACustomClass(binder, PropertyNames.HEALTH_CHECK_STRATEGY,
                     HealthCheckHandler.class,
                     "No health check invocation strategy specified, using the default strategy %s. In order to override " +
@@ -161,7 +169,7 @@ public class ServerBootstrap {
             }
         }
 
-        private void bindHealthCheckHandler(BootstrapBinder binder) {
+        private void bindHealthCheckHandler(Binder binder) {
             boolean bound = bindACustomClass(binder, PropertyNames.HEALTH_CHECK_HANDLER_CLASS_PROP_NAME,
                     HealthCheckHandler.class,
                     "No health check handler defined. This means your application can not provide meaningful health " +
@@ -180,7 +188,7 @@ public class ServerBootstrap {
         }
 
         @SuppressWarnings("unchecked")
-        private <T> boolean bindACustomClass(BootstrapBinder binder, String customClassPropName, Class<T> bindTo,
+        private <T> boolean bindACustomClass(Binder binder, String customClassPropName, Class<T> bindTo,
                                              String propertNotFoundErrMsg, Object... arguments) {
             boolean bound = false;
             String customClassName = ConfigurationManager.getConfigInstance().getString(customClassPropName);

@@ -20,6 +20,8 @@ import com.google.inject.Injector;
 import com.netflix.config.ConfigurationManager;
 import com.netflix.karyon.server.eureka.EurekaHealthCheckCallback;
 import com.netflix.karyon.spi.PropertyNames;
+import com.netflix.karyon.util.KaryonTestSetupUtil;
+import com.test.FlappingHealthCheck;
 import com.test.HealthCheckGuy;
 import com.test.RegistrationSequence;
 import com.test.RogueHealthCheck;
@@ -41,16 +43,12 @@ public class KaryonServerTest {
 
     @Before
     public void setUp() throws Exception {
-        System.setProperty(PropertyNames.SERVER_BOOTSTRAP_BASE_PACKAGES_OVERRIDE, "com.test");
-        System.setProperty(PropertyNames.DISABLE_EUREKA_INTEGRATION, "true");
+        KaryonTestSetupUtil.setUp();
     }
 
     @After
     public void tearDown() throws Exception {
-        ConfigurationManager.getConfigInstance().clearProperty(PropertyNames.DISABLE_APPLICATION_DISCOVERY_PROP_NAME);
-        ConfigurationManager.getConfigInstance().clearProperty(PropertyNames.EXPLICIT_APPLICATION_CLASS_PROP_NAME);
-        RegistrationSequence.reset();
-        server.close();
+        KaryonTestSetupUtil.tearDown(server);
     }
 
     @Test
@@ -93,6 +91,17 @@ public class KaryonServerTest {
     }
 
     @Test
+    public void testFlappingHealthCheck() throws Exception {
+        ConfigurationManager.getConfigInstance().setProperty(PropertyNames.HEALTH_CHECK_HANDLER_CLASS_PROP_NAME,
+                FlappingHealthCheck.class.getName());
+
+        Injector injector = startServer();
+        EurekaHealthCheckCallback eurekaHealthCheckCallback = injector.getInstance(EurekaHealthCheckCallback.class);
+        Assert.assertTrue("First health check did not pass.", eurekaHealthCheckCallback.isHealthy());
+        Assert.assertFalse("Second health check did not fail.", eurekaHealthCheckCallback.isHealthy());
+    }
+
+    @Test
     public void testHealthCheckSuccess() throws Exception {
         ConfigurationManager.getConfigInstance().setProperty(PropertyNames.HEALTH_CHECK_HANDLER_CLASS_PROP_NAME,
                 HealthCheckGuy.class.getName());
@@ -118,9 +127,7 @@ public class KaryonServerTest {
     }
 
     private Injector startServer() throws Exception {
-        server = new KaryonServer() { };
-        Injector injector = server.initialize();
-        server.start();
-        return injector;
+        server = new KaryonServer();
+        return KaryonTestSetupUtil.startServer(server);
     }
 }

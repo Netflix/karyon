@@ -10,12 +10,14 @@ import com.netflix.karyon.spi.PropertyNames;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.PostConstruct;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
@@ -52,6 +54,7 @@ public class AsyncHealthCheckInvocationStrategy implements HealthCheckInvocation
     private AtomicReference<HealthCheckTask> currentFuture;
     private SynchronousQueue<Boolean> healthCheckFeeder;
     private Thread healthChecker;
+    private AtomicBoolean started = new AtomicBoolean();
 
     @Inject
     public AsyncHealthCheckInvocationStrategy(HealthCheckHandler healthCheckHandler) {
@@ -74,13 +77,21 @@ public class AsyncHealthCheckInvocationStrategy implements HealthCheckInvocation
             }
         });
         healthChecker.setDaemon(true);
+    }
+
+    @PostConstruct
+    public void start() {
+        if (!started.compareAndSet(false, true)) {
+            return;
+        }
         healthChecker.start();
-        healthCheckFeeder.offer(true); // Bootstrap one check so our current future always has a value.
     }
 
     @Override
     public int invokeCheck() throws TimeoutException {
-        healthCheckFeeder.offer(true);
+        if (!healthCheckFeeder.offer(true)) {
+            logger.debug("Async healthcheck already in progress, will use the existing result.");
+        }
 
         Future<Integer> currFuture = currentFuture.get();
         try {
@@ -97,7 +108,10 @@ public class AsyncHealthCheckInvocationStrategy implements HealthCheckInvocation
     }
 
     public void stop() throws InterruptedException {
-        healthCheckFeeder.put(false);
+        if (healthCheckFeeder.offer(false)) {
+            logger.info("Healthchecker poison pill offer failed, interrupting the thread.");
+            healthChecker.interrupt();
+        }
     }
 
     private class HealthCheckTask extends FutureTask<Integer> {

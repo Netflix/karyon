@@ -1,4 +1,4 @@
-package com.netflix.adminresources;
+package com.netflix.adminresources.resources;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
@@ -77,10 +77,19 @@ public class EmbeddedContentResource {
                             buffer = new byte[length];
                             is.read(buffer, 0, length);
                             // cache so we don't load from classpath each time
-                            resourceCache.putIfAbsent(path, buffer);
+                            byte[] existing = resourceCache.putIfAbsent(path, buffer);
+                            if (null != existing) {
+                                buffer = existing;
+                            }
                         }
                     } catch (IOException e) {
                         logger.error("Error loading resource", e);
+                    } finally {
+                        try {
+                            is.close();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
                     }
                 }
             }
