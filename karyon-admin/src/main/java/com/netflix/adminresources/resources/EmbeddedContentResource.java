@@ -1,5 +1,6 @@
 package com.netflix.adminresources.resources;
 
+import com.google.common.annotations.Beta;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.sun.jersey.api.NotFoundException;
@@ -30,6 +31,7 @@ import java.util.concurrent.ConcurrentMap;
  * 
  */
 @Path("/adminres")
+@Beta
 public class EmbeddedContentResource {
 
     private static final Logger logger = LoggerFactory.getLogger(EmbeddedContentResource.class);

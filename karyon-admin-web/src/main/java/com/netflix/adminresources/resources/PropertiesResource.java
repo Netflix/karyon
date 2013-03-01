@@ -1,5 +1,6 @@
 package com.netflix.adminresources.resources;
 
+import com.google.common.annotations.Beta;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.netflix.config.ConfigurationManager;
@@ -17,6 +18,7 @@ import java.util.TreeMap;
 /**
  * @author Nitesh Kant
  */
+@Beta
 @Path("/admin/properties")
 @Produces(MediaType.APPLICATION_JSON)
 public class PropertiesResource {

@@ -1,5 +1,6 @@
 package com.netflix.adminresources.resources;
 
+import com.google.common.annotations.Beta;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import org.slf4j.Logger;
@@ -24,6 +25,7 @@ import java.util.regex.Pattern;
  * @author pkamath
  * @author Nitesh Kant
  */
+@Beta
 @Path("/admin/jars")
 @Produces(MediaType.APPLICATION_JSON)
 public class JarsInfoResource {

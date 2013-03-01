@@ -52,6 +52,12 @@ project(':karyon-admin') {
         compile 'org.eclipse.jetty:jetty-server:7.6.2.v20120308'
         compile 'org.eclipse.jetty:jetty-servlet:7.6.2.v20120308'
         compile 'com.sun.jersey.contribs:jersey-guice:1.17'
+    }
+}
+
+project(':karyon-admin-web') {
+    dependencies {
+        compile project(':karyon-admin')
         compile 'com.google.code.gson:gson:2.2.2'
     }
 }
