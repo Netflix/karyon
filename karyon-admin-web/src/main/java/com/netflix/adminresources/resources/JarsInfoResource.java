@@ -1,3 +1,19 @@
+/*
+ * Copyright 2013 Netflix, Inc.
+ *
+ *      Licensed under the Apache License, Version 2.0 (the "License");
+ *      you may not use this file except in compliance with the License.
+ *      You may obtain a copy of the License at
+ *
+ *          http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *      Unless required by applicable law or agreed to in writing, software
+ *      distributed under the License is distributed on an "AS IS" BASIS,
+ *      WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *      See the License for the specific language governing permissions and
+ *      limitations under the License.
+ */
+
 package com.netflix.adminresources.resources;
 
 import com.google.common.annotations.Beta;
@@ -13,9 +29,9 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.io.InputStream;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 import java.util.regex.Matcher;
@@ -26,7 +42,7 @@ import java.util.regex.Pattern;
  * @author Nitesh Kant
  */
 @Beta
-@Path("/admin/jars")
+@Path("/webadmin/jars")
 @Produces(MediaType.APPLICATION_JSON)
 public class JarsInfoResource {
 
@@ -36,15 +52,15 @@ public class JarsInfoResource {
 
     @GET
     public Response getAllJarsInfo() {
-        Map<String, Attributes> jarInfo = getJarInfo();
+        List<JarInfo> jarInfo = getJarInfo();
         GsonBuilder gsonBuilder = new GsonBuilder().serializeNulls();
         Gson gson = gsonBuilder.create();
-        String propsJson = gson.toJson(jarInfo);
+        String propsJson = gson.toJson(new KaryonAdminResponse(jarInfo));
         return Response.ok(propsJson).build();
     }
 
-    public Map<String, Attributes> getJarInfo() {
-        Map<String, Attributes> jarInfo = new HashMap<String, Attributes>();
+    public List<JarInfo> getJarInfo() {
+        List<JarInfo> toReturn = new ArrayList<JarInfo>();
         Pattern pattern = Pattern.compile(JAR_PATTERN);
         try {
             ClassLoader cl = Thread.currentThread().getContextClassLoader();
@@ -57,12 +73,34 @@ public class JarsInfoResource {
                 if (matcher.matches()) {
                     key = matcher.group(1);
                 }
-                jarInfo.put(key, new Manifest(is).getMainAttributes());
+                Attributes mainAttributes = new Manifest(is).getMainAttributes();
+                toReturn.add(new JarInfo(key, mainAttributes));
                 is.close();
             }
         } catch (Exception e) {
             logger.error("Failed to load environment jar information.", e);
         }
-        return jarInfo;
+        return toReturn;
+    }
+
+    private class JarInfo {
+
+        public static final String MANIFEST_VERSION = "Manifest-Version";
+        public static final String CREATED_BY = "Created-By";
+        public static final String UNAVAILABLE = "Unavailable";
+        private String jar;
+        private String createdBy = UNAVAILABLE;
+        private String manifestVersion = UNAVAILABLE;
+
+        public JarInfo(String key, Attributes mainAttributes) {
+            jar = key;
+            if (null != mainAttributes.getValue(MANIFEST_VERSION)) {
+                manifestVersion = String.valueOf(mainAttributes.getValue(MANIFEST_VERSION));
+            }
+
+            if (null != mainAttributes.getValue(CREATED_BY)) {
+                createdBy = String.valueOf(mainAttributes.getValue(CREATED_BY));
+            }
+        }
     }
 }

@@ -1,3 +1,19 @@
+/*
+ * Copyright 2013 Netflix, Inc.
+ *
+ *      Licensed under the Apache License, Version 2.0 (the "License");
+ *      you may not use this file except in compliance with the License.
+ *      You may obtain a copy of the License at
+ *
+ *          http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *      Unless required by applicable law or agreed to in writing, software
+ *      distributed under the License is distributed on an "AS IS" BASIS,
+ *      WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *      See the License for the specific language governing permissions and
+ *      limitations under the License.
+ */
+
 package com.netflix.adminresources;
 
 import com.google.common.base.Joiner;
@@ -6,12 +22,15 @@ import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.servlet.GuiceFilter;
+import com.netflix.config.DynamicPropertyFactory;
+import com.netflix.config.DynamicStringProperty;
 import com.netflix.governator.annotations.Configuration;
 import com.netflix.governator.guice.LifecycleInjector;
 import com.netflix.governator.guice.LifecycleInjectorBuilder;
 import com.netflix.governator.lifecycle.LifecycleManager;
 import com.netflix.karyon.server.eureka.HealthCheckInvocationStrategy;
 import com.netflix.karyon.spi.Component;
+import com.netflix.karyon.spi.PropertyNames;
 import com.sun.jersey.api.core.PackagesResourceConfig;
 import com.sun.jersey.guice.JerseyServletModule;
 import com.sun.jersey.guice.spi.container.servlet.GuiceContainer;
@@ -50,6 +69,11 @@ import java.util.Map;
 public class AdminResourcesContainer {
 
     private static final Logger logger = LoggerFactory.getLogger(AdminResourcesContainer.class);
+
+    public static final String DEFAULT_PAGE_PROP_NAME = PropertyNames.KARYON_PROPERTIES_PREFIX + "admin.default.page";
+
+    public static final DynamicStringProperty DEFAULT_PAGE =
+            DynamicPropertyFactory.getInstance().getStringProperty(DEFAULT_PAGE_PROP_NAME, "/healthcheck");
 
     public static final String CONTAINER_LISTEN_PORT = "netflix.platform.admin.resources.port";
     public static final int LISTEN_PORT_DEFAULT = 8077;

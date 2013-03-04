@@ -1,0 +1,197 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Karyon admin</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <!-- Le styles -->
+    <link href="bootstrap/css/bootstrap.css" rel="stylesheet">
+    <link href="datatable/css/datatable-bootstrap.css" rel="stylesheet">
+    <style type="text/css">
+        body {
+            padding-top: 60px;
+            padding-bottom: 40px;
+        }
+    </style>
+    <link href="bootstrap/css/bootstrap-responsive.css" rel="stylesheet">
+</head>
+
+<body>
+
+<div class="navbar navbar-inverse navbar-fixed-top">
+    <div class="navbar-inner">
+        <div class="container">
+            <button type="button" class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="brand" href="#">Karyon</a>
+            <div class="nav-collapse collapse">
+                <ul class="nav" id="karyonTab">
+                    <li class="active"><a href="#env">Environment</a></li>
+                    <li><a href="#jars">Jars</a></li>
+                    <li><a href="#jmx">JMX</a></li>
+                    <li><a href="#archaius">Archaius</a></li>
+                    <!--<li><a href="#eureka">Eureka</a></li>-->
+                </ul>
+            </div><!--/.nav-collapse -->
+        </div>
+    </div>
+</div>
+
+<div class="container">
+
+    <div class="tab-content">
+        <div class="tab-pane active" id="env" data-toggle="tab">
+            <h1>Application environment</h1> <br/>
+            <table cellpadding="0" cellspacing="0" border="0" class="table table-striped table-bordered table-hover" id="envTable"></table>
+        </div>
+        <div class="tab-pane" id="jars" data-toggle="tab">
+            <h1>Available Jars</h1> <br/>
+            <table cellpadding="0" cellspacing="0" border="0" class="table table-striped table-bordered table-hover" id="jarsTable"></table>
+        </div>
+        <div class="tab-pane" id="jmx" data-toggle="tab">
+            <h1>JMX beans (Platform mbean server)</h1> <br/>
+            <table cellpadding="0" cellspacing="0" border="0" class="table table-striped table-bordered table-hover" id="jmxTable"></table>
+        </div>
+        <div class="tab-pane" id="archaius" data-toggle="tab">
+            <h1>Archaius properties</h1> <br/>
+            <table cellpadding="0" cellspacing="0" border="0" class="table table-striped table-bordered table-hover" id="archaiusTable"></table>
+        </div>
+<!--
+        <div class="tab-pane" id="eureka" data-toggle="tab">
+            <h1>Eureka instances</h1> <br/>
+            <table cellpadding="0" cellspacing="0" border="0" class="table table-striped table-bordered table-hover" id="eurekaTable"></table>
+        </div>
+-->
+    </div>
+
+    <hr>
+
+</div> <!-- /container -->
+
+<!-- Le javascript
+================================================== -->
+<!-- Placed at the end of the document so the pages load faster -->
+<!--<script src="jquery/jquery-1.8.2.js"></script>-->
+<script src="datatable/js/jquery.js"></script>
+<script src="datatable/js/jquery.dataTables.js"></script>
+<script src="datatable/js/DT_bootstrap.js"></script>
+<script src="bootstrap/js/bootstrap.js"></script>
+<script>
+
+    $(document).ready(function() {
+        var baseURL = '/webadmin/';
+        $('#envTable').dataTable( {
+            "sDom": "<'row'<'span6'l><'span6'f>r>t<'row'<'span6'i><'span6'p>>",
+            "bProcessing": true,
+            "aoColumns": [
+                            {"sTitle" : "Environment Property Name", "mData" : "name"},
+                            {"sTitle" : "Environment Property Value", "mData" : "value"}
+                         ],
+            "sAjaxDataProp": "data",
+            "sAjaxSource": baseURL + 'env'
+        } );
+        $('#jarsTable').dataTable( {
+            "sDom": "<'row'<'span6'l><'span6'f>r>t<'row'<'span6'i><'span6'p>>",
+            "bProcessing": true,
+            "aoColumns": [
+                            {"sTitle" : "Jar", "mData" : "jar"},
+                            {"sTitle" : "Created By", "mData" : "createdBy"},
+                            {"sTitle" : "Manifest version", "mData" : "manifestVersion"}
+                         ],
+            "sAjaxDataProp": "data",
+            "sAjaxSource": baseURL + 'jars'
+        } );
+
+        $('#jmxTable').dataTable( {
+            "sDom": "<'row'<'span6'l><'span6'f>r>t<'row'<'span6'i><'span6'p>>",
+            "bProcessing": true,
+            "aoColumns": [
+                           {"sTitle" : "Bean name", "mData" : "displayName"},
+                           {"sTitle" : "Attributes Details", "mData" : "attributes", "bVisible" : "true",
+                            "mRender" : function ( data, type, full ) {
+                                var sOut = '<table cellpadding="5" cellspacing="0" border="0" style="padding-left:50px;">';
+                                for(key in data) {
+                                    var value = data[key];
+                                    sOut += '<tr><td>' + key +'</td><td>'+ value + '</td></tr>';
+                                }
+                                sOut += '</table>';
+                                return sOut;
+                            }
+                           }],
+            "sAjaxDataProp": "data",
+            "sAjaxSource": baseURL + 'jmx'
+        } );
+
+/*
+        $('#jmxTable tbody').on( 'click', 'tr', function () {
+            alert('clicked');
+        } );
+*/
+
+        $('#archaiusTable').dataTable( {
+            "sDom": "<'row'<'span6'l><'span6'f>r>t<'row'<'span6'i><'span6'p>>",
+            "bProcessing": true,
+            "aoColumns": [ {"sTitle" : "Property name", "mData" : "name"},
+                         {"sTitle" : "Property value", "mData" : "value"}],
+            "sAjaxDataProp": "data",
+            "sAjaxSource": baseURL + 'properties'
+        } );
+    } );
+
+    $('#karyonTab a').click(function (e) {
+        e.preventDefault();
+        // TODO: Reload data
+/*
+        var pattern=/#.+/gi //use regex to get anchor(==selector)
+        var contentID = e.target.toString().match(pattern)[0];
+        switch (contentID)
+        {
+            case "#jmx":
+                $('#jmxTable').dataTable().fnReloadAjax();
+                break;
+            case "#env":
+                $('#envTable').dataTable().fnReloadAjax();
+                break;
+            case "#jars":
+                $('#jarsTable').dataTable().fnReloadAjax();
+                break;
+            case "#archaius":
+                $('#archaiusTable').dataTable().fnReloadAjax();
+                break;
+        }
+*/
+        $(this).tab('show');
+    })
+
+
+</script>
+<!--
+
+<script>
+    $(function() {
+        var baseURL = 'http://localhost:8077/webadmin/';
+        //load content for first tab and initialize
+        $('#env').load(baseURL+'env', function() {
+            $('#karyonTab').tab(); //initialize tabs
+        });
+        $('#karyonTab').bind('show', function(e) {
+            var pattern=/#.+/gi //use regex to get anchor(==selector)
+            var contentID = e.target.toString().match(pattern)[0]; //get anchor
+            //load content for selected tab
+            $(contentID).load(baseURL+contentID.replace('#',''), function(){
+                $('#karyonTab').tab(); //reinitialize tabs
+            });
+        });
+    });
+</script>
+-->
+
+</body>
+</html>
