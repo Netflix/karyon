@@ -83,13 +83,16 @@ public class JarsInfoResource {
         return toReturn;
     }
 
-    private class JarInfo {
+    private static class JarInfo {
 
         public static final String MANIFEST_VERSION = "Manifest-Version";
         public static final String CREATED_BY = "Created-By";
         public static final String UNAVAILABLE = "Unavailable";
+        @SuppressWarnings("unused")
         private String jar;
+        @SuppressWarnings("unused")
         private String createdBy = UNAVAILABLE;
+        @SuppressWarnings("unused")
         private String manifestVersion = UNAVAILABLE;
 
         public JarInfo(String key, Attributes mainAttributes) {
@@ -101,6 +104,18 @@ public class JarsInfoResource {
             if (null != mainAttributes.getValue(CREATED_BY)) {
                 createdBy = String.valueOf(mainAttributes.getValue(CREATED_BY));
             }
+        }
+
+        public String getJar() {
+            return jar;
+        }
+
+        public String getCreatedBy() {
+            return createdBy;
+        }
+
+        public String getManifestVersion() {
+            return manifestVersion;
         }
     }
 }

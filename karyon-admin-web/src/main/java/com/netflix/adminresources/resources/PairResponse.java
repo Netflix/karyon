@@ -42,7 +42,7 @@ public class PairResponse {
         data.add(new Pair(name, value));
     }
 
-    private class Pair {
+    private static class Pair {
 
         private String name;
         private Object value;
@@ -50,6 +50,14 @@ public class PairResponse {
         private Pair(String name, Object value) {
             this.name = name;
             this.value = value;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public Object getValue() {
+            return value;
         }
     }
 }

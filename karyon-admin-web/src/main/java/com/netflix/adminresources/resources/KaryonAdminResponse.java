@@ -26,4 +26,8 @@ public class KaryonAdminResponse {
     public KaryonAdminResponse(Object data) {
         this.data = data;
     }
+
+    public Object getData() {
+        return data;
+    }
 }
