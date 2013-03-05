@@ -21,6 +21,7 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Binder;
 import com.netflix.config.ConfigurationManager;
 import com.netflix.governator.configuration.ArchaiusConfigurationProvider;
+import com.netflix.governator.configuration.ConfigurationProvider;
 import com.netflix.governator.guice.BootstrapBinder;
 import com.netflix.governator.guice.BootstrapModule;
 import com.netflix.governator.guice.LifecycleInjector;
@@ -74,6 +75,8 @@ import java.util.List;
  <li>{@link com.netflix.karyon.server.ServerBootstrap#getBasePackages()}: Specify the base packages to be added for
  governator classpath scanning. This is in case for any reason one does not want to specify a property
  {@link PropertyNames#SERVER_BOOTSTRAP_BASE_PACKAGES_OVERRIDE} as mentioned above.</li>
+ <li>{@link com.netflix.karyon.server.ServerBootstrap#getConfigurationProvider()}: Any custom configuration provider
+ that is to be used by governator. Defaults to {@link ArchaiusConfigurationProvider}</li>
  </ul>
  *
  * In case, the above extension is required, the name of the custom class must be specified in a system property named
@@ -101,6 +104,16 @@ public class ServerBootstrap {
         return LifecycleInjector.builder().usingBasePackages(allBasePackages).usingClasspathScanner(
                 scanner).withBootstrapModule(new KaryonBootstrapModule()).withModules(
                 new KaryonGuiceModule());
+    }
+
+    /**
+     * Returns the {@link ConfigurationProvider} to be used by governator. Defaults to {@link ArchaiusConfigurationProvider}
+     *
+     * @return  The class instance of the {@link ConfigurationProvider} to be used, this will be instantiated by governator.
+     */
+    @SuppressWarnings("unchecked")
+    protected Class<? extends ConfigurationProvider> getConfigurationProvider() {
+        return ArchaiusConfigurationProvider.class;
     }
 
     /**
@@ -158,7 +171,7 @@ public class ServerBootstrap {
 
         @Override
         public void configure(BootstrapBinder binder) {
-            binder.bindConfigurationProvider().to(ArchaiusConfigurationProvider.class);
+            binder.bindConfigurationProvider().to(getConfigurationProvider());
             configureBootstrapBinder(binder);
         }
     }

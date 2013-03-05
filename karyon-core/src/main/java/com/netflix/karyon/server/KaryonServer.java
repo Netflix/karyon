@@ -140,6 +140,7 @@ public class KaryonServer implements Closeable {
 
         String appId = ConfigurationManager.getDeploymentContext().getApplicationId();
 
+        // Loading properties via archaius.
         if (null != appId) {
             try {
                 logger.info(String.format("Loading application properties with app id: %s and environment: %s", appId,
