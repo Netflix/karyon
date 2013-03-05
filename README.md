@@ -11,3 +11,14 @@ Karyon can be thought of as the nucleus of a blueprint that contains the followi
 * Runtime Insights and Diagnostics (via built in Admin Console)
 * Pluggable Web Resources (via JSR-311 and Jersey)
 * Cloud Ready
+
+Getting Started
+===============
+
+Easiest way to get started with karyon is to see the examples provided with karyon under karyon-examples module.
+
+
+Documentation
+==============
+
+Please see [wiki] (https://github.com/Netflix/karyon/wiki) for detailed documentation.
