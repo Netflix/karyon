@@ -1,6 +1,0 @@
-com.netflix.karyon.finder
-com.netflix.karyon.server
-com.netflix.karyon.server.eureka
-com.netflix.karyon.server.lifecycle
-com.netflix.karyon.server.utils
-com.netflix.karyon.spi
