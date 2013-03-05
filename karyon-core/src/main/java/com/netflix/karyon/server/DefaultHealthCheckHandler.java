@@ -14,36 +14,18 @@
  *      limitations under the License.
  */
 
-package com.netflix.karyon.server.eureka;
+package com.netflix.karyon.server;
 
-import com.google.inject.Inject;
 import com.netflix.karyon.spi.HealthCheckHandler;
 
-import java.util.concurrent.TimeoutException;
-
 /**
- * An implementation of {@link HealthCheckInvocationStrategy} that synchronously calls the underlying
- * {@link HealthCheckHandler}.
+ * Default health check handler implementation which always returns healthy.
  *
  * @author Nitesh Kant
  */
-@SuppressWarnings("unused")
-public class SyncHealthCheckInvocationStrategy implements HealthCheckInvocationStrategy {
-
-    private HealthCheckHandler handler;
-
-    @Inject
-    public SyncHealthCheckInvocationStrategy(HealthCheckHandler handler) {
-        this.handler = handler;
-    }
-
+class DefaultHealthCheckHandler implements HealthCheckHandler {
     @Override
-    public int invokeCheck() throws TimeoutException {
-        return handler.getStatus();
-    }
-
-    @Override
-    public HealthCheckHandler getHandler() {
-        return handler;
+    public int getStatus() {
+        return 200;
     }
 }

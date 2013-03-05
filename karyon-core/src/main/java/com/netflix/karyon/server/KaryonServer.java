@@ -59,7 +59,7 @@ import java.io.IOException;
  * default prefix can be overridden by specifying the same in the property {@link PropertyNames#EUREKA_PROPERTIES_NAME_PREFIX_PROP_NAME}
  * as a property accessible to <a href="https://github.com/Netflix/archaius">archaius</a>
  * The integration with eureka can be disabled by specifying a property
- * {@link com.netflix.karyon.spi.PropertyNames#DISABLE_EUREKA_INTEGRATION} set to <code>false</code> and accessible to
+ * {@link com.netflix.karyon.spi.PropertyNames#DISABLE_EUREKA_INTEGRATION} set to <code>true</code> and accessible to
  * <a href="https://github.com/Netflix/archaius">archaius</a>
  *
  * <h2>Archaius Integration</h2>

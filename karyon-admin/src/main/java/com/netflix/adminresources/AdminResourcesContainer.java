@@ -17,23 +17,15 @@
 package com.netflix.adminresources;
 
 import com.google.common.base.Joiner;
-import com.google.common.base.Throwables;
-import com.google.common.collect.Maps;
 import com.google.inject.Inject;
-import com.google.inject.Injector;
-import com.google.inject.servlet.GuiceFilter;
 import com.netflix.config.DynamicPropertyFactory;
 import com.netflix.config.DynamicStringProperty;
 import com.netflix.governator.annotations.Configuration;
-import com.netflix.governator.guice.LifecycleInjector;
-import com.netflix.governator.guice.LifecycleInjectorBuilder;
-import com.netflix.governator.lifecycle.LifecycleManager;
 import com.netflix.karyon.server.eureka.HealthCheckInvocationStrategy;
 import com.netflix.karyon.spi.Component;
 import com.netflix.karyon.spi.PropertyNames;
 import com.sun.jersey.api.core.PackagesResourceConfig;
-import com.sun.jersey.guice.JerseyServletModule;
-import com.sun.jersey.guice.spi.container.servlet.GuiceContainer;
+import com.sun.jersey.spi.container.servlet.ServletContainer;
 import org.eclipse.jetty.server.DispatcherType;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.FilterHolder;
@@ -46,20 +38,31 @@ import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import java.util.Arrays;
 import java.util.EnumSet;
-import java.util.Map;
 
 /**
  * This class starts an embedded jetty server, listening at port specified by property
  * {@link AdminResourcesContainer#CONTAINER_LISTEN_PORT} and defaulting to
  * {@link AdminResourcesContainer#LISTEN_PORT_DEFAULT}. <br/>
- * The embedded server is a jersey-governator combination so any jersey resources available in packages
+ *
+ * The embedded server uses jersey so any jersey resources available in packages
  * specified via properties {@link AdminResourcesContainer#JERSEY_CORE_PACKAGES} and
- * {@link AdminResourcesContainer#JERSEY_APP_PACKAGES} will be scanned and initialized via governator. <br/>
- * Karyon admin uses a completely different governator injector from the main karyon server for the purpose of isolation
- * of the main application from the admin application. <br/>
+ * {@link AdminResourcesContainer#JERSEY_APP_PACKAGES} will be scanned and initialized. <br/>
+ * <b>This server does not use guice/governator to initialize jersey resources as guice has an
+ * <a href="https://code.google.com/p/google-guice/issues/detail?id=635">open issue</a> which makes it difficult to have
+ * multiple {@link com.google.inject.servlet.GuiceFilter} in the same JVM.</b>
  *
  * Karyon admin starts in an embedded container to have a "always available" endpoint for any application. This helps
- * in a homogeneous admin view for all applications.
+ * in a homogeneous admin view for all applications. <br/>
+ *
+ * <h3>Available resources</h3>
+ *
+ * The following resources are available by default:
+ *
+ * <ul>
+ <li>Healthcheck: A healthcheck is available at path {@link HealthCheckServlet#PATH}. This utilizes the configured
+ {@link com.netflix.karyon.spi.HealthCheckHandler} for karyon.</li>
+ <li>Admin resource: Any url starting with "/adminres" is served via {@link com.netflix.adminresources.resources.EmbeddedContentResource}</li>
+ </ul>
  *
  * @author pkamath
  * @author Nitesh Kant
@@ -103,40 +106,26 @@ public class AdminResourcesContainer {
     private String appJerseyPackages = "";
     private Server server;
 
-    private final LifecycleInjectorBuilder builder;
-
     @Inject
     public AdminResourcesContainer(final HealthCheckInvocationStrategy healthCheckInvocationStrategy) {
         final String packages = Joiner.on(",").join(getAdminResourcePackages());
-        builder = LifecycleInjector.builder().usingBasePackages(packages).withModules(
-                new JerseyServletModule() {
-                    @Override
-                    protected void configureServlets() {
-                        Map<String, String> params = Maps.newHashMap();
-                        params.put(PackagesResourceConfig.PROPERTY_PACKAGES, packages);
-                        serve("/*").with(GuiceContainer.class, params);
-                        filter("/*").through(LoggingFilter.class);
-                        binder().bind(GuiceContainer.class).asEagerSingleton();
-                        binder().bind(HealthCheckInvocationStrategy.class).toInstance(healthCheckInvocationStrategy); // we use the only instance as async strategies have an overhead
-                    }
-
-                }
-        );
-        final Injector injector = builder.createInjector();
-        LifecycleManager manager = injector.getInstance(LifecycleManager.class);
-        try {
-            manager.start();
-        } catch (Exception e) {
-            logger.error("Governator lifecycle manager failed to start for admin resources, admin resources will not be started.", e);
-            throw Throwables.propagate(e);
-        }
 
         server = new Server(listenPort);
         ServletContextHandler handler = new ServletContextHandler();
         handler.setContextPath("/");
-        handler.addServlet(new ServletHolder(new RedirectServlet()), "/*");
-        FilterHolder guiceFilter = new FilterHolder(injector.getInstance(GuiceFilter.class));
-        handler.addFilter(guiceFilter, "/*", EnumSet.allOf(DispatcherType.class));
+        ServletHolder servletHolder = new ServletHolder(ServletContainer.class);
+        servletHolder.setInitParameter("com.sun.jersey.config.property.resourceConfigClass", "com.sun.jersey.api.core.PackagesResourceConfig");
+        servletHolder.setInitParameter(PackagesResourceConfig.PROPERTY_PACKAGES, packages);
+
+        handler.addServlet(servletHolder, "/*");
+
+        ServletHolder hcServlet = new ServletHolder(new HealthCheckServlet(healthCheckInvocationStrategy));
+        handler.addServlet(hcServlet, HealthCheckServlet.PATH);
+
+        FilterHolder loggingFilter = new FilterHolder(new LoggingFilter());
+        FilterHolder redirectFilter = new FilterHolder(new RedirectFilter());
+        handler.addFilter(loggingFilter, "/*", EnumSet.allOf(DispatcherType.class));
+        handler.addFilter(redirectFilter, "/*", EnumSet.allOf(DispatcherType.class));
 
         server.setHandler(handler);
     }
@@ -165,5 +154,6 @@ public class AdminResourcesContainer {
         } catch (Throwable t) {
             logger.warn("Error while shutting down Admin resources server", t);
         }
+        //manager.close();
     }
 }

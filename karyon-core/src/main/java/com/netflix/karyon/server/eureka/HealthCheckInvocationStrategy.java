@@ -44,4 +44,11 @@ public interface HealthCheckInvocationStrategy {
      * strategy implementation)
      */
     int invokeCheck() throws TimeoutException;
+
+    /**
+     * Returns the instance of {@link HealthCheckHandler} associated with this strategy.
+     *
+     * @return The instance of {@link HealthCheckHandler} associated with this strategy.
+     */
+    HealthCheckHandler getHandler();
 }

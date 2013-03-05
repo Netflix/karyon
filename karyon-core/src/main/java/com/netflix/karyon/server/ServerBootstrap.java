@@ -53,14 +53,21 @@ import java.util.List;
  <li>Configures base packages for governator classpath scanning as "com.netflix" and any extra packages as specified
  by a property {@link PropertyNames#SERVER_BOOTSTRAP_BASE_PACKAGES_OVERRIDE} as a comman separated list of packages to
  scan by governator.</li>
+ <li>Binds the {@link ArchaiusConfigurationProvider} as governator's {@link com.netflix.governator.configuration.ConfigurationProvider}</li>
+ <li>Binds appropriate {@link HealthCheckHandler} implementation as specified by
+ {@link PropertyNames#HEALTH_CHECK_HANDLER_CLASS_PROP_NAME} or a default handler {@link DefaultHealthCheckHandler}</li>
+ <li>Binds appropriate {@link HealthCheckInvocationStrategy} as specified by
+ {@link PropertyNames#HEALTH_CHECK_STRATEGY} or the default {@link AsyncHealthCheckInvocationStrategy}</li>
  </ul>
  *
  * <h4>Extension points</h4>
  *
  * The default behavior of bootstrapping can be extended by extending this class and overriding the following as needed:
  * <ul>
- <li>{@link ServerBootstrap#configureBinder}: Callback to configure
- {@link BootstrapBinder} before returning from {@link BootstrapModule#configure(com.netflix.governator.guice.BootstrapBinder)}</li>
+ <li>{@link ServerBootstrap#configureBootstrapBinder(BootstrapBinder)}: Callback to configure {@link BootstrapBinder}
+ before returning from {@link com.google.inject.Module#configure(Binder)}.</li>
+ <li>{@link ServerBootstrap#configureBinder}: Callback to configure {@link Binder} before returning from
+ {@link BootstrapModule#configure(com.netflix.governator.guice.BootstrapBinder)}.</li>
  <li>{@link ServerBootstrap#beforeInjectorCreation(com.netflix.governator.guice.LifecycleInjectorBuilder)}: A callback
  before creating the {@link com.google.inject.Injector} from {@link LifecycleInjectorBuilder} provided by this class
  to {@link KaryonServer}</li>
@@ -119,6 +126,17 @@ public class ServerBootstrap {
     }
 
     /**
+     * Callback to configure {@link BootstrapBinder} before returning from
+     * {@link BootstrapModule#configure(com.netflix.governator.guice.BootstrapBinder)}.
+     * Default implementation does nothing, so the overridden methods do not need to call super.
+     *
+     * @param bootstrapBinder The bootstrap binder as passed to {@link BootstrapModule#configure(com.netflix.governator.guice.BootstrapBinder)}
+     */
+    protected void configureBootstrapBinder(@SuppressWarnings("unused") BootstrapBinder bootstrapBinder) {
+        // No op by default
+    }
+
+    /**
      * Specify the base packages to be added for governator classpath scanning. This is in case for any reason one does
      * not want to specify a property {@link PropertyNames#SERVER_BOOTSTRAP_BASE_PACKAGES_OVERRIDE} as mentioned in
      * {@link ServerBootstrap}.
@@ -136,11 +154,12 @@ public class ServerBootstrap {
         return toReturn;
     }
 
-    private static class KaryonBootstrapModule implements BootstrapModule {
+    private class KaryonBootstrapModule implements BootstrapModule {
 
         @Override
         public void configure(BootstrapBinder binder) {
             binder.bindConfigurationProvider().to(ArchaiusConfigurationProvider.class);
+            configureBootstrapBinder(binder);
         }
     }
 
@@ -178,12 +197,7 @@ public class ServerBootstrap {
                     HealthCheckHandler.class.getName(), PropertyNames.HEALTH_CHECK_HANDLER_CLASS_PROP_NAME);
 
             if(!bound) {
-                binder.bind(HealthCheckHandler.class).toInstance(new HealthCheckHandler() {
-                    @Override
-                    public int getStatus() {
-                        return 200;
-                    }
-                });
+                binder.bind(HealthCheckHandler.class).toInstance(new DefaultHealthCheckHandler());
             }
         }
 
@@ -214,5 +228,7 @@ public class ServerBootstrap {
 
             return bound;
         }
+
     }
+
 }

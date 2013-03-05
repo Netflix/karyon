@@ -31,7 +31,15 @@ import java.lang.annotation.Target;
  * {@link com.netflix.governator.annotations.AutoBind}. In such a case, you can just mark your class as a
  * {@link com.netflix.governator.annotations.AutoBindSingleton} <br/>
  *
- * All governated classes will be instantiated when karyon initializes.
+ * All governated classes will be instantiated when karyon initializes. <br/>
+ *
+ * <h3>Controlling the application discovery</h3>
+ *
+ * The automatic discovery of application can be disabled by setting a property
+ * {@link PropertyNames#DISABLE_APPLICATION_DISCOVERY_PROP_NAME} available to archaius to <code>true</code>  <br/>
+ * If there are multiple classes annotated with {@link Application} for whatever reasons, one can choose to explicitly
+ * tell karyon about the application class by specifying the fully qualified classname as a property with name
+ * {@link PropertyNames#EXPLICIT_APPLICATION_CLASS_PROP_NAME}
  *
  * @author Nitesh Kant
  */

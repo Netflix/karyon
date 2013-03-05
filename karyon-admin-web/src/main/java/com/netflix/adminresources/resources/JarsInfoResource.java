@@ -59,7 +59,7 @@ public class JarsInfoResource {
         return Response.ok(propsJson).build();
     }
 
-    public List<JarInfo> getJarInfo() {
+    private List<JarInfo> getJarInfo() {
         List<JarInfo> toReturn = new ArrayList<JarInfo>();
         Pattern pattern = Pattern.compile(JAR_PATTERN);
         try {

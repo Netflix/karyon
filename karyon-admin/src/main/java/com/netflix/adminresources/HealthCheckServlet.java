@@ -14,44 +14,45 @@
  *      limitations under the License.
  */
 
-package com.netflix.adminresources.resources;
+package com.netflix.adminresources;
 
-import com.google.inject.Inject;
 import com.netflix.karyon.server.eureka.HealthCheckInvocationStrategy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.core.Response;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.util.concurrent.TimeoutException;
 
 /**
  * A health check resource available via {@link com.netflix.adminresources.AdminResourcesContainer}, this in turn just
- * calls the {@link HealthCheckInvocationStrategy} to invoke the configured {@link com.netflix.karyon.spi.HealthCheckHandler}
+ * calls the {@link HealthCheckInvocationStrategy} to invoke the configured {@link com.netflix.karyon.spi.HealthCheckHandler}. <br/>
+ * This servlet is available at path
  *
  * @author Nitesh Kant
  */
-@Path("/healthcheck")
-public class HealthCheckResource {
+public class HealthCheckServlet extends HttpServlet {
 
-    private static final Logger logger = LoggerFactory.getLogger(HealthCheckResource.class);
+    private static final Logger logger = LoggerFactory.getLogger(HealthCheckServlet.class);
+    public static final String PATH = "/healthcheck";
 
     private HealthCheckInvocationStrategy healthCheckInvocationStrategy;
 
-    @Inject
-    public HealthCheckResource(HealthCheckInvocationStrategy healthCheckInvocationStrategy) {
+    public HealthCheckServlet(HealthCheckInvocationStrategy healthCheckInvocationStrategy) {
         this.healthCheckInvocationStrategy = healthCheckInvocationStrategy;
     }
 
-    @GET
-    public Response checkHealth() {
+    @Override
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         try {
             int status = healthCheckInvocationStrategy.invokeCheck();
-            return Response.status(status).build();
+            resp.setStatus(status);
         } catch (TimeoutException e) {
             logger.error("Karyon health check failed via adminresource health endpoint. Returning 500", e);
-            return Response.serverError().build();
+            resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         }
     }
 }

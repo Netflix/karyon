@@ -30,6 +30,8 @@ import java.util.List;
 import java.util.Set;
 
 /**
+ * Discovers all the classes that are annotated with {@link com.netflix.karyon.spi.Component}.
+ *
  * @author Nitesh Kant
  */
 public class ComponentFinder {

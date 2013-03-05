@@ -123,6 +123,11 @@ public class AsyncHealthCheckInvocationStrategy implements HealthCheckInvocation
         return 500;
     }
 
+    @Override
+    public HealthCheckHandler getHandler() {
+        return healthCheckHandler;
+    }
+
     public void stop() throws InterruptedException {
         if (healthCheckFeeder.offer(false)) {
             logger.info("Healthchecker poison pill offer failed, interrupting the thread.");
