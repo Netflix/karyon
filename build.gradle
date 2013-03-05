@@ -74,6 +74,6 @@ project(':karyon-admin') {
 project(':karyon-admin-web') {
     dependencies {
         compile project(':karyon-admin')
-        compile 'com.google.code.gson:gson:2.2.2'
+        compile 'com.google.code.gson:gson:2.1'
     }
 }
