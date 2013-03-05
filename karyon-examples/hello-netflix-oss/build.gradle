@@ -28,7 +28,7 @@ war {
 
 dependencies {
     compile 'org.slf4j:slf4j-api:1.7.0'
-    runtime 'org.slf4j:slf4j-simple:1.7.2'
+    runtime 'org.slf4j:slf4j-simple:1.7.0'
     compile project(':karyon-extensions')
     compile project(':karyon-admin-web')
 }
