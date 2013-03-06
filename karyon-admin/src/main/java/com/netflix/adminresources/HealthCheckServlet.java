@@ -30,7 +30,7 @@ import java.util.concurrent.TimeoutException;
 /**
  * A health check resource available via {@link com.netflix.adminresources.AdminResourcesContainer}, this in turn just
  * calls the {@link HealthCheckInvocationStrategy} to invoke the configured {@link com.netflix.karyon.spi.HealthCheckHandler}. <br/>
- * This servlet is available at path
+ * This servlet is available at path {@link HealthCheckServlet#PATH}
  *
  * @author Nitesh Kant
  */
