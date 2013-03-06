@@ -7,8 +7,8 @@ This is the simplest example of karyon using guice and jersey. This showcases, t
 * _eureka_: This is _disabled_ by default but can be enabled by setting property "com.netflix.karyon.eureka.disable" to "false"
  in [hello-netflix-oss.properties](https://github.com/Netflix/karyon/blob/master/karyon-examples/hello-netflix-oss/src/main/resources/hello-netflix-oss.properties) or commenting out that property. This will mean populating the property file
  [eureka-client.properties](https://github.com/Netflix/karyon/blob/master/karyon-examples/hello-netflix-oss/src/main/resources/eureka-client.properties), available in this example, with proper eureka endpoints in your environment.
-* karyon-admin-web: Starts an embedded jetty server having an admin console available at http://localhost:8077/
-* karyon health check: Provides a "always healthy" handler where the implementor can add any logic to signify health of
+* _karyon-admin-web_: Starts an embedded jetty server having an admin console available at http://localhost:8077/
+* _karyon health check_: Provides a "always healthy" handler where the implementor can add any logic to signify health of
 the application. The handler class is: [com.netflix.hellonoss.server.health.HealthCheck](https://github.com/Netflix/karyon/blob/master/karyon-examples/hello-netflix-oss/src/main/java/com/netflix/hellonoss/server/health/HealthCheck.java)
 
 Running the example
