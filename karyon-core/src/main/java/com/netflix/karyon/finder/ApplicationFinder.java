@@ -64,6 +64,8 @@ public class ApplicationFinder {
     public Class<?> findApplication() {
 
         if (disableAppDiscovery) {
+            logger.info("Application classes discovery is turned off, not scanning for application classes. Set " +
+                        DISABLE_APPLICATION_DISCOVERY_PROP_NAME + " to false to enable this feature.");
             return null;
         }
 
