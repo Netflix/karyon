@@ -20,9 +20,11 @@ import com.google.inject.Injector;
 import com.netflix.config.ConfigurationManager;
 import com.netflix.karyon.server.KaryonServer;
 import com.netflix.karyon.spi.PropertyNames;
+import junit.framework.Assert;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.conn.HttpHostConnectException;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.junit.After;
 import org.junit.Before;
@@ -33,6 +35,7 @@ import org.junit.Test;
  */
 public class AdminResourceTest {
 
+    public static final String CUSTOM_LISTEN_PORT = "9999";
     private KaryonServer server;
 
     @Before
@@ -52,9 +55,20 @@ public class AdminResourceTest {
     public void testBasic() throws Exception {
         startServer();
         HttpClient client = new DefaultHttpClient();
-        HttpGet healthGet = new HttpGet("http://localhost:8077/healthcheck");
+        HttpGet healthGet = new HttpGet("http://localhost:"+ AdminResourcesContainer.LISTEN_PORT_DEFAULT + "/healthcheck");
         HttpResponse response = client.execute(healthGet);
-        System.out.println("response = " + response);
+        Assert.assertEquals("admin resource health check failed.", 200, response.getStatusLine().getStatusCode());
+    }
+
+    @Test (expected = HttpHostConnectException.class)
+    public void testCustomPort() throws Exception {
+        ConfigurationManager.getConfigInstance().setProperty(AdminResourcesContainer.CONTAINER_LISTEN_PORT, CUSTOM_LISTEN_PORT);
+        startServer();
+        HttpClient client = new DefaultHttpClient();
+        HttpGet healthGet = new HttpGet("http://localhost:"+ AdminResourcesContainer.LISTEN_PORT_DEFAULT + "/healthcheck");
+        client.execute(healthGet);
+        throw new AssertionError("Admin container did not bind to the custom port " + CUSTOM_LISTEN_PORT +
+                                 ", instead listened to default port: " + AdminResourcesContainer.LISTEN_PORT_DEFAULT);
     }
 
     private Injector startServer() throws Exception {

@@ -105,9 +105,19 @@ public class AdminResourcesContainer {
     )
     private String appJerseyPackages = "";
     private Server server;
+    private final HealthCheckInvocationStrategy healthCheckInvocationStrategy;
 
     @Inject
     public AdminResourcesContainer(final HealthCheckInvocationStrategy healthCheckInvocationStrategy) {
+        this.healthCheckInvocationStrategy = healthCheckInvocationStrategy;
+    }
+
+    @PostConstruct
+    public void init() {
+        if (!coreJerseyPackages.equals(JERSEY_CORE_PACKAGES_DEAULT)) {
+            coreJerseyPackages = Joiner.on(",").join(coreJerseyPackages, "com.netflix.adminresources"); // duplication does not hurt.
+        }
+
         final String packages = Joiner.on(",").join(getAdminResourcePackages());
 
         server = new Server(listenPort);
@@ -128,23 +138,15 @@ public class AdminResourcesContainer {
         handler.addFilter(redirectFilter, "/*", EnumSet.allOf(DispatcherType.class));
 
         server.setHandler(handler);
+        try {
+            server.start();
+        } catch (Exception e) {
+            logger.error(String.format("Failed to start admin resource container, karyon admin console on port %s will not be available.", listenPort), e);
+        }
     }
 
     private Iterable getAdminResourcePackages() {
         return Arrays.asList(coreJerseyPackages, appJerseyPackages);
-    }
-
-    /**
-     * Starts the container and hence the embedded jetty server.
-     *
-     * @throws Exception if there is an issue while starting the server
-     */
-    @PostConstruct
-    public void init() throws Exception {
-        if (!coreJerseyPackages.equals(JERSEY_CORE_PACKAGES_DEAULT)) {
-            coreJerseyPackages = Joiner.on(",").join(coreJerseyPackages, "com.netflix.adminresources"); // duplication does not hurt.
-        }
-        server.start();
     }
 
     @PreDestroy
