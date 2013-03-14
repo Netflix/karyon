@@ -49,7 +49,6 @@ project(':karyon-core') {
         compile 'com.netflix.governator:governator:1.1.1'
         compile 'commons-collections:commons-collections:3.2.1'
         compile 'javax.servlet:servlet-api:2.5'
-        compile 'com.netflix.netflix-commons:netflix-statistics:0.1.0'
         compile 'com.netflix.eureka:eureka-client:1.1.73'
         testCompile 'org.mortbay.jetty:jetty:6.1H.22'
     }
