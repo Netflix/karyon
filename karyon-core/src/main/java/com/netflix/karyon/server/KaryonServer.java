@@ -27,6 +27,7 @@ import com.netflix.karyon.spi.PropertyNames;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nullable;
 import java.io.Closeable;
 import java.io.IOException;
 
@@ -124,6 +125,40 @@ public class KaryonServer implements Closeable {
     private LifecycleManager lifecycleManager;
     private Injector injector;
     private ServerInitializer initializer;
+    private ServerBootstrap serverBootstrap;
+
+    /**
+     * Same as calling {@link KaryonServer#KaryonServer(ServerBootstrap)} with <code>null</code>  argument.
+     */
+    public KaryonServer() {
+        this(null);
+    }
+
+    /**
+     * Instantiates karyon server with the passed bootstrap class. If the passed bootstrap class is <code>null</code>
+     * then the bootstrap class name is obtained from the property {@link PropertyNames#SERVER_BOOTSTRAP_CLASS_OVERRIDE},
+     * absence of which, uses {@link ServerBootstrap}.
+     *
+     * @param bootstrap Bootstrap class to use, can be null.
+     */
+    public KaryonServer(@Nullable ServerBootstrap bootstrap) {
+
+        loadProperties();
+
+        if (null == bootstrap) {
+            String bootstrapClassName =
+                    ConfigurationManager.getConfigInstance().getString( PropertyNames.SERVER_BOOTSTRAP_CLASS_OVERRIDE);
+            if (null == bootstrapClassName) {
+                serverBootstrap = new ServerBootstrap();
+            } else {
+                serverBootstrap = instantiateBootstrapClass(bootstrapClassName);
+            }
+        } else {
+            serverBootstrap = bootstrap;
+        }
+
+        serverBootstrap.initialize();
+    }
 
     /**
      * Bootstraps karyon by using {@link ServerBootstrap} by default. This can be customized by extending
@@ -138,35 +173,8 @@ public class KaryonServer implements Closeable {
             return injector;
         }
 
-        String appId = ConfigurationManager.getDeploymentContext().getApplicationId();
-
-        // Loading properties via archaius.
-        if (null != appId) {
-            try {
-                logger.info(String.format("Loading application properties with app id: %s and environment: %s", appId,
-                                          ConfigurationManager.getDeploymentContext().getDeploymentEnvironment()));
-                ConfigurationManager.loadCascadedPropertiesFromResources(appId);
-            } catch (IOException e) {
-                logger.error(String.format(
-                        "Failed to load properties for application id: %s and environment: %s. This is ok, if you do not have application level properties.",
-                        appId,
-                        ConfigurationManager.getDeploymentContext().getDeploymentEnvironment()), e);
-            }
-        } else {
-            logger.warn(
-                    "Application identifier not defined, skipping application level properties loading. You must set a property 'archaius.deployment.applicationId' to be able to load application level properties.");
-        }
-
-        ServerBootstrap bootstrap;
-        String bootstrapClassName = ConfigurationManager.getConfigInstance().getString( PropertyNames.SERVER_BOOTSTRAP_CLASS_OVERRIDE);
-        if (null == bootstrapClassName) {
-            bootstrap = new ServerBootstrap();
-        } else {
-            bootstrap = instantiateBootstrapClass(bootstrapClassName);
-        }
-
-        LifecycleInjectorBuilder injectorBuilder = bootstrap.bootstrap();
-        bootstrap.beforeInjectorCreation(injectorBuilder);
+        LifecycleInjectorBuilder injectorBuilder = serverBootstrap.bootstrap();
+        serverBootstrap.beforeInjectorCreation(injectorBuilder);
 
         injector = injectorBuilder.createInjector();
         return injector;
@@ -221,6 +229,27 @@ public class KaryonServer implements Closeable {
         } catch (ClassCastException e) {
             logger.error(String.format("Bootstrap class %s should extend from %s", bootstrapClassName, ServerBootstrap.class.getName()), e);
             throw Throwables.propagate(e);
+        }
+    }
+
+    private void loadProperties() {
+        String appId = ConfigurationManager.getDeploymentContext().getApplicationId();
+
+        // Loading properties via archaius.
+        if (null != appId) {
+            try {
+                logger.info(String.format("Loading application properties with app id: %s and environment: %s", appId,
+                        ConfigurationManager.getDeploymentContext().getDeploymentEnvironment()));
+                ConfigurationManager.loadCascadedPropertiesFromResources(appId);
+            } catch (IOException e) {
+                logger.error(String.format(
+                        "Failed to load properties for application id: %s and environment: %s. This is ok, if you do not have application level properties.",
+                        appId,
+                        ConfigurationManager.getDeploymentContext().getDeploymentEnvironment()), e);
+            }
+        } else {
+            logger.warn(
+                    "Application identifier not defined, skipping application level properties loading. You must set a property 'archaius.deployment.applicationId' to be able to load application level properties.");
         }
     }
 }
