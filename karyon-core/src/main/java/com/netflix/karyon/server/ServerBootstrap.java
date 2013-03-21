@@ -65,6 +65,8 @@ import java.util.List;
  *
  * The default behavior of bootstrapping can be extended by extending this class and overriding the following as needed:
  * <ul>
+ <li>{@link com.netflix.karyon.server.ServerBootstrap#newLifecycleInjectorBuilder()}: Callback to use a custom
+ {@link LifecycleInjectorBuilder}</li>
  <li>{@link ServerBootstrap#configureBootstrapBinder(BootstrapBinder)}: Callback to configure {@link BootstrapBinder}
  before returning from {@link com.google.inject.Module#configure(Binder)}.</li>
  <li>{@link ServerBootstrap#configureBinder}: Callback to configure {@link Binder} before returning from
@@ -87,23 +89,32 @@ import java.util.List;
 public class ServerBootstrap {
 
     private static final Logger logger = LoggerFactory.getLogger(ServerBootstrap.class);
+    private List<String> allBasePackages;
+    private ClasspathScanner classpathScanner;
 
-    LifecycleInjectorBuilder bootstrap() {
-        List<String> allBasePackages = new ArrayList<String>();
-        allBasePackages.add("com.netflix");
-
-        Collection<String> basePackages = getBasePackages();
-        if (null != basePackages) {
-            allBasePackages.addAll(basePackages);
-        }
+    void initialize() {
+        readBasePackages();
 
         List<Class<? extends Annotation>> annotations = Lists.newArrayList();
         annotations.add(Application.class);
         annotations.add(Component.class);
-        ClasspathScanner scanner = LifecycleInjector.createStandardClasspathScanner(allBasePackages, annotations);
-        return LifecycleInjector.builder().usingBasePackages(allBasePackages).usingClasspathScanner(
-                scanner).withBootstrapModule(new KaryonBootstrapModule()).withModules(
+        classpathScanner = LifecycleInjector.createStandardClasspathScanner(allBasePackages, annotations);
+    }
+
+    LifecycleInjectorBuilder bootstrap() {
+        return newLifecycleInjectorBuilder().usingBasePackages(allBasePackages).usingClasspathScanner(classpathScanner).
+                withBootstrapModule(new KaryonBootstrapModule()).withModules(
                 new KaryonGuiceModule());
+    }
+
+    /**
+     * Returns a new instance of {@link LifecycleInjectorBuilder} to be used by governator. Defaults to
+     * {@link com.netflix.governator.guice.LifecycleInjector#builder()}
+     *
+     * @return A new instance of {@link LifecycleInjectorBuilder} to be used by governator.
+     */
+    protected LifecycleInjectorBuilder newLifecycleInjectorBuilder() {
+        return LifecycleInjector.builder();
     }
 
     /**
@@ -165,6 +176,32 @@ public class ServerBootstrap {
             toReturn.add(String.valueOf(basePackage));
         }
         return toReturn;
+    }
+
+    /**
+     * Returns the {@link ClasspathScanner} used (to be used) by karyon. This is just for usage by classes outside of
+     * karyon, karyon does not use this method to get hold of the scanner. What this essentially means is that
+     * overriding this will not yield any benefits.
+     *
+     * @return The {@link ClasspathScanner} used (to be used) by karyon. This can be null, if this method is called
+     * before creating an instance of {@link KaryonServer}
+     */
+    @Nullable
+    @SuppressWarnings("unused")
+    protected ClasspathScanner getClasspathScanner() {
+        return classpathScanner;
+    }
+
+    private void readBasePackages() {
+        List<String> _allBasePackages = new ArrayList<String>();
+        _allBasePackages.add("com.netflix");
+
+        Collection<String> basePackages = getBasePackages();
+        if (null != basePackages) {
+            _allBasePackages.addAll(basePackages);
+        }
+
+        allBasePackages = _allBasePackages;
     }
 
     private class KaryonBootstrapModule implements BootstrapModule {
