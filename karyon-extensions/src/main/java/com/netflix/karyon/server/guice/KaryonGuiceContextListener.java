@@ -80,6 +80,7 @@ public class KaryonGuiceContextListener extends GuiceServletContextListener {
 
     @Override
     public void contextDestroyed(ServletContextEvent servletContextEvent) {
+        super.contextDestroyed(servletContextEvent);
         try {
             server.close();
         } catch (IOException e) {
