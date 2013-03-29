@@ -32,6 +32,8 @@ apply from: file('gradle/check.gradle')
 apply from: file('gradle/license.gradle')
 apply from: file('gradle/release.gradle')
 
+apply plugin: 'java'
+
 subprojects {
     group = "com.netflix.${githubProjectName}" // TEMPLATE: Set to organization of project
 
@@ -40,6 +42,7 @@ subprojects {
         compile 'com.google.guava:guava:11.0.2'
         compile 'javax.ws.rs:jsr311-api:1.1.1'
         testCompile 'junit:junit:4.10'
+        testRuntime 'org.slf4j:slf4j-simple:1.7.0'
     }
 }
 

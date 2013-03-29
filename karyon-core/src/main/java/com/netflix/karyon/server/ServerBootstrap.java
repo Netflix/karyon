@@ -28,11 +28,14 @@ import com.netflix.governator.guice.LifecycleInjector;
 import com.netflix.governator.guice.LifecycleInjectorBuilder;
 import com.netflix.governator.lifecycle.ClasspathScanner;
 import com.netflix.karyon.server.eureka.AsyncHealthCheckInvocationStrategy;
+import com.netflix.karyon.server.eureka.EurekaHandler;
 import com.netflix.karyon.server.eureka.HealthCheckInvocationStrategy;
+import com.netflix.karyon.server.utils.KaryonUtils;
 import com.netflix.karyon.spi.Application;
 import com.netflix.karyon.spi.Component;
 import com.netflix.karyon.spi.HealthCheckHandler;
 import com.netflix.karyon.spi.PropertyNames;
+import com.netflix.karyon.spi.ServiceRegistryClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -78,7 +81,8 @@ import java.util.List;
  governator classpath scanning. This is in case for any reason one does not want to specify a property
  {@link PropertyNames#SERVER_BOOTSTRAP_BASE_PACKAGES_OVERRIDE} as mentioned above.</li>
  <li>{@link com.netflix.karyon.server.ServerBootstrap#getConfigurationProvider()}: Any custom configuration provider
- that is to be used by governator. Defaults to {@link ArchaiusConfigurationProvider}</li>
+ that is to be used by governator. Defaults to {@link ArchaiusConfigurationProvider}. This can be used to make karyon
+ not register any configuration provider for governator, by returning <code>null</code> from this method.</li>
  </ul>
  *
  * In case, the above extension is required, the name of the custom class must be specified in a system property named
@@ -98,6 +102,8 @@ public class ServerBootstrap {
         List<Class<? extends Annotation>> annotations = Lists.newArrayList();
         annotations.add(Application.class);
         annotations.add(Component.class);
+
+        logger.info("Creating a new governator classpath scanner with base packages: " + allBasePackages);
         classpathScanner = LifecycleInjector.createStandardClasspathScanner(allBasePackages, annotations);
     }
 
@@ -120,11 +126,30 @@ public class ServerBootstrap {
     /**
      * Returns the {@link ConfigurationProvider} to be used by governator. Defaults to {@link ArchaiusConfigurationProvider}
      *
-     * @return  The class instance of the {@link ConfigurationProvider} to be used, this will be instantiated by governator.
+     * @return The class instance of the {@link ConfigurationProvider} to be used, this will be instantiated by governator.
+     *         If this is null, then karyon will not register a configuration provider with governator.
      */
-    @SuppressWarnings("unchecked")
+    @Nullable
     protected Class<? extends ConfigurationProvider> getConfigurationProvider() {
         return ArchaiusConfigurationProvider.class;
+    }
+
+    /**
+     * Returns the {@link com.netflix.karyon.spi.ServiceRegistryClient} to be used by karyon.
+     * Defaults to {@link com.netflix.karyon.server.eureka.EurekaHandler} unless the property
+     * {@code PropertyNames#DISABLE_EUREKA_INTEGRATION} is set to <code>false</code>, in which case, this will return
+     * <code>null</code>
+     *
+     * @return The class instance of the {@link ServiceRegistryClient} to be used, this will be instantiated by governator.
+     *         If this is null, then karyon will not register any service handler.
+     */
+    @Nullable
+    protected Class<? extends ServiceRegistryClient> getServiceRegistryClient() {
+        if (KaryonUtils.isCoreComponentEnabled(PropertyNames.EUREKA_COMPONENT_NAME)) {
+            return EurekaHandler.class;
+        } else {
+            return null;
+        }
     }
 
     /**
@@ -208,7 +233,10 @@ public class ServerBootstrap {
 
         @Override
         public void configure(BootstrapBinder binder) {
-            binder.bindConfigurationProvider().to(getConfigurationProvider());
+            Class<? extends ConfigurationProvider> configurationProvider = getConfigurationProvider();
+            if (null != configurationProvider) {
+                binder.bindConfigurationProvider().to(configurationProvider);
+            }
             configureBootstrapBinder(binder);
         }
     }
@@ -218,15 +246,30 @@ public class ServerBootstrap {
         @Override
         public void configure() {
 
-            bindHealthCheckStrategy(binder());
+            bindServiceRegistryClient();
 
-            bindHealthCheckHandler(binder());
+            bindHealthCheckStrategy();
+
+            bindHealthCheckHandler();
 
             configureBinder(binder());
         }
 
-        private void bindHealthCheckStrategy(Binder binder) {
-            boolean bound = bindACustomClass(binder, PropertyNames.HEALTH_CHECK_STRATEGY,
+        private void bindServiceRegistryClient() {
+            Class<? extends ServiceRegistryClient> serviceRegistryClient = getServiceRegistryClient();
+            if (null != serviceRegistryClient) {
+                binder().bind(ServiceRegistryClient.class).to(serviceRegistryClient);
+                logger.info("Bound service registry client to: " + serviceRegistryClient.getName());
+            } else {
+                logger.info("Not registering a service registry client. This may be 1) If you return null from " +
+                            "getServiceRegistryClient() in your " + ServerBootstrap.class.getName() + " implementation." +
+                            " 2) If you have set the property: " + PropertyNames.DISABLE_EUREKA_INTEGRATION + " to true.");
+                binder().bind(ServiceRegistryClient.class).to(NoneServiceRegistryClient.class);
+            }
+        }
+
+        private void bindHealthCheckStrategy() {
+            boolean bound = bindACustomClass(binder(), PropertyNames.HEALTH_CHECK_STRATEGY,
                     HealthCheckHandler.class,
                     "No health check invocation strategy specified, using the default strategy %s. In order to override " +
                     "this behavior you provide an implementation of %s and specify the fully qualified class name of " +
@@ -234,12 +277,12 @@ public class ServerBootstrap {
                     HealthCheckInvocationStrategy.class.getName(), PropertyNames.HEALTH_CHECK_STRATEGY);
 
             if(!bound) {
-                binder.bind(HealthCheckInvocationStrategy.class).to(AsyncHealthCheckInvocationStrategy.class);
+                binder().bind(HealthCheckInvocationStrategy.class).to(AsyncHealthCheckInvocationStrategy.class);
             }
         }
 
-        private void bindHealthCheckHandler(Binder binder) {
-            boolean bound = bindACustomClass(binder, PropertyNames.HEALTH_CHECK_HANDLER_CLASS_PROP_NAME,
+        private void bindHealthCheckHandler() {
+            boolean bound = bindACustomClass(binder(), PropertyNames.HEALTH_CHECK_HANDLER_CLASS_PROP_NAME,
                     HealthCheckHandler.class,
                     "No health check handler defined. This means your application can not provide meaningful health " +
                     "state to external entities. It is highly recommended that you provide an implementation of %s and " +
@@ -247,7 +290,7 @@ public class ServerBootstrap {
                     HealthCheckHandler.class.getName(), PropertyNames.HEALTH_CHECK_HANDLER_CLASS_PROP_NAME);
 
             if(!bound) {
-                binder.bind(HealthCheckHandler.class).toInstance(new DefaultHealthCheckHandler());
+                binder().bind(HealthCheckHandler.class).toInstance(new DefaultHealthCheckHandler());
             }
         }
 

@@ -33,12 +33,15 @@ import junit.framework.Assert;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author Nitesh Kant
  */
 public class KaryonServerTest {
 
+    private static final Logger logger = LoggerFactory.getLogger(KaryonServerTest.class);
     private KaryonServer server;
 
     @Before
@@ -53,6 +56,13 @@ public class KaryonServerTest {
 
     @Test
     public void testAnnotatedClasses() throws Exception {
+
+        logger.error("Setting properties explicitly.");
+
+        System.setProperty(PropertyNames.SERVER_BOOTSTRAP_BASE_PACKAGES_OVERRIDE, "com.test");
+        System.setProperty(PropertyNames.DISABLE_EUREKA_INTEGRATION, "true");
+
+
         startServer();
 
         Assert.assertTrue("Component not initialized.", RegistrationSequence.contains(TestComponent.class));
