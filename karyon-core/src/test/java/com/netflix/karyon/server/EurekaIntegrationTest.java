@@ -86,7 +86,7 @@ public class EurekaIntegrationTest {
     }
 
     private void startServer() throws Exception {
-        server = new KaryonServer() { };
+        server = new KaryonServer();
         server.initialize();
         server.start();
     }

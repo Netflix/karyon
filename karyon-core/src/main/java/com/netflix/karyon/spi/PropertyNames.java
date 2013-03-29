@@ -77,10 +77,17 @@ public class PropertyNames {
 
     public static final String EUREKA_COMPONENT_NAME = "eureka";
 
+    public static final String ARCHAIUS_COMPONENT_NAME = "archaius";
+
     /**
      * Set this to <code>true</code>  to disable integration with eureka.
      */
     public static final String DISABLE_EUREKA_INTEGRATION = KARYON_PROPERTIES_PREFIX + EUREKA_COMPONENT_NAME + ".disable";
+
+    /**
+     * Set this to <code>true</code>  to disable integration with archaius.
+     */
+    public static final String DISABLE_ARCHAIUS_INTEGRATION = KARYON_PROPERTIES_PREFIX + ARCHAIUS_COMPONENT_NAME + ".disable";
 
     /**
      * Fully qualified classname of the health check invocation strategy. Default is an async strategy.

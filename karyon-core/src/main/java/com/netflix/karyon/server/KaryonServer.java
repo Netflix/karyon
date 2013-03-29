@@ -82,8 +82,11 @@ import java.io.IOException;
  *
  * NOTE: The above property names are valid if the default deployment context is used for archaius.
  *
- * If any customization is required in archaius, one should do the same before calling
- * {@link com.netflix.karyon.server.KaryonServer#initialize()}.
+ * If any customization is required in archaius, one should do the same before instantiating
+ * {@link com.netflix.karyon.server.KaryonServer}.
+ *
+ * If this archaius integration is not required, you must set a system property
+ * {@link PropertyNames#DISABLE_ARCHAIUS_INTEGRATION}
  *
  * <h2>Example</h2>
  * One can create a very simple server using karyon as:
@@ -143,11 +146,11 @@ public class KaryonServer implements Closeable {
      */
     public KaryonServer(@Nullable ServerBootstrap bootstrap) {
 
-        loadProperties();
+        PhaseInterceptorRegistry.notifyInterceptors(InitializationPhaseInterceptor.Phase.OnCreate);
 
         if (null == bootstrap) {
             String bootstrapClassName =
-                    ConfigurationManager.getConfigInstance().getString( PropertyNames.SERVER_BOOTSTRAP_CLASS_OVERRIDE);
+                    ConfigurationManager.getConfigInstance().getString(PropertyNames.SERVER_BOOTSTRAP_CLASS_OVERRIDE);
             if (null == bootstrapClassName) {
                 serverBootstrap = new ServerBootstrap();
             } else {
@@ -156,6 +159,8 @@ public class KaryonServer implements Closeable {
         } else {
             serverBootstrap = bootstrap;
         }
+
+        PhaseInterceptorRegistry.notifyInterceptors(InitializationPhaseInterceptor.Phase.InitBootstrap);
 
         serverBootstrap.initialize();
     }
@@ -177,6 +182,9 @@ public class KaryonServer implements Closeable {
         serverBootstrap.beforeInjectorCreation(injectorBuilder);
 
         injector = injectorBuilder.createInjector();
+
+        initializer = injector.getInstance(ServerInitializer.class);
+
         return injector;
     }
 
@@ -193,7 +201,6 @@ public class KaryonServer implements Closeable {
         lifecycleManager = injector.getInstance(LifecycleManager.class);
         lifecycleManager.start();
 
-        initializer = injector.getInstance(ServerInitializer.class);
         initializer.initialize(injector);
     }
 
@@ -229,27 +236,6 @@ public class KaryonServer implements Closeable {
         } catch (ClassCastException e) {
             logger.error(String.format("Bootstrap class %s should extend from %s", bootstrapClassName, ServerBootstrap.class.getName()), e);
             throw Throwables.propagate(e);
-        }
-    }
-
-    private void loadProperties() {
-        String appId = ConfigurationManager.getDeploymentContext().getApplicationId();
-
-        // Loading properties via archaius.
-        if (null != appId) {
-            try {
-                logger.info(String.format("Loading application properties with app id: %s and environment: %s", appId,
-                        ConfigurationManager.getDeploymentContext().getDeploymentEnvironment()));
-                ConfigurationManager.loadCascadedPropertiesFromResources(appId);
-            } catch (IOException e) {
-                logger.error(String.format(
-                        "Failed to load properties for application id: %s and environment: %s. This is ok, if you do not have application level properties.",
-                        appId,
-                        ConfigurationManager.getDeploymentContext().getDeploymentEnvironment()), e);
-            }
-        } else {
-            logger.warn(
-                    "Application identifier not defined, skipping application level properties loading. You must set a property 'archaius.deployment.applicationId' to be able to load application level properties.");
         }
     }
 }

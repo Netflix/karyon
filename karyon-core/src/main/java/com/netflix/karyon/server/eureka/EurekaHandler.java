@@ -16,6 +16,7 @@
 
 package com.netflix.karyon.server.eureka;
 
+import com.google.common.base.Preconditions;
 import com.google.inject.Inject;
 import com.netflix.appinfo.ApplicationInfoManager;
 import com.netflix.appinfo.CloudInstanceConfig;
@@ -25,14 +26,15 @@ import com.netflix.appinfo.InstanceInfo;
 import com.netflix.appinfo.MyDataCenterInstanceConfig;
 import com.netflix.discovery.DefaultEurekaClientConfig;
 import com.netflix.discovery.DiscoveryManager;
-import com.netflix.governator.annotations.AutoBindSingleton;
 import com.netflix.governator.annotations.Configuration;
 import com.netflix.karyon.server.utils.KaryonUtils;
 import com.netflix.karyon.spi.PropertyNames;
+import com.netflix.karyon.spi.ServiceRegistryClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.PostConstruct;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import static com.netflix.karyon.spi.PropertyNames.EUREKA_DATACENTER_TYPE_PROP_NAME;
 import static com.netflix.karyon.spi.PropertyNames.EUREKA_PROPERTIES_NAME_PREFIX_PROP_NAME;
@@ -48,13 +50,13 @@ import static com.netflix.karyon.spi.PropertyNames.EUREKA_PROPERTIES_NAME_PREFIX
  * @author Nitesh Kant
  * @see com.netflix.karyon.server.KaryonServer
  */
-@AutoBindSingleton
-public class EurekaHandler {
+public class EurekaHandler implements ServiceRegistryClient {
 
     protected static final Logger logger = LoggerFactory.getLogger(EurekaHandler.class);
 
     private EurekaHealthCheckCallback eurekaHealthCheckCallback;
     private HealthCheckInvocationStrategy healthCheckInvocationStrategy;
+    private AtomicBoolean registered = new AtomicBoolean();
 
     @Configuration(
             value = EUREKA_PROPERTIES_NAME_PREFIX_PROP_NAME,
@@ -80,11 +82,17 @@ public class EurekaHandler {
         if (!eurekaNamespace.endsWith(".")) {
             eurekaNamespace = eurekaNamespace + "."; // Eureka requires this.
         }
+        register();
     }
 
     public void register() {
         if (!KaryonUtils.isCoreComponentEnabled(PropertyNames.EUREKA_COMPONENT_NAME)) {
             logger.info("Eureka is disabled, skipping instance's eureka registration.");
+            return;
+        }
+
+        if (!registered.compareAndSet(false, true)) {
+            logger.info("Eureka handler already registered, skipping registration.");
             return;
         }
 
@@ -141,6 +149,20 @@ public class EurekaHandler {
                 Thread.interrupted(); // reset the interrupted status
                 logger.error("Interrupted while stopping the async health check invocation strategy. Ignoring.", e);
             }
+        }
+    }
+
+    @Override
+    public void updateStatus(ServiceStatus newStatus) {
+        Preconditions.checkNotNull(newStatus, "Service status can not be null.");
+
+        switch (newStatus) {
+            case UP:
+                markAsUp();
+                break;
+            case DOWN:
+                markAsDown();
+                break;
         }
     }
 }

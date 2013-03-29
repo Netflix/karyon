@@ -21,7 +21,7 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.netflix.karyon.finder.ApplicationFinder;
 import com.netflix.karyon.finder.ComponentFinder;
-import com.netflix.karyon.server.eureka.EurekaHandler;
+import com.netflix.karyon.spi.ServiceRegistryClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,16 +45,16 @@ public class ServerInitializer implements Closeable {
 
     private static final Logger logger = LoggerFactory.getLogger(ServerInitializer.class);
 
-    private EurekaHandler eurekaHandler;
+    private ServiceRegistryClient serviceRegistryClient;
 
     private ApplicationFinder applicationFinder;
 
     private ComponentFinder componentFinder;
 
     @Inject
-    public ServerInitializer(EurekaHandler eurekaHandler, ApplicationFinder applicationFinder,
+    public ServerInitializer(ServiceRegistryClient serviceRegistryClient, ApplicationFinder applicationFinder,
                              ComponentFinder componentFinder) {
-        this.eurekaHandler = eurekaHandler;
+        this.serviceRegistryClient = serviceRegistryClient;
         this.applicationFinder = applicationFinder;
         this.componentFinder = componentFinder;
     }
@@ -65,8 +65,6 @@ public class ServerInitializer implements Closeable {
      * @param injector Injector used to initialize <a href="https://github.com/Netflix/governator/">Governator</a>
      */
     public void initialize(Injector injector) {
-
-        eurekaHandler.register();
 
         Set<Class<?>> components = componentFinder.findComponents();
 
@@ -95,7 +93,7 @@ public class ServerInitializer implements Closeable {
             }
         }
 
-        eurekaHandler.markAsUp();
+        serviceRegistryClient.updateStatus(ServiceRegistryClient.ServiceStatus.UP);
     }
 
     /**
@@ -103,6 +101,6 @@ public class ServerInitializer implements Closeable {
      */
     @Override
     public void close() {
-        eurekaHandler.markAsDown();
+        serviceRegistryClient.updateStatus(ServiceRegistryClient.ServiceStatus.DOWN);
     }
 }
