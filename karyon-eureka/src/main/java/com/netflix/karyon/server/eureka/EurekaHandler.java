@@ -55,8 +55,12 @@ public class EurekaHandler implements ServiceRegistryClient {
 
     protected static final Logger logger = LoggerFactory.getLogger(EurekaHandler.class);
 
+    @Inject(optional = true)
     private EurekaHealthCheckCallback eurekaHealthCheckCallback;
+
+    @Inject(optional = true)
     private HealthCheckInvocationStrategy healthCheckInvocationStrategy;
+
     private AtomicBoolean registered = new AtomicBoolean();
 
     @Configuration(
@@ -70,13 +74,6 @@ public class EurekaHandler implements ServiceRegistryClient {
             documentation = "Datacenter type used for initializing appropriate eureka instance configuration."
     )
     private String datacenterType;
-
-    @Inject
-    public EurekaHandler(EurekaHealthCheckCallback eurekaHealthCheckCallback,
-                         HealthCheckInvocationStrategy healthCheckInvocationStrategy) {
-        this.eurekaHealthCheckCallback = eurekaHealthCheckCallback;
-        this.healthCheckInvocationStrategy = healthCheckInvocationStrategy;
-    }
 
     @PostConstruct
     public void postConfig() {
@@ -100,9 +97,11 @@ public class EurekaHandler implements ServiceRegistryClient {
         EurekaInstanceConfig eurekaInstanceConfig = createEurekaInstanceConfig();
 
         DiscoveryManager.getInstance().initComponent(eurekaInstanceConfig, new DefaultEurekaClientConfig(eurekaNamespace));
-        // We always register the callback with eureka, the handler in turn checks if the unification is enabled, if yes,
-        // the underlying handler is used else returns healthy.
-        DiscoveryManager.getInstance().getDiscoveryClient().registerHealthCheckCallback(eurekaHealthCheckCallback);
+        if (null != eurekaHealthCheckCallback) {
+            // We always register the callback with eureka, the handler in turn checks if the unification is enabled, if yes,
+            // the underlying handler is used else returns healthy.
+            DiscoveryManager.getInstance().getDiscoveryClient().registerHealthCheckCallback(eurekaHealthCheckCallback);
+        }
     }
 
     protected EurekaInstanceConfig createEurekaInstanceConfig() {
@@ -148,7 +147,8 @@ public class EurekaHandler implements ServiceRegistryClient {
         }
 
         DiscoveryManager.getInstance().shutdownComponent();
-        if (AsyncHealthCheckInvocationStrategy.class.isAssignableFrom(healthCheckInvocationStrategy.getClass())) {
+        if (null != healthCheckInvocationStrategy
+                && AsyncHealthCheckInvocationStrategy.class.isAssignableFrom(healthCheckInvocationStrategy.getClass())) {
             try {
                 ((AsyncHealthCheckInvocationStrategy) healthCheckInvocationStrategy).stop();
             } catch (InterruptedException e) {
