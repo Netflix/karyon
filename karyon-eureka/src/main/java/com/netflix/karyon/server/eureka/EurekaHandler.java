@@ -37,6 +37,7 @@ import org.slf4j.LoggerFactory;
 import javax.annotation.PostConstruct;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import static com.netflix.karyon.spi.PropertyNames.EUREKA_CLIENT_PROPERTIES_NAME_PREFIX_PROP_NAME;
 import static com.netflix.karyon.spi.PropertyNames.EUREKA_DATACENTER_TYPE_PROP_NAME;
 import static com.netflix.karyon.spi.PropertyNames.EUREKA_PROPERTIES_NAME_PREFIX_PROP_NAME;
 
@@ -70,6 +71,12 @@ public class EurekaHandler implements ServiceRegistryClient {
     private String eurekaNamespace = "eureka";
 
     @Configuration(
+            value = EUREKA_CLIENT_PROPERTIES_NAME_PREFIX_PROP_NAME,
+            documentation = "Namespace for eureka client related properties."
+    )
+    private String eurekaClientNamespace;
+
+    @Configuration(
             value = EUREKA_DATACENTER_TYPE_PROP_NAME,
             documentation = "Datacenter type used for initializing appropriate eureka instance configuration."
     )
@@ -79,6 +86,12 @@ public class EurekaHandler implements ServiceRegistryClient {
     public void postConfig() {
         if (!eurekaNamespace.endsWith(".")) {
             eurekaNamespace = eurekaNamespace + "."; // Eureka requires this.
+        }
+
+        if (null == eurekaClientNamespace) {
+            eurekaClientNamespace = eurekaNamespace;
+        } else if (!eurekaClientNamespace.endsWith(".")) {
+            eurekaClientNamespace = eurekaClientNamespace + "."; // Eureka requires this.
         }
         register();
     }
@@ -96,7 +109,7 @@ public class EurekaHandler implements ServiceRegistryClient {
 
         EurekaInstanceConfig eurekaInstanceConfig = createEurekaInstanceConfig();
 
-        DiscoveryManager.getInstance().initComponent(eurekaInstanceConfig, new DefaultEurekaClientConfig(eurekaNamespace));
+        DiscoveryManager.getInstance().initComponent(eurekaInstanceConfig, new DefaultEurekaClientConfig(eurekaClientNamespace));
         if (null != eurekaHealthCheckCallback) {
             // We always register the callback with eureka, the handler in turn checks if the unification is enabled, if yes,
             // the underlying handler is used else returns healthy.
