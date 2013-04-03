@@ -119,9 +119,16 @@ public class EurekaHandler implements ServiceRegistryClient {
         }
 
         switch (dcType) {
-            case Netflix:
             case Amazon:
                 eurekaInstanceConfig = new CloudInstanceConfig(eurekaNamespace);
+                break;
+            case Netflix:
+                eurekaInstanceConfig = new MyDataCenterInstanceConfig(eurekaNamespace, new DataCenterInfo() {
+                    @Override
+                    public Name getName() {
+                        return Name.Netflix;
+                    }
+                });
                 break;
             default:
                 // Every other value is just custom data center.
