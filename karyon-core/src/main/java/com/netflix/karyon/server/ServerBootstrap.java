@@ -241,7 +241,7 @@ public class ServerBootstrap {
         }
     }
 
-    private class KaryonGuiceModule extends AbstractModule {
+    public class KaryonGuiceModule extends AbstractModule {
 
         @Override
         public void configure() {
@@ -255,7 +255,7 @@ public class ServerBootstrap {
             configureBinder(binder());
         }
 
-        private void bindServiceRegistryClient() {
+        protected void bindServiceRegistryClient() {
             Class<? extends ServiceRegistryClient> serviceRegistryClient = getServiceRegistryClient();
             if (null != serviceRegistryClient) {
                 binder().bind(ServiceRegistryClient.class).to(serviceRegistryClient);
@@ -268,7 +268,7 @@ public class ServerBootstrap {
             }
         }
 
-        private void bindHealthCheckStrategy() {
+        protected void bindHealthCheckStrategy() {
             boolean bound = bindACustomClass(binder(), PropertyNames.HEALTH_CHECK_STRATEGY,
                     HealthCheckHandler.class,
                     "No health check invocation strategy specified, using the default strategy %s. In order to override " +
@@ -281,7 +281,7 @@ public class ServerBootstrap {
             }
         }
 
-        private void bindHealthCheckHandler() {
+        protected void bindHealthCheckHandler() {
             boolean bound = bindACustomClass(binder(), PropertyNames.HEALTH_CHECK_HANDLER_CLASS_PROP_NAME,
                     HealthCheckHandler.class,
                     "No health check handler defined. This means your application can not provide meaningful health " +

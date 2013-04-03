@@ -15,4 +15,4 @@
  */
 
 rootProject.name='karyon'
-include 'karyon-core','karyon-extensions', 'karyon-admin', 'karyon-admin-web', 'karyon-examples:hello-netflix-oss'
+include 'karyon-spi','karyon-eureka','karyon-core','karyon-extensions', 'karyon-admin', 'karyon-admin-web', 'karyon-examples:hello-netflix-oss'

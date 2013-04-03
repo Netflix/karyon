@@ -107,7 +107,7 @@ public class PropertyNames {
 
     /**
      * If this is set to <code>true</code> the karyon health check results will be sent to eureka by using an adapter
-     * to {@link com.netflix.appinfo.HealthCheckCallback}
+     * to eureka's healthcheck.
      */
     public static final String UNIFY_HEALTHCHECK_WITH_EUREKA = KARYON_PROPERTIES_PREFIX + "unify.health.check.with.eureka";
 }
