@@ -56,7 +56,10 @@ public class EurekaHandler implements ServiceRegistryClient {
 
     protected static final Logger logger = LoggerFactory.getLogger(EurekaHandler.class);
 
+    @Inject(optional = true)
     private EurekaHealthCheckCallback eurekaHealthCheckCallback;
+
+    @Inject(optional = true)
     private HealthCheckInvocationStrategy healthCheckInvocationStrategy;
 
     private AtomicBoolean registered = new AtomicBoolean();
@@ -78,6 +81,7 @@ public class EurekaHandler implements ServiceRegistryClient {
             documentation = "Datacenter type used for initializing appropriate eureka instance configuration."
     )
     private String datacenterType;
+/*
 
     @Inject
     public EurekaHandler(EurekaHealthCheckCallback eurekaHealthCheckCallback,
@@ -85,6 +89,7 @@ public class EurekaHandler implements ServiceRegistryClient {
         this.eurekaHealthCheckCallback = eurekaHealthCheckCallback;
         this.healthCheckInvocationStrategy = healthCheckInvocationStrategy;
     }
+*/
 
     @PostConstruct
     public void postConfig() {
@@ -101,7 +106,7 @@ public class EurekaHandler implements ServiceRegistryClient {
     }
 
     public void register() {
-        if (!isEurekaDisabled()) {
+        if (isEurekaDisabled()) {
             logger.info("Eureka is disabled, skipping instance's eureka registration.");
             return;
         }

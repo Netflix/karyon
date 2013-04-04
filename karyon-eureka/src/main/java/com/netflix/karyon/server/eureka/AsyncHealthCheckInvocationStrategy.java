@@ -17,10 +17,10 @@
 package com.netflix.karyon.server.eureka;
 
 import com.google.inject.Inject;
-import com.google.inject.Singleton;
 import com.netflix.config.DynamicIntProperty;
 import com.netflix.config.DynamicPropertyFactory;
 import com.netflix.governator.annotations.Configuration;
+import com.netflix.governator.guice.lazy.LazySingleton;
 import com.netflix.karyon.spi.HealthCheckHandler;
 import com.netflix.karyon.spi.PropertyNames;
 import org.slf4j.Logger;
@@ -51,7 +51,7 @@ import java.util.concurrent.atomic.AtomicReference;
  * 
  * @author Nitesh Kant
  */
-@Singleton
+@LazySingleton
 public class AsyncHealthCheckInvocationStrategy implements HealthCheckInvocationStrategy {
 
     protected static final Logger logger = LoggerFactory.getLogger(AsyncHealthCheckInvocationStrategy.class);
