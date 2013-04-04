@@ -86,7 +86,8 @@ public class KaryonServerTest {
         ConfigurationManager.getConfigInstance().setProperty(PropertyNames.HEALTH_CHECK_HANDLER_CLASS_PROP_NAME,
                 HealthCheckGuy.class.getName());
 
-        startServer();
+        Injector injector = startServer();
+        injector.getInstance(EurekaHealthCheckCallback.class);
         Assert.assertTrue("Health check handler not initialized.", RegistrationSequence.contains(HealthCheckGuy.class));
     }
 

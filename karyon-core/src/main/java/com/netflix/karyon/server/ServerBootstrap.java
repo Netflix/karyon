@@ -17,7 +17,6 @@
 package com.netflix.karyon.server;
 
 import com.google.common.collect.Lists;
-import com.google.inject.AbstractModule;
 import com.google.inject.Binder;
 import com.netflix.config.ConfigurationManager;
 import com.netflix.governator.configuration.ArchaiusConfigurationProvider;

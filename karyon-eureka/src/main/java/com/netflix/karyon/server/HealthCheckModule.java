@@ -51,7 +51,7 @@ public class HealthCheckModule extends AbstractModule {
                 HealthCheckHandler.class.getName(), PropertyNames.HEALTH_CHECK_HANDLER_CLASS_PROP_NAME);
 
         if(!bound) {
-            binder().bind(HealthCheckHandler.class).toInstance(new DefaultHealthCheckHandler());
+            binder().bind(HealthCheckHandler.class).to(DefaultHealthCheckHandler.class);
         }
     }
 
