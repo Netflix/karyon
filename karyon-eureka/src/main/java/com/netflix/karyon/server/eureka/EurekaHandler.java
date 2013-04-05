@@ -65,19 +65,19 @@ public class EurekaHandler implements ServiceRegistryClient {
             value = EUREKA_PROPERTIES_NAME_PREFIX_PROP_NAME,
             documentation = "Namespace for eureka related properties."
     )
-    private String eurekaNamespace = "eureka";
+    protected String eurekaNamespace = "eureka";
 
     @Configuration(
             value = EUREKA_CLIENT_PROPERTIES_NAME_PREFIX_PROP_NAME,
             documentation = "Namespace for eureka client related properties."
     )
-    private String eurekaClientNamespace;
+    protected String eurekaClientNamespace;
 
     @Configuration(
             value = EUREKA_DATACENTER_TYPE_PROP_NAME,
             documentation = "Datacenter type used for initializing appropriate eureka instance configuration."
     )
-    private String datacenterType;
+    protected String datacenterType;
 
     @Inject
     public EurekaHandler(EurekaHealthCheckCallback eurekaHealthCheckCallback,

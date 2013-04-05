@@ -60,7 +60,7 @@ public class AsyncHealthCheckInvocationStrategy implements HealthCheckInvocation
             value = PropertyNames.HEALTH_CHECK_TIMEOUT_DEFAULT_MILLIS,
             documentation = "Default timeout value for healthchecks in milliseconds."
     )
-    private int HEALTH_CHECK_TIMEOUT_DEFAULT = 1000;
+    protected int HEALTH_CHECK_TIMEOUT_DEFAULT = 1000;
 
     private final DynamicIntProperty HEALTH_CHECK_TIMEOUT_MILLIS =
             DynamicPropertyFactory.getInstance().getIntProperty(PropertyNames.HEALTH_CHECK_TIMEOUT_MILLIS,
