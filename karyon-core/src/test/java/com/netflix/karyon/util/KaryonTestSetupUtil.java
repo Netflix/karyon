@@ -33,6 +33,7 @@ public class KaryonTestSetupUtil {
     }
 
     public static void tearDown(KaryonServer server) throws Exception {
+        ConfigurationManager.getConfigInstance().clearProperty(PropertyNames.SERVER_BOOTSTRAP_BASE_PACKAGES_OVERRIDE);
         ConfigurationManager.getConfigInstance().clearProperty(PropertyNames.DISABLE_APPLICATION_DISCOVERY_PROP_NAME);
         ConfigurationManager.getConfigInstance().clearProperty(PropertyNames.EXPLICIT_APPLICATION_CLASS_PROP_NAME);
         RegistrationSequence.reset();

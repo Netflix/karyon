@@ -17,7 +17,6 @@
 package com.netflix.karyon.server;
 
 import com.google.common.collect.Lists;
-import com.google.inject.AbstractModule;
 import com.google.inject.Binder;
 import com.netflix.config.ConfigurationManager;
 import com.netflix.governator.configuration.ArchaiusConfigurationProvider;
@@ -93,6 +92,7 @@ import java.util.List;
 public class ServerBootstrap {
 
     private static final Logger logger = LoggerFactory.getLogger(ServerBootstrap.class);
+
     private List<String> allBasePackages;
     private ClasspathScanner classpathScanner;
 
@@ -241,21 +241,19 @@ public class ServerBootstrap {
         }
     }
 
-    private class KaryonGuiceModule extends AbstractModule {
+    public class KaryonGuiceModule extends HealthCheckModule {
 
         @Override
         public void configure() {
 
+            super.configure();
+
             bindServiceRegistryClient();
-
-            bindHealthCheckStrategy();
-
-            bindHealthCheckHandler();
 
             configureBinder(binder());
         }
 
-        private void bindServiceRegistryClient() {
+        protected void bindServiceRegistryClient() {
             Class<? extends ServiceRegistryClient> serviceRegistryClient = getServiceRegistryClient();
             if (null != serviceRegistryClient) {
                 binder().bind(ServiceRegistryClient.class).to(serviceRegistryClient);
@@ -266,60 +264,6 @@ public class ServerBootstrap {
                             " 2) If you have set the property: " + PropertyNames.DISABLE_EUREKA_INTEGRATION + " to true.");
                 binder().bind(ServiceRegistryClient.class).to(NoneServiceRegistryClient.class);
             }
-        }
-
-        private void bindHealthCheckStrategy() {
-            boolean bound = bindACustomClass(binder(), PropertyNames.HEALTH_CHECK_STRATEGY,
-                    HealthCheckHandler.class,
-                    "No health check invocation strategy specified, using the default strategy %s. In order to override " +
-                    "this behavior you provide an implementation of %s and specify the fully qualified class name of " +
-                    "the implementation in the property %s", AsyncHealthCheckInvocationStrategy.class.getName(),
-                    HealthCheckInvocationStrategy.class.getName(), PropertyNames.HEALTH_CHECK_STRATEGY);
-
-            if(!bound) {
-                binder().bind(HealthCheckInvocationStrategy.class).to(AsyncHealthCheckInvocationStrategy.class);
-            }
-        }
-
-        private void bindHealthCheckHandler() {
-            boolean bound = bindACustomClass(binder(), PropertyNames.HEALTH_CHECK_HANDLER_CLASS_PROP_NAME,
-                    HealthCheckHandler.class,
-                    "No health check handler defined. This means your application can not provide meaningful health " +
-                    "state to external entities. It is highly recommended that you provide an implementation of %s and " +
-                    "specify the fully qualified class name of the implementation in the property %s",
-                    HealthCheckHandler.class.getName(), PropertyNames.HEALTH_CHECK_HANDLER_CLASS_PROP_NAME);
-
-            if(!bound) {
-                binder().bind(HealthCheckHandler.class).toInstance(new DefaultHealthCheckHandler());
-            }
-        }
-
-        @SuppressWarnings("unchecked")
-        private <T> boolean bindACustomClass(Binder binder, String customClassPropName, Class<T> bindTo,
-                                             String propertNotFoundErrMsg, Object... arguments) {
-            boolean bound = false;
-            String customClassName = ConfigurationManager.getConfigInstance().getString(customClassPropName);
-            if (null != customClassName) {
-                Class<? extends T> customClass = null;
-                try {
-                    Class<?> aClass = Class.forName(customClassName);
-                    if (bindTo.isAssignableFrom(aClass)) {
-                        binder.bind(bindTo).to((Class<? extends T>) aClass);
-                        bound = true;
-                    } else {
-                        logger.warn(String.format("Binding for %s failed, %s can not be assigned to %s.",
-                                bindTo.getName(), customClassName, bindTo.getName()));
-                    }
-                } catch (ClassNotFoundException e) {
-                    logger.error(
-                            String.format("Binding for %s failed, class %s specified as property %s can not be found.",
-                                    bindTo.getName(), customClass, customClassPropName), e);
-                }
-            } else {
-                logger.info(String.format(propertNotFoundErrMsg, arguments));
-            }
-
-            return bound;
         }
 
     }

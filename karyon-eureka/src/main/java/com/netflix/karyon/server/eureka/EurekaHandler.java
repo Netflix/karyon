@@ -24,10 +24,11 @@ import com.netflix.appinfo.DataCenterInfo;
 import com.netflix.appinfo.EurekaInstanceConfig;
 import com.netflix.appinfo.InstanceInfo;
 import com.netflix.appinfo.MyDataCenterInstanceConfig;
+import com.netflix.config.ConfigurationManager;
 import com.netflix.discovery.DefaultEurekaClientConfig;
 import com.netflix.discovery.DiscoveryManager;
 import com.netflix.governator.annotations.Configuration;
-import com.netflix.karyon.server.utils.KaryonUtils;
+import com.netflix.governator.guice.lazy.LazySingleton;
 import com.netflix.karyon.spi.PropertyNames;
 import com.netflix.karyon.spi.ServiceRegistryClient;
 import org.slf4j.Logger;
@@ -36,6 +37,7 @@ import org.slf4j.LoggerFactory;
 import javax.annotation.PostConstruct;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import static com.netflix.karyon.spi.PropertyNames.EUREKA_CLIENT_PROPERTIES_NAME_PREFIX_PROP_NAME;
 import static com.netflix.karyon.spi.PropertyNames.EUREKA_DATACENTER_TYPE_PROP_NAME;
 import static com.netflix.karyon.spi.PropertyNames.EUREKA_PROPERTIES_NAME_PREFIX_PROP_NAME;
 
@@ -48,27 +50,34 @@ import static com.netflix.karyon.spi.PropertyNames.EUREKA_PROPERTIES_NAME_PREFIX
  * eureka. Otherwise {@link MyDataCenterInstanceConfig} is used as eureka config.
  *
  * @author Nitesh Kant
- * @see com.netflix.karyon.server.KaryonServer
  */
+@LazySingleton
 public class EurekaHandler implements ServiceRegistryClient {
 
     protected static final Logger logger = LoggerFactory.getLogger(EurekaHandler.class);
 
     private EurekaHealthCheckCallback eurekaHealthCheckCallback;
     private HealthCheckInvocationStrategy healthCheckInvocationStrategy;
+
     private AtomicBoolean registered = new AtomicBoolean();
 
     @Configuration(
             value = EUREKA_PROPERTIES_NAME_PREFIX_PROP_NAME,
             documentation = "Namespace for eureka related properties."
     )
-    private String eurekaNamespace = "eureka";
+    protected String eurekaNamespace = "eureka";
+
+    @Configuration(
+            value = EUREKA_CLIENT_PROPERTIES_NAME_PREFIX_PROP_NAME,
+            documentation = "Namespace for eureka client related properties."
+    )
+    protected String eurekaClientNamespace;
 
     @Configuration(
             value = EUREKA_DATACENTER_TYPE_PROP_NAME,
             documentation = "Datacenter type used for initializing appropriate eureka instance configuration."
     )
-    private String datacenterType;
+    protected String datacenterType;
 
     @Inject
     public EurekaHandler(EurekaHealthCheckCallback eurekaHealthCheckCallback,
@@ -82,11 +91,17 @@ public class EurekaHandler implements ServiceRegistryClient {
         if (!eurekaNamespace.endsWith(".")) {
             eurekaNamespace = eurekaNamespace + "."; // Eureka requires this.
         }
+
+        if (null == eurekaClientNamespace) {
+            eurekaClientNamespace = eurekaNamespace;
+        } else if (!eurekaClientNamespace.endsWith(".")) {
+            eurekaClientNamespace = eurekaClientNamespace + "."; // Eureka requires this.
+        }
         register();
     }
 
     public void register() {
-        if (!KaryonUtils.isCoreComponentEnabled(PropertyNames.EUREKA_COMPONENT_NAME)) {
+        if (isEurekaDisabled()) {
             logger.info("Eureka is disabled, skipping instance's eureka registration.");
             return;
         }
@@ -96,6 +111,17 @@ public class EurekaHandler implements ServiceRegistryClient {
             return;
         }
 
+        EurekaInstanceConfig eurekaInstanceConfig = createEurekaInstanceConfig();
+
+        DiscoveryManager.getInstance().initComponent(eurekaInstanceConfig, new DefaultEurekaClientConfig(eurekaClientNamespace));
+        if (null != eurekaHealthCheckCallback) {
+            // We always register the callback with eureka, the handler in turn checks if the unification is enabled, if yes,
+            // the underlying handler is used else returns healthy.
+            DiscoveryManager.getInstance().getDiscoveryClient().registerHealthCheckCallback(eurekaHealthCheckCallback);
+        }
+    }
+
+    protected EurekaInstanceConfig createEurekaInstanceConfig() {
         EurekaInstanceConfig eurekaInstanceConfig;
 
         DataCenterInfo.Name dcType = DataCenterInfo.Name.MyOwn;
@@ -110,24 +136,27 @@ public class EurekaHandler implements ServiceRegistryClient {
         }
 
         switch (dcType) {
-            case Netflix:
             case Amazon:
                 eurekaInstanceConfig = new CloudInstanceConfig(eurekaNamespace);
+                break;
+            case Netflix:
+                eurekaInstanceConfig = new MyDataCenterInstanceConfig(eurekaNamespace, new DataCenterInfo() {
+                    @Override
+                    public Name getName() {
+                        return Name.Netflix;
+                    }
+                });
                 break;
             default:
                 // Every other value is just custom data center.
                 eurekaInstanceConfig = new MyDataCenterInstanceConfig(eurekaNamespace);
                 break;
         }
-
-        DiscoveryManager.getInstance().initComponent(eurekaInstanceConfig, new DefaultEurekaClientConfig(eurekaNamespace));
-        // We always register the callback with eureka, the handler inturn checks if the unification is enabled, if yes,
-        // the underlying handler is used else returns healthy.
-        DiscoveryManager.getInstance().getDiscoveryClient().registerHealthCheckCallback(eurekaHealthCheckCallback);
+        return eurekaInstanceConfig;
     }
 
     public void markAsUp() {
-        if (!KaryonUtils.isCoreComponentEnabled(PropertyNames.EUREKA_COMPONENT_NAME)) {
+        if (isEurekaDisabled()) {
             logger.info("Eureka is disabled, skipping instance's eureka update to up.");
             return;
         }
@@ -136,13 +165,14 @@ public class EurekaHandler implements ServiceRegistryClient {
     }
 
     public void markAsDown() {
-        if (!KaryonUtils.isCoreComponentEnabled(PropertyNames.EUREKA_COMPONENT_NAME)) {
+        if (isEurekaDisabled()) {
             logger.info("Eureka is disabled, skipping instance's eureka update to down.");
             return;
         }
 
         DiscoveryManager.getInstance().shutdownComponent();
-        if (AsyncHealthCheckInvocationStrategy.class.isAssignableFrom(healthCheckInvocationStrategy.getClass())) {
+        if (null != healthCheckInvocationStrategy
+                && AsyncHealthCheckInvocationStrategy.class.isAssignableFrom(healthCheckInvocationStrategy.getClass())) {
             try {
                 ((AsyncHealthCheckInvocationStrategy) healthCheckInvocationStrategy).stop();
             } catch (InterruptedException e) {
@@ -164,5 +194,9 @@ public class EurekaHandler implements ServiceRegistryClient {
                 markAsDown();
                 break;
         }
+    }
+
+    private boolean isEurekaDisabled() {
+        return ConfigurationManager.getConfigInstance().getBoolean(PropertyNames.DISABLE_EUREKA_INTEGRATION, false);
     }
 }

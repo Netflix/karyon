@@ -45,6 +45,11 @@ public class PropertyNames {
     public static final String EUREKA_PROPERTIES_NAME_PREFIX_PROP_NAME = KARYON_PROPERTIES_PREFIX + "eureka.properties.prefix";
 
     /**
+     * Prefix for all eureka related properties. Default to the value set in {@link PropertyNames#EUREKA_PROPERTIES_NAME_PREFIX_PROP_NAME}
+     */
+    public static final String EUREKA_CLIENT_PROPERTIES_NAME_PREFIX_PROP_NAME = KARYON_PROPERTIES_PREFIX + "eureka.client.properties.prefix";
+
+    /**
      * Datacenter type for eureka.
      */
     public static final String EUREKA_DATACENTER_TYPE_PROP_NAME = KARYON_PROPERTIES_PREFIX + "eureka.datacenter.type";
@@ -107,7 +112,7 @@ public class PropertyNames {
 
     /**
      * If this is set to <code>true</code> the karyon health check results will be sent to eureka by using an adapter
-     * to {@link com.netflix.appinfo.HealthCheckCallback}
+     * to eureka's healthcheck.
      */
     public static final String UNIFY_HEALTHCHECK_WITH_EUREKA = KARYON_PROPERTIES_PREFIX + "unify.health.check.with.eureka";
 }
