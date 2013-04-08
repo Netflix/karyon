@@ -52,10 +52,21 @@ public class EurekaHealthCheckCallback implements HealthCheckCallback {
 
         try {
             int healthStatus = healthCheckInvocationStrategy.invokeCheck();
-            return healthStatus >= 200 && healthStatus < 300;
+            return isHealthy(healthStatus);
         } catch (TimeoutException e) {
             logger.info("Application health check time out, returning unhealthy. Error: " + e.getMessage());
             return false;
         }
+    }
+
+    /**
+     * Asserts whether the given status signifies healthy for eureka.
+     *
+     * @param healthStatus Health status to assert.
+     *
+     * @return <code>true</code> if the status means healthy.
+     */
+    protected boolean isHealthy(int healthStatus) {
+        return healthStatus >= 200 && healthStatus < 300;
     }
 }
