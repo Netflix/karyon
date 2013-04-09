@@ -31,7 +31,7 @@ public class HealthCheckModule extends AbstractModule {
 
     protected void bindHealthCheckStrategy() {
         boolean bound = bindACustomClass(binder(), PropertyNames.HEALTH_CHECK_STRATEGY,
-                HealthCheckHandler.class,
+                HealthCheckInvocationStrategy.class,
                 "No health check invocation strategy specified, using the default strategy %s. In order to override " +
                 "this behavior you provide an implementation of %s and specify the fully qualified class name of " +
                 "the implementation in the property %s", AsyncHealthCheckInvocationStrategy.class.getName(),
