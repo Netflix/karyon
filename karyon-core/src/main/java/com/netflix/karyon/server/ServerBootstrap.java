@@ -58,7 +58,7 @@ import java.util.List;
  scan by governator.</li>
  <li>Binds the {@link ArchaiusConfigurationProvider} as governator's {@link com.netflix.governator.configuration.ConfigurationProvider}</li>
  <li>Binds appropriate {@link HealthCheckHandler} implementation as specified by
- {@link PropertyNames#HEALTH_CHECK_HANDLER_CLASS_PROP_NAME} or a default handler {@link DefaultHealthCheckHandler}</li>
+ {@link PropertyNames#HEALTH_CHECK_HANDLER_CLASS_PROP_NAME} or a default handler {@link com.netflix.karyon.spi.DefaultHealthCheckHandler}</li>
  <li>Binds appropriate {@link HealthCheckInvocationStrategy} as specified by
  {@link PropertyNames#HEALTH_CHECK_STRATEGY} or the default {@link AsyncHealthCheckInvocationStrategy}</li>
  </ul>

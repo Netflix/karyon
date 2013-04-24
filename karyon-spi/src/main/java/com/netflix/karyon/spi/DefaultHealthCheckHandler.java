@@ -14,7 +14,7 @@
  *      limitations under the License.
  */
 
-package com.netflix.karyon.server;
+package com.netflix.karyon.spi;
 
 import com.netflix.karyon.spi.HealthCheckHandler;
 
@@ -23,7 +23,7 @@ import com.netflix.karyon.spi.HealthCheckHandler;
  *
  * @author Nitesh Kant
  */
-class DefaultHealthCheckHandler implements HealthCheckHandler {
+public class DefaultHealthCheckHandler implements HealthCheckHandler {
     @Override
     public int getStatus() {
         return 200;

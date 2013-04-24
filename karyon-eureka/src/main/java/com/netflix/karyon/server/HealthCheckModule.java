@@ -5,6 +5,7 @@ import com.google.inject.Binder;
 import com.netflix.config.ConfigurationManager;
 import com.netflix.karyon.server.eureka.AsyncHealthCheckInvocationStrategy;
 import com.netflix.karyon.server.eureka.HealthCheckInvocationStrategy;
+import com.netflix.karyon.spi.DefaultHealthCheckHandler;
 import com.netflix.karyon.spi.HealthCheckHandler;
 import com.netflix.karyon.spi.PropertyNames;
 import org.slf4j.Logger;
@@ -30,29 +31,21 @@ public class HealthCheckModule extends AbstractModule {
     }
 
     protected void bindHealthCheckStrategy() {
-        boolean bound = bindACustomClass(binder(), PropertyNames.HEALTH_CHECK_STRATEGY,
+        bindACustomClass(binder(), PropertyNames.HEALTH_CHECK_STRATEGY,
                 HealthCheckInvocationStrategy.class,
                 "No health check invocation strategy specified, using the default strategy %s. In order to override " +
                 "this behavior you provide an implementation of %s and specify the fully qualified class name of " +
                 "the implementation in the property %s", AsyncHealthCheckInvocationStrategy.class.getName(),
                 HealthCheckInvocationStrategy.class.getName(), PropertyNames.HEALTH_CHECK_STRATEGY);
-
-        if(!bound) {
-            binder().bind(HealthCheckInvocationStrategy.class).to(AsyncHealthCheckInvocationStrategy.class);
-        }
     }
 
     protected void bindHealthCheckHandler() {
-        boolean bound = bindACustomClass(binder(), PropertyNames.HEALTH_CHECK_HANDLER_CLASS_PROP_NAME,
+        bindACustomClass(binder(), PropertyNames.HEALTH_CHECK_HANDLER_CLASS_PROP_NAME,
                 HealthCheckHandler.class,
                 "No health check handler defined. This means your application can not provide meaningful health " +
                 "state to external entities. It is highly recommended that you provide an implementation of %s and " +
                 "specify the fully qualified class name of the implementation in the property %s",
                 HealthCheckHandler.class.getName(), PropertyNames.HEALTH_CHECK_HANDLER_CLASS_PROP_NAME);
-
-        if(!bound) {
-            binder().bind(HealthCheckHandler.class).to(DefaultHealthCheckHandler.class);
-        }
     }
 
     @SuppressWarnings("unchecked")
