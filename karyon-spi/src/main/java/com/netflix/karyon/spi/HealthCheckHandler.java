@@ -16,6 +16,8 @@
 
 package com.netflix.karyon.spi;
 
+import com.google.inject.ImplementedBy;
+
 /**
  * This is an extension to the <a href="https://github.com/Netflix/eureka/blob/master/eureka-client/src/main/java/com/netflix/appinfo/HealthCheckCallback.java">callback handler </a>
  * in <a href="https://github.com/Netflix/eureka/">eureka</a> to provide a
@@ -28,6 +30,7 @@ package com.netflix.karyon.spi;
  *
  * @author Nitesh Kant
  */
+@ImplementedBy(DefaultHealthCheckHandler.class)
 public interface HealthCheckHandler {
 
     /**

@@ -16,6 +16,7 @@
 
 package com.netflix.karyon.server.eureka;
 
+import com.google.inject.ImplementedBy;
 import com.netflix.karyon.spi.HealthCheckHandler;
 
 import java.util.concurrent.TimeoutException;
@@ -32,6 +33,7 @@ import java.util.concurrent.TimeoutException;
  *
  * @author Nitesh Kant
  */
+@ImplementedBy(AsyncHealthCheckInvocationStrategy.class)
 public interface HealthCheckInvocationStrategy {
 
     /**
