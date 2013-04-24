@@ -21,7 +21,9 @@ directory of karyon (not from the hello-netflix-oss module)
 
 * Create a war file and deploy in the container of your choice: Run the command: _./gradlew :karyon-examples:hello-netflix-oss:war_ from the base
   directory of karyon (not from the hello-netflix-oss module). This will create the war file in
-  the directory: karyon-examples/hello-netflix-oss/build/libs/
+  the directory: karyon-examples/hello-netflix-oss/build/libs/ In this case you will have to start your container with the following JVM properties:
+      * archaius.deployment.applicationId=hello-netflix-oss
+      * archaius.deployment.environment=dev
 
 
 What to see
