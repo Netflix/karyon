@@ -26,6 +26,7 @@ import com.netflix.discovery.shared.Application;
 import com.netflix.discovery.shared.Applications;
 import com.netflix.karyon.server.utils.KaryonUtils;
 import com.netflix.karyon.spi.PropertyNames;
+import com.sun.jersey.api.view.Viewable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,20 +36,30 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author pkamath
  * @author Nitesh Kant
  */
 @Beta
-@Path("/webadmin/eureka")
-@Produces(MediaType.APPLICATION_JSON)
+@Path("/admin/eureka")
+@Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_HTML})
 public class EurekaResource {
 
     private static final Logger logger = LoggerFactory.getLogger(JarsInfoResource.class);
 
     @GET
+    public Viewable index() {
+        Map<String, Object> model = new HashMap<String, Object>();
+        return new Viewable("/webadmin/discovery/index.ftl", model);
+    }
+
+
+    @GET
+    @Path("all")
     public Response getEurekaDetails() {
         List<EurekaInstanceInfo> instanceInfoList = new ArrayList<EurekaInstanceInfo>();
 

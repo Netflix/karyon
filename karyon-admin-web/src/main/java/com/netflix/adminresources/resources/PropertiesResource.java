@@ -17,16 +17,22 @@
 package com.netflix.adminresources.resources;
 
 import com.google.common.annotations.Beta;
+import com.google.common.collect.ImmutableMap;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.netflix.config.ConfigurationManager;
+import com.netflix.config.DynamicProperty;
+import com.netflix.config.DynamicPropertyFactory;
+import com.netflix.config.DynamicStringProperty;
+import com.sun.jersey.api.view.Viewable;
 import org.apache.commons.configuration.AbstractConfiguration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
+import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
@@ -35,9 +41,19 @@ import java.util.TreeMap;
  * @author Nitesh Kant
  */
 @Beta
-@Path("/webadmin/properties")
+@Path("/webadmin/props")
 @Produces(MediaType.APPLICATION_JSON)
 public class PropertiesResource {
+    private static final Logger LOG = LoggerFactory.getLogger(PropertiesResource.class);
+
+    /**
+     * List all properties
+    @GET
+    public Viewable showIndex() {
+        Map<String, Object> model = new HashMap<String, Object>();
+        return new Viewable("/webadmin/props/index.ftl", model);
+    }
+     */
 
     @GET
     public Response getAllProperties() {
@@ -56,4 +72,5 @@ public class PropertiesResource {
         String propsJson = gson.toJson(new PairResponse(allPropsAsString));
         return Response.ok(propsJson).build();
     }
+
 }
