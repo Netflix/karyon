@@ -37,7 +37,7 @@
                 <li><a href="#" id="submenu-jars"><span>Jars</span></a></li>
                 <li><a href="#" id="submenu-jmx"><span>JMX</span></a></li>
                 <li><a href="#" id="submenu-props"><span>Archaius</span></a></li>
-                <li><a href="#" id="submenu-discovery"><span>Eureka</span></a></li>
+                <li><a href="#" id="submenu-eureka"><span>Eureka</span></a></li>
             </ul>
         </div>
         <div class="right">

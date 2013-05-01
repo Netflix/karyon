@@ -3,7 +3,7 @@ $(document).ready(function() {
 
     $("#status-error").html("");
 
-<#assign source = "/admin/eureka/all">
+    <#assign source = "/webadmin/eureka">
 
     var oTable = $('#discovery-table').dataTable( {
         "aoColumns": [

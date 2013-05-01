@@ -57,8 +57,8 @@ public class WebAdminTest {
             .put("http://localhost:8077/webadmin/jars", MediaType.APPLICATION_JSON)
             .put("http://localhost:8077/webadmin/jmx?key=root&_=1366497431351", MediaType.APPLICATION_JSON)
             .put("http://localhost:8077/admin/jmx", MediaType.TEXT_HTML)
-            .put("http://localhost:8077/admin/discovery", MediaType.TEXT_HTML)
-            .put("http://localhost:8077/admin/eureka/all", MediaType.APPLICATION_JSON)
+            .put("http://localhost:8077/admin/eureka", MediaType.TEXT_HTML)
+            .put("http://localhost:8077/webadmin/eureka", MediaType.APPLICATION_JSON)
             .build();
 
     @Before

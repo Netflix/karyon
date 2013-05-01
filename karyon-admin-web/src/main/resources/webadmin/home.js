@@ -24,7 +24,7 @@ $(document).ready(function() {
 
     $("#machine-readable").click(function(e) {
         e.preventDefault();
-        window.open("v1/platform/base/" + $.getHashParams()["view"]);
+        window.open("/webadmin/" + $.getHashParams()["view"]);
     });
 
 

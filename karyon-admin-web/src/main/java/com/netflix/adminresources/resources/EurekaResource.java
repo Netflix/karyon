@@ -45,21 +45,14 @@ import java.util.Map;
  * @author Nitesh Kant
  */
 @Beta
-@Path("/admin/eureka")
-@Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_HTML})
+@Path("/webadmin/eureka")
+@Produces(MediaType.APPLICATION_JSON)
 public class EurekaResource {
 
     private static final Logger logger = LoggerFactory.getLogger(JarsInfoResource.class);
 
-    @GET
-    public Viewable index() {
-        Map<String, Object> model = new HashMap<String, Object>();
-        return new Viewable("/webadmin/discovery/index.ftl", model);
-    }
-
 
     @GET
-    @Path("all")
     public Response getEurekaDetails() {
         List<EurekaInstanceInfo> instanceInfoList = new ArrayList<EurekaInstanceInfo>();
 
