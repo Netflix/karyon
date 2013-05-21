@@ -109,8 +109,7 @@ public class ServerBootstrap {
 
     LifecycleInjectorBuilder bootstrap() {
         return newLifecycleInjectorBuilder().usingBasePackages(allBasePackages).usingClasspathScanner(classpathScanner).
-                withBootstrapModule(new KaryonBootstrapModule()).withModules(
-                new KaryonGuiceModule());
+                withBootstrapModule(getBootstrapModule()).withModules(new KaryonGuiceModule());
     }
 
     /**
@@ -186,6 +185,16 @@ public class ServerBootstrap {
     }
 
     /**
+     * Creates a new bootstrap module. It is recommended to extend the {@link KaryonBootstrapModule} as your bootstrap
+     * module.
+     *
+     * @return Bootstrap module instance.
+     */
+    protected BootstrapModule getBootstrapModule() {
+        return new KaryonBootstrapModule();
+    }
+
+    /**
      * Specify the base packages to be added for governator classpath scanning. This is in case for any reason one does
      * not want to specify a property {@link PropertyNames#SERVER_BOOTSTRAP_BASE_PACKAGES_OVERRIDE} as mentioned in
      * {@link ServerBootstrap}.
@@ -229,7 +238,7 @@ public class ServerBootstrap {
         allBasePackages = _allBasePackages;
     }
 
-    private class KaryonBootstrapModule implements BootstrapModule {
+    protected class KaryonBootstrapModule implements BootstrapModule {
 
         @Override
         public void configure(BootstrapBinder binder) {
