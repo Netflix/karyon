@@ -40,7 +40,6 @@ subprojects {
     dependencies {
         compile 'org.slf4j:slf4j-api:1.6.4'
         compile 'com.google.guava:guava:11.0.2'
-        compile 'javax.ws.rs:jsr311-api:1.1.1'
         testCompile 'junit:junit:4.10'
         testRuntime 'org.slf4j:slf4j-simple:1.7.0'
     }
@@ -68,7 +67,6 @@ project(':karyon-core') {
     dependencies {
         compile project(':karyon-eureka')
         compile 'commons-collections:commons-collections:3.2.1'
-        compile 'javax.servlet:servlet-api:2.5'
         testCompile 'org.mortbay.jetty:jetty:6.1H.22'
     }
 }
@@ -76,6 +74,7 @@ project(':karyon-core') {
 project(':karyon-extensions') {
     dependencies {
         compile project(':karyon-core')
+        compile 'javax.servlet:servlet-api:2.5'
         compile 'com.google.inject.extensions:guice-servlet:3.0'
     }
 }
@@ -83,6 +82,7 @@ project(':karyon-extensions') {
 project(':karyon-admin') {
     dependencies {
         compile project(':karyon-core')
+        compile 'javax.ws.rs:jsr311-api:1.1.1'
         compile 'org.eclipse.jetty:jetty-server:7.6.7.v20120910'
         compile 'org.eclipse.jetty:jetty-servlet:7.6.7.v20120910'
         compile 'com.sun.jersey.contribs:jersey-guice:1.8'
