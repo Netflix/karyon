@@ -41,6 +41,7 @@ public class AdminResourceTest {
     @Before
     public void setUp() throws Exception {
         System.setProperty(PropertyNames.SERVER_BOOTSTRAP_BASE_PACKAGES_OVERRIDE, "com.test");
+        System.setProperty(PropertyNames.HEALTH_CHECK_TIMEOUT_MILLIS, "5000");
         System.setProperty(PropertyNames.DISABLE_EUREKA_INTEGRATION, "true");
     }
 
