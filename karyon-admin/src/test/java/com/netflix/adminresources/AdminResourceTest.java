@@ -19,6 +19,7 @@ package com.netflix.adminresources;
 import com.google.inject.Injector;
 import com.netflix.config.ConfigurationManager;
 import com.netflix.karyon.server.KaryonServer;
+import com.netflix.karyon.server.eureka.SyncHealthCheckInvocationStrategy;
 import com.netflix.karyon.spi.PropertyNames;
 import junit.framework.Assert;
 import org.apache.http.HttpResponse;
@@ -42,6 +43,7 @@ public class AdminResourceTest {
     public void setUp() throws Exception {
         System.setProperty(PropertyNames.SERVER_BOOTSTRAP_BASE_PACKAGES_OVERRIDE, "com.test");
         System.setProperty(PropertyNames.HEALTH_CHECK_TIMEOUT_MILLIS, "60000");
+        System.setProperty(PropertyNames.HEALTH_CHECK_STRATEGY, SyncHealthCheckInvocationStrategy.class.getName());
         System.setProperty(PropertyNames.DISABLE_EUREKA_INTEGRATION, "true");
     }
 
@@ -56,7 +58,8 @@ public class AdminResourceTest {
     public void testBasic() throws Exception {
         startServer();
         HttpClient client = new DefaultHttpClient();
-        HttpGet healthGet = new HttpGet("http://localhost:"+ AdminResourcesContainer.LISTEN_PORT_DEFAULT + "/healthcheck");
+        HttpGet healthGet =
+                new HttpGet("http://localhost:" + AdminResourcesContainer.LISTEN_PORT_DEFAULT + "/healthcheck");
         HttpResponse response = client.execute(healthGet);
         Assert.assertEquals("admin resource health check failed.", 200, response.getStatusLine().getStatusCode());
     }
