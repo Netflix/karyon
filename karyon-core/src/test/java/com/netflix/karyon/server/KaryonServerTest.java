@@ -18,7 +18,9 @@ package com.netflix.karyon.server;
 
 import com.google.inject.Injector;
 import com.netflix.config.ConfigurationManager;
+import com.netflix.karyon.server.eureka.AsyncHealthCheckInvocationStrategy;
 import com.netflix.karyon.server.eureka.EurekaHealthCheckCallback;
+import com.netflix.karyon.server.eureka.SyncHealthCheckInvocationStrategy;
 import com.netflix.karyon.spi.PropertyNames;
 import com.netflix.karyon.util.KaryonTestSetupUtil;
 import com.test.FlappingHealthCheck;
@@ -93,6 +95,9 @@ public class KaryonServerTest {
 
     @Test
     public void testHealthCheckTimeout() throws Exception {
+        ConfigurationManager.getConfigInstance().setProperty(PropertyNames.HEALTH_CHECK_STRATEGY,
+                AsyncHealthCheckInvocationStrategy.class.getName());
+
         ConfigurationManager.getConfigInstance().setProperty(PropertyNames.HEALTH_CHECK_HANDLER_CLASS_PROP_NAME,
                 RogueHealthCheck.class.getName());
 
@@ -103,6 +108,9 @@ public class KaryonServerTest {
 
     @Test
     public void testFlappingHealthCheck() throws Exception {
+        ConfigurationManager.getConfigInstance().setProperty(PropertyNames.HEALTH_CHECK_STRATEGY,
+                SyncHealthCheckInvocationStrategy.class.getName());
+
         ConfigurationManager.getConfigInstance().setProperty(PropertyNames.HEALTH_CHECK_HANDLER_CLASS_PROP_NAME,
                 FlappingHealthCheck.class.getName());
 

@@ -28,7 +28,6 @@ import org.slf4j.LoggerFactory;
 
 import javax.annotation.PostConstruct;
 import java.util.concurrent.Callable;
-import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.TimeUnit;
@@ -69,6 +68,15 @@ public class AsyncHealthCheckInvocationStrategy implements HealthCheckInvocation
     private HealthCheckHandler healthCheckHandler;
     private AtomicReference<HealthCheckTask> currentFuture;
     private SynchronousQueue<Boolean> healthCheckFeeder;
+
+    /**
+     * This is used when {@link #invokeCheck()} gets a future which is not yet started the execution. This essentially
+     * will be a race-condition where-in the task finishes execution between the time {@link #invokeCheck()} signals
+     * the health check thread to execute the handler and does a {@link #currentFuture#get()}. In this case, we just
+     * use the last computed value.
+     */
+    private volatile int lastComputedStatus = 500;
+
     private Thread healthChecker;
     private AtomicBoolean started = new AtomicBoolean();
 
@@ -109,13 +117,19 @@ public class AsyncHealthCheckInvocationStrategy implements HealthCheckInvocation
             logger.debug("Async healthcheck already in progress, will use the existing result.");
         }
 
-        Future<Integer> currFuture = currentFuture.get();
+        HealthCheckTask currFuture = currentFuture.get();
         try {
             return currFuture.get(HEALTH_CHECK_TIMEOUT_MILLIS.get(), TimeUnit.MILLISECONDS);
         } catch (InterruptedException e) {
             Thread.interrupted(); /// reset the interrupted status.
             logger.error("Async health check interrupted, this is deemed as failure.", e);
         } catch (TimeoutException e) {
+            if (!currFuture.isStarted()) { // This will happen if the health check task finishes between healthCheckFeeder.offer() & currentFuture.get()
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Async health check strategy got a future that was not started, returning last computed status: " + lastComputedStatus);
+                }
+                return lastComputedStatus;
+            }
             throw e;
         } catch (Exception e) {
             logger.error("Async health check failed, this is deemed as failure.", e);
@@ -137,6 +151,8 @@ public class AsyncHealthCheckInvocationStrategy implements HealthCheckInvocation
 
     private class HealthCheckTask extends FutureTask<Integer> {
 
+        private volatile boolean started;
+
         private HealthCheckTask() {
             this(false);
         }
@@ -154,7 +170,26 @@ public class AsyncHealthCheckInvocationStrategy implements HealthCheckInvocation
         }
 
         @Override
+        public void run() {
+            started = true;
+            super.run();
+        }
+
+        public boolean isStarted() {
+            return started;
+        }
+
+        @Override
         protected void done() {
+            if (!isCancelled()) {
+                try {
+                    lastComputedStatus = get(1, TimeUnit.MILLISECONDS);
+                } catch (Exception e) {
+                    logger.info(
+                            "Failed to set the last computed status for health check invocation. Current last computed status: "
+                            + lastComputedStatus, e);
+                }
+            }
             currentFuture.compareAndSet(this, new HealthCheckTask()); // Whenever it is done, do a fresh check on demand
         }
     }

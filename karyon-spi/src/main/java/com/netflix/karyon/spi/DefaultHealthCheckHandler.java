@@ -16,8 +16,6 @@
 
 package com.netflix.karyon.spi;
 
-import com.netflix.karyon.spi.HealthCheckHandler;
-
 /**
  * Default health check handler implementation which always returns healthy.
  *

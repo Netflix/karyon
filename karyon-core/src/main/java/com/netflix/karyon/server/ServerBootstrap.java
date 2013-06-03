@@ -42,7 +42,9 @@ import javax.annotation.Nullable;
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * This class is the point where the karyon environment in bootstrapped which more or less is the bootstrapping of
@@ -93,7 +95,7 @@ public class ServerBootstrap {
 
     private static final Logger logger = LoggerFactory.getLogger(ServerBootstrap.class);
 
-    private List<String> allBasePackages;
+    private Set<String> allBasePackages;
     private ClasspathScanner classpathScanner;
 
     void initialize() {
@@ -227,7 +229,7 @@ public class ServerBootstrap {
     }
 
     private void readBasePackages() {
-        List<String> _allBasePackages = new ArrayList<String>();
+        Set<String> _allBasePackages = new HashSet<String>();
         _allBasePackages.add("com.netflix");
 
         Collection<String> basePackages = getBasePackages();
