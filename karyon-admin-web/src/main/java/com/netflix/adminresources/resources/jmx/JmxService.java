@@ -7,21 +7,18 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.management.Attribute;
-import javax.management.AttributeList;
-import javax.management.MBeanAttributeInfo;
-import javax.management.MBeanInfo;
-import javax.management.MBeanOperationInfo;
-import javax.management.MBeanServer;
-import javax.management.ObjectName;
+import javax.management.*;
 import javax.management.openmbean.CompositeDataSupport;
 
 import org.apache.commons.lang.StringUtils;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class JmxService {
+    private static final Logger LOG = LoggerFactory.getLogger(JmxService.class);
 
     private static final String CSV_PATTERN   = "\"([^\"]+?)\",?|([^,]+),?|,";
     private static final String CURRENT_VALUE = "CurrentValue";
@@ -105,9 +102,17 @@ public class JmxService {
                     node.setNoLink(false);
                 }  
             }
-        } catch (Exception e) {
+        } catch (MalformedObjectNameException e) {
+            LOG.error("Exception in getDomainTree ", e);
+        } catch (IntrospectionException e) {
+            LOG.error("Exception in getDomainTree ", e);
+        } catch (ReflectionException e) {
+            LOG.error("Exception in getDomainTree ", e);
+        } catch (InstanceNotFoundException e) {
+            LOG.error("Exception in getDomainTree ", e);
+        } catch (RuntimeException e) {
+            LOG.error("Exception in getDomainTree ", e);
         }
-        
         return domainNode;
     }
     
@@ -139,6 +144,7 @@ public class JmxService {
                 keys.add(objName.getCanonicalName());
             }
         } catch (Exception e) {
+            LOG.error("Exception in getKeysFromRegex ", e);
         }
         
         return keys;
