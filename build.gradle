@@ -70,7 +70,6 @@ project(':karyon-core') {
         compile 'commons-collections:commons-collections:3.2.1'
         compile 'javax.servlet:servlet-api:2.5'
         testCompile 'org.mortbay.jetty:jetty:6.1H.22'
-        runtime 'org.freemarker:freemarker:2.3.19'
     }
 }
 
