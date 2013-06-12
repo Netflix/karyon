@@ -25,6 +25,7 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import com.google.inject.Singleton;
 
 /**
  * A {@link javax.servlet.Filter} implementation to redirect root requests to a default location as specified by
@@ -33,6 +34,8 @@ import java.io.IOException;
  * @author pkamath
  * @author Nitesh Kant
  */
+
+@Singleton
 public class RedirectFilter implements Filter {
 
     @Override
