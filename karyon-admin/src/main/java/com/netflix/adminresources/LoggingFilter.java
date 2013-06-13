@@ -28,6 +28,7 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.util.regex.Pattern;
+import com.google.inject.Singleton;
 
 /**
  * A {@link Filter} implementation to capture request details like remote host, HTTP method and request URI
@@ -35,6 +36,7 @@ import java.util.regex.Pattern;
  * @author pkamath
  * @author Nitesh Kant
  */
+@Singleton
 public class LoggingFilter implements Filter {
 
     private static final Logger logger = LoggerFactory.getLogger(LoggingFilter.class);

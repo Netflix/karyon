@@ -26,6 +26,7 @@ import com.netflix.discovery.shared.Application;
 import com.netflix.discovery.shared.Applications;
 import com.netflix.karyon.server.utils.KaryonUtils;
 import com.netflix.karyon.spi.PropertyNames;
+import com.sun.jersey.api.view.Viewable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,7 +36,9 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author pkamath
@@ -47,6 +50,7 @@ import java.util.List;
 public class EurekaResource {
 
     private static final Logger logger = LoggerFactory.getLogger(JarsInfoResource.class);
+
 
     @GET
     public Response getEurekaDetails() {
