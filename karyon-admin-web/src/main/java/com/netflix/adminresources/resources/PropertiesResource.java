@@ -28,6 +28,8 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.apache.commons.configuration.AbstractConfiguration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.annotations.Beta;
 import com.google.gson.Gson;
@@ -38,9 +40,19 @@ import com.netflix.config.ConfigurationManager;
  * @author Nitesh Kant
  */
 @Beta
-@Path("/webadmin/properties")
+@Path("/webadmin/props")
 @Produces(MediaType.APPLICATION_JSON)
 public class PropertiesResource {
+    private static final Logger LOG = LoggerFactory.getLogger(PropertiesResource.class);
+
+    /**
+     * List all properties
+    @GET
+    public Viewable showIndex() {
+        Map<String, Object> model = new HashMap<String, Object>();
+        return new Viewable("/webadmin/props/index.ftl", model);
+    }
+     */
 
     @GET
     public Response getAllProperties() {
