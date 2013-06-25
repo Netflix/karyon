@@ -63,15 +63,21 @@ public class PropertiesResource {
         Set<String> maskedResources = MaskedResourceHelper.getMaskedResourceSet();
         
         while (keys.hasNext()) {
-            String key = keys.next();
-            // don't include any masked resources
-            if (!maskedResources.contains(key)) {
-	            Object value = config.getProperty(key);
-	            if (null != value) {
-	                allPropsAsString.put(key, value.toString());
-	            }
+            final String key = keys.next();
+
+            // mask the specified properties
+            final Object value;
+            if (maskedResources.contains(key)) {
+            	value = MaskedResourceHelper.MASKED_PROPERTY_VALUE;
+            } else {
+	            value = config.getProperty(key);
+            }
+            
+            if (null != value) {
+                allPropsAsString.put(key, value.toString());
             }
         }
+        
         GsonBuilder gsonBuilder = new GsonBuilder().serializeNulls();
         Gson gson = gsonBuilder.create();
         String propsJson = gson.toJson(new PairResponse(allPropsAsString));

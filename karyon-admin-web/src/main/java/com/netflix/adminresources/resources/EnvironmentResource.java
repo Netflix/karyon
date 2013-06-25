@@ -16,19 +16,20 @@
 
 package com.netflix.adminresources.resources;
 
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
-
-import com.google.common.annotations.Beta;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+
+import com.google.common.annotations.Beta;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
 /**
  * @author Nitesh Kant
@@ -39,20 +40,22 @@ import javax.ws.rs.core.Response;
 public class EnvironmentResource {
     @GET
     public Response getAllProperties() {  
-        Map<String,String> envVars = System.getenv();
+    	// make a writable copy of the immutable System.getenv() map
+        Map<String,String> envVarsMap = new HashMap<String,String>(System.getenv());
         
-        // filter out masked env vars
+        // mask the specified properties if they're in the envVarsMap
         Set<String> maskedResources = MaskedResourceHelper.getMaskedResourceSet();
-    	Iterator<String> maskedResourcesIter = maskedResources.iterator();
-		while (maskedResourcesIter.hasNext()) {
-			String maskedResource = maskedResourcesIter.next();
-        	envVars.remove(maskedResource);
+    	Iterator<String> maskedResourcesIter = maskedResources.iterator();		
+    	while (maskedResourcesIter.hasNext()) {			
+    		String maskedResource = maskedResourcesIter.next();
+        	if (envVarsMap.containsKey(maskedResource)) {
+        		envVarsMap.put(maskedResource, MaskedResourceHelper.MASKED_PROPERTY_VALUE);
+        	}
         }
 
         GsonBuilder gsonBuilder = new GsonBuilder().serializeNulls();
         Gson gson = gsonBuilder.create();                
-
-        String propsJson = gson.toJson(new PairResponse(envVars));        
+        String propsJson = gson.toJson(new PairResponse(envVarsMap));        
         
         return Response.ok(propsJson).build();
     }
