@@ -39,6 +39,12 @@ When running with gradle's jetty plugin, you should be able to hit the endpoints
 
 {"Message":"Hello Netflix OSS component!"}
 
+* http://localhost:8989/hello-netflix-oss/rest/v1/from/component:  This will give you a JSON response:
+
+{"Message":"I am a component"}
+
+This is to demonstrate injection in Jersey resources.
+
 * http://localhost:8077/
 
 This will take you to the karyon admin user interface.
