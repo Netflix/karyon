@@ -13,8 +13,6 @@
  *      See the License for the specific language governing permissions and
  *      limitations under the License.
  */
-ext.githubProjectName = rootProject.name // Change if github project name is not the same as the root project's name
-
 buildscript {
     repositories { mavenCentral() }
     apply from: file('../../gradle/buildscript.gradle'), to: buildscript
@@ -29,30 +27,8 @@ apply from: file('../../gradle/maven.gradle')
 apply from: file('../../gradle/check.gradle')
 apply from: file('../../gradle/license.gradle')
 
-apply plugin: 'war'
-apply plugin: 'jetty'
-
-war {
-    from('resources')  {
-        include '*.properties'
-        into 'WEB-INF/classes/'
-    }
-    webXml = file('src/main/webapp/WEB-INF/web.xml')
-}
-
 dependencies {
     compile 'org.slf4j:slf4j-api:1.7.0'
     runtime 'org.slf4j:slf4j-simple:1.7.0'
-    compile project(':karyon-extensions')
-    compile project(':karyon-admin-web')
-}
-
-jettyRun.doFirst {
-    // use the default port of the ws-backend-simulation module
-    System.setProperty("archaius.deployment.applicationId","hello-netflix-oss")
-    System.setProperty("archaius.deployment.environment","dev")
-}
-
-jettyRun {
-    httpPort = 8989
+    compile project(':karyon-extensions:karyon-netty-jersey-blocking')
 }
