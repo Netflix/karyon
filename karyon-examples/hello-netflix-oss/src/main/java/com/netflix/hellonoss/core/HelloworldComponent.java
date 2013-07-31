@@ -26,8 +26,14 @@ import javax.annotation.PostConstruct;
 @Component
 public class HelloworldComponent {
 
+    private String helloString = "I am a component";
+
     @PostConstruct
     public void initialize() {
         // TODO: Initialization logic, eg: connection to DB etc.
+    }
+
+    public String getHelloString() {
+        return helloString;
     }
 }
