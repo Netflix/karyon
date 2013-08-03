@@ -16,20 +16,21 @@
 
 package com.netflix.karyon.server;
 
+import java.io.Closeable;
+import java.io.IOException;
+
+import javax.annotation.Nullable;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.common.base.Throwables;
 import com.google.common.io.Closeables;
 import com.google.inject.Injector;
 import com.netflix.config.ConfigurationManager;
-import com.netflix.governator.guice.LifecycleInjectorBuilder;
 import com.netflix.governator.lifecycle.LifecycleManager;
 import com.netflix.karyon.server.lifecycle.ServerInitializer;
 import com.netflix.karyon.spi.PropertyNames;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.annotation.Nullable;
-import java.io.Closeable;
-import java.io.IOException;
 
 /**
  * The core server for Karyon. This server provides all core functionality to startup a karyon server but is not useful
@@ -161,8 +162,6 @@ public class KaryonServer implements Closeable {
         }
 
         PhaseInterceptorRegistry.notifyInterceptors(InitializationPhaseInterceptor.Phase.InitBootstrap);
-
-        serverBootstrap.initialize();
     }
 
     /**
@@ -170,7 +169,7 @@ public class KaryonServer implements Closeable {
      * {@link ServerBootstrap}. <br/>
      * This method must be called during the server initialization.
      *
-     * @return Guice's injector instance that will be used by <a href="https://github.com/Netflix/governator/">Governator</a>
+     * @return main injector instance that will be used by <a href="https://github.com/Netflix/governator/">Governator</a>
      */
     public synchronized Injector initialize() {
 
@@ -178,11 +177,7 @@ public class KaryonServer implements Closeable {
             return injector;
         }
 
-        LifecycleInjectorBuilder injectorBuilder = serverBootstrap.bootstrap();
-        serverBootstrap.beforeInjectorCreation(injectorBuilder);
-
-        injector = injectorBuilder.createInjector();
-
+        injector = serverBootstrap.bootstrap();
         initializer = injector.getInstance(ServerInitializer.class);
 
         return injector;

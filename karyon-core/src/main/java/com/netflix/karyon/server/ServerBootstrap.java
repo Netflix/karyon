@@ -16,8 +16,21 @@
 
 package com.netflix.karyon.server;
 
+import java.lang.annotation.Annotation;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import javax.annotation.Nullable;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.common.collect.Lists;
 import com.google.inject.Binder;
+import com.google.inject.Injector;
 import com.netflix.config.ConfigurationManager;
 import com.netflix.governator.configuration.ArchaiusConfigurationProvider;
 import com.netflix.governator.configuration.ConfigurationProvider;
@@ -35,16 +48,6 @@ import com.netflix.karyon.spi.Component;
 import com.netflix.karyon.spi.HealthCheckHandler;
 import com.netflix.karyon.spi.PropertyNames;
 import com.netflix.karyon.spi.ServiceRegistryClient;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.annotation.Nullable;
-import java.lang.annotation.Annotation;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 
 /**
  * This class is the point where the karyon environment in bootstrapped which more or less is the bootstrapping of
@@ -75,7 +78,7 @@ import java.util.Set;
  before returning from {@link com.google.inject.Module#configure(Binder)}.</li>
  <li>{@link ServerBootstrap#configureBinder}: Callback to configure {@link Binder} before returning from
  {@link BootstrapModule#configure(com.netflix.governator.guice.BootstrapBinder)}.</li>
- <li>{@link ServerBootstrap#beforeInjectorCreation(com.netflix.governator.guice.LifecycleInjectorBuilder)}: A callback
+ <li>{@link ServerBootstrap#createInjector(com.netflix.governator.guice.LifecycleInjectorBuilder)}: A callback
  before creating the {@link com.google.inject.Injector} from {@link LifecycleInjectorBuilder} provided by this class
  to {@link KaryonServer}</li>
  <li>{@link com.netflix.karyon.server.ServerBootstrap#getBasePackages()}: Specify the base packages to be added for
@@ -95,11 +98,11 @@ public class ServerBootstrap {
 
     private static final Logger logger = LoggerFactory.getLogger(ServerBootstrap.class);
 
-    private Set<String> allBasePackages;
-    private ClasspathScanner classpathScanner;
+    private final Set<String> allBasePackages;
+    private final ClasspathScanner classpathScanner;
 
-    void initialize() {
-        readBasePackages();
+    protected ServerBootstrap() {
+        allBasePackages = readBasePackages();
 
         List<Class<? extends Annotation>> annotations = Lists.newArrayList();
         annotations.add(Application.class);
@@ -108,10 +111,31 @@ public class ServerBootstrap {
         logger.info("Creating a new governator classpath scanner with base packages: " + allBasePackages);
         classpathScanner = LifecycleInjector.createStandardClasspathScanner(allBasePackages, annotations);
     }
+    
+    private Set<String> readBasePackages() {
+        Set<String> _allBasePackages = new HashSet<String>();
+        _allBasePackages.add("com.netflix");
 
-    LifecycleInjectorBuilder bootstrap() {
-        return newLifecycleInjectorBuilder().usingBasePackages(allBasePackages).usingClasspathScanner(classpathScanner).
-                withBootstrapModule(getBootstrapModule()).withModules(new KaryonGuiceModule());
+        Collection<String> basePackages = getBasePackages();
+        if (null != basePackages) {
+            _allBasePackages.addAll(basePackages);
+        }
+
+        return _allBasePackages;
+    }
+
+    /**
+     * 
+     * @return main injector instance
+     */
+    Injector bootstrap() {
+        LifecycleInjectorBuilder builder = newLifecycleInjectorBuilder()
+                .usingBasePackages(allBasePackages)
+                .usingClasspathScanner(classpathScanner)
+                .withBootstrapModule(getBootstrapModule())
+                .withModules(new KaryonGuiceModule());
+        Injector injector = createInjector(builder);
+        return injector;
     }
 
     /**
@@ -161,8 +185,10 @@ public class ServerBootstrap {
      * @param builderToBeUsed The builder to be used for creating an injector. This builder can be modified/configured
      *                        as required.
      */
-    protected void beforeInjectorCreation(@SuppressWarnings("unused") LifecycleInjectorBuilder builderToBeUsed) {
-        // No op by default
+    protected Injector createInjector(LifecycleInjectorBuilder builder) {
+        LifecycleInjector lifecycleInjector = builder.build();
+        Injector injector = lifecycleInjector.createInjector();
+        return injector;
     }
 
     /**
@@ -226,18 +252,6 @@ public class ServerBootstrap {
     @SuppressWarnings("unused")
     protected ClasspathScanner getClasspathScanner() {
         return classpathScanner;
-    }
-
-    private void readBasePackages() {
-        Set<String> _allBasePackages = new HashSet<String>();
-        _allBasePackages.add("com.netflix");
-
-        Collection<String> basePackages = getBasePackages();
-        if (null != basePackages) {
-            _allBasePackages.addAll(basePackages);
-        }
-
-        allBasePackages = _allBasePackages;
     }
 
     protected class KaryonBootstrapModule implements BootstrapModule {
