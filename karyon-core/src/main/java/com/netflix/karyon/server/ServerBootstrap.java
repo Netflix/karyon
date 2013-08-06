@@ -78,7 +78,7 @@ import com.netflix.karyon.spi.ServiceRegistryClient;
  before returning from {@link com.google.inject.Module#configure(Binder)}.</li>
  <li>{@link ServerBootstrap#configureBinder}: Callback to configure {@link Binder} before returning from
  {@link BootstrapModule#configure(com.netflix.governator.guice.BootstrapBinder)}.</li>
- <li>{@link ServerBootstrap#createInjector(com.netflix.governator.guice.LifecycleInjectorBuilder)}: A callback
+ <li>{@link ServerBootstrap#beforeInjectorCreation(com.netflix.governator.guice.LifecycleInjectorBuilder)}: A callback
  before creating the {@link com.google.inject.Injector} from {@link LifecycleInjectorBuilder} provided by this class
  to {@link KaryonServer}</li>
  <li>{@link com.netflix.karyon.server.ServerBootstrap#getBasePackages()}: Specify the base packages to be added for

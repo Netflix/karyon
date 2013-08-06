@@ -171,7 +171,7 @@ public class KaryonServer implements Closeable {
      * {@link ServerBootstrap}. <br/>
      * This method must be called during the server initialization.
      *
-     * @return main injector instance that will be used by <a href="https://github.com/Netflix/governator/">Governator</a>
+     * @return Guice injector instance that will be used by <a href="https://github.com/Netflix/governator/">Governator</a>
      */
     public synchronized Injector initialize() {
 
