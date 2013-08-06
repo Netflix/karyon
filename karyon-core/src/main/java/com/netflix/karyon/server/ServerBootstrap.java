@@ -111,18 +111,6 @@ public class ServerBootstrap {
         logger.info("Creating a new governator classpath scanner with base packages: " + allBasePackages);
         classpathScanner = LifecycleInjector.createStandardClasspathScanner(allBasePackages, annotations);
     }
-    
-    private Set<String> readBasePackages() {
-        Set<String> _allBasePackages = new HashSet<String>();
-        _allBasePackages.add("com.netflix");
-
-        Collection<String> basePackages = getBasePackages();
-        if (null != basePackages) {
-            _allBasePackages.addAll(basePackages);
-        }
-
-        return _allBasePackages;
-    }
 
     /**
      * 
@@ -184,6 +172,13 @@ public class ServerBootstrap {
      *
      * @param builderToBeUsed The builder to be used for creating an injector. This builder can be modified/configured
      *                        as required.
+     */
+    protected void beforeInjectorCreation(@SuppressWarnings("unused") LifecycleInjectorBuilder builderToBeUsed) {
+    	// No op by default
+    }
+    	
+    /**
+     * create the main application injector
      */
     protected Injector createInjector(LifecycleInjectorBuilder builder) {
         LifecycleInjector lifecycleInjector = builder.build();
@@ -253,7 +248,19 @@ public class ServerBootstrap {
     protected ClasspathScanner getClasspathScanner() {
         return classpathScanner;
     }
+    
+    private Set<String> readBasePackages() {
+        Set<String> _allBasePackages = new HashSet<String>();
+        _allBasePackages.add("com.netflix");
 
+        Collection<String> basePackages = getBasePackages();
+        if (null != basePackages) {
+            _allBasePackages.addAll(basePackages);
+        }
+
+        return _allBasePackages;
+    }
+    
     protected class KaryonBootstrapModule implements BootstrapModule {
 
         @Override
