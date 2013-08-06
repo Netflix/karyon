@@ -162,6 +162,8 @@ public class KaryonServer implements Closeable {
         }
 
         PhaseInterceptorRegistry.notifyInterceptors(InitializationPhaseInterceptor.Phase.InitBootstrap);
+        
+        serverBootstrap.initialize();
     }
 
     /**

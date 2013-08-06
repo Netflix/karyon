@@ -98,11 +98,11 @@ public class ServerBootstrap {
 
     private static final Logger logger = LoggerFactory.getLogger(ServerBootstrap.class);
 
-    private final Set<String> allBasePackages;
-    private final ClasspathScanner classpathScanner;
+    private Set<String> allBasePackages;
+    private ClasspathScanner classpathScanner;
 
-    protected ServerBootstrap() {
-        allBasePackages = readBasePackages();
+    void initialize() {
+        readBasePackages();
 
         List<Class<? extends Annotation>> annotations = Lists.newArrayList();
         annotations.add(Application.class);
@@ -249,7 +249,7 @@ public class ServerBootstrap {
         return classpathScanner;
     }
     
-    private Set<String> readBasePackages() {
+    private void readBasePackages() {
         Set<String> _allBasePackages = new HashSet<String>();
         _allBasePackages.add("com.netflix");
 
@@ -258,7 +258,7 @@ public class ServerBootstrap {
             _allBasePackages.addAll(basePackages);
         }
 
-        return _allBasePackages;
+        allBasePackages = _allBasePackages;
     }
     
     protected class KaryonBootstrapModule implements BootstrapModule {
