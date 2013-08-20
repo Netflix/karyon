@@ -55,7 +55,7 @@ public class HelloworldResourceTest {
     private HelloworldResource instance;
 
     /**
-     * Test the {@link HelloworldResource#hello()}.
+     * Test the {@link HelloworldResource#hello()} method.
      */
     @Test
     public void shouldRetrieveHelloMessage() {
