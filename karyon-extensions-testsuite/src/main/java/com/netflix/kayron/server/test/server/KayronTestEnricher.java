@@ -16,7 +16,6 @@
 package com.netflix.kayron.server.test.server;
 
 import com.google.inject.Injector;
-import com.netflix.karyon.server.guice.KaryonGuiceContextListener;
 import com.netflix.kayron.server.test.KayronTestGuiceContextListener;
 import com.netflix.kayron.server.test.RunInKaryon;
 import org.jboss.arquillian.test.spi.TestEnricher;

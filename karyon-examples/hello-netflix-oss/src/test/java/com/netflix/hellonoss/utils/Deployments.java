@@ -19,7 +19,6 @@ import com.google.inject.servlet.GuiceFilter;
 import com.netflix.hellonoss.core.HelloworldComponent;
 import com.netflix.hellonoss.server.HelloWorldBootstrap;
 import com.netflix.hellonoss.server.health.HealthCheck;
-import com.netflix.karyon.server.guice.KaryonGuiceContextListener;
 import com.netflix.kayron.server.test.KayronTestGuiceContextListener;
 import org.jboss.shrinkwrap.api.Archive;
 import org.jboss.shrinkwrap.api.ShrinkWrap;

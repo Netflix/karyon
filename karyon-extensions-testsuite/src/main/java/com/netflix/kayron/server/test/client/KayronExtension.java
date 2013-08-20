@@ -25,7 +25,7 @@ import org.jboss.arquillian.core.spi.LoadableExtension;
  *
  * @author Jakub Narloch (jmnarloch@gmail.com)
  */
-public class KayronGuiceExtension implements LoadableExtension {
+public class KayronExtension implements LoadableExtension {
 
     /**
      * Registers the extension.
