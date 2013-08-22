@@ -27,8 +27,17 @@ apply from: file('../../gradle/maven.gradle')
 apply from: file('../../gradle/check.gradle')
 apply from: file('../../gradle/license.gradle')
 
+apply plugin:'application'
+
 dependencies {
     compile 'org.slf4j:slf4j-api:1.7.0'
     runtime 'org.slf4j:slf4j-simple:1.7.0'
     compile project(':karyon-extensions:karyon-netty-jersey-blocking')
 }
+
+run {
+    environment "archaius.deployment.applicationId": "hello-karyon-netty"
+    environment "archaius.deployment.environment": "dev"
+}
+
+mainClassName = "com.netflix.karyon.example.netty.Server"

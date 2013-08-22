@@ -1,4 +1,4 @@
-package com.netflix.karyon.server.netty.jersey.blocking;
+package com.netflix.karyon.server.http.jersey.blocking;
 
 import com.google.common.base.Preconditions;
 import com.sun.jersey.api.container.ContainerException;
@@ -13,7 +13,7 @@ import org.slf4j.LoggerFactory;
  */
 public class NettyContainerProvider implements ContainerProvider<NettyContainer> {
 
-    private static Logger logger = LoggerFactory.getLogger(NettyContainerProvider.class);
+    private static final Logger logger = LoggerFactory.getLogger(NettyContainerProvider.class);
 
     @Override
     public NettyContainer createContainer(Class<NettyContainer> type, ResourceConfig resourceConfig,

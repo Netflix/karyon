@@ -1,4 +1,4 @@
-package com.netflix.karyon.server.netty.spi;
+package com.netflix.karyon.server.http.spi;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
@@ -13,8 +13,9 @@ import javax.annotation.Nullable;
  * users. <br/>
  *
  * The implementation must hold state between the invocations of {@link #createResponse(HttpResponseStatus, ByteBuf)}
- * and {@link #sendResponse()}.
+ * and {@link #sendResponse()}. <br/>
  *
+ * The implementations are <em>NOT</em> required to be thread-safe.
  * @author Nitesh Kant
  */
 public interface HttpResponseWriter {
@@ -22,11 +23,12 @@ public interface HttpResponseWriter {
     /**
      * Creates a response for this writer with an optional content. <br/>
      *
-     *
      * @param responseStatus The HTTP response status of the response.
      * @param content Optional content buffer.
      *
      * @return The response object.
+     *
+     * @throws IllegalStateException If the response is already created.
      */
     FullHttpResponse createResponse(HttpResponseStatus responseStatus, @Nullable ByteBuf content);
 
@@ -37,6 +39,21 @@ public interface HttpResponseWriter {
      * {@link #createResponse(HttpResponseStatus, ByteBuf)} were made before this.
      */
     void sendResponse();
+
+    /**
+     * Returns the response instance, if created, as suggested by {@link #isResponseCreated()}
+     *
+     * @return The response instance, if created, else {@code null}
+     */
+    @Nullable
+    FullHttpResponse response();
+
+    /**
+     * Asserts whether the response is created or not.
+     *
+     * @return {@code true} if the response is created, else, {@code false}.
+     */
+    boolean isResponseCreated();
 
     /**
      * Returns the underlying netty's {@link ChannelHandlerContext}.

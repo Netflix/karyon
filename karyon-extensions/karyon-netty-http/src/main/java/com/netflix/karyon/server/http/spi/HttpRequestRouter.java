@@ -1,4 +1,4 @@
-package com.netflix.karyon.server.netty.spi;
+package com.netflix.karyon.server.http.spi;
 
 import io.netty.handler.codec.http.FullHttpRequest;
 
@@ -34,4 +34,9 @@ public interface HttpRequestRouter {
      * @param responseWriter Response writer to write the response.
      */
     void process(FullHttpRequest request, HttpResponseWriter responseWriter);
+
+    /**
+     * Starts the router.
+     */
+    void start();
 }

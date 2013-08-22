@@ -1,2 +1,2 @@
-com.netflix.karyon.server.netty.jersey.blocking.NettyContainerProvider
+com.netflix.karyon.server.http.jersey.blocking.NettyContainerProvider
 

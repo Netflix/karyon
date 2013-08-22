@@ -1,6 +1,6 @@
-package com.netflix.karyon.server.netty.jersey.blocking;
+package com.netflix.karyon.server.http.jersey.blocking;
 
-import com.netflix.karyon.server.netty.spi.HttpResponseWriter;
+import com.netflix.karyon.server.http.spi.HttpResponseWriter;
 import com.sun.jersey.core.header.InBoundHeaders;
 import com.sun.jersey.spi.container.ContainerRequest;
 import com.sun.jersey.spi.container.ContainerResponse;
