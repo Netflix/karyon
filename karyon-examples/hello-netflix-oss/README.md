@@ -39,7 +39,7 @@ When running with gradle's jetty plugin, you should be able to hit the endpoints
 
 {"Message":"Hello Netflix OSS component!"}
 
-* http://localhost:8989/hello-netflix-oss/rest/v1/from/component:  This will give you a JSON response:
+* http://localhost:8989/hello-netflix-oss/rest/v1/hello/from/component:  This will give you a JSON response:
 
 {"Message":"I am a component"}
 
