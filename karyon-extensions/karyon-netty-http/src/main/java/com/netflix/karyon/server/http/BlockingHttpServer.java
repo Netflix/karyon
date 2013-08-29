@@ -1,6 +1,6 @@
 package com.netflix.karyon.server.http;
 
-import com.netflix.karyon.server.http.filter.PipelineFactory;
+import com.netflix.karyon.server.http.interceptor.PipelineFactory;
 import com.netflix.karyon.server.http.spi.HttpRequestRouter;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.socket.SocketChannel;

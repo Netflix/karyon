@@ -2,11 +2,11 @@ package com.netflix.karyon.server.http;
 
 
 import com.google.common.base.Preconditions;
-import com.netflix.karyon.server.http.filter.Filter;
+import com.netflix.karyon.server.http.interceptor.Interceptor;
+import com.netflix.karyon.server.http.interceptor.InterceptorExecutionContext;
+import com.netflix.karyon.server.http.interceptor.InterceptorExecutionContextImpl;
 import com.netflix.karyon.server.http.spi.HttpRequestRouter;
-import com.netflix.karyon.server.http.filter.FilterExecutionContext;
-import com.netflix.karyon.server.http.filter.FilterExecutionContextImpl;
-import com.netflix.karyon.server.http.filter.PipelineFactory;
+import com.netflix.karyon.server.http.interceptor.PipelineFactory;
 import com.netflix.karyon.server.http.spi.HttpResponseWriter;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
@@ -35,7 +35,7 @@ public class ServerHandler extends SimpleChannelInboundHandler<FullHttpRequest> 
     @Nullable
     private final PipelineFactory filterPipelineFactory;
     @Nullable
-    private final Filter terminatingFilter;
+    private final Interceptor terminatingInterceptor;
 
     public ServerHandler(@NotNull HttpRequestRouter httpRequestRouter, @Nullable PipelineFactory filterPipelineFactory) {
         super(true);
@@ -43,36 +43,36 @@ public class ServerHandler extends SimpleChannelInboundHandler<FullHttpRequest> 
         this.filterPipelineFactory = filterPipelineFactory;
         this.httpRequestRouter = httpRequestRouter;
         if (null != filterPipelineFactory) {
-            terminatingFilter = new RouterFilterAdapter(this.httpRequestRouter);
+            terminatingInterceptor = new RouterInterceptorAdapter(this.httpRequestRouter);
         } else {
-            terminatingFilter = null;
+            terminatingInterceptor = null;
         }
     }
 
     @Override
     protected void channelRead0(final ChannelHandlerContext ctx, final FullHttpRequest request) throws Exception {
-        FilterExecutionContext filterExecutionContext = getFilterExecutionContext(request);
+        InterceptorExecutionContext interceptorExecutionContext = getFilterExecutionContext(request);
         HttpResponseWriterImpl responseWriter = new HttpResponseWriterImpl(request, ctx);
 
-        if (null != filterExecutionContext) {
-            filterExecutionContext.executeNextFilter(request, responseWriter);
+        if (null != interceptorExecutionContext) {
+            interceptorExecutionContext.executeNextInterceptor(request, responseWriter);
         } else {
             httpRequestRouter.process(request, responseWriter);
         }
     }
 
     @Nullable
-    private FilterExecutionContext getFilterExecutionContext(FullHttpRequest request) {
+    private InterceptorExecutionContext getFilterExecutionContext(FullHttpRequest request) {
         if (null == filterPipelineFactory) {
             return null;
         }
 
-        List<Filter> filters = filterPipelineFactory.getFilters(request);
-        if (null == filters || filters.isEmpty()) {
+        List<Interceptor> interceptors = filterPipelineFactory.getInterceptors(request);
+        if (null == interceptors || interceptors.isEmpty()) {
             return null;
         }
 
-        return new FilterExecutionContextImpl(filters, terminatingFilter);
+        return new InterceptorExecutionContextImpl(interceptors, terminatingInterceptor);
     }
 
     @Override
@@ -136,17 +136,17 @@ public class ServerHandler extends SimpleChannelInboundHandler<FullHttpRequest> 
         }
     }
 
-    private static class RouterFilterAdapter implements Filter {
+    private static class RouterInterceptorAdapter implements Interceptor {
 
         private final HttpRequestRouter router;
 
-        private RouterFilterAdapter(HttpRequestRouter router) {
+        private RouterInterceptorAdapter(HttpRequestRouter router) {
             this.router = router;
         }
 
         @Override
         public void filter(FullHttpRequest httpRequest, HttpResponseWriter responseWriter,
-                           FilterExecutionContext executionContext) {
+                           InterceptorExecutionContext executionContext) {
             router.process(httpRequest, responseWriter);
         }
     }

@@ -1,10 +1,13 @@
 package com.netflix.karyon.server.http;
 
 import com.google.common.base.Preconditions;
-import com.netflix.karyon.server.http.filter.Filter;
+import com.netflix.karyon.server.http.interceptor.Interceptor;
+import com.netflix.karyon.server.http.interceptor.InterceptorPipelineBuilder;
+import com.netflix.karyon.server.http.interceptor.MethodConstraintKey;
+import com.netflix.karyon.server.http.interceptor.PipelineDefinition;
+import com.netflix.karyon.server.http.interceptor.UriConstraintKey;
 import com.netflix.karyon.server.http.spi.HttpRequestRouter;
-import com.netflix.karyon.server.http.filter.FilterPipelineBuilder;
-import com.netflix.karyon.server.http.filter.PipelineFactory;
+import com.netflix.karyon.server.http.interceptor.PipelineFactory;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
@@ -13,6 +16,10 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.oio.OioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.channel.socket.oio.OioServerSocketChannel;
+import io.netty.handler.codec.http.HttpMethod;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * A builder that provides multiple configuration hooks to the {@link HttpServer}. <br/>
@@ -32,14 +39,15 @@ public class HttpServerBuilder {
     private HttpRequestRouter requestRouter;
     private int executorThreadCount = NOT_DEFINED;
     private Class<? extends ServerChannel> serverChannelClass = NioServerSocketChannel.class;
-    private int acceptorThreadCount;
+    private int acceptorThreadCount = 1;
     private int workerSelectorCount;
-    private PipelineFactory filterFactory;
-    private FilterPipelineBuilder filterPipelineBuilder;
+    private PipelineFactory interceptorFactory;
+    private final List<InterceptorAttacher> interceptorAttachers;
 
     public HttpServerBuilder(int serverPort) {
         nettyBootstrap = new ServerBootstrap();
         nettyBootstrap.localAddress(serverPort);
+        interceptorAttachers = new ArrayList<InterceptorAttacher>();
     }
 
     public HttpServerBuilder withAcceptorThreads(int acceptorThreads) {
@@ -72,19 +80,22 @@ public class HttpServerBuilder {
         return this;
     }
 
-    public HttpServerBuilder filters(PipelineFactory filterFactory) {
-        Preconditions.checkNotNull(filterFactory, "Filter factory can not be null.");
-        this.filterFactory = filterFactory;
+    public HttpServerBuilder interceptors(PipelineFactory interceptorFactory) {
+        Preconditions.checkNotNull(interceptorFactory, "Interceptor pipeline factory can not be null.");
+        this.interceptorFactory = interceptorFactory;
         return this;
     }
 
-    public HttpServerBuilder filter(String constraint, Filter filter) {
-        if (null == filterPipelineBuilder) {
-            filterPipelineBuilder = new FilterPipelineBuilder();
-        }
+    public InterceptorAttacher forUri(String uri) {
+        InterceptorAttacher interceptorAttacher = new InterceptorAttacher(new UriConstraintKey(uri));
+        interceptorAttachers.add(interceptorAttacher);
+        return interceptorAttacher;
+    }
 
-        filterPipelineBuilder.filter(constraint, filter);
-        return this;
+    public InterceptorAttacher forHttpMethod(HttpMethod method) {
+        InterceptorAttacher interceptorAttacher = new InterceptorAttacher(new MethodConstraintKey(method));
+        interceptorAttachers.add(interceptorAttacher);
+        return interceptorAttacher;
     }
 
     public HttpServerBuilder requestRouter(HttpRequestRouter requestRouter, int executorThreadCount) {
@@ -113,15 +124,34 @@ public class HttpServerBuilder {
         nettyBootstrap.group(acceptorGroup, workerGroup)
                       .channel(serverChannelClass);
 
-        if (null == filterFactory && null != filterPipelineBuilder) {
-            filterFactory = filterPipelineBuilder.buildFactory();
+        if (null == interceptorFactory && !interceptorAttachers.isEmpty()) {
+            InterceptorPipelineBuilder builder = new InterceptorPipelineBuilder();
+            for (InterceptorAttacher interceptorAttacher : interceptorAttachers) {
+                builder.addIntereceptorMapping(interceptorAttacher.constraint, interceptorAttacher.interceptors);
+            }
+            interceptorFactory = builder.buildFactory();
         }
 
         if (isBlocking) {
-            return new BlockingHttpServer(nettyBootstrap, requestRouter, filterFactory, karyonBootstrap);
+            return new BlockingHttpServer(nettyBootstrap, requestRouter, interceptorFactory, karyonBootstrap);
         } else {
-            return new NonBlockingHttpServer(nettyBootstrap, requestRouter, executorThreadCount, filterFactory,
+            return new NonBlockingHttpServer(nettyBootstrap, requestRouter, executorThreadCount, interceptorFactory,
                                              karyonBootstrap);
+        }
+    }
+
+    public class InterceptorAttacher {
+
+        private final PipelineDefinition.Key constraint;
+        private Interceptor[] interceptors;
+
+        public InterceptorAttacher(PipelineDefinition.Key constraint) {
+            this.constraint = constraint;
+        }
+
+        public HttpServerBuilder interceptWith(Interceptor... interceptors) {
+            this.interceptors = interceptors;
+            return HttpServerBuilder.this;
         }
     }
 }
