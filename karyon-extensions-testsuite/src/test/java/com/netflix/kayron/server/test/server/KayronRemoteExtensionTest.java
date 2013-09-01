@@ -73,6 +73,7 @@ public class KayronRemoteExtensionTest {
         // then
         verify(extensionBuilder).service(TestEnricher.class, KayronTestEnricher.class);
         verify(extensionBuilder).observer(KayronServerInitializer.class);
+        verify(extensionBuilder).observer(KayronExtensionConfigurationProducer.class);
         verifyNoMoreInteractions(extensionBuilder);
     }
 }
