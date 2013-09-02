@@ -13,29 +13,20 @@
  *      See the License for the specific language governing permissions and
  *      limitations under the License.
  */
-package com.netflix.kayron.server.test.server;
-
-import org.jboss.arquillian.container.test.spi.RemoteLoadableExtension;
-import org.jboss.arquillian.test.spi.TestEnricher;
+package com.netflix.kayron.server.test.configuration;
 
 /**
- * Registers the remote extension in the executing container.
+ * Exports the configuration object. The result of this method will be used for exporting the assets with the test
+ * deployment.
  *
  * @author Jakub Narloch (jmnarloch@gmail.com)
  */
-public class KayronRemoteExtension implements RemoteLoadableExtension {
+public interface ConfigurationExporter {
 
     /**
-     * Registers the extension.
+     * Exports the configuration as a string representation.
      *
-     * @param builder the extension builder
+     * @return the spring representtion of the properties
      */
-    @Override
-    public void register(ExtensionBuilder builder) {
-
-        // registers the test enricher
-        builder.service(TestEnricher.class, KayronTestEnricher.class)
-                .observer(KayronServerInitializer.class)
-                .observer(KayronExtensionConfigurationProducer.class);
-    }
+    String exportAsString();
 }

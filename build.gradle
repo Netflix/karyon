@@ -100,6 +100,10 @@ project(':karyon-extensions-testsuite') {
         compile 'org.jboss.arquillian.test:arquillian-test-spi:1.1.0.Final'
         compile 'org.jboss.shrinkwrap:shrinkwrap-impl-base:1.1.2'
         testCompile 'org.mockito:mockito-all:1.9.0'
+        testCompile 'org.jboss.arquillian.core:arquillian-core-impl-base:1.1.0.Final'
+        testCompile 'org.jboss.arquillian.core:arquillian-core-impl-base:1.1.0.Final:tests'
+        testCompile 'org.jboss.arquillian.test:arquillian-test-impl-base:1.1.0.Final'
+        testCompile 'org.jboss.arquillian.test:arquillian-test-impl-base:1.1.0.Final:tests'
     }
 }
 

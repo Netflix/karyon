@@ -16,11 +16,18 @@
 package com.netflix.kayron.server.test.server;
 
 import com.netflix.kayron.server.test.RunInKaryon;
+import com.netflix.kayron.server.test.configuration.KayronExtensionConfiguration;
+import org.jboss.arquillian.core.api.annotation.ApplicationScoped;
+import org.jboss.arquillian.test.spi.context.ClassContext;
+import org.jboss.arquillian.test.spi.event.suite.AfterSuite;
 import org.jboss.arquillian.test.spi.event.suite.BeforeClass;
+import org.jboss.arquillian.test.spi.event.suite.BeforeSuite;
+import org.jboss.arquillian.test.test.AbstractTestTestBase;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.List;
 import java.util.Properties;
 
 import static org.junit.Assert.assertEquals;
@@ -31,7 +38,7 @@ import static org.junit.Assert.assertNull;
  *
  * @author Jakub Narloch (jmnarloch@gmail.com)
  */
-public class KayronServerInitializerTest {
+public class KayronServerInitializerTest extends AbstractTestTestBase {
 
     /**
      * Represents the kayron property name.
@@ -54,13 +61,34 @@ public class KayronServerInitializerTest {
     private Properties systemProperties;
 
     /**
+     * The configuration instance.
+     */
+    private KayronExtensionConfiguration configuration;
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected void addExtensions(List<Class<?>> extensions) {
+        extensions.add(KayronServerInitializer.class);
+    }
+
+    /**
      * Sets up the test environment.
      */
     @Before
     public void setUp() {
 
+        // activates the arquillian context
+        getManager().getContext(ClassContext.class).activate(KayronServerInitializerTest.class);
+        getManager().fire(new BeforeSuite());
+
         // given
+        configuration = new KayronExtensionConfiguration();
+        bind(ApplicationScoped.class, KayronExtensionConfiguration.class, configuration);
+
         instance = new KayronServerInitializer();
+        getManager().inject(instance);
 
         // stores the properties between the test execution
         systemProperties = System.getProperties();
@@ -79,13 +107,17 @@ public class KayronServerInitializerTest {
 
         // clears the properties, by restoring the previous properties values
         System.setProperties(systemProperties);
+
+        // cleans the context
+        getManager().fire(new AfterSuite());
+        getManager().getContext(ClassContext.class).deactivate();
     }
 
     /**
      * Tests the {@link KayronServerInitializer#initializeProperties(BeforeClass)} method.
      */
     @Test
-    public void shouldSetProperties() {
+    public void shouldSetPropertiesFromAnnotation() {
 
         // given
         assertNull("The property 'archaius.deployment.applicationId' should be null.",
@@ -107,7 +139,7 @@ public class KayronServerInitializerTest {
      * Tests the {@link KayronServerInitializer#initializeProperties(BeforeClass)} method.
      */
     @Test
-    public void shouldSetPropertiesWithDefaultEnvironment() {
+    public void shouldSetPropertiesFromAnnotationWithDefaultEnvironment() {
 
         // given
         assertNull("The property 'archaius.deployment.applicationId' should be null.",
@@ -121,6 +153,55 @@ public class KayronServerInitializerTest {
         // then
         assertEquals("The property 'archaius.deployment.applicationId' hasn't been set.",
                 "kayron-dev", System.getProperty(APPLICATION_ID_PROPERTY_NAME));
+        assertEquals("The property 'archaius.deployment.environment' hasn't been set.",
+                "dev", System.getProperty(ENVIRONMENT_PROPERTY_NAME));
+    }
+
+    /**
+     * Tests the {@link KayronServerInitializer#initializeProperties(BeforeClass)} method.
+     */
+    @Test
+    public void shouldSetPropertiesFromConfiguration() {
+
+        // given
+        assertNull("The property 'archaius.deployment.applicationId' should be null.",
+                System.getProperty(APPLICATION_ID_PROPERTY_NAME));
+        assertNull("The property 'archaius.deployment.environment' should be null.",
+                System.getProperty(ENVIRONMENT_PROPERTY_NAME));
+
+        configuration.setApplicationId("kayron-config");
+        configuration.setEnvironment("test");
+
+        // when
+        instance.initializeProperties(new BeforeClass(ConfigurationTestCase.class));
+
+        // then
+        assertEquals("The property 'archaius.deployment.applicationId' hasn't been set.",
+                "kayron-config", System.getProperty(APPLICATION_ID_PROPERTY_NAME));
+        assertEquals("The property 'archaius.deployment.environment' hasn't been set.",
+                "test", System.getProperty(ENVIRONMENT_PROPERTY_NAME));
+    }
+
+    /**
+     * Tests the {@link KayronServerInitializer#initializeProperties(BeforeClass)} method.
+     */
+    @Test
+    public void shouldSetPropertiesFromConfigurationWithDefaultEnvironment() {
+
+        // given
+        assertNull("The property 'archaius.deployment.applicationId' should be null.",
+                System.getProperty(APPLICATION_ID_PROPERTY_NAME));
+        assertNull("The property 'archaius.deployment.environment' should be null.",
+                System.getProperty(ENVIRONMENT_PROPERTY_NAME));
+
+        configuration.setApplicationId("kayron-config");
+
+        // when
+        instance.initializeProperties(new BeforeClass(ConfigurationTestCase.class));
+
+        // then
+        assertEquals("The property 'archaius.deployment.applicationId' hasn't been set.",
+                "kayron-config", System.getProperty(APPLICATION_ID_PROPERTY_NAME));
         assertEquals("The property 'archaius.deployment.environment' hasn't been set.",
                 "dev", System.getProperty(ENVIRONMENT_PROPERTY_NAME));
     }
@@ -143,6 +224,17 @@ public class KayronServerInitializerTest {
      */
     @RunInKaryon(applicationId = "kayron-dev")
     private static class DevTestCase {
+
+        // empty class
+    }
+
+    /**
+     * A simple class that imitates a test case.
+     *
+     * @author Jakub Narloch (jmnarloch@gmail.com)
+     */
+    @RunInKaryon
+    private static class ConfigurationTestCase {
 
         // empty class
     }

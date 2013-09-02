@@ -49,5 +49,5 @@ public @interface RunInKaryon {
      *
      * Defaults to {@code dev}.
      */
-    String environment() default "dev";
+    String environment() default "";
 }
