@@ -26,11 +26,6 @@ war {
     webXml = file('src/main/webapp/WEB-INF/web.xml')
 }
 
-configurations {
-
-    compileOnly
-}
-
 dependencies {
     compile 'org.slf4j:slf4j-api:1.7.0'
     runtime 'org.slf4j:slf4j-simple:1.7.0'
