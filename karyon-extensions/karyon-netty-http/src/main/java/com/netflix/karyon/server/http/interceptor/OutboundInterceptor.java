@@ -4,12 +4,14 @@ import com.netflix.karyon.server.http.spi.HttpResponseWriter;
 import io.netty.handler.codec.http.FullHttpRequest;
 
 /**
- * Interceptors are based on the <a href="http://en.wikipedia.org/wiki/Interceptor_pattern">Interceptor pattern</a> and
- * are used to implement cross-cutting concerns across all or a set of HTTP requests. <br/>
+ * Interceptor that is called by karyon when the router has finished processing and has invoked
+ * {@link HttpResponseWriter#sendResponse()} to indicate writing of response back to the client.
  *
  * @see com.netflix.karyon.server.http.interceptor
+ *
+ * @author Nitesh Kant
  */
-public interface Interceptor {
+public interface OutboundInterceptor {
 
     /**
      * Executes this interceptor.
@@ -18,5 +20,6 @@ public interface Interceptor {
      * @param responseWriter Response writer.
      * @param executionContext Execution context for this execution.
      */
-    void filter(FullHttpRequest httpRequest, HttpResponseWriter responseWriter, InterceptorExecutionContext executionContext);
+    void interceptOut(FullHttpRequest httpRequest, HttpResponseWriter responseWriter,
+                      InterceptorExecutionContext executionContext);
 }

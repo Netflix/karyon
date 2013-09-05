@@ -14,11 +14,20 @@ import java.util.List;
 public interface PipelineFactory {
 
     /**
-     * Returns a list of interceptors to be executed for the passed {@code request}. <br/>
+     * Returns a list of inbound interceptors to be executed for the passed {@code request}. <br/>
      *
      * @param request Request for which the interceptor list is to be created.
      *
-     * @return The list of interceptors for the passed request.
+     * @return The list of inbound interceptors for the passed request.
      */
-    List<Interceptor> getInterceptors(FullHttpRequest request);
+    List<InboundInterceptor> getInboundInterceptors(FullHttpRequest request);
+
+    /**
+     * Returns a list of outbound interceptors to be executed for the passed {@code request}. <br/>
+     *
+     * @param request Request for which the interceptor list is to be created.
+     *
+     * @return The list of outbound interceptors for the passed request.
+     */
+    List<OutboundInterceptor> getOutboundInterceptors(FullHttpRequest request);
 }

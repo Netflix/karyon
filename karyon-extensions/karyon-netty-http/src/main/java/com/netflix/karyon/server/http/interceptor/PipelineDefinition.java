@@ -5,8 +5,9 @@ import io.netty.handler.codec.http.FullHttpRequest;
 
 /**
  * A definition of all interceptors that are confiured for any application. <br/>
- * At runtime an instance of {@link PipelineFactory} will execute all {@link Key}s returned from {@link #getInterceptors()}
- * to determine which interceptors will be applied for a particular request.
+ * At runtime an instance of {@link PipelineFactory} will execute all {@link Key}s returned from
+ * {@link #getInboundInterceptors()} and {@link #getOutboundInterceptors()} to determine which interceptors are to be
+ * applied for a particular request.
  *
  * @author Nitesh Kant
  */
@@ -19,10 +20,20 @@ public interface PipelineDefinition {
      *
      * @return A super set of all interceptors defined for the application.
      */
-    Multimap<Key, Interceptor> getInterceptors();
+    Multimap<Key, InboundInterceptor> getInboundInterceptors();
 
     /**
-     * Key for a {@link Interceptor} which determines whether a interceptor must be applied for a particular request. <br/>
+     * Returns a super set of all interceptors defined for the application. <br/>
+     * {@link Key#apply(FullHttpRequest)} will be invoked on the returned keys to determine which interceptors apply for a
+     * particular request.
+     *
+     * @return A super set of all interceptors defined for the application.
+     */
+    Multimap<Key, OutboundInterceptor> getOutboundInterceptors();
+
+    /**
+     * Key for a {@link InboundInterceptor} or {@link OutboundInterceptor} which determines whether a interceptor must
+     * be applied for a particular request. <br/>
      * Any implementation for the key must be aware that it will be invoked per request so it should always optimize
      * for speed of evaluation.
      */

@@ -4,6 +4,7 @@ import com.netflix.karyon.server.KaryonServer;
 import com.netflix.karyon.server.http.spi.HttpRequestRouter;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.Channel;
+import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.handler.codec.http.HttpObjectAggregator;
@@ -23,6 +24,7 @@ public abstract class HttpServer extends KaryonServer {
 
     protected final HttpRequestRouter httpRequestRouter;
     private ServerBootstrap bootstrap;
+    private ChannelFuture serverShutdownFuture;
 
     HttpServer(@Nonnull ServerBootstrap bootstrap,
                @Nonnull HttpRequestRouter httpRequestRouter,
@@ -32,8 +34,20 @@ public abstract class HttpServer extends KaryonServer {
         this.httpRequestRouter = httpRequestRouter;
     }
 
+    /**
+     * Starts this server and blocks the calling thread till the server is stopped. <br/>
+     * In case it is not required to block the calling thread, one must instead call
+     * {@link #startWithoutWaitingForShutdown()}
+     *
+     * @throws Exception If the start fails.
+     */
     @Override
     public void start() throws Exception {
+        startWithoutWaitingForShutdown();
+        serverShutdownFuture.sync();
+    }
+
+    public void startWithoutWaitingForShutdown() throws Exception {
         initialize();
         super.start();
         httpRequestRouter.start();
@@ -60,7 +74,7 @@ public abstract class HttpServer extends KaryonServer {
                 }
             }
         }));
-        channel.closeFuture().sync(); // Blocking till it closes
+        serverShutdownFuture = channel.closeFuture();
     }
 
     public void stop() throws InterruptedException {

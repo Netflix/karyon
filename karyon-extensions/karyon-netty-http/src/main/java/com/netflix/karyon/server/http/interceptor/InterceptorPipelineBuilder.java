@@ -12,54 +12,89 @@ import java.util.Collection;
 import java.util.LinkedHashMap;
 
 /**
- * A {@link PipelineDefinition} builder that provides various criterions for which an {@link Interceptor} instance can
- * be attached to a request processing.
+ * A {@link PipelineDefinition} builder that provides various criterions for which an {@link InboundInterceptor}
+ * or a {@link OutboundInterceptor} instance can be attached to request processing.
  *
  * @author Nitesh Kant
  */
 public class InterceptorPipelineBuilder {
 
-    private ListMultimap<PipelineDefinition.Key, Interceptor> filters =
-            Multimaps.newListMultimap(new LinkedHashMap<PipelineDefinition.Key, Collection<Interceptor>>(),
-                                      new Supplier<ArrayList<Interceptor>>() {
+    private final ListMultimap<PipelineDefinition.Key, InboundInterceptor> inboundInterceptors =
+            Multimaps.newListMultimap(new LinkedHashMap<PipelineDefinition.Key, Collection<InboundInterceptor>>(),
+                                      new Supplier<ArrayList<InboundInterceptor>>() {
                                           @Override
-                                          public ArrayList<Interceptor> get() {
-                                              return new ArrayList<Interceptor>();
+                                          public ArrayList<InboundInterceptor> get() {
+                                              return new ArrayList<InboundInterceptor>();
                                           }
                                       });
 
-    /**
-     * Configures an interceptor to be invoked if the HTTP request path follows the passed criterion. <br/>
-     * The criterion can be defined as
-     *
-     * @param constraint Constraint that guards the interceptor execution.
-     * @param interceptor Interceptor to invoke if the criterion is satisfied.
-     *
-     * @return This builder instance.
-     */
-    public InterceptorPipelineBuilder interceptIfUri(String constraint, Interceptor interceptor) {
-        filters.put(new UriConstraintKey(constraint), interceptor);
+    private final ListMultimap<PipelineDefinition.Key, OutboundInterceptor> outboundInterceptors =
+            Multimaps.newListMultimap(new LinkedHashMap<PipelineDefinition.Key, Collection<OutboundInterceptor>>(),
+                                      new Supplier<ArrayList<OutboundInterceptor>>() {
+                                          @Override
+                                          public ArrayList<OutboundInterceptor> get() {
+                                              return new ArrayList<OutboundInterceptor>();
+                                          }
+                                      });
+
+    public InterceptorPipelineBuilder interceptIfUri(String constraint, InboundInterceptor interceptor) {
+        inboundInterceptors.put(new UriConstraintKey(constraint), interceptor);
         return this;
     }
 
-    public InterceptorPipelineBuilder interceptIfMethod(HttpMethod method, Interceptor interceptor) {
-        filters.put(new MethodConstraintKey(method), interceptor);
+    public InterceptorPipelineBuilder interceptIfMethod(HttpMethod method, InboundInterceptor interceptor) {
+        inboundInterceptors.put(new MethodConstraintKey(method), interceptor);
         return this;
     }
 
-    public InterceptorPipelineBuilder addIntereceptorMapping(PipelineDefinition.Key constraint, Interceptor... interceptors) {
-        for (Interceptor interceptor : interceptors) {
-            filters.put(constraint, interceptor);
+    public InterceptorPipelineBuilder addIntereceptorMapping(PipelineDefinition.Key constraint, InboundInterceptor... interceptors) {
+        for (InboundInterceptor interceptor : interceptors) {
+            inboundInterceptors.put(constraint, interceptor);
+        }
+        return this;
+    }
+
+    public InterceptorPipelineBuilder interceptIfUri(String constraint, OutboundInterceptor interceptor) {
+        outboundInterceptors.put(new UriConstraintKey(constraint), interceptor);
+        return this;
+    }
+
+    public InterceptorPipelineBuilder interceptIfMethod(HttpMethod method, OutboundInterceptor interceptor) {
+        outboundInterceptors.put(new MethodConstraintKey(method), interceptor);
+        return this;
+    }
+
+    public InterceptorPipelineBuilder addIntereceptorMapping(PipelineDefinition.Key constraint, OutboundInterceptor... interceptors) {
+        for (OutboundInterceptor interceptor : interceptors) {
+            outboundInterceptors.put(constraint, interceptor);
+        }
+        return this;
+    }
+
+    public InterceptorPipelineBuilder addIntereceptorMapping(PipelineDefinition.Key constraint, BidirectionalInterceptorAdapter... interceptors) {
+        for (BidirectionalInterceptorAdapter interceptor : interceptors) {
+            outboundInterceptors.put(constraint, interceptor);
+            inboundInterceptors.put(constraint, interceptor);
         }
         return this;
     }
 
     public PipelineDefinition build() {
-        final ImmutableMultimap<PipelineDefinition.Key, Interceptor> filterDefn = ImmutableMultimap.copyOf(filters);
+        final ImmutableMultimap<PipelineDefinition.Key, InboundInterceptor> inDefn = ImmutableMultimap.copyOf(
+                inboundInterceptors);
+        final ImmutableMultimap<PipelineDefinition.Key, OutboundInterceptor> outDefn = ImmutableMultimap.copyOf(
+                outboundInterceptors);
+
         return new PipelineDefinition() {
+
             @Override
-            public Multimap<Key, Interceptor> getInterceptors() {
-                return filterDefn;
+            public Multimap<Key, InboundInterceptor> getInboundInterceptors() {
+                return inDefn;
+            }
+
+            @Override
+            public Multimap<Key, OutboundInterceptor> getOutboundInterceptors() {
+                return outDefn;
             }
         };
     }

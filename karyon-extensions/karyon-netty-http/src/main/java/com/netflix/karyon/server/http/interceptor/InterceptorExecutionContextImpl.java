@@ -5,7 +5,7 @@ import com.netflix.karyon.server.http.spi.HttpResponseWriter;
 import io.netty.handler.codec.http.FullHttpRequest;
 
 import javax.annotation.Nullable;
-import javax.validation.constraints.NotNull;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
@@ -14,32 +14,84 @@ import java.util.List;
  */
 public class InterceptorExecutionContextImpl implements InterceptorExecutionContext {
 
-    private final Iterator<Interceptor> filtersIterator;
-    private final Interceptor tail;
+    private final Iterator<InboundInterceptor> inboundInterceptors;
+    private final InboundInterceptor inTail;
 
-    public InterceptorExecutionContextImpl(@NotNull List<Interceptor> interceptors, @Nullable Interceptor tail) {
-        Preconditions.checkNotNull(interceptors, "Filters can not be null.");
-        filtersIterator = interceptors.iterator();
-        this.tail = tail;
+    private final Iterator<OutboundInterceptor> outboundInterceptors;
+    private final OutboundInterceptor outTail;
+
+    private final boolean isOutbound;
+
+    public InterceptorExecutionContextImpl(List<InboundInterceptor> interceptors, @Nullable InboundInterceptor tail) {
+        Preconditions.checkState(null != interceptors, "Interceptors can not be null.");
+        if (!interceptors.isEmpty()) { // Optimizing empty iterator creation
+            inboundInterceptors = interceptors.iterator();
+        } else {
+            inboundInterceptors = Collections.<InboundInterceptor>emptyList().iterator();
+        }
+        inTail = tail;
+        outboundInterceptors = null;
+        outTail = null;
+        isOutbound = false;
+    }
+
+    public InterceptorExecutionContextImpl(List<OutboundInterceptor> interceptors, @Nullable OutboundInterceptor tail) {
+        Preconditions.checkState(null != interceptors, "Interceptors can not be null.");
+        inboundInterceptors = null;
+        inTail = null;
+        if (!interceptors.isEmpty()) { // Optimizing unused iterator creation
+            outboundInterceptors = interceptors.iterator();
+        } else {
+            outboundInterceptors = Collections.<OutboundInterceptor>emptyList().iterator();
+        }
+        outTail = tail;
+        isOutbound = true;
     }
 
     @Override
     public void executeNextInterceptor(FullHttpRequest request, HttpResponseWriter responseWriter) {
-        Interceptor interceptorsToExecute = null;
-        while (filtersIterator.hasNext()) {
-            Interceptor next = filtersIterator.next();
+        if (isOutbound) {
+            executeOut(request, responseWriter);
+        } else {
+            executeIn(request, responseWriter);
+        }
+    }
+
+    private void executeIn(FullHttpRequest request, HttpResponseWriter responseWriter) {
+        InboundInterceptor nextInterceptor = null;
+        while (inboundInterceptors.hasNext()) {
+            InboundInterceptor next = inboundInterceptors.next();
             if (null != next) {
-                interceptorsToExecute = next;
+                nextInterceptor = next;
                 break;
             }
         }
 
-        if (null == interceptorsToExecute) {
-            if (null != tail) {
-                tail.filter(request, responseWriter, this);
+        if (null == nextInterceptor) {
+            if (null != inTail) {
+                inTail.interceptIn(request, responseWriter, this);
             }
         } else {
-            interceptorsToExecute.filter(request, responseWriter, this);
+            nextInterceptor.interceptIn(request, responseWriter, this);
+        }
+    }
+
+    private void executeOut(FullHttpRequest request, HttpResponseWriter responseWriter) {
+        OutboundInterceptor nextInterceptor = null;
+        while (outboundInterceptors.hasNext()) {
+            OutboundInterceptor next = outboundInterceptors.next();
+            if (null != next) {
+                nextInterceptor = next;
+                break;
+            }
+        }
+
+        if (null == nextInterceptor) {
+            if (null != outTail) {
+                outTail.interceptOut(request, responseWriter, this);
+            }
+        } else {
+            nextInterceptor.interceptOut(request, responseWriter, this);
         }
     }
 }

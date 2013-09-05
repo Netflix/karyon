@@ -14,21 +14,36 @@ import java.util.Map;
  */
 public class PipelineFactoryImpl implements PipelineFactory {
 
-    private final Multimap<PipelineDefinition.Key, Interceptor> filters;
+    private final Multimap<PipelineDefinition.Key, InboundInterceptor> inboundInterceptors;
+    private final Multimap<PipelineDefinition.Key, OutboundInterceptor> outboundInterceptors;
 
     public PipelineFactoryImpl(@NotNull PipelineDefinition pipelineDefinition) {
         Preconditions.checkNotNull(pipelineDefinition, "Pipeline definition can not be null.");
-        filters = pipelineDefinition.getInterceptors();
-        Preconditions.checkNotNull(filters, "Filters returned by pipeline definition can not be null.");
+        inboundInterceptors = pipelineDefinition.getInboundInterceptors();
+        outboundInterceptors = pipelineDefinition.getOutboundInterceptors();
+        Preconditions.checkNotNull(inboundInterceptors, "Inbound interceptors returned by pipeline definition can not be null.");
+        Preconditions.checkNotNull(outboundInterceptors, "Outbound interceptors returned by pipeline definition can not be null.");
     }
 
     @Override
-    public List<Interceptor> getInterceptors(FullHttpRequest request) {
+    public List<InboundInterceptor> getInboundInterceptors(FullHttpRequest request) {
         // TODO: See if this can be cached.
-        List<Interceptor> applicableInterceptors = new ArrayList<Interceptor>();
-        for (Map.Entry<PipelineDefinition.Key, Interceptor> filterEntry : filters.entries()) {
-            if (filterEntry.getKey().apply(request)) {
-                applicableInterceptors.add(filterEntry.getValue());
+        List<InboundInterceptor> applicableInterceptors = new ArrayList<InboundInterceptor>();
+        for (Map.Entry<PipelineDefinition.Key, InboundInterceptor> interceptorEntry : inboundInterceptors.entries()) {
+            if (interceptorEntry.getKey().apply(request)) {
+                applicableInterceptors.add(interceptorEntry.getValue());
+            }
+        }
+        return applicableInterceptors;
+    }
+
+    @Override
+    public List<OutboundInterceptor> getOutboundInterceptors(FullHttpRequest request) {
+        // TODO: See if this can be cached.
+        List<OutboundInterceptor> applicableInterceptors = new ArrayList<OutboundInterceptor>();
+        for (Map.Entry<PipelineDefinition.Key, OutboundInterceptor> interceptorEntry : outboundInterceptors.entries()) {
+            if (interceptorEntry.getKey().apply(request)) {
+                applicableInterceptors.add(interceptorEntry.getValue());
             }
         }
         return applicableInterceptors;
