@@ -23,8 +23,8 @@ public final class Server {
                .withWorkerCount(10)
                .serverSocketOption(ChannelOption.SO_BACKLOG, 100)
                .clientSocketOption(ChannelOption.TCP_NODELAY, true)
-               .forUri("/*").interceptWith(new InboundInterceptorImpl())
-               .forUri("/*").interceptWith(new OutboundInterceptorImpl())
+               .forUri("/hello/*").interceptWith(new InboundInterceptorImpl())
+               .forUri("/hello/out/").interceptWith(new OutboundInterceptorImpl())
                .forUri("/*").interceptWith(new LoggingInterceptor())
                .build().startWithoutWaitingForShutdown();
 

@@ -17,7 +17,7 @@ public class MethodConstraintKey implements PipelineDefinition.Key {
     }
 
     @Override
-    public boolean apply(FullHttpRequest request) {
+    public boolean apply(FullHttpRequest request, KeyEvaluationContext context) {
         return request.getMethod().equals(method);
     }
 }

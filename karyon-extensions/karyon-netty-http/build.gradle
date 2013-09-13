@@ -30,6 +30,6 @@ apply from: file('../../gradle/license.gradle')
 dependencies {
     compile project(':karyon-core')
     runtime 'org.slf4j:slf4j-simple:1.7.0'
-    compile 'io.netty:netty-handler:4.0.4.Final'
-    compile 'io.netty:netty-codec-http:4.0.4.Final'
+    compile 'io.netty:netty-handler:4.0.9.Final'
+    compile 'io.netty:netty-codec-http:4.0.9.Final'
 }

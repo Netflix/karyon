@@ -8,7 +8,8 @@ import com.netflix.karyon.server.http.interceptor.MethodConstraintKey;
 import com.netflix.karyon.server.http.interceptor.OutboundInterceptor;
 import com.netflix.karyon.server.http.interceptor.PipelineDefinition;
 import com.netflix.karyon.server.http.interceptor.PipelineFactory;
-import com.netflix.karyon.server.http.interceptor.UriConstraintKey;
+import com.netflix.karyon.server.http.interceptor.RegexUriConstraintKey;
+import com.netflix.karyon.server.http.interceptor.ServletStyleUriConstraintKey;
 import com.netflix.karyon.server.http.spi.HttpRequestRouter;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelOption;
@@ -58,7 +59,14 @@ public abstract class HttpServerBuilder<T extends HttpServerBuilder, S extends H
 
     public InterceptorAttacher forUri(String uri) {
         Preconditions.checkNotNull(uri, "Uri for intercepting must not be null");
-        InterceptorAttacher interceptorAttacher = new InterceptorAttacher(new UriConstraintKey(uri));
+        InterceptorAttacher interceptorAttacher = new InterceptorAttacher(new ServletStyleUriConstraintKey(uri));
+        interceptorAttachers.add(interceptorAttacher);
+        return interceptorAttacher;
+    }
+
+    public InterceptorAttacher forUriRegex(String regEx) {
+        Preconditions.checkNotNull(regEx, "URI Regular expression for interception must not be null");
+        InterceptorAttacher interceptorAttacher = new InterceptorAttacher(new RegexUriConstraintKey(regEx));
         interceptorAttachers.add(interceptorAttacher);
         return interceptorAttacher;
     }

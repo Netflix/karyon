@@ -7,16 +7,15 @@ import com.sun.jersey.spi.container.ContainerResponse;
 import com.sun.jersey.spi.container.ContainerResponseWriter;
 import com.sun.jersey.spi.container.WebApplication;
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.ByteBufInputStream;
+import io.netty.buffer.ByteBufOutputStream;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -49,12 +48,7 @@ final class NettyToJerseyBridge {
             URI uri = new URI(nettyRequest.getUri());
             return new ContainerRequest(application, nettyRequest.getMethod().name(),
                                         baseUri, uri, new JerseyRequestHeadersAdapter(nettyRequest.headers()),
-                                        new BufferedInputStream(new InputStream() {
-                                            @Override
-                                            public int read() throws IOException {
-                                                return nettyRequest.content().readByte();
-                                            }
-                                        }));
+                                        new ByteBufInputStream(nettyRequest.content()));
         } catch (URISyntaxException e) {
             logger.error(String.format("Invalid request uri: %s", nettyRequest.getUri()), e);
             throw new IllegalArgumentException(e);
@@ -65,23 +59,16 @@ final class NettyToJerseyBridge {
         return new ContainerResponseWriter() {
 
             @Override
-            public OutputStream writeStatusAndHeaders(long contentLength, ContainerResponse response)
-                    throws IOException {
+            public OutputStream writeStatusAndHeaders(long contentLength, ContainerResponse response) {
                 int responseStatus = response.getStatus();
                 ByteBuf contentBuffer = responseWriter.getChannelHandlerContext().alloc().buffer();
 
                 responseWriter.createResponse(HttpResponseStatus.valueOf(responseStatus), contentBuffer);
-                final ByteBuf finalContentBuffer = contentBuffer;
-                return new BufferedOutputStream(new OutputStream() {
-                    @Override
-                    public void write(int b) throws IOException {
-                        finalContentBuffer.writeByte(b);
-                    }
-                });
+                return new ByteBufOutputStream(contentBuffer);
             }
 
             @Override
-            public void finish() throws IOException {
+            public void finish() {
                 responseWriter.sendResponse();
             }
         };

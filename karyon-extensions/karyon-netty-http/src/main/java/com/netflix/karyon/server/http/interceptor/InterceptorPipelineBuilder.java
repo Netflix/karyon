@@ -37,8 +37,13 @@ public class InterceptorPipelineBuilder {
                                           }
                                       });
 
+    public InterceptorPipelineBuilder interceptIfUriForRegex(String regex, InboundInterceptor interceptor) {
+        inboundInterceptors.put(new RegexUriConstraintKey(regex), interceptor);
+        return this;
+    }
+
     public InterceptorPipelineBuilder interceptIfUri(String constraint, InboundInterceptor interceptor) {
-        inboundInterceptors.put(new UriConstraintKey(constraint), interceptor);
+        inboundInterceptors.put(new ServletStyleUriConstraintKey(constraint), interceptor);
         return this;
     }
 
@@ -54,8 +59,13 @@ public class InterceptorPipelineBuilder {
         return this;
     }
 
+    public InterceptorPipelineBuilder interceptIfUriForRegex(String regex, OutboundInterceptor interceptor) {
+        outboundInterceptors.put(new RegexUriConstraintKey(regex), interceptor);
+        return this;
+    }
+
     public InterceptorPipelineBuilder interceptIfUri(String constraint, OutboundInterceptor interceptor) {
-        outboundInterceptors.put(new UriConstraintKey(constraint), interceptor);
+        outboundInterceptors.put(new ServletStyleUriConstraintKey(constraint), interceptor);
         return this;
     }
 
@@ -68,6 +78,24 @@ public class InterceptorPipelineBuilder {
         for (OutboundInterceptor interceptor : interceptors) {
             outboundInterceptors.put(constraint, interceptor);
         }
+        return this;
+    }
+
+    public InterceptorPipelineBuilder interceptIfUriForRegex(String regex, BidirectionalInterceptorAdapter interceptor) {
+        interceptIfUriForRegex(regex, (InboundInterceptor) interceptor);
+        interceptIfUriForRegex(regex, (OutboundInterceptor) interceptor);
+        return this;
+    }
+
+    public InterceptorPipelineBuilder interceptIfUri(String constraint, BidirectionalInterceptorAdapter interceptor) {
+        interceptIfUri(constraint, (InboundInterceptor) interceptor);
+        interceptIfUri(constraint, (OutboundInterceptor) interceptor);
+        return this;
+    }
+
+    public InterceptorPipelineBuilder interceptIfMethod(HttpMethod method, BidirectionalInterceptorAdapter interceptor) {
+        interceptIfMethod(method, (InboundInterceptor) interceptor);
+        interceptIfMethod(method, (OutboundInterceptor) interceptor);
         return this;
     }
 

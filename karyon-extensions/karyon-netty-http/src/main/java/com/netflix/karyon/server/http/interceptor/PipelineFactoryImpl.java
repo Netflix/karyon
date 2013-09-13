@@ -28,9 +28,10 @@ public class PipelineFactoryImpl implements PipelineFactory {
     @Override
     public List<InboundInterceptor> getInboundInterceptors(FullHttpRequest request) {
         // TODO: See if this can be cached.
+        PipelineDefinition.Key.KeyEvaluationContext ctx = new PipelineDefinition.Key.KeyEvaluationContext();
         List<InboundInterceptor> applicableInterceptors = new ArrayList<InboundInterceptor>();
         for (Map.Entry<PipelineDefinition.Key, InboundInterceptor> interceptorEntry : inboundInterceptors.entries()) {
-            if (interceptorEntry.getKey().apply(request)) {
+            if (interceptorEntry.getKey().apply(request, ctx)) {
                 applicableInterceptors.add(interceptorEntry.getValue());
             }
         }
@@ -40,9 +41,10 @@ public class PipelineFactoryImpl implements PipelineFactory {
     @Override
     public List<OutboundInterceptor> getOutboundInterceptors(FullHttpRequest request) {
         // TODO: See if this can be cached.
+        PipelineDefinition.Key.KeyEvaluationContext ctx = new PipelineDefinition.Key.KeyEvaluationContext();
         List<OutboundInterceptor> applicableInterceptors = new ArrayList<OutboundInterceptor>();
         for (Map.Entry<PipelineDefinition.Key, OutboundInterceptor> interceptorEntry : outboundInterceptors.entries()) {
-            if (interceptorEntry.getKey().apply(request)) {
+            if (interceptorEntry.getKey().apply(request, ctx)) {
                 applicableInterceptors.add(interceptorEntry.getValue());
             }
         }

@@ -26,7 +26,7 @@ public class ServerHandler extends SimpleChannelInboundHandler<FullHttpRequest> 
     private final PipelineFactory interceptorPipelineFactory;
 
     public ServerHandler(@NotNull HttpRequestRouter httpRequestRouter, @Nullable PipelineFactory interceptorPipelineFactory) {
-        super(true);
+        super(true); // TODO: For async routers we should provide a facility to release.
         Preconditions.checkNotNull(httpRequestRouter, "Request router can not be null.");
         this.interceptorPipelineFactory = interceptorPipelineFactory;
         this.httpRequestRouter = httpRequestRouter;
@@ -63,7 +63,6 @@ public class ServerHandler extends SimpleChannelInboundHandler<FullHttpRequest> 
                                                                                       terminatingInterceptor);
                 }
             }
-
         }
 
         if (null != interceptorExecutionContext) {
