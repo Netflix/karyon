@@ -91,7 +91,6 @@ project(':karyon-extensions') {
 project(':karyon-extensions-testsuite') {
     dependencies {
         compile project(':karyon-extensions')
-        compile 'javax.servlet:javax.servlet-api:3.0.1'
         compile 'com.google.inject.extensions:guice-servlet:3.0'
         compile 'org.jboss.arquillian.core:arquillian-core-spi:1.1.1.Final'
         compile 'org.jboss.arquillian.container:arquillian-container-spi:1.1.1.Final'

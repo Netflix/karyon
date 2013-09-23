@@ -17,7 +17,7 @@ package com.netflix.hellonoss.server;
 
 import com.google.inject.Inject;
 import com.netflix.hellonoss.utils.Deployments;
-import com.netflix.kayron.server.test.RunInKaryon;
+import com.netflix.karyon.server.test.RunInKaryon;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.shrinkwrap.api.Archive;

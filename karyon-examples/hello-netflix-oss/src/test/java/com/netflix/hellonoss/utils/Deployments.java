@@ -19,7 +19,7 @@ import com.google.inject.servlet.GuiceFilter;
 import com.netflix.hellonoss.core.HelloworldComponent;
 import com.netflix.hellonoss.server.HelloWorldBootstrap;
 import com.netflix.hellonoss.server.health.HealthCheck;
-import com.netflix.kayron.server.test.KayronTestGuiceContextListener;
+import com.netflix.karyon.server.test.KaryonTestGuiceContextListener;
 import org.jboss.shrinkwrap.api.Archive;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.asset.StringAsset;
@@ -90,7 +90,7 @@ public final class Deployments {
                 .filterName("guiceFilter")
                 .urlPattern("/*").up()
                 .createListener()
-                .listenerClass(KayronTestGuiceContextListener.class.getName()).up()
+                .listenerClass(KaryonTestGuiceContextListener.class.getName()).up()
                 .exportAsString();
     }
 }
