@@ -20,7 +20,7 @@ include 'karyon-spi',\
  'karyon-core',\
  'karyon-extensions:karyon-servlet', \
  'karyon-extensions:karyon-netty-http', \
- 'karyon-extensions:karyon-netty-jersey-blocking', \ 
+ 'karyon-extensions:karyon-netty-jersey-blocking', \
  'karyon-extensions-testsuite', \
  'karyon-admin',\
  'karyon-admin-web',\
