@@ -13,16 +13,20 @@
  *      See the License for the specific language governing permissions and
  *      limitations under the License.
  */
+package com.netflix.karyon.server.test.configuration;
 
-rootProject.name='karyon'
-include 'karyon-spi',\
- 'karyon-eureka',\
- 'karyon-core',\
- 'karyon-extensions:karyon-servlet', \
- 'karyon-extensions:karyon-netty-http', \
- 'karyon-extensions:karyon-netty-jersey-blocking', \ 
- 'karyon-extensions-testsuite', \
- 'karyon-admin',\
- 'karyon-admin-web',\
- 'karyon-examples:hello-netflix-oss',\
- 'karyon-examples:hello-karyon-netty'
+/**
+ * Parses the configuration. The implementation classes can support different storage mechanisms and data
+ * representations.
+ *
+ * @author Jakub Narloch (jmnarloch@gmail.com)
+ */
+public interface ConfigurationParser {
+
+    /**
+     * Parses the configuration.
+     *
+     * @return the configuration
+     */
+    KaryonExtensionConfiguration parse();
+}

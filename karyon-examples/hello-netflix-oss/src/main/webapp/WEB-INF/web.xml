@@ -1,6 +1,7 @@
+<?xml version="1.0"?>
 <web-app version="2.5" xmlns="http://java.sun.com/xml/ns/javaee"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://java.sun.com/xml/ns/javaee ">
+         xsi:schemaLocation="http://java.sun.com/xml/ns/javaee">
 
     <filter>
         <filter-name>guiceFilter</filter-name>

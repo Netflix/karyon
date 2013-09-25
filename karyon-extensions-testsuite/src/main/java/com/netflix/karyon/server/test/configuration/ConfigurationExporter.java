@@ -13,16 +13,20 @@
  *      See the License for the specific language governing permissions and
  *      limitations under the License.
  */
+package com.netflix.karyon.server.test.configuration;
 
-rootProject.name='karyon'
-include 'karyon-spi',\
- 'karyon-eureka',\
- 'karyon-core',\
- 'karyon-extensions:karyon-servlet', \
- 'karyon-extensions:karyon-netty-http', \
- 'karyon-extensions:karyon-netty-jersey-blocking', \ 
- 'karyon-extensions-testsuite', \
- 'karyon-admin',\
- 'karyon-admin-web',\
- 'karyon-examples:hello-netflix-oss',\
- 'karyon-examples:hello-karyon-netty'
+/**
+ * Exports the configuration object. The result of this method will be used for exporting the assets with the test
+ * deployment.
+ *
+ * @author Jakub Narloch (jmnarloch@gmail.com)
+ */
+public interface ConfigurationExporter {
+
+    /**
+     * Exports the configuration as a string representation.
+     *
+     * @return the spring representtion of the properties
+     */
+    String exportAsString();
+}
