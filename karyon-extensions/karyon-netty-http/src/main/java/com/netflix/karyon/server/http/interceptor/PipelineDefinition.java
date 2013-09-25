@@ -82,6 +82,10 @@ public interface PipelineDefinition {
                 }
 
                 if (null == queryStringDecoder) {
+                    if (!uri.endsWith("/") && !uri.contains(".") && !uri.contains("?")) {
+                        // Normalize the URI for better matching of Servlet style URI constraints.
+                        uri += "/";
+                    }
                     queryStringDecoder = new QueryStringDecoder(uri);
                 }
 

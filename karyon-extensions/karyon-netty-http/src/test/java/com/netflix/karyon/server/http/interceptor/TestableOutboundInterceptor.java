@@ -6,29 +6,33 @@ import io.netty.handler.codec.http.FullHttpRequest;
 /**
 * @author Nitesh Kant
 */
-class TestableInboundInterceptor implements InboundInterceptor {
+public class TestableOutboundInterceptor implements OutboundInterceptor {
 
     private final PipelineDefinition.Key filterKey;
     private volatile boolean wasLastCallValid;
     private volatile boolean receivedACall;
 
-    public TestableInboundInterceptor(PipelineDefinition.Key filterKey) {
+    public TestableOutboundInterceptor(PipelineDefinition.Key filterKey) {
         this.filterKey = filterKey;
-    }
-
-    @Override
-    public void interceptIn(FullHttpRequest httpRequest, HttpResponseWriter responseWriter,
-                            InterceptorExecutionContext executionContext) {
-        wasLastCallValid = filterKey.apply(httpRequest, new PipelineDefinition.Key.KeyEvaluationContext());
-        receivedACall = true;
-        executionContext.executeNextInterceptor(httpRequest, responseWriter);
     }
 
     public boolean wasLastCallValid() {
         return wasLastCallValid;
     }
 
-    boolean isReceivedACall() {
+    @Override
+    public void interceptOut(FullHttpRequest httpRequest, HttpResponseWriter responseWriter,
+                             InterceptorExecutionContext executionContext) {
+        wasLastCallValid = filterKey.apply(httpRequest, new PipelineDefinition.Key.KeyEvaluationContext());
+        receivedACall = true;
+        executionContext.executeNextInterceptor(httpRequest, responseWriter);
+    }
+
+    public boolean isWasLastCallValid() {
+        return wasLastCallValid;
+    }
+
+    public boolean isReceivedACall() {
         return receivedACall;
     }
 }

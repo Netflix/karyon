@@ -50,7 +50,7 @@ subprojects {
 
 project(':karyon-spi') {
     dependencies {
-        compile('com.netflix.governator:governator:1.1.1') {
+        compile('com.netflix.governator:governator:1.+') {
             exclude module: 'archaius-core'
         }
     }
@@ -59,10 +59,10 @@ project(':karyon-spi') {
 project(':karyon-eureka') {
     dependencies {
         compile project(':karyon-spi')
-        compile('com.netflix.archaius:archaius-core:0.5.4') {
+        compile('com.netflix.archaius:archaius-core:0.+') {
             force = true
         }
-        compile 'com.netflix.eureka:eureka-client:1.1.73'
+        compile 'com.netflix.eureka:eureka-client:1.+'
     }
 }
 
@@ -84,6 +84,7 @@ project(':karyon-admin') {
         compile 'com.sun.jersey.contribs:jersey-guice:1.8'
         compile 'com.google.inject.extensions:guice-servlet:3.0'
         compile 'com.netflix.pytheas:pytheas-core:1.11'
+        testCompile 'org.apache.httpcomponents:httpclient:4.1.2'
         runtime 'org.codehaus.jackson:jackson-mapper-asl:1.9.11'
     }
 }

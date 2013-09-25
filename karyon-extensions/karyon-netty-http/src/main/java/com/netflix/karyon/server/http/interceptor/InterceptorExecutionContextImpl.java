@@ -21,6 +21,7 @@ public class InterceptorExecutionContextImpl implements InterceptorExecutionCont
     private final OutboundInterceptor outTail;
 
     private final boolean isOutbound;
+    private volatile boolean tailExecuted;
 
     public InterceptorExecutionContextImpl(List<InboundInterceptor> interceptors, @Nullable InboundInterceptor tail) {
         Preconditions.checkState(null != interceptors, "Interceptors can not be null.");
@@ -39,7 +40,7 @@ public class InterceptorExecutionContextImpl implements InterceptorExecutionCont
         Preconditions.checkState(null != interceptors, "Interceptors can not be null.");
         inboundInterceptors = null;
         inTail = null;
-        if (!interceptors.isEmpty()) { // Optimizing unused iterator creation
+        if (!interceptors.isEmpty()) { // Optimizing empty iterator creation
             outboundInterceptors = interceptors.iterator();
         } else {
             outboundInterceptors = Collections.<OutboundInterceptor>emptyList().iterator();
@@ -68,7 +69,8 @@ public class InterceptorExecutionContextImpl implements InterceptorExecutionCont
         }
 
         if (null == nextInterceptor) {
-            if (null != inTail) {
+            if (null != inTail && !tailExecuted) {
+                tailExecuted = true; // Even if tail invocation failed, we should set this flag, so we don't invoke it again.
                 inTail.interceptIn(request, responseWriter, this);
             }
         } else {
@@ -87,7 +89,8 @@ public class InterceptorExecutionContextImpl implements InterceptorExecutionCont
         }
 
         if (null == nextInterceptor) {
-            if (null != outTail) {
+            if (null != outTail && !tailExecuted) {
+                tailExecuted = true; // Even if tail invocation failed, we should set this flag, so we don't invoke it again.
                 outTail.interceptOut(request, responseWriter, this);
             }
         } else {

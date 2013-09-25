@@ -21,7 +21,7 @@ import static io.netty.handler.codec.http.HttpHeaders.Names.CONTENT_LENGTH;
 /**
  * @author Nitesh Kant
  */
-class HttpResponseWriterImpl implements HttpResponseWriter {
+public class HttpResponseWriterImpl implements HttpResponseWriter {
 
     private final FullHttpRequest request;
     private final ChannelHandlerContext ctx;

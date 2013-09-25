@@ -3,6 +3,8 @@ package com.netflix.karyon.server.http.interceptor;
 import com.google.common.base.Preconditions;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.HttpRequest;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nullable;
 
@@ -38,6 +40,8 @@ import javax.annotation.Nullable;
  */
 public class ServletStyleUriConstraintKey implements PipelineDefinition.Key {
 
+    private static final Logger logger = LoggerFactory.getLogger(ServletStyleUriConstraintKey.class);
+
     private final Matcher matcher;
 
     public ServletStyleUriConstraintKey(String constraint) {
@@ -48,21 +52,22 @@ public class ServletStyleUriConstraintKey implements PipelineDefinition.Key {
 
         if (constraint.endsWith("/*")) {
             matcher = new PrefixMatcher(constraint.substring(0, constraint.length() - 1),
-                                        new Matcher(constraint.substring(0, constraint.length() - 2), null));
+                                        new Matcher(constraint.substring(0, constraint.length() - 2), null)); // Prefix match removing * or exact match removing /*
         } else if (constraint.endsWith("*")) {
             matcher = new PrefixMatcher(constraint.substring(0, constraint.length() - 1), null);
         } else {
-            matcher = new Matcher(constraint, null);
+            matcher = new Matcher(constraint, new Matcher(constraint + '/', null));
         }
     }
 
     @Override
     public boolean apply(FullHttpRequest request, KeyEvaluationContext context) {
         String requestUriPath = context.getRequestUriPath(request);
+        boolean matches = false;
         if (null != requestUriPath) {
-            return matcher.match(requestUriPath);
+            matches = matcher.match(requestUriPath);
         }
-        return false;
+        return matches;
     }
 
     private static class Matcher {
@@ -82,7 +87,21 @@ public class ServletStyleUriConstraintKey implements PipelineDefinition.Key {
         }
 
         protected boolean isMatching(String requestUriPath) {
-            return requestUriPath.equals(constraint);
+            boolean matches = requestUriPath.equals(constraint);
+            if (logger.isDebugEnabled()) {
+                logger.debug("Exact match result for servlet style uri constraint for uri path {} and constraint {} : {}",
+                             new Object[] {requestUriPath, constraint, matches});
+            }
+            return matches;
+        }
+
+        @Override
+        public String toString() {
+            final StringBuilder sb = new StringBuilder("Matcher{");
+            sb.append("constraint='").append(constraint).append('\'');
+            sb.append(", nextMatcher=").append(nextMatcher);
+            sb.append('}');
+            return sb.toString();
         }
     }
 
@@ -94,7 +113,20 @@ public class ServletStyleUriConstraintKey implements PipelineDefinition.Key {
 
         @Override
         protected boolean isMatching(String requestUriPath) {
-            return requestUriPath.startsWith(constraint);
+            boolean matches = requestUriPath.startsWith(constraint);
+            if (logger.isDebugEnabled()) {
+                logger.debug("Prefix match result for servlet style uri constraint for uri path {} and constraint {} : {}",
+                             new Object[] {requestUriPath, constraint, matches});
+            }
+            return matches;
         }
+    }
+
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder("ServletStyleUriConstraintKey{");
+        sb.append("matcher=").append(matcher);
+        sb.append('}');
+        return sb.toString();
     }
 }

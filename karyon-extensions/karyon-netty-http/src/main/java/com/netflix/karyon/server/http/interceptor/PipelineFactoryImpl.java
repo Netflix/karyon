@@ -3,6 +3,8 @@ package com.netflix.karyon.server.http.interceptor;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Multimap;
 import io.netty.handler.codec.http.FullHttpRequest;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
@@ -13,6 +15,8 @@ import java.util.Map;
  * @author Nitesh Kant
  */
 public class PipelineFactoryImpl implements PipelineFactory {
+
+    private static final Logger logger = LoggerFactory.getLogger(PipelineFactoryImpl.class);
 
     private final Multimap<PipelineDefinition.Key, InboundInterceptor> inboundInterceptors;
     private final Multimap<PipelineDefinition.Key, OutboundInterceptor> outboundInterceptors;
@@ -33,6 +37,9 @@ public class PipelineFactoryImpl implements PipelineFactory {
         for (Map.Entry<PipelineDefinition.Key, InboundInterceptor> interceptorEntry : inboundInterceptors.entries()) {
             if (interceptorEntry.getKey().apply(request, ctx)) {
                 applicableInterceptors.add(interceptorEntry.getValue());
+            } else if (logger.isDebugEnabled()) {
+                logger.debug("Ignoring inbound interceptor {} as the key {} does not apply.",
+                             interceptorEntry.getValue().getClass().getName(), interceptorEntry.getKey());
             }
         }
         return applicableInterceptors;
@@ -46,6 +53,9 @@ public class PipelineFactoryImpl implements PipelineFactory {
         for (Map.Entry<PipelineDefinition.Key, OutboundInterceptor> interceptorEntry : outboundInterceptors.entries()) {
             if (interceptorEntry.getKey().apply(request, ctx)) {
                 applicableInterceptors.add(interceptorEntry.getValue());
+            } else if (logger.isDebugEnabled()) {
+                logger.debug("Ignoring outbound interceptor {} as the key {} does not apply.",
+                             interceptorEntry.getValue().getClass().getName(), interceptorEntry.getKey());
             }
         }
         return applicableInterceptors;

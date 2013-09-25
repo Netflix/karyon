@@ -17,6 +17,7 @@
 package com.netflix.adminresources;
 
 import com.google.inject.Injector;
+import com.netflix.config.ConcurrentCompositeConfiguration;
 import com.netflix.config.ConfigurationManager;
 import com.netflix.karyon.server.KaryonServer;
 import com.netflix.karyon.server.eureka.SyncHealthCheckInvocationStrategy;
@@ -66,7 +67,8 @@ public class AdminResourceTest {
 
     @Test (expected = HttpHostConnectException.class)
     public void testCustomPort() throws Exception {
-        ConfigurationManager.getConfigInstance().setProperty(AdminResourcesContainer.CONTAINER_LISTEN_PORT, CUSTOM_LISTEN_PORT);
+        ((ConcurrentCompositeConfiguration) ConfigurationManager.getConfigInstance()).setOverrideProperty(
+                AdminResourcesContainer.CONTAINER_LISTEN_PORT, CUSTOM_LISTEN_PORT);
         startServer();
         HttpClient client = new DefaultHttpClient();
         HttpGet healthGet = new HttpGet("http://localhost:"+ AdminResourcesContainer.LISTEN_PORT_DEFAULT + "/healthcheck");
