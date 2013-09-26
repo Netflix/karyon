@@ -17,11 +17,12 @@
 package com.netflix.karyon.server;
 
 import com.netflix.appinfo.InstanceInfo;
+import com.netflix.config.ConcurrentCompositeConfiguration;
 import com.netflix.config.ConfigurationManager;
 import com.netflix.discovery.DiscoveryManager;
 import com.netflix.karyon.spi.PropertyNames;
 import com.netflix.karyon.util.EurekaResourceMock;
-import junit.framework.Assert;
+import org.junit.Assert;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -54,33 +55,36 @@ public class EurekaIntegrationTest {
     @After
     public void tearDown() throws Exception {
         eurekaResourceMock.stop();
-        ConfigurationManager.getConfigInstance().setProperty(PropertyNames.DISABLE_EUREKA_INTEGRATION, "true");
+        ((ConcurrentCompositeConfiguration) ConfigurationManager.getConfigInstance()).setOverrideProperty(PropertyNames.DISABLE_EUREKA_INTEGRATION, "true");
     }
 
     @Test
     public void testRegister() throws Exception {
-        startServer();
-        InstanceInfo nextServerInfo = null;
-        int retryCount = 0;
-        int sleepTime = 1000;
-        while (nextServerInfo == null && ++retryCount < 7) {
-            try {
-                nextServerInfo = DiscoveryManager.getInstance()
-                                                 .getDiscoveryClient()
-                                                 .getNextServerFromEureka(System.getProperty("eureka.vipAddress"), false);
-                System.out.println("Service registered with eureka after retries: " + retryCount);
-            } catch (Throwable th) {
-                System.out.println("Waiting for service to register with eureka.. Sleeping for: (ms)" + sleepTime);
+        try {
+            startServer();
+            InstanceInfo nextServerInfo = null;
+            int retryCount = 0;
+            int sleepTime = 1000;
+            while (nextServerInfo == null && ++retryCount < 7) {
                 try {
-                    Thread.sleep(sleepTime);
-                } catch (InterruptedException e1) {
-                    System.out.println("Test interrupted while waiting for registry. Bailing out.");
-                    break;
+                    nextServerInfo = DiscoveryManager.getInstance()
+                                                     .getDiscoveryClient()
+                                                     .getNextServerFromEureka(System.getProperty("eureka.vipAddress"), false);
+                    System.out.println("Service registered with eureka after retries: " + retryCount);
+                } catch (Throwable th) {
+                    System.out.println("Waiting for service to register with eureka.. Sleeping for: (ms)" + sleepTime);
+                    try {
+                        Thread.sleep(sleepTime);
+                    } catch (InterruptedException e1) {
+                        System.out.println("Test interrupted while waiting for registry. Bailing out.");
+                        break;
+                    }
                 }
             }
+        } finally {
+            shutdownServer();
         }
 
-        shutdownServer();
 
         Assert.assertFalse("Application not unregistered from eureka.", eurekaResourceMock.handler.appRegistered.get());
     }
@@ -92,6 +96,8 @@ public class EurekaIntegrationTest {
     }
 
     private void shutdownServer() throws Exception {
-        server.close();
+        if (null != server) {
+            server.close();
+        }
     }
 }

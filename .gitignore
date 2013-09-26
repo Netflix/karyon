@@ -34,10 +34,12 @@ Thumbs.db
 # Editor Files #
 ################
 *~
+*.swp
 
 # Gradle Files #
 ################
 .gradle
+.m2
 
 # Build output directies
 /target

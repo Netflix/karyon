@@ -16,6 +16,8 @@
 
 package com.netflix.hellonoss.server;
 
+import com.google.inject.Inject;
+import com.netflix.hellonoss.core.HelloworldComponent;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import org.slf4j.Logger;
@@ -32,6 +34,12 @@ import javax.ws.rs.core.Response;
 public class HelloworldResource {
 
     private static final Logger logger = LoggerFactory.getLogger(HelloworldResource.class);
+    private final HelloworldComponent component;
+
+    @Inject
+    public HelloworldResource(HelloworldComponent component) {
+        this.component = component; // This is just to demo injection in jersey.
+    }
 
     @Path("to/{name}")
     @GET
@@ -59,4 +67,20 @@ public class HelloworldResource {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
         }
     }
+
+    @Path("from/component")
+    @GET
+    @Produces({MediaType.APPLICATION_JSON})
+    public Response helloFromComponent() {
+        JSONObject response = new JSONObject();
+        try {
+            response.put("Message", component.getHelloString());
+            return Response.ok(response.toString()).build();
+        } catch (JSONException e) {
+            logger.error("Error creating json response.", e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+
 }

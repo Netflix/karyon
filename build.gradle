@@ -18,12 +18,23 @@
 ext.githubProjectName = rootProject.name // Change if github project name is not the same as the root project's name
 
 buildscript {
-    repositories { mavenCentral() }
+    repositories {
+        mavenLocal()
+        mavenCentral() // maven { url 'http://jcenter.bintray.com' }
+    }
     apply from: file('gradle/buildscript.gradle'), to: buildscript 
 }
 
 allprojects {
-    repositories { mavenCentral() }
+    repositories { 
+        mavenCentral() // maven { url: 'http://jcenter.bintray.com' }
+    }
+}
+
+configurations.all {
+    resolutionStrategy {
+        force 'javax.servlet:javax.servlet-api:3.0.1'
+    }
 }
 
 apply from: file('gradle/convention.gradle')
@@ -31,8 +42,6 @@ apply from: file('gradle/maven.gradle')
 apply from: file('gradle/check.gradle')
 apply from: file('gradle/license.gradle')
 apply from: file('gradle/release.gradle')
-
-apply plugin: 'java'
 
 subprojects {
     group = "com.netflix.${githubProjectName}" // TEMPLATE: Set to organization of project
@@ -47,7 +56,7 @@ subprojects {
 
 project(':karyon-spi') {
     dependencies {
-        compile('com.netflix.governator:governator:1.1.1') {
+        compile('com.netflix.governator:governator:1.+') {
             exclude module: 'archaius-core'
         }
     }
@@ -56,10 +65,10 @@ project(':karyon-spi') {
 project(':karyon-eureka') {
     dependencies {
         compile project(':karyon-spi')
-        compile('com.netflix.archaius:archaius-core:0.5.4') {
+        compile('com.netflix.archaius:archaius-core:0.+') {
             force = true
         }
-        compile 'com.netflix.eureka:eureka-client:1.1.73'
+        compile 'com.netflix.eureka:eureka-client:1.+'
     }
 }
 
@@ -71,11 +80,21 @@ project(':karyon-core') {
     }
 }
 
-project(':karyon-extensions') {
+project(':karyon-extensions-testsuite') {
     dependencies {
-        compile project(':karyon-core')
-        compile 'javax.servlet:servlet-api:2.5'
+        compile project(':karyon-extensions:karyon-servlet')
         compile 'com.google.inject.extensions:guice-servlet:3.0'
+        compile 'org.jboss.arquillian.core:arquillian-core-spi:1.1.1.Final'
+        compile 'org.jboss.arquillian.container:arquillian-container-spi:1.1.1.Final'
+        compile 'org.jboss.arquillian.container:arquillian-container-test-spi:1.1.1.Final'
+        compile 'org.jboss.arquillian.container:arquillian-container-test-impl-base:1.1.1.Final'
+        compile 'org.jboss.arquillian.test:arquillian-test-spi:1.1.1.Final'
+        compile 'org.jboss.shrinkwrap:shrinkwrap-impl-base:1.1.2'
+        testCompile 'org.mockito:mockito-all:1.9.0'
+        testCompile 'org.jboss.arquillian.core:arquillian-core-impl-base:1.1.1.Final'
+        testCompile 'org.jboss.arquillian.core:arquillian-core-impl-base:1.1.1.Final:tests'
+        testCompile 'org.jboss.arquillian.test:arquillian-test-impl-base:1.1.1.Final'
+        testCompile 'org.jboss.arquillian.test:arquillian-test-impl-base:1.1.1.Final:tests'
     }
 }
 
@@ -89,7 +108,8 @@ project(':karyon-admin') {
         compile 'com.sun.jersey.contribs:jersey-guice:1.8'
         compile 'com.google.inject.extensions:guice-servlet:3.0'
         compile 'com.netflix.pytheas:pytheas-core:1.11'
-        runtime 'org.codehaus.jackson:jackson-mapper-asl:1.9.12'
+        testCompile 'org.apache.httpcomponents:httpclient:4.1.2'
+        runtime 'org.codehaus.jackson:jackson-mapper-asl:1.9.11'
     }
 }
 
@@ -98,7 +118,7 @@ project(':karyon-admin-web') {
         compile project(':karyon-admin')
         compile 'com.google.code.gson:gson:2.1'
         compile 'com.netflix.pytheas:pytheas-core:1.11'
-        runtime 'org.freemarker:freemarker:2.3.19'
-        runtime 'org.codehaus.jackson:jackson-mapper-asl:1.9.12'
+        runtime 'org.freemarker:freemarker:2.3.15'
+        runtime 'org.codehaus.jackson:jackson-mapper-asl:1.9.11'
     }
 }

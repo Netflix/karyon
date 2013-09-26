@@ -17,6 +17,7 @@
 package com.netflix.karyon.util;
 
 import com.google.inject.Injector;
+import com.netflix.config.ConcurrentCompositeConfiguration;
 import com.netflix.config.ConfigurationManager;
 import com.netflix.karyon.server.KaryonServer;
 import com.netflix.karyon.spi.PropertyNames;
@@ -33,11 +34,16 @@ public class KaryonTestSetupUtil {
     }
 
     public static void tearDown(KaryonServer server) throws Exception {
-        ConfigurationManager.getConfigInstance().clearProperty(PropertyNames.SERVER_BOOTSTRAP_BASE_PACKAGES_OVERRIDE);
-        ConfigurationManager.getConfigInstance().clearProperty(PropertyNames.DISABLE_APPLICATION_DISCOVERY_PROP_NAME);
-        ConfigurationManager.getConfigInstance().clearProperty(PropertyNames.EXPLICIT_APPLICATION_CLASS_PROP_NAME);
+        clearProperty(PropertyNames.SERVER_BOOTSTRAP_BASE_PACKAGES_OVERRIDE);
+        clearProperty(PropertyNames.DISABLE_APPLICATION_DISCOVERY_PROP_NAME);
+        clearProperty(PropertyNames.EXPLICIT_APPLICATION_CLASS_PROP_NAME);
         RegistrationSequence.reset();
         server.close();
+    }
+
+    public static void clearProperty(String propertyName) {
+        ConfigurationManager.getConfigInstance().clearProperty(propertyName);
+        ((ConcurrentCompositeConfiguration) ConfigurationManager.getConfigInstance()).clearOverrideProperty(propertyName);
     }
 
     public static Injector startServer(KaryonServer server) throws Exception {
