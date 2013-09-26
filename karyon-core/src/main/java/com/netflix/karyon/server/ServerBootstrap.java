@@ -16,8 +16,23 @@
 
 package com.netflix.karyon.server;
 
+import java.lang.annotation.Annotation;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import javax.annotation.Nullable;
+
+import com.google.inject.Module;
+import com.netflix.karyon.spi.DefaultHealthCheckHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.common.collect.Lists;
 import com.google.inject.Binder;
+import com.google.inject.Injector;
 import com.netflix.config.ConfigurationManager;
 import com.netflix.governator.configuration.ArchaiusConfigurationProvider;
 import com.netflix.governator.configuration.ConfigurationProvider;
@@ -35,16 +50,6 @@ import com.netflix.karyon.spi.Component;
 import com.netflix.karyon.spi.HealthCheckHandler;
 import com.netflix.karyon.spi.PropertyNames;
 import com.netflix.karyon.spi.ServiceRegistryClient;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.annotation.Nullable;
-import java.lang.annotation.Annotation;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 
 /**
  * This class is the point where the karyon environment in bootstrapped which more or less is the bootstrapping of
@@ -58,9 +63,9 @@ import java.util.Set;
  <li>Configures base packages for governator classpath scanning as "com.netflix" and any extra packages as specified
  by a property {@link PropertyNames#SERVER_BOOTSTRAP_BASE_PACKAGES_OVERRIDE} as a comman separated list of packages to
  scan by governator.</li>
- <li>Binds the {@link ArchaiusConfigurationProvider} as governator's {@link com.netflix.governator.configuration.ConfigurationProvider}</li>
+ <li>Binds the {@link ArchaiusConfigurationProvider} as governator's {@link ConfigurationProvider}</li>
  <li>Binds appropriate {@link HealthCheckHandler} implementation as specified by
- {@link PropertyNames#HEALTH_CHECK_HANDLER_CLASS_PROP_NAME} or a default handler {@link com.netflix.karyon.spi.DefaultHealthCheckHandler}</li>
+ {@link PropertyNames#HEALTH_CHECK_HANDLER_CLASS_PROP_NAME} or a default handler {@link DefaultHealthCheckHandler}</li>
  <li>Binds appropriate {@link HealthCheckInvocationStrategy} as specified by
  {@link PropertyNames#HEALTH_CHECK_STRATEGY} or the default {@link AsyncHealthCheckInvocationStrategy}</li>
  </ul>
@@ -69,21 +74,21 @@ import java.util.Set;
  *
  * The default behavior of bootstrapping can be extended by extending this class and overriding the following as needed:
  * <ul>
- <li>{@link com.netflix.karyon.server.ServerBootstrap#newLifecycleInjectorBuilder()}: Callback to use a custom
+ <li>{@link ServerBootstrap#newLifecycleInjectorBuilder()}: Callback to use a custom
  {@link LifecycleInjectorBuilder}</li>
  <li>{@link ServerBootstrap#configureBootstrapBinder(BootstrapBinder)}: Callback to configure {@link BootstrapBinder}
- before returning from {@link com.google.inject.Module#configure(Binder)}.</li>
+ before returning from {@link Module#configure(Binder)}.</li>
  <li>{@link ServerBootstrap#configureBinder}: Callback to configure {@link Binder} before returning from
- {@link BootstrapModule#configure(com.netflix.governator.guice.BootstrapBinder)}.</li>
- <li>{@link ServerBootstrap#beforeInjectorCreation(com.netflix.governator.guice.LifecycleInjectorBuilder)}: A callback
- before creating the {@link com.google.inject.Injector} from {@link LifecycleInjectorBuilder} provided by this class
+ {@link BootstrapModule#configure(BootstrapBinder)}.</li>
+ <li>{@link ServerBootstrap#beforeInjectorCreation(LifecycleInjectorBuilder)}: A callback
+ before creating the {@link Injector} from {@link LifecycleInjectorBuilder} provided by this class
  to {@link KaryonServer}</li>
- <li>{@link com.netflix.karyon.server.ServerBootstrap#getBasePackages()}: Specify the base packages to be added for
+ <li>{@link ServerBootstrap#getBasePackages()}: Specify the base packages to be added for
  governator classpath scanning. This is in case for any reason one does not want to specify a property
  {@link PropertyNames#SERVER_BOOTSTRAP_BASE_PACKAGES_OVERRIDE} as mentioned above.</li>
- <li>{@link com.netflix.karyon.server.ServerBootstrap#getConfigurationProvider()}: Any custom configuration provider
+ <li>{@link ServerBootstrap#getConfigurationProvider()}: Any custom configuration provider
  that is to be used by governator. Defaults to {@link ArchaiusConfigurationProvider}. This can be used to make karyon
- not register any configuration provider for governator, by returning <code>null</code> from this method.</li>
+ not register any configuration provider for governator, by returning {@code null} from this method.</li>
  </ul>
  *
  * In case, the above extension is required, the name of the custom class must be specified in a system property named
@@ -109,9 +114,18 @@ public class ServerBootstrap {
         classpathScanner = LifecycleInjector.createStandardClasspathScanner(allBasePackages, annotations);
     }
 
-    LifecycleInjectorBuilder bootstrap() {
-        return newLifecycleInjectorBuilder().usingBasePackages(allBasePackages).usingClasspathScanner(classpathScanner).
-                withBootstrapModule(getBootstrapModule()).withModules(new KaryonGuiceModule());
+    /**
+     *
+     * @return main injector instance
+     */
+    Injector bootstrap() {
+        LifecycleInjectorBuilder builder = newLifecycleInjectorBuilder()
+                .usingBasePackages(allBasePackages)
+                .usingClasspathScanner(classpathScanner)
+                .withBootstrapModule(getBootstrapModule())
+                .withModules(new KaryonGuiceModule());
+        Injector injector = createInjector(builder);
+        return injector;
     }
 
     /**
@@ -154,7 +168,7 @@ public class ServerBootstrap {
     }
 
     /**
-     * A callback before creating the {@link com.google.inject.Injector} from {@link LifecycleInjectorBuilder} provided
+     * A callback before creating the {@link Injector} from {@link LifecycleInjectorBuilder} provided
      * by this class to {@link KaryonServer}. <p/>
      * Default implementation does nothing, so the overridden methods do not need to call super.
      *
@@ -166,7 +180,17 @@ public class ServerBootstrap {
     }
 
     /**
-     * Callback to configure {@link Binder} before returning from {@link com.google.inject.Module#configure(Binder)}.
+     * create the main application injector
+     */
+    protected Injector createInjector(LifecycleInjectorBuilder builder) {
+        beforeInjectorCreation(builder);
+        LifecycleInjector lifecycleInjector = builder.build();
+        Injector injector = lifecycleInjector.createInjector();
+        return injector;
+    }
+
+    /**
+     * Callback to configure {@link Binder} before returning from {@link Module#configure(Binder)}.
      * Default implementation does nothing, so the overridden methods do not need to call super.
      *
      * @param binder The binder as passed to the guice module used by karyon.
@@ -177,10 +201,10 @@ public class ServerBootstrap {
 
     /**
      * Callback to configure {@link BootstrapBinder} before returning from
-     * {@link BootstrapModule#configure(com.netflix.governator.guice.BootstrapBinder)}.
+     * {@link BootstrapModule#configure(BootstrapBinder)}.
      * Default implementation does nothing, so the overridden methods do not need to call super.
      *
-     * @param bootstrapBinder The bootstrap binder as passed to {@link BootstrapModule#configure(com.netflix.governator.guice.BootstrapBinder)}
+     * @param bootstrapBinder The bootstrap binder as passed to {@link BootstrapModule#configure(BootstrapBinder)}
      */
     protected void configureBootstrapBinder(@SuppressWarnings("unused") BootstrapBinder bootstrapBinder) {
         // No op by default

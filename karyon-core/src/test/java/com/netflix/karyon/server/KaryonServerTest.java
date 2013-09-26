@@ -17,6 +17,7 @@
 package com.netflix.karyon.server;
 
 import com.google.inject.Injector;
+import com.netflix.config.ConcurrentCompositeConfiguration;
 import com.netflix.config.ConfigurationManager;
 import com.netflix.karyon.server.eureka.AsyncHealthCheckInvocationStrategy;
 import com.netflix.karyon.server.eureka.EurekaHealthCheckCallback;
@@ -31,7 +32,7 @@ import com.test.TestApplication;
 import com.test.TestComponent;
 import com.testmulti.TestApplication2;
 import com.testmulti.TestApplication3;
-import junit.framework.Assert;
+import org.junit.Assert;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -75,7 +76,7 @@ public class KaryonServerTest {
 
     @Test
     public void testOnlyAnnotatedComponent() throws Exception {
-        ConfigurationManager.getConfigInstance().setProperty(PropertyNames.DISABLE_APPLICATION_DISCOVERY_PROP_NAME,
+        ((ConcurrentCompositeConfiguration) ConfigurationManager.getConfigInstance()).setOverrideProperty(PropertyNames.DISABLE_APPLICATION_DISCOVERY_PROP_NAME,
                 true);
 
         startServer();
@@ -85,7 +86,7 @@ public class KaryonServerTest {
 
     @Test
     public void testHealthCheck() throws Exception {
-        ConfigurationManager.getConfigInstance().setProperty(PropertyNames.HEALTH_CHECK_HANDLER_CLASS_PROP_NAME,
+        ((ConcurrentCompositeConfiguration) ConfigurationManager.getConfigInstance()).setOverrideProperty(PropertyNames.HEALTH_CHECK_HANDLER_CLASS_PROP_NAME,
                 HealthCheckGuy.class.getName());
 
         Injector injector = startServer();
@@ -95,10 +96,12 @@ public class KaryonServerTest {
 
     @Test
     public void testHealthCheckTimeout() throws Exception {
-        ConfigurationManager.getConfigInstance().setProperty(PropertyNames.HEALTH_CHECK_STRATEGY,
+        ((ConcurrentCompositeConfiguration) ConfigurationManager.getConfigInstance()).setOverrideProperty(PropertyNames.HEALTH_CHECK_STRATEGY,
                 AsyncHealthCheckInvocationStrategy.class.getName());
 
-        ConfigurationManager.getConfigInstance().setProperty(PropertyNames.HEALTH_CHECK_HANDLER_CLASS_PROP_NAME,
+        ((ConcurrentCompositeConfiguration) ConfigurationManager.getConfigInstance()).setOverrideProperty(PropertyNames.HEALTH_CHECK_TIMEOUT_MILLIS, "10");
+
+        ((ConcurrentCompositeConfiguration) ConfigurationManager.getConfigInstance()).setOverrideProperty(PropertyNames.HEALTH_CHECK_HANDLER_CLASS_PROP_NAME,
                 RogueHealthCheck.class.getName());
 
         Injector injector = startServer();
@@ -108,10 +111,10 @@ public class KaryonServerTest {
 
     @Test
     public void testFlappingHealthCheck() throws Exception {
-        ConfigurationManager.getConfigInstance().setProperty(PropertyNames.HEALTH_CHECK_STRATEGY,
+        ((ConcurrentCompositeConfiguration) ConfigurationManager.getConfigInstance()).setOverrideProperty(PropertyNames.HEALTH_CHECK_STRATEGY,
                 SyncHealthCheckInvocationStrategy.class.getName());
 
-        ConfigurationManager.getConfigInstance().setProperty(PropertyNames.HEALTH_CHECK_HANDLER_CLASS_PROP_NAME,
+        ((ConcurrentCompositeConfiguration) ConfigurationManager.getConfigInstance()).setOverrideProperty(PropertyNames.HEALTH_CHECK_HANDLER_CLASS_PROP_NAME,
                 FlappingHealthCheck.class.getName());
 
         Injector injector = startServer();
@@ -122,7 +125,7 @@ public class KaryonServerTest {
 
     @Test
     public void testHealthCheckSuccess() throws Exception {
-        ConfigurationManager.getConfigInstance().setProperty(PropertyNames.HEALTH_CHECK_HANDLER_CLASS_PROP_NAME,
+        ((ConcurrentCompositeConfiguration) ConfigurationManager.getConfigInstance()).setOverrideProperty(PropertyNames.HEALTH_CHECK_HANDLER_CLASS_PROP_NAME,
                 HealthCheckGuy.class.getName());
 
         Injector injector = startServer();
@@ -132,8 +135,8 @@ public class KaryonServerTest {
 
     @Test
     public void testMultipleApps() throws Exception {
-        ConfigurationManager.getConfigInstance().setProperty(PropertyNames.SERVER_BOOTSTRAP_BASE_PACKAGES_OVERRIDE, "com.test,com.testmulti");
-        ConfigurationManager.getConfigInstance().setProperty(PropertyNames.EXPLICIT_APPLICATION_CLASS_PROP_NAME,
+        ((ConcurrentCompositeConfiguration) ConfigurationManager.getConfigInstance()).setOverrideProperty(PropertyNames.SERVER_BOOTSTRAP_BASE_PACKAGES_OVERRIDE, "com.test,com.testmulti");
+        ((ConcurrentCompositeConfiguration) ConfigurationManager.getConfigInstance()).setOverrideProperty(PropertyNames.EXPLICIT_APPLICATION_CLASS_PROP_NAME,
                 TestApplication3.class.getName());
         startServer();
 
