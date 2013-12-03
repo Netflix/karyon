@@ -33,7 +33,8 @@ public interface HttpResponseWriter {
     FullHttpResponse createResponse(HttpResponseStatus responseStatus, @Nullable ByteBuf content);
 
     /**
-     * Sends the response created by {@link #createResponse(HttpResponseStatus, ByteBuf)}.
+     * Sends the response created by {@link #createResponse(HttpResponseStatus, ByteBuf)}. If the response is already
+     * sent, this call is ignored.
      *
      * @throws IllegalStateException If no response was created before i.e. no calls to
      * {@link #createResponse(HttpResponseStatus, ByteBuf)} were made before this.
@@ -54,6 +55,13 @@ public interface HttpResponseWriter {
      * @return {@code true} if the response is created, else, {@code false}.
      */
     boolean isResponseCreated();
+
+    /**
+     * Asserts whether the response is sent or not.
+     *
+     * @return {@code true} if the response is sent, else, {@code false}.
+     */
+    boolean isResponseSent();
 
     /**
      * Returns the underlying netty's {@link ChannelHandlerContext}.

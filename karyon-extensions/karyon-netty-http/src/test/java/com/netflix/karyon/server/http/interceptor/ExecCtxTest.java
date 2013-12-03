@@ -18,10 +18,10 @@ public class ExecCtxTest {
     @Test
     public void testInboundCtx() throws Exception {
         List<InboundInterceptor> interceptors = new ArrayList<InboundInterceptor>();
-        TestableInboundInterceptor intercept1 = new TestableInboundInterceptor(new ServletStyleUriConstraintKey("*"));
-        TestableInboundInterceptor intercept2 = new TestableInboundInterceptor(new ServletStyleUriConstraintKey("*"));
-        TestableInboundInterceptor intercept3 = new TestableInboundInterceptor(new ServletStyleUriConstraintKey("*"));
-        TestableInboundInterceptor tail = new TestableInboundInterceptor(new ServletStyleUriConstraintKey("*"));
+        TestableInboundInterceptor intercept1 = new TestableInboundInterceptor(new ServletStyleUriConstraintKey("*", ""));
+        TestableInboundInterceptor intercept2 = new TestableInboundInterceptor(new ServletStyleUriConstraintKey("*", ""));
+        TestableInboundInterceptor intercept3 = new TestableInboundInterceptor(new ServletStyleUriConstraintKey("*", ""));
+        TestableInboundInterceptor tail = new TestableInboundInterceptor(new ServletStyleUriConstraintKey("*", ""));
         interceptors.add(intercept1);
         interceptors.add(intercept2);
         interceptors.add(intercept3);
@@ -40,10 +40,13 @@ public class ExecCtxTest {
     @Test
     public void testOutboundCtx() throws Exception {
         List<OutboundInterceptor> interceptors = new ArrayList<OutboundInterceptor>();
-        TestableOutboundInterceptor intercept1 = new TestableOutboundInterceptor(new ServletStyleUriConstraintKey("*"));
-        TestableOutboundInterceptor intercept2 = new TestableOutboundInterceptor(new ServletStyleUriConstraintKey("*"));
-        TestableOutboundInterceptor intercept3 = new TestableOutboundInterceptor(new ServletStyleUriConstraintKey("*"));
-        TestableOutboundInterceptor tail = new TestableOutboundInterceptor(new ServletStyleUriConstraintKey("*"));
+        TestableOutboundInterceptor intercept1 = new TestableOutboundInterceptor(new ServletStyleUriConstraintKey("*",
+                                                                                                                  ""));
+        TestableOutboundInterceptor intercept2 = new TestableOutboundInterceptor(new ServletStyleUriConstraintKey("*",
+                                                                                                                  ""));
+        TestableOutboundInterceptor intercept3 = new TestableOutboundInterceptor(new ServletStyleUriConstraintKey("*",
+                                                                                                                  ""));
+        TestableOutboundInterceptor tail = new TestableOutboundInterceptor(new ServletStyleUriConstraintKey("*", ""));
         interceptors.add(intercept1);
         interceptors.add(intercept2);
         interceptors.add(intercept3);

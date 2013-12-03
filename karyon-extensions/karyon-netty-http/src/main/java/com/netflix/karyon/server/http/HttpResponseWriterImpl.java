@@ -12,6 +12,8 @@ import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.FullHttpResponse;
 import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.handler.codec.http.HttpResponseStatus;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nullable;
 
@@ -23,9 +25,14 @@ import static io.netty.handler.codec.http.HttpHeaders.Names.CONTENT_LENGTH;
  */
 public class HttpResponseWriterImpl implements HttpResponseWriter {
 
+    private enum ResponseState { NotCreated, Created, Sent }
+
+    private static final Logger logger = LoggerFactory.getLogger(HttpResponseWriterImpl.class);
+
     private final FullHttpRequest request;
     private final ChannelHandlerContext ctx;
-    private DefaultFullHttpResponse response;
+    private volatile DefaultFullHttpResponse response;
+    private volatile ResponseState responseState = ResponseState.NotCreated;
 
     public HttpResponseWriterImpl(FullHttpRequest request, ChannelHandlerContext ctx) {
         this.request = request;
@@ -40,12 +47,20 @@ public class HttpResponseWriterImpl implements HttpResponseWriter {
             content = Unpooled.buffer(0);
         }
         response = new DefaultFullHttpResponse(request.getProtocolVersion(), responseStatus, content);
+        responseState = ResponseState.Created;
         return response;
     }
 
     @Override
     public void sendResponse() {
         validateReadyForSend();
+        if (responseState == ResponseState.Sent) {
+            if (logger.isInfoEnabled()) {
+                logger.info("Response already sent, ignoring this sendResponse call. Dumping stacktrace as exception for debugging.",
+                            new IllegalStateException());
+            }
+            return;
+        }
         boolean keepAlive = HttpHeaders.isKeepAlive(request);
         if (keepAlive) {
             response.headers().set(CONTENT_LENGTH, response.content().readableBytes());
@@ -53,7 +68,7 @@ public class HttpResponseWriterImpl implements HttpResponseWriter {
         }
 
         ChannelFuture writeFuture = ctx.write(response);
-
+        responseState = ResponseState.Sent;
         if (!keepAlive) {
             writeFuture.addListener(ChannelFutureListener.CLOSE);
         }
@@ -72,7 +87,12 @@ public class HttpResponseWriterImpl implements HttpResponseWriter {
 
     @Override
     public boolean isResponseCreated() {
-        return null != response;
+        return ResponseState.NotCreated != responseState;
+    }
+
+    @Override
+    public boolean isResponseSent() {
+        return ResponseState.Sent == responseState;
     }
 
     @Override

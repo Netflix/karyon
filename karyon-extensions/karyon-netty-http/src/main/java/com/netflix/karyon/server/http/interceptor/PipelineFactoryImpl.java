@@ -2,6 +2,7 @@ package com.netflix.karyon.server.http.interceptor;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Multimap;
+import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.http.FullHttpRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,9 +31,10 @@ public class PipelineFactoryImpl implements PipelineFactory {
     }
 
     @Override
-    public List<InboundInterceptor> getInboundInterceptors(FullHttpRequest request) {
+    public List<InboundInterceptor> getInboundInterceptors(FullHttpRequest request,
+                                                           ChannelHandlerContext handlerContext) {
         // TODO: See if this can be cached.
-        PipelineDefinition.Key.KeyEvaluationContext ctx = new PipelineDefinition.Key.KeyEvaluationContext();
+        PipelineDefinition.Key.KeyEvaluationContext ctx = new PipelineDefinition.Key.KeyEvaluationContext(handlerContext);
         List<InboundInterceptor> applicableInterceptors = new ArrayList<InboundInterceptor>();
         for (Map.Entry<PipelineDefinition.Key, InboundInterceptor> interceptorEntry : inboundInterceptors.entries()) {
             if (interceptorEntry.getKey().apply(request, ctx)) {
@@ -46,9 +48,10 @@ public class PipelineFactoryImpl implements PipelineFactory {
     }
 
     @Override
-    public List<OutboundInterceptor> getOutboundInterceptors(FullHttpRequest request) {
+    public List<OutboundInterceptor> getOutboundInterceptors(FullHttpRequest request,
+                                                             ChannelHandlerContext handlerContext) {
         // TODO: See if this can be cached.
-        PipelineDefinition.Key.KeyEvaluationContext ctx = new PipelineDefinition.Key.KeyEvaluationContext();
+        PipelineDefinition.Key.KeyEvaluationContext ctx = new PipelineDefinition.Key.KeyEvaluationContext(handlerContext);
         List<OutboundInterceptor> applicableInterceptors = new ArrayList<OutboundInterceptor>();
         for (Map.Entry<PipelineDefinition.Key, OutboundInterceptor> interceptorEntry : outboundInterceptors.entries()) {
             if (interceptorEntry.getKey().apply(request, ctx)) {

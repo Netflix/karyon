@@ -67,7 +67,7 @@ public class HttpServerTestBase {
         router = new TestableRequestRouter();
         regexBasedInterceptor = new TestableBidirectionalInterceptor(new RegexUriConstraintKey("/.*"));
         methodBasedInterceptor = new TestableBidirectionalInterceptor(new MethodConstraintKey(HttpMethod.GET));
-        uriBasedInterceptor = new TestableBidirectionalInterceptor(new ServletStyleUriConstraintKey("/*"));
+        uriBasedInterceptor = new TestableBidirectionalInterceptor(new ServletStyleUriConstraintKey("/*", ""));
         builder.requestRouter(router)
                .forUri("/*").interceptWith(uriBasedInterceptor)
                .forUriRegex("/.*").interceptWith(regexBasedInterceptor)

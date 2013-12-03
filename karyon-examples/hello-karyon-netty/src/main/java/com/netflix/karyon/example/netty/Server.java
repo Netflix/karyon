@@ -9,6 +9,10 @@ import io.netty.channel.ChannelOption;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.HttpResponseStatus;
 
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
 /**
  * @author Nitesh Kant
  */
@@ -41,15 +45,23 @@ public final class Server {
 
     private static class AlwaysNotFoundRouter implements HttpRequestRouter {
 
+        private ExecutorService executors = Executors.newCachedThreadPool();
+
         @Override
         public boolean isBlocking() {
             return false;
         }
 
         @Override
-        public void process(FullHttpRequest request, HttpResponseWriter responseWriter) {
-            responseWriter.createResponse(HttpResponseStatus.NOT_FOUND, null);
-            responseWriter.sendResponse();
+        public void process(FullHttpRequest request, final HttpResponseWriter responseWriter) {
+            executors.submit(new Callable<Object>() {
+                @Override
+                public Object call() throws Exception {
+                    responseWriter.createResponse(HttpResponseStatus.NOT_FOUND, null);
+                    responseWriter.sendResponse();
+                    return null;
+                }
+            });
         }
 
         @Override

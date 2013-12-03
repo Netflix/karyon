@@ -1,9 +1,13 @@
 package com.netflix.karyon.server.http.interceptor;
 
+import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Multimap;
+import com.netflix.karyon.server.http.spi.RequestContextAttributes;
+import com.netflix.karyon.server.http.spi.QueryStringDecoder;
+import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.HttpRequest;
-import io.netty.handler.codec.http.QueryStringDecoder;
 
 import javax.annotation.Nullable;
 
@@ -62,8 +66,17 @@ public interface PipelineDefinition {
          */
         class KeyEvaluationContext {
 
-            @Nullable
-            private volatile QueryStringDecoder queryStringDecoder;
+            @Nullable private final ChannelHandlerContext channelHandlerContext;
+            @Nullable private QueryStringDecoder queryStringDecoder;
+
+            @VisibleForTesting
+            KeyEvaluationContext() {
+                this(null);
+            }
+
+            public KeyEvaluationContext(@Nullable ChannelHandlerContext channelHandlerContext) {
+                this.channelHandlerContext = channelHandlerContext;
+            }
 
             /**
              * Parses (if not done previously) and returns the path component in the URI.
@@ -75,21 +88,22 @@ public interface PipelineDefinition {
              */
             @Nullable
             String getRequestUriPath(HttpRequest httpRequest) {
-
+                Preconditions.checkNotNull(httpRequest, "Http request can not be null.");
                 String uri = httpRequest.getUri();
                 if (null == uri) {
                     return null;
                 }
 
                 if (null == queryStringDecoder) {
-                    if (!uri.endsWith("/") && !uri.contains(".") && !uri.contains("?")) {
-                        // Normalize the URI for better matching of Servlet style URI constraints.
-                        uri += "/";
+                    if (null == channelHandlerContext) {
+                        queryStringDecoder = new QueryStringDecoder(uri);
+                    } else {
+                        queryStringDecoder = RequestContextAttributes.getOrCreateQueryStringDecoder(httpRequest,
+                                                                                                    channelHandlerContext);
                     }
-                    queryStringDecoder = new QueryStringDecoder(uri);
                 }
 
-                return queryStringDecoder.path();
+                return queryStringDecoder.nettyDecoder().path();
             }
         }
     }

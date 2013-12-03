@@ -33,6 +33,11 @@ class HttpResponseWriterMock implements HttpResponseWriter {
     }
 
     @Override
+    public boolean isResponseSent() {
+        return false;
+    }
+
+    @Override
     public ChannelHandlerContext getChannelHandlerContext() {
         return null;
     }

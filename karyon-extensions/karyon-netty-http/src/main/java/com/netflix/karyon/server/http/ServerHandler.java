@@ -44,8 +44,10 @@ public class ServerHandler extends SimpleChannelInboundHandler<FullHttpRequest> 
         if (null != interceptorPipelineFactory) {
             RouterInterceptorAdapter terminatingInterceptor = null;
 
-            List<OutboundInterceptor> outboundInterceptors = interceptorPipelineFactory.getOutboundInterceptors(request);
-            List<InboundInterceptor> inboundInterceptors = interceptorPipelineFactory.getInboundInterceptors(request);
+            List<OutboundInterceptor> outboundInterceptors = interceptorPipelineFactory.getOutboundInterceptors(request,
+                                                                                                                ctx);
+            List<InboundInterceptor> inboundInterceptors = interceptorPipelineFactory.getInboundInterceptors(request,
+                                                                                                             ctx);
 
             if (!outboundInterceptors.isEmpty() || !inboundInterceptors.isEmpty()) {
 
@@ -97,7 +99,7 @@ public class ServerHandler extends SimpleChannelInboundHandler<FullHttpRequest> 
                     router.process(httpRequest, responseWriter);
                     break;
                 case OUTBOUND:
-                    if (null != responseWriter) {
+                    if (null != writer) {
                         writer.sendResponse();
                     }
                     break;

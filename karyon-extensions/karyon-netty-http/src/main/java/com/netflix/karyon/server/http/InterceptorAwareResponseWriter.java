@@ -50,6 +50,11 @@ class InterceptorAwareResponseWriter implements HttpResponseWriter {
     }
 
     @Override
+    public boolean isResponseSent() {
+        return writerDelegate.isResponseSent();
+    }
+
+    @Override
     public ChannelHandlerContext getChannelHandlerContext() {
         return writerDelegate.getChannelHandlerContext();
     }

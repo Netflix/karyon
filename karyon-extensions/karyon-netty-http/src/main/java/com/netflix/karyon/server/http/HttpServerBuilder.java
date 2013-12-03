@@ -59,7 +59,7 @@ public abstract class HttpServerBuilder<T extends HttpServerBuilder, S extends H
 
     public InterceptorAttacher forUri(String uri) {
         Preconditions.checkNotNull(uri, "Uri for intercepting must not be null");
-        InterceptorAttacher interceptorAttacher = new InterceptorAttacher(new ServletStyleUriConstraintKey(uri));
+        InterceptorAttacher interceptorAttacher = new InterceptorAttacher(new ServletStyleUriConstraintKey(uri, ""));
         interceptorAttachers.add(interceptorAttacher);
         return interceptorAttacher;
     }

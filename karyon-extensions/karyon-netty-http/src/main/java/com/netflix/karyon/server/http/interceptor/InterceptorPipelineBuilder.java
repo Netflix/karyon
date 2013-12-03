@@ -43,7 +43,7 @@ public class InterceptorPipelineBuilder {
     }
 
     public InterceptorPipelineBuilder interceptIfUri(String constraint, InboundInterceptor interceptor) {
-        inboundInterceptors.put(new ServletStyleUriConstraintKey(constraint), interceptor);
+        inboundInterceptors.put(new ServletStyleUriConstraintKey(constraint, ""), interceptor);
         return this;
     }
 
@@ -65,7 +65,7 @@ public class InterceptorPipelineBuilder {
     }
 
     public InterceptorPipelineBuilder interceptIfUri(String constraint, OutboundInterceptor interceptor) {
-        outboundInterceptors.put(new ServletStyleUriConstraintKey(constraint), interceptor);
+        outboundInterceptors.put(new ServletStyleUriConstraintKey(constraint, ""), interceptor);
         return this;
     }
 

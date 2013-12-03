@@ -43,20 +43,25 @@ public class ServletStyleUriConstraintKey implements PipelineDefinition.Key {
     private static final Logger logger = LoggerFactory.getLogger(ServletStyleUriConstraintKey.class);
 
     private final Matcher matcher;
+    private final String contextPath;
 
-    public ServletStyleUriConstraintKey(String constraint) {
+    public ServletStyleUriConstraintKey(final String constraint, final String contextPath) {
         Preconditions.checkNotNull(constraint, "Constraint can not be null.");
+        this.contextPath = contextPath.startsWith("/") ? contextPath : '/' + contextPath; // uri & constraint always starts with a /
+        String normalizedConstraint = constraint;
         if (!constraint.startsWith("/")) { // URI always comes with a leading '/'
-            constraint = '/' + constraint;
+            normalizedConstraint = '/' + constraint;
         }
 
-        if (constraint.endsWith("/*")) {
-            matcher = new PrefixMatcher(constraint.substring(0, constraint.length() - 1),
-                                        new Matcher(constraint.substring(0, constraint.length() - 2), null)); // Prefix match removing * or exact match removing /*
-        } else if (constraint.endsWith("*")) {
-            matcher = new PrefixMatcher(constraint.substring(0, constraint.length() - 1), null);
+        if (normalizedConstraint.startsWith("/*.")) {
+            matcher = new ExtensionMatcher(constraint); // not normalizedConstraint as then we will have to ignore the first character.
+        } else if (normalizedConstraint.endsWith("/*")) {
+            matcher = new PrefixMatcher(normalizedConstraint.substring(0, normalizedConstraint.length() - 1),
+                                        new Matcher(normalizedConstraint.substring(0, normalizedConstraint.length() - 2), null)); // Prefix match removing * or exact match removing /*
+        } else if (normalizedConstraint.endsWith("*")) {
+            matcher = new PrefixMatcher(normalizedConstraint.substring(0, normalizedConstraint.length() - 1), null);
         } else {
-            matcher = new Matcher(constraint, new Matcher(constraint + '/', null));
+            matcher = new Matcher(normalizedConstraint, new Matcher(normalizedConstraint + '/', null));
         }
     }
 
@@ -70,29 +75,56 @@ public class ServletStyleUriConstraintKey implements PipelineDefinition.Key {
         return matches;
     }
 
-    private static class Matcher {
+    /**
+     * This must be called if and only if {@link #apply(FullHttpRequest, PipelineDefinition.Key.KeyEvaluationContext)}
+     * returned for the same request.
+     *
+     * @param request Request which satisfies this key.
+     * @param context The key evaluation context.
+     *
+     * @return The servlet path.
+     */
+    public String getServletPath(HttpRequest request, KeyEvaluationContext context) {
+        String requestUriPath = context.getRequestUriPath(request);
+        if (null != requestUriPath) {
+            return matcher.getServletPath(requestUriPath);
+        }
+        return "";
+    }
+
+    private class Matcher {
 
         protected final String constraint;
+        protected final String constraintWithoutContextPath;
 
         @Nullable
         private final Matcher nextMatcher;
 
         private Matcher(String constraint, @Nullable Matcher nextMatcher) {
             this.constraint = constraint;
+            constraintWithoutContextPath = constraint.substring(contextPath.length());
             this.nextMatcher = nextMatcher;
         }
 
         protected boolean match(String requestUriPath) {
-            return isMatching(requestUriPath) || null != nextMatcher && nextMatcher.match(requestUriPath);
+            return isMatching(requestUriPath, false) || null != nextMatcher && nextMatcher.match(requestUriPath);
         }
 
-        protected boolean isMatching(String requestUriPath) {
+        protected boolean isMatching(String requestUriPath, boolean noLog) {
             boolean matches = requestUriPath.equals(constraint);
-            if (logger.isDebugEnabled()) {
+            if (!noLog && logger.isDebugEnabled()) {
                 logger.debug("Exact match result for servlet style uri constraint for uri path {} and constraint {} : {}",
                              new Object[] {requestUriPath, constraint, matches});
             }
             return matches;
+        }
+
+        public String getServletPath(String requestUriPath) {
+            if (requestUriPath.equals(constraint)) {
+                // exact match & hence not required to query the next matcher.
+                return constraintWithoutContextPath;
+            }
+            return null != nextMatcher ? nextMatcher.getServletPath(requestUriPath) : "";
         }
 
         @Override
@@ -105,20 +137,53 @@ public class ServletStyleUriConstraintKey implements PipelineDefinition.Key {
         }
     }
 
-    private static class PrefixMatcher extends Matcher {
+    private class PrefixMatcher extends Matcher {
 
         private PrefixMatcher(String prefix, @Nullable Matcher nextMatcher) {
             super(prefix, nextMatcher);
         }
 
         @Override
-        protected boolean isMatching(String requestUriPath) {
+        protected boolean isMatching(String requestUriPath, boolean noLog) {
             boolean matches = requestUriPath.startsWith(constraint);
-            if (logger.isDebugEnabled()) {
+            if (!noLog && logger.isDebugEnabled()) {
                 logger.debug("Prefix match result for servlet style uri constraint for uri path {} and constraint {} : {}",
                              new Object[] {requestUriPath, constraint, matches});
             }
             return matches;
+        }
+
+        @Override
+        public String getServletPath(String requestUriPath) {
+            if (isMatching(requestUriPath, true)) {
+                return constraintWithoutContextPath.substring(0, constraintWithoutContextPath.length() - 1); // Leaving out the postfix of *, this is what we need.
+            }
+            return super.getServletPath(requestUriPath);
+        }
+    }
+
+    private class ExtensionMatcher extends Matcher {
+
+        private ExtensionMatcher(String constraint) {
+            super(constraint.substring(1), null); // This matcher does a contains query removing the * prefix
+        }
+
+        @Override
+        protected boolean isMatching(String requestUriPath, boolean noLog) {
+            boolean matches = requestUriPath.contains(constraint);// The constructor removes the preciding * in the constraint.
+            if (!noLog && logger.isDebugEnabled()) {
+                logger.debug("Extension match result for servlet style uri constraint for uri path {} and constraint {} : {}",
+                             new Object[] {requestUriPath, constraint, matches});
+            }
+            return matches;
+        }
+
+        @Override
+        public String getServletPath(String requestUriPath) {
+            if (isMatching(requestUriPath, true)) {
+                return ""; // Extension mapping does not have servlet path.
+            }
+            return super.getServletPath(requestUriPath);
         }
     }
 

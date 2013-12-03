@@ -21,7 +21,7 @@ public class PipelineFactoryTest {
 
         PipelineFactory pipelineFactory = builder.buildFactory();
         FullHttpRequest request = new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "/abc/def");
-        List<InboundInterceptor> in = pipelineFactory.getInboundInterceptors(request);
+        List<InboundInterceptor> in = pipelineFactory.getInboundInterceptors(request, null);
         Assert.assertEquals("Inbound interceptor not returned for matching URI.", 1, in.size());
     }
 
@@ -32,7 +32,7 @@ public class PipelineFactoryTest {
 
         PipelineFactory pipelineFactory = builder.buildFactory();
         FullHttpRequest request = new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "/abc/def");
-        List<OutboundInterceptor> out = pipelineFactory.getOutboundInterceptors(request);
+        List<OutboundInterceptor> out = pipelineFactory.getOutboundInterceptors(request, null);
         Assert.assertEquals("Outbound interceptor not returned for matching URI.", 1, out.size());
     }
 
@@ -48,18 +48,18 @@ public class PipelineFactoryTest {
         PipelineFactory pipelineFactory = builder.buildFactory();
         FullHttpRequest request = new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "/abc/def");
 
-        List<OutboundInterceptor> out = pipelineFactory.getOutboundInterceptors(request);
+        List<OutboundInterceptor> out = pipelineFactory.getOutboundInterceptors(request, null);
         Assert.assertEquals("Outbound interceptor count not as expected.", 1, out.size());
 
-        List<InboundInterceptor> in = pipelineFactory.getInboundInterceptors(request);
+        List<InboundInterceptor> in = pipelineFactory.getInboundInterceptors(request, null);
         Assert.assertEquals("Inbound interceptor count not as expected.", 1, in.size());
 
         FullHttpRequest requestMatchingAll = new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "/abc/efg");
 
-        out = pipelineFactory.getOutboundInterceptors(requestMatchingAll);
+        out = pipelineFactory.getOutboundInterceptors(requestMatchingAll, null);
         Assert.assertEquals("Outbound interceptor count not as expected.", 2, out.size());
 
-        in = pipelineFactory.getInboundInterceptors(requestMatchingAll);
+        in = pipelineFactory.getInboundInterceptors(requestMatchingAll, null);
         Assert.assertEquals("Inbound interceptor count not as expected.", 2, in.size());
 
     }
@@ -71,9 +71,9 @@ public class PipelineFactoryTest {
 
         PipelineFactory pipelineFactory = builder.buildFactory();
         FullHttpRequest request = new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "/abc/def");
-        List<InboundInterceptor> in = pipelineFactory.getInboundInterceptors(request);
+        List<InboundInterceptor> in = pipelineFactory.getInboundInterceptors(request, null);
         Assert.assertEquals("Bidirectional interceptor not returned as inbound.", 1, in.size());
-        List<OutboundInterceptor> out = pipelineFactory.getOutboundInterceptors(request);
+        List<OutboundInterceptor> out = pipelineFactory.getOutboundInterceptors(request, null);
         Assert.assertEquals("Bidirectional interceptor not returned as outbound.", 1, out.size());
     }
 
@@ -84,7 +84,7 @@ public class PipelineFactoryTest {
 
         PipelineFactory pipelineFactory = builder.buildFactory();
         FullHttpRequest request = new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "/abc/def");
-        List<InboundInterceptor> in = pipelineFactory.getInboundInterceptors(request);
+        List<InboundInterceptor> in = pipelineFactory.getInboundInterceptors(request, null);
         Assert.assertEquals("Inbound interceptor not returned for matching regex.", 1, in.size());
     }
 
@@ -95,7 +95,7 @@ public class PipelineFactoryTest {
 
         PipelineFactory pipelineFactory = builder.buildFactory();
         FullHttpRequest request = new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "/abc/def");
-        List<OutboundInterceptor> out = pipelineFactory.getOutboundInterceptors(request);
+        List<OutboundInterceptor> out = pipelineFactory.getOutboundInterceptors(request, null);
         Assert.assertEquals("Outbound interceptor not returned for matching regex.", 1, out.size());
     }
 
@@ -106,9 +106,9 @@ public class PipelineFactoryTest {
 
         PipelineFactory pipelineFactory = builder.buildFactory();
         FullHttpRequest request = new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "/abc/def");
-        List<InboundInterceptor> in = pipelineFactory.getInboundInterceptors(request);
+        List<InboundInterceptor> in = pipelineFactory.getInboundInterceptors(request, null);
         Assert.assertEquals("Bidirectional interceptor not returned as inbound.", 1, in.size());
-        List<OutboundInterceptor> out = pipelineFactory.getOutboundInterceptors(request);
+        List<OutboundInterceptor> out = pipelineFactory.getOutboundInterceptors(request, null);
         Assert.assertEquals("Bidirectional interceptor not returned as outbound.", 1, out.size());
     }
 
@@ -119,7 +119,7 @@ public class PipelineFactoryTest {
 
         PipelineFactory pipelineFactory = builder.buildFactory();
         FullHttpRequest request = new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.DELETE, "/abc/def");
-        List<InboundInterceptor> in = pipelineFactory.getInboundInterceptors(request);
+        List<InboundInterceptor> in = pipelineFactory.getInboundInterceptors(request, null);
         Assert.assertEquals("Inbound interceptor not returned for matching http method.", 1, in.size());
     }
 
@@ -130,7 +130,7 @@ public class PipelineFactoryTest {
 
         PipelineFactory pipelineFactory = builder.buildFactory();
         FullHttpRequest request = new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.CONNECT, "/abc/def");
-        List<OutboundInterceptor> out = pipelineFactory.getOutboundInterceptors(request);
+        List<OutboundInterceptor> out = pipelineFactory.getOutboundInterceptors(request, null);
         Assert.assertEquals("Outbound interceptor not returned for matching regex.", 1, out.size());
     }
 
@@ -141,15 +141,16 @@ public class PipelineFactoryTest {
 
         PipelineFactory pipelineFactory = builder.buildFactory();
         FullHttpRequest request = new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.POST, "/abc/def");
-        List<InboundInterceptor> in = pipelineFactory.getInboundInterceptors(request);
+        List<InboundInterceptor> in = pipelineFactory.getInboundInterceptors(request, null);
         Assert.assertEquals("Bidirectional interceptor not returned as inbound.", 1, in.size());
-        List<OutboundInterceptor> out = pipelineFactory.getOutboundInterceptors(request);
+        List<OutboundInterceptor> out = pipelineFactory.getOutboundInterceptors(request, null);
         Assert.assertEquals("Bidirectional interceptor not returned as outbound.", 1, out.size());
     }
 
     private static TestableBidirectionalInterceptor addBidirectionalInterceptorForUriConstraint(InterceptorPipelineBuilder builder,
                                                                                                 String constraint) {
-        TestableBidirectionalInterceptor interceptor = new TestableBidirectionalInterceptor(new ServletStyleUriConstraintKey(constraint));
+        TestableBidirectionalInterceptor interceptor = new TestableBidirectionalInterceptor(new ServletStyleUriConstraintKey(constraint,
+                                                                                                                             ""));
         builder.interceptIfUri(constraint, interceptor);
         return interceptor;
     }
@@ -163,7 +164,8 @@ public class PipelineFactoryTest {
 
     private static TestableInboundInterceptor addInboundInterceptorForUriConstraint(InterceptorPipelineBuilder builder,
                                                                                     String constraint) {
-        TestableInboundInterceptor interceptor = new TestableInboundInterceptor(new ServletStyleUriConstraintKey(constraint));
+        TestableInboundInterceptor interceptor = new TestableInboundInterceptor(new ServletStyleUriConstraintKey(constraint,
+                                                                                                                 ""));
         builder.interceptIfUri(constraint, interceptor);
         return interceptor;
     }
@@ -171,7 +173,8 @@ public class PipelineFactoryTest {
     private static TestableOutboundInterceptor addOutboundInterceptorForUriConstraint(
             InterceptorPipelineBuilder builder,
             String constraint) {
-        TestableOutboundInterceptor interceptor = new TestableOutboundInterceptor(new ServletStyleUriConstraintKey(constraint));
+        TestableOutboundInterceptor interceptor = new TestableOutboundInterceptor(new ServletStyleUriConstraintKey(constraint,
+                                                                                                                   ""));
         builder.interceptIfUri(constraint, interceptor);
         return interceptor;
     }
