@@ -43,6 +43,7 @@ public class HttpServletResponseImpl implements HttpServletResponse {
     private String charsetName;
     private String contentType;
     private Locale locale;
+    private volatile boolean responseStatusCodeUpdated;
 
     private static final HttpDateHeaderHandlerImpl HTTP_DATE_HEADER_HANDLER = new HttpDateHeaderHandlerImpl();
     @GuardedBy("this") private ServletOutputStream servletOutputStream;
@@ -156,20 +157,13 @@ public class HttpServletResponseImpl implements HttpServletResponse {
 
     @Override
     public void setStatus(int sc) {
-        // Not calling the overloaded method here as it is deprecated.
-        FullHttpResponse response = responseWriter.response();
-        if (response != null) {
-            response.setStatus(HttpResponseStatus.valueOf(sc));
-        }
+        _setStatus(HttpResponseStatus.valueOf(sc));
     }
 
     @Override
     @Deprecated
     public void setStatus(int sc, String sm) {
-        FullHttpResponse response = responseWriter.response();
-        if (response != null) {
-            response.setStatus(new HttpResponseStatus(sc, sm));
-        }
+        _setStatus(new HttpResponseStatus(sc, sm));
     }
 
     @Override
@@ -311,8 +305,17 @@ public class HttpServletResponseImpl implements HttpServletResponse {
         return servletRequest;
     }
 
+    private void _setStatus(HttpResponseStatus sc) {
+        responseStatusCodeUpdated = true;
+        FullHttpResponse response = responseWriter.response();
+        if (response != null) {
+            response.setStatus(sc);
+        }
+    }
+
     private void _sendError(int responseCode, @Nullable String message) {
         ensureResponseNotSent();
+        responseStatusCodeUpdated = true;
         FullHttpResponse response = responseWriter.response();
         if (response != null) {
             response.setStatus(HttpResponseStatus.valueOf(responseCode));
@@ -348,7 +351,7 @@ public class HttpServletResponseImpl implements HttpServletResponse {
             response.headers().set(HttpHeaders.Names.CONTENT_ENCODING, charsetName);
         }
 
-        if (response.content().readableBytes() == 0) {
+        if (!responseStatusCodeUpdated && response.content().readableBytes() == 0) {
             response.setStatus(HttpResponseStatus.NO_CONTENT);
         }
     }

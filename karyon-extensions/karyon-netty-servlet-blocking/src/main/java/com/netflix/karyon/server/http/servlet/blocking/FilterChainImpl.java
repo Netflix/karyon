@@ -32,7 +32,7 @@ public class FilterChainImpl implements FilterChain {
     }
 
     @Override
-    public void doFilter(ServletRequest request, ServletResponse response) throws IOException, ServletException {
+    public synchronized void doFilter(ServletRequest request, ServletResponse response) throws IOException, ServletException {
         if (filtersIterator.hasNext()) {
             Filter nextFilter = filtersIterator.next();
             nextFilter.doFilter(request, response, this);

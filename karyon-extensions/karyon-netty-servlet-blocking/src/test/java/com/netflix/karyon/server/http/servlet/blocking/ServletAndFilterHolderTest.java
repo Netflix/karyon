@@ -36,22 +36,22 @@ public class ServletAndFilterHolderTest {
 
     @Test
     public void testExactMatch() throws Exception {
-        testAServletBinding("a/b", "a/b", false);
+        testAServletBinding("a/b", "/a/b", false);
     }
 
     @Test
     public void testRegExServletMatch() throws Exception {
-        testAServletBinding(".*", "a/b", true);
+        testAServletBinding(".*", "/a/b", true);
     }
 
     @Test
     public void testExactFilterMatch() throws Exception {
-        testAFilterBinding("a/b", "a/b", false);
+        testAFilterBinding("a/b", "/a/b", false);
     }
 
     @Test
     public void testRegExFilterMatch() throws Exception {
-        testAFilterBinding(".*", "a/b", true);
+        testAFilterBinding(".*", "/a/b", true);
     }
 
     @Test

@@ -353,6 +353,28 @@ public class HttpServletResponseTest {
         servletResponse.flushBuffer();
     }
 
+    @Test
+    public void testEmptyContent() throws Exception {
+        HttpServletResponseImpl servletResponse = createServletResponse();
+        servletResponse.flushBuffer();
+        FullHttpResponse response = servletResponse.responseWriter().response();
+        Assert.assertNotNull("Response is null", response);
+        Assert.assertEquals("Unexpected response status code for empty response.", HttpResponseStatus.NO_CONTENT.code(),
+                            response.getStatus().code());
+    }
+
+    @Test
+    public void testEmptyContentWithUpdatedStatus() throws Exception {
+        HttpServletResponseImpl servletResponse = createServletResponse();
+        int expectedCode = 200;
+        servletResponse.setStatus(expectedCode);
+        servletResponse.flushBuffer();
+        FullHttpResponse response = servletResponse.responseWriter().response();
+        Assert.assertNotNull("Response is null", response);
+        Assert.assertEquals("Explicit response status code overridden on send.", expectedCode,
+                            response.getStatus().code());
+    }
+
     private static HttpServletResponseImpl createServletResponse() {
         return createServletResponse(testUri, null);
     }
@@ -364,7 +386,7 @@ public class HttpServletResponseTest {
         QueryStringDecoder decoder = new QueryStringDecoder(nettyRequest.getUri());
         HttpServletRequestImpl.PathComponents pathComponents =
                 new HttpServletRequestImpl.PathComponents(decoder, CONTEXT_PATH, SERVLET_PATH);
-        ChannelHandlerContextMock context = new ChannelHandlerContextMock(LOCAL_ADDRESS, SERVER_PORT,
+        NoOpChannelHandlerContextMock context = new NoOpChannelHandlerContextMock(LOCAL_ADDRESS, SERVER_PORT,
                                                                           LOCAL_ADDRESS, LOCAL_PORT,
                                                                           REMOTE_ADDRESS, REMOTE_PORT);
         HttpServletRequestImpl request = new HttpServletRequestImpl(pathComponents, nettyRequest, sessionManager,

@@ -4,12 +4,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import javax.servlet.Filter;
-import javax.servlet.FilterChain;
-import javax.servlet.FilterConfig;
 import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -32,16 +27,16 @@ public class FilterChainTest {
 
     @Test
     public void testChain() throws Exception {
-        List<FilterImpl> filters = new ArrayList<FilterImpl>();
-        filters.add(new FilterImpl(0));
-        filters.add(new FilterImpl(1));
-        filters.add(new FilterImpl(2));
+        List<TestableFilter> filters = new ArrayList<TestableFilter>();
+        filters.add(new TestableFilter(0, invocationOrderCounter, false));
+        filters.add(new TestableFilter(1, invocationOrderCounter, false));
+        filters.add(new TestableFilter(2, invocationOrderCounter, false));
 
         ServletImpl servlet = new ServletImpl();
         FilterChainImpl chain = new FilterChainImpl(servlet, filters);
         chain.doFilter(null, null);
 
-        for (FilterImpl filter : filters) {
+        for (TestableFilter filter : filters) {
             Assert.assertEquals("Unexpected invocation order for filter.", filter.indexInChain, filter.invokedOrder);
         }
 
@@ -59,29 +54,4 @@ public class FilterChainTest {
         }
     }
 
-    private static class FilterImpl implements Filter {
-
-        private final int indexInChain;
-        private int invokedOrder;
-
-        private FilterImpl(int indexInChain) {
-            this.indexInChain = indexInChain;
-        }
-
-
-        @Override
-        public void init(FilterConfig filterConfig) throws ServletException {
-        }
-
-        @Override
-        public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
-                throws IOException, ServletException {
-            invokedOrder = invocationOrderCounter.incrementAndGet();
-            chain.doFilter(request, response);
-        }
-
-        @Override
-        public void destroy() {
-        }
-    }
 }

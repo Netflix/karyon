@@ -15,7 +15,6 @@ import io.netty.handler.codec.http.HttpResponseStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
 import java.io.OutputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -36,7 +35,7 @@ final class NettyToJerseyBridge {
 
     private static final Logger logger = LoggerFactory.getLogger(NettyToJerseyBridge.class);
 
-    private WebApplication application;
+    private final WebApplication application;
 
     NettyToJerseyBridge(WebApplication application) {
         this.application = application;

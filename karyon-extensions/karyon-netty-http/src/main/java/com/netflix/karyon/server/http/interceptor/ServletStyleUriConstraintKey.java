@@ -102,7 +102,7 @@ public class ServletStyleUriConstraintKey implements PipelineDefinition.Key {
 
         private Matcher(String constraint, @Nullable Matcher nextMatcher) {
             this.constraint = constraint;
-            constraintWithoutContextPath = constraint.substring(contextPath.length());
+            constraintWithoutContextPath = constraint.isEmpty() ? constraint : constraint.substring(contextPath.length());
             this.nextMatcher = nextMatcher;
         }
 

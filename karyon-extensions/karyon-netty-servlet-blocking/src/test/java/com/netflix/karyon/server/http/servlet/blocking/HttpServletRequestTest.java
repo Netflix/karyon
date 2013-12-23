@@ -550,7 +550,7 @@ public class HttpServletRequestTest {
         HttpServletRequestImpl.PathComponents pathComponents =
                 new HttpServletRequestImpl.PathComponents(decoder, CONTEXT_PATH, SERVLET_PATH);
         return new HttpServletRequestImpl(pathComponents, nettyRequest, sessionManager,
-                                          new ChannelHandlerContextMock(LOCAL_ADDRESS, SERVER_PORT,
+                                          new NoOpChannelHandlerContextMock(LOCAL_ADDRESS, SERVER_PORT,
                                                                         LOCAL_ADDRESS, LOCAL_PORT,
                                                                         REMOTE_ADDRESS, REMOTE_PORT), false);
     }

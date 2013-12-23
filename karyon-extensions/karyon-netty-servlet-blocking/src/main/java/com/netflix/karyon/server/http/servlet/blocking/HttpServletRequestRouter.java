@@ -13,8 +13,7 @@ import io.netty.handler.codec.http.HttpResponseStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
@@ -91,7 +90,7 @@ public class HttpServletRequestRouter implements HttpRequestRouter {
         try {
             filterChain.doFilter(servletRequest, servletResponse);
         } catch (Exception e) {
-            sendErrorResponseOnFilterchainError(responseWriter, e);
+            sendErrorResponseOnFilterchainError(servletResponse, e);
         } finally {
             try {
                 servletResponse.sendResponseIfNotSent();
@@ -101,12 +100,12 @@ public class HttpServletRequestRouter implements HttpRequestRouter {
         }
     }
 
-    private static void sendErrorResponseOnFilterchainError(HttpResponseWriter responseWriter,
-                                                            Exception e) {
+    private static void sendErrorResponseOnFilterchainError(HttpServletResponseImpl response, Exception e) {
         logger.error("Error invoking the filter/servlet. Sending an error response.", e);
-        FullHttpResponse response = responseWriter.response();
-        if (response != null) {
-            response.setStatus(HttpResponseStatus.INTERNAL_SERVER_ERROR);
+        try {
+            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
+        } catch (IOException e1) {
+            logger.error("Ignoring the error upon sending error response on filter chain error: " + e.getMessage(), e1);
         }
     }
 

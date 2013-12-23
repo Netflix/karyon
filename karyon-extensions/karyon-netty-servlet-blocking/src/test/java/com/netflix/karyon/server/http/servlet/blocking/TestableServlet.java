@@ -12,18 +12,27 @@ import java.io.IOException;
 public class TestableServlet extends HttpServlet {
 
     private static final long serialVersionUID = 1779057897162088887L;
+    private final boolean throwException;
 
     HttpServletRequest req;
     HttpServletResponse resp;
     volatile boolean invoked;
+
+    public TestableServlet() {
+        this(false);
+    }
+
+    public TestableServlet(boolean throwException) {
+        this.throwException = throwException;
+    }
 
     @Override
     protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         invoked = true;
         this.req = req;
         this.resp = resp;
+        if (throwException) {
+            throw new IllegalStateException("Explicit exception throwing.");
+        }
     }
-
-
-
 }

@@ -1,7 +1,6 @@
 package com.netflix.karyon.server.http.servlet.blocking;
 
 import io.netty.channel.Channel;
-import io.netty.channel.ChannelHandlerContextWrapper;
 import io.netty.channel.socket.ServerSocketChannel;
 import io.netty.channel.socket.oio.OioServerSocketChannel;
 import io.netty.channel.socket.oio.OioSocketChannel;
@@ -15,7 +14,7 @@ import java.net.SocketAddress;
 /**
  * @author Nitesh Kant
  */
-public class ChannelHandlerContextMock extends ChannelHandlerContextWrapper {
+public class NoOpChannelHandlerContextMock extends NoOpChannelHandlerContext {
 
     private final Channel channel;
     private final InetSocketAddress serverSockAddr;
@@ -23,9 +22,9 @@ public class ChannelHandlerContextMock extends ChannelHandlerContextWrapper {
     private final InetSocketAddress localAddr;
     private final DefaultAttributeMap attributeMap;
 
-    public ChannelHandlerContextMock(final String serverAddr, final int serverPort,
-                                     final String localAddr, final int localPort,
-                                     final String remoteAddr, final int remotePort) {
+    public NoOpChannelHandlerContextMock(final String serverAddr, final int serverPort,
+                                         final String localAddr, final int localPort,
+                                         final String remoteAddr, final int remotePort) {
         serverSockAddr = InetSocketAddress.createUnresolved(serverAddr, serverPort);
         this.localAddr = new InetSocketAddress(localAddr, localPort);
         this.remoteAddr = new InetSocketAddress(remoteAddr, remotePort);
@@ -43,12 +42,12 @@ public class ChannelHandlerContextMock extends ChannelHandlerContextWrapper {
 
             @Override
             public InetSocketAddress localAddress() {
-                return ChannelHandlerContextMock.this.localAddr;
+                return NoOpChannelHandlerContextMock.this.localAddr;
             }
 
             @Override
             public InetSocketAddress remoteAddress() {
-                return ChannelHandlerContextMock.this.remoteAddr;
+                return NoOpChannelHandlerContextMock.this.remoteAddr;
             }
         };
         attributeMap = new DefaultAttributeMap();
