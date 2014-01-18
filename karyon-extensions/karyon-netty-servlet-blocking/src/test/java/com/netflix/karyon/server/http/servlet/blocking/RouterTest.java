@@ -9,7 +9,6 @@ import io.netty.handler.codec.http.HttpVersion;
 import org.junit.Assert;
 import org.junit.Test;
 
-import javax.annotation.Nullable;
 import javax.servlet.Filter;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -34,8 +33,9 @@ public class RouterTest {
     public static final HttpMethod HTTP_METHOD = HttpMethod.GET;
     public static final HttpVersion HTTP_VERSION = HttpVersion.HTTP_1_1;
     public static final String JSESSIONID_COOKIE_NAME = "JSESSIONID";
-    public static final String REMOTE_ADDRESS = "1.1.1.1";
-    public static final String LOCAL_ADDRESS = "1.0.0.1";
+
+    @SuppressWarnings("PMD") public static final String REMOTE_ADDRESS = "1.1.1.1";
+    @SuppressWarnings("PMD") public static final String LOCAL_ADDRESS = "1.0.0.1";
     public static final int SERVER_PORT = 9999;
     public static final int LOCAL_PORT = 9998;
     public static final int REMOTE_PORT = 8888;
@@ -56,7 +56,7 @@ public class RouterTest {
         HTTPServletRequestRouterBuilder builder = new HTTPServletRequestRouterBuilder();
         HttpServletRequestRouter router = builder.build();
         DefaultFullHttpRequest request = new DefaultFullHttpRequest(HTTP_VERSION, HTTP_METHOD, testUri);
-        HttpResponseWriterMock writerMock = getHttpResponseWriterMock();
+        StatefulHttpResponseWriterMock writerMock = getHttpResponseWriterMock();
         router.process(request, writerMock);
 
         FullHttpResponse response = writerMock.response();
@@ -75,9 +75,11 @@ public class RouterTest {
         HttpServletRequest invokedWithReq = servlet.req;
         Assert.assertNotNull("Servlet invoked with null request.", invokedWithReq);
         Assert.assertEquals("Unexpected servlet request path info.", REMAINING_PATH, invokedWithReq.getPathInfo());
-        Assert.assertEquals("Unexpected servlet request context path.", CONTEXT_PATH.substring(0, CONTEXT_PATH.length() - 1),
+        Assert.assertEquals("Unexpected servlet request context path.", CONTEXT_PATH.substring(0, CONTEXT_PATH.length()
+                                                                                                  - 1),
                             invokedWithReq.getContextPath());
-        Assert.assertEquals("Unexpected servlet request servlet path.", '/' + SERVLET_PATH, invokedWithReq.getServletPath());
+        Assert.assertEquals("Unexpected servlet request servlet path.", '/' + SERVLET_PATH,
+                            invokedWithReq.getServletPath());
 
         HttpServletResponseImpl invokedWithResp = (HttpServletResponseImpl) servlet.resp;
         FullHttpResponse response = invokedWithResp.responseWriter().response();
@@ -115,46 +117,19 @@ public class RouterTest {
         Assert.assertEquals("Unexpected response code.", 500, response.getStatus().code());
     }
 
-    @Test
-    public void testErrorBeforeFilterChainCreation() throws Exception {
-        TestableServlet servlet = new TestableServlet(true);
-        TestableFilter filter = new TestableFilter(0, null, false);
-        RouterAndAccomplice routerAndAccomplice = new RouterAndAccomplice(servlet, filter).invoke();
-        HttpResponseWriterMock writerMock = getHttpResponseWriterMock(null);
-        processRequest(routerAndAccomplice, writerMock);
-        Assert.assertFalse("Filter invoked.", filter.invoked);
-        Assert.assertFalse("Servlet invoked.", servlet.invoked);
-
-        FullHttpResponse response = writerMock.response();
-        Assert.assertNotNull("Response is null.", response);
-        Assert.assertEquals("Unexpected response code.", 500, response.getStatus().code());
-    }
-
-    private HttpResponseWriterMock processRequest(RouterAndAccomplice routerAndAccomplice) {
+    private StatefulHttpResponseWriterMock processRequest(RouterAndAccomplice routerAndAccomplice) {
         HttpServletRequestRouter router = routerAndAccomplice.getRouter();
         DefaultFullHttpRequest request = new DefaultFullHttpRequest(HTTP_VERSION, HTTP_METHOD, testUri);
-        HttpResponseWriterMock writerMock = getHttpResponseWriterMock();
+        StatefulHttpResponseWriterMock writerMock = getHttpResponseWriterMock();
         router.process(request, writerMock);
         return writerMock;
     }
 
-    private HttpResponseWriterMock processRequest(RouterAndAccomplice routerAndAccomplice,
-                                                  HttpResponseWriterMock writerMock) {
-        HttpServletRequestRouter router = routerAndAccomplice.getRouter();
-        DefaultFullHttpRequest request = new DefaultFullHttpRequest(HTTP_VERSION, HTTP_METHOD, testUri);
-        router.process(request, writerMock);
-        return writerMock;
-    }
-
-    private static HttpResponseWriterMock getHttpResponseWriterMock() {
+    private static StatefulHttpResponseWriterMock getHttpResponseWriterMock() {
         NoOpChannelHandlerContextMock contextMock = new NoOpChannelHandlerContextMock(LOCAL_ADDRESS, SERVER_PORT, LOCAL_ADDRESS,
                                                                               LOCAL_PORT, REMOTE_ADDRESS,
                                                                               REMOTE_PORT);
-        return new HttpResponseWriterMock(HTTP_VERSION, contextMock);
-    }
-
-    private static HttpResponseWriterMock getHttpResponseWriterMock(@Nullable NoOpChannelHandlerContextMock contextMock) {
-        return new HttpResponseWriterMock(HTTP_VERSION, contextMock);
+        return new StatefulHttpResponseWriterMock(HTTP_VERSION, contextMock);
     }
 
     private class RouterAndAccomplice {

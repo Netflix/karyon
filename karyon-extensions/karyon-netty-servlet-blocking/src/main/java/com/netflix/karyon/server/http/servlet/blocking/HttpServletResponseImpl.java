@@ -2,7 +2,7 @@ package com.netflix.karyon.server.http.servlet.blocking;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
-import com.netflix.karyon.server.http.spi.HttpResponseWriter;
+import com.netflix.karyon.server.http.spi.StatefulHttpResponseWriter;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufOutputStream;
 import io.netty.handler.codec.http.DefaultCookie;
@@ -37,7 +37,7 @@ public class HttpServletResponseImpl implements HttpServletResponse {
 
     private static final Logger logger = LoggerFactory.getLogger(HttpServletResponseImpl.class);
 
-    private final HttpResponseWriter responseWriter;
+    private final StatefulHttpResponseWriter responseWriter;
     private final ErrorPageGenerator errorPageGenerator;
     private final HttpServletRequestImpl servletRequest;
     private String charsetName;
@@ -49,7 +49,7 @@ public class HttpServletResponseImpl implements HttpServletResponse {
     @GuardedBy("this") private ServletOutputStream servletOutputStream;
     @GuardedBy("this") private PrintWriter outputWriter;
 
-    public HttpServletResponseImpl(HttpResponseWriter responseWriter, ErrorPageGenerator errorPageGenerator,
+    public HttpServletResponseImpl(StatefulHttpResponseWriter responseWriter, ErrorPageGenerator errorPageGenerator,
                                    HttpServletRequestImpl servletRequest) {
         this.responseWriter = responseWriter;
         this.errorPageGenerator = errorPageGenerator;
@@ -296,7 +296,7 @@ public class HttpServletResponseImpl implements HttpServletResponse {
     }
 
     @VisibleForTesting
-    HttpResponseWriter responseWriter() {
+    StatefulHttpResponseWriter responseWriter() {
         return responseWriter;
     }
 

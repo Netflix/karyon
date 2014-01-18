@@ -15,15 +15,13 @@
  * An interceptor pipeline (inbound or outbound) follows the
  * <a href="http://en.wikipedia.org/wiki/Chain-of-responsibility_pattern">Chain of Responsibility</a> pattern and hence
  * every interceptor in the chain has the responsibility of invoking the next interceptor in the pipeline using
- * {@link InterceptorExecutionContext#executeNextInterceptor(FullHttpRequest, HttpResponseWriter)}. Failure to do so, will break
+ * {@link InterceptorExecutionContext#executeNextInterceptor(FullHttpRequest, StatefulHttpResponseWriter)}. Failure to do so, will break
  * the chain and hence the processing of the request or sending or response. <br/>
- * Invocation of {@link InterceptorExecutionContext#executeNextInterceptor(FullHttpRequest, HttpResponseWriter)} by the
+ * Invocation of {@link InterceptorExecutionContext#executeNextInterceptor(FullHttpRequest, StatefulHttpResponseWriter)} by the
  * last interceptor in the inbound chain will invoke the router. <br/>
- * Invocation of {@link InterceptorExecutionContext#executeNextInterceptor(FullHttpRequest, HttpResponseWriter)} by the
+ * Invocation of {@link InterceptorExecutionContext#executeNextInterceptor(FullHttpRequest, StatefulHttpResponseWriter)} by the
  * last interceptor in the outbound chain will send the response to the client. <br/>
  */
 package com.netflix.karyon.server.http.interceptor;
 
-import com.netflix.karyon.server.http.interceptor.InterceptorExecutionContext;
-import com.netflix.karyon.server.http.spi.HttpRequestRouter;
-import com.netflix.karyon.server.http.spi.HttpResponseWriter;
+import com.netflix.karyon.server.http.spi.StatefulHttpResponseWriter;

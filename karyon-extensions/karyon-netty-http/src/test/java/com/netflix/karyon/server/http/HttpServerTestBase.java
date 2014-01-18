@@ -5,7 +5,10 @@ import com.netflix.karyon.server.http.interceptor.MethodConstraintKey;
 import com.netflix.karyon.server.http.interceptor.RegexUriConstraintKey;
 import com.netflix.karyon.server.http.interceptor.ServletStyleUriConstraintKey;
 import com.netflix.karyon.server.http.interceptor.TestableBidirectionalInterceptor;
+import com.netflix.karyon.server.spi.DefaultChannelPipelineConfigurator;
 import com.netflix.karyon.spi.PropertyNames;
+import io.netty.handler.codec.http.FullHttpRequest;
+import io.netty.handler.codec.http.FullHttpResponse;
 import io.netty.handler.codec.http.HttpMethod;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
@@ -22,11 +25,11 @@ import java.io.IOException;
  */
 public class HttpServerTestBase {
 
-    protected TestableBidirectionalInterceptor regexBasedInterceptor;
-    protected TestableBidirectionalInterceptor methodBasedInterceptor;
-    protected TestableBidirectionalInterceptor uriBasedInterceptor;
+    protected TestableBidirectionalInterceptor<FullHttpRequest, FullHttpResponse> regexBasedInterceptor;
+    protected TestableBidirectionalInterceptor<FullHttpRequest, FullHttpResponse> methodBasedInterceptor;
+    protected TestableBidirectionalInterceptor<FullHttpRequest, FullHttpResponse> uriBasedInterceptor;
     protected TestableRequestRouter router;
-    protected HttpServer server;
+    protected HttpServer<FullHttpRequest, FullHttpResponse> server;
 
     @Before
     public void setUp() throws Exception {
@@ -54,7 +57,8 @@ public class HttpServerTestBase {
                             response.getStatusLine().getStatusCode());
     }
 
-    protected static void assertInterceptorCalls(TestableBidirectionalInterceptor interceptor, String name) {
+    protected static void assertInterceptorCalls(TestableBidirectionalInterceptor<FullHttpRequest, FullHttpResponse> interceptor,
+                                                 String name) {
         Assert.assertTrue(name + " interceptor did not get invoked for inbound processing.",
                           interceptor.isCalledForIn());
         Assert.assertTrue(name + " interceptor got invoked for inbound processing but was not supposed to be.", interceptor.wasLastInCallValid());
@@ -63,15 +67,24 @@ public class HttpServerTestBase {
                           interceptor.wasLastOutCallValid());
     }
 
-    protected void configureServerBuilder(@SuppressWarnings("rawtypes") HttpServerBuilder builder) {
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    protected void configureServerBuilder(HttpServerBuilder builder) {
         router = new TestableRequestRouter();
-        regexBasedInterceptor = new TestableBidirectionalInterceptor(new RegexUriConstraintKey("/.*"));
-        methodBasedInterceptor = new TestableBidirectionalInterceptor(new MethodConstraintKey(HttpMethod.GET));
-        uriBasedInterceptor = new TestableBidirectionalInterceptor(new ServletStyleUriConstraintKey("/*", ""));
-        builder.requestRouter(router)
-               .forUri("/*").interceptWith(uriBasedInterceptor)
-               .forUriRegex("/.*").interceptWith(regexBasedInterceptor)
-               .forHttpMethod(HttpMethod.GET).interceptWith(methodBasedInterceptor);
+        HttpPipelineConfigurator httpConfigurator = new HttpPipelineConfigurator();
+        DefaultChannelPipelineConfigurator<FullHttpRequest, FullHttpResponse> pipelineConfigurator =
+                new DefaultChannelPipelineConfigurator<FullHttpRequest, FullHttpResponse>(builder.getUniqueServerName(),
+                                                                                          null,
+                                                                                          new FullHttpObjectPipelineConfiguratorImpl(8192, httpConfigurator));
+        builder.requestRouter(router).pipelineConfigurator(pipelineConfigurator)
+               .responseWriterFactory(new StatefulHttpResponseWriterImpl.ResponseWriterFactoryImpl());
+        HttpServerBuilder.InterceptorAttacher uriAttacher = builder.forUri("/*");
+        HttpServerBuilder.InterceptorAttacher uriRegexAttacher = builder.forUriRegex("/.*");
+        HttpServerBuilder.InterceptorAttacher methodAttacher = builder.forHttpMethod(HttpMethod.GET);
+        regexBasedInterceptor = new TestableBidirectionalInterceptor(new RegexUriConstraintKey("/.*"), uriRegexAttacher);
+        methodBasedInterceptor = new TestableBidirectionalInterceptor(new MethodConstraintKey(HttpMethod.GET),
+                                                                      methodAttacher);
+        uriBasedInterceptor = new TestableBidirectionalInterceptor(new ServletStyleUriConstraintKey("/*", ""),
+                                                                   uriAttacher);
     }
 
     protected void assertRouterInvocation() {

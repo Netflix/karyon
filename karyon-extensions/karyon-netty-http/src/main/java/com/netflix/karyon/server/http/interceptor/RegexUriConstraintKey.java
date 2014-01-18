@@ -1,7 +1,6 @@
 package com.netflix.karyon.server.http.interceptor;
 
 import com.google.common.base.Preconditions;
-import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.HttpRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,7 +27,7 @@ public class RegexUriConstraintKey implements PipelineDefinition.Key {
     }
 
     @Override
-    public boolean apply(FullHttpRequest request, KeyEvaluationContext context) {
+    public boolean apply(HttpRequest request, KeyEvaluationContext context) {
         String requestUriPath = context.getRequestUriPath(request);
         boolean matches = false;
         if (null != requestUriPath) {
@@ -36,8 +35,7 @@ public class RegexUriConstraintKey implements PipelineDefinition.Key {
             matches = matcher.matches();
         }
         if (logger.isDebugEnabled()) {
-            logger.debug("Result for regex based uri constraint for uri path {} and pattern {} : {}",
-                         new Object[] {requestUriPath, regEx, matches});
+            logger.debug("Result for regex based uri constraint for uri path {} and pattern {} : {}", requestUriPath, regEx, matches);
         }
         return matches;
     }

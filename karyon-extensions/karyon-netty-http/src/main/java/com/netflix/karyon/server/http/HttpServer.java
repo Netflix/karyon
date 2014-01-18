@@ -1,94 +1,51 @@
 package com.netflix.karyon.server.http;
 
-import com.netflix.karyon.server.KaryonServer;
-import com.netflix.karyon.server.http.spi.HttpRequestRouter;
+import com.netflix.karyon.server.ApplicationPipelineConfigurator;
+import com.netflix.karyon.server.KaryonNettyServer;
+import com.netflix.karyon.server.http.interceptor.InterceptorsNettyHandler;
+import com.netflix.karyon.server.http.interceptor.PipelineFactory;
+import com.netflix.karyon.server.spi.ChannelPipelineConfigurator;
+import com.netflix.karyon.server.spi.ResponseWriter;
+import com.netflix.karyon.server.spi.ResponseWriterFactory;
 import io.netty.bootstrap.ServerBootstrap;
-import io.netty.channel.Channel;
-import io.netty.channel.ChannelFuture;
-import io.netty.channel.ChannelInitializer;
-import io.netty.channel.socket.SocketChannel;
-import io.netty.handler.codec.http.HttpObjectAggregator;
-import io.netty.handler.codec.http.HttpRequestDecoder;
-import io.netty.handler.codec.http.HttpResponseEncoder;
-import io.netty.handler.logging.LoggingHandler;
-import io.netty.util.concurrent.Future;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import io.netty.channel.ChannelPipeline;
+import io.netty.handler.codec.http.HttpObject;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-public abstract class HttpServer extends KaryonServer {
+/**
+ * A base class for all HTTP servers based on {@link KaryonNettyServer}
+ *
+ * @param <I> Request type for the server.
+ * @param <O> Response type for the server.
+ */
+public abstract class HttpServer<I extends HttpObject, O extends HttpObject> extends KaryonNettyServer<I, O> {
 
-    private final Logger logger = LoggerFactory.getLogger(HttpServer.class);
-
-    protected final HttpRequestRouter httpRequestRouter;
-    private ServerBootstrap bootstrap;
-    private ChannelFuture serverShutdownFuture;
+    @Nullable
+    private final PipelineFactory<I, O> interceptorFactory;
 
     HttpServer(@Nonnull ServerBootstrap bootstrap,
-               @Nonnull HttpRequestRouter httpRequestRouter,
+               @Nonnull ChannelPipelineConfigurator<I, O> pipelineConfigurator,
+               @Nonnull ResponseWriterFactory<O> responseWriterFactory,
+               @Nullable final PipelineFactory<I, O> interceptorFactory,
                @Nullable com.netflix.karyon.server.ServerBootstrap karyonBootstrap) {
-        super(karyonBootstrap);
-        this.bootstrap = bootstrap;
-        this.httpRequestRouter = httpRequestRouter;
+        super(bootstrap, pipelineConfigurator, responseWriterFactory, karyonBootstrap);
+        this.interceptorFactory = interceptorFactory;
     }
 
-    /**
-     * Starts this server and blocks the calling thread till the server is stopped. <br/>
-     * In case it is not required to block the calling thread, one must instead call
-     * {@link #startWithoutWaitingForShutdown()}
-     *
-     * @throws Exception If the start fails.
-     */
     @Override
-    public void start() throws Exception {
-        startWithoutWaitingForShutdown();
-        serverShutdownFuture.sync();
-    }
-
-    public void startWithoutWaitingForShutdown() throws Exception {
-        initialize();
-        super.start();
-        httpRequestRouter.start();
-        bootstrap.childHandler(new ChannelInitializer<SocketChannel>() {
+    protected ApplicationPipelineConfigurator<I, O> newApplicationPipelineConfigurator() {
+        return new ApplicationPipelineConfigurator<I, O>(routerExecutorGroup, responseWriterFactory, router,
+                                                         taskRegistry, inputType) {
             @Override
-            protected void initChannel(SocketChannel ch) throws Exception {
-                ch.pipeline()
-                  .addLast("logger", new LoggingHandler())
-                  .addLast("decoder", new HttpRequestDecoder())
-                  .addLast("aggregator", new HttpObjectAggregator(1048576))
-                  .addLast("encoder", new HttpResponseEncoder());
-                addRouterToPipeline(ch);
+            protected void configurePipeline(@SuppressWarnings("unused") ChannelPipeline channelPipeline,
+                                             @SuppressWarnings("unused") ResponseWriter<O> responseWriter) {
+                channelPipeline.addBefore(ROUTING_HANDLER_NAME,
+                                          InterceptorsNettyHandler.INBOUND_INTERCEPTOR_NETTY_HANDLER,
+                                          new InterceptorsNettyHandler<I, O>(interceptorFactory, responseWriter,
+                                                                             inputType, outputType));
             }
-        });
-        Channel channel = bootstrap.bind().sync().channel();
-        logger.info("Started netty http module at port: " + channel.localAddress());
-        Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    stop();
-                } catch (InterruptedException e) {
-                    logger.error("Error while shutting down.", e);
-                }
-            }
-        }));
-        serverShutdownFuture = channel.closeFuture();
+        };
     }
-
-    public void stop() throws InterruptedException {
-
-        logger.info("Shutting down server.");
-        Future<?> acceptorTermFuture = bootstrap.group().shutdownGracefully();
-        Future<?> workerTermFuture = bootstrap.childGroup().shutdownGracefully();
-
-        logger.info("Waiting for acceptor threads to stop.");
-        acceptorTermFuture.sync();
-        logger.info("Waiting for worker threads to stop.");
-        workerTermFuture.sync();
-        logger.info("Shutdown complete.");
-    }
-
-    protected abstract void addRouterToPipeline(SocketChannel ch);
 }

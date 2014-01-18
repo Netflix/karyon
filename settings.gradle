@@ -19,6 +19,7 @@ include 'karyon-spi',\
  'karyon-eureka',\
  'karyon-core',\
  'karyon-extensions:karyon-servlet', \
+ 'karyon-extensions:karyon-netty', \
  'karyon-extensions:karyon-netty-http', \
  'karyon-extensions:karyon-netty-jersey-blocking', \
  'karyon-extensions:karyon-netty-servlet-blocking', \

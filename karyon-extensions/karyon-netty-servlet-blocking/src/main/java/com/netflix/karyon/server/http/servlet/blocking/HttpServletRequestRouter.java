@@ -3,13 +3,17 @@ package com.netflix.karyon.server.http.servlet.blocking;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.netflix.config.ConfigurationManager;
+import com.netflix.karyon.server.http.spi.BlockingHttpRequestRouter;
 import com.netflix.karyon.server.http.spi.HttpRequestRouter;
-import com.netflix.karyon.server.http.spi.HttpResponseWriter;
+import com.netflix.karyon.server.http.spi.StatefulHttpResponseWriter;
+import com.netflix.karyon.server.spi.ResponseWriter;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.FullHttpResponse;
 import io.netty.handler.codec.http.HttpResponseStatus;
+import io.netty.util.concurrent.DefaultPromise;
+import io.netty.util.concurrent.Future;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,7 +30,7 @@ import static com.netflix.karyon.server.http.spi.RequestContextAttributes.getOrC
  *
  * @author Nitesh Kant
  */
-public class HttpServletRequestRouter implements HttpRequestRouter {
+public class HttpServletRequestRouter implements BlockingHttpRequestRouter<FullHttpRequest, FullHttpResponse> {
 
     private static final Logger logger = LoggerFactory.getLogger(HttpServletRequestRouter.class);
 
@@ -53,38 +57,38 @@ public class HttpServletRequestRouter implements HttpRequestRouter {
     }
 
     @Override
-    public boolean isBlocking() {
-        return true;
-    }
+    public Future<Void> process(FullHttpRequest request, ResponseWriter<FullHttpResponse> responseWriter) {
+        Future<Void> processingFuture = new DefaultPromise<Void>(responseWriter.getChannelHandlerContext().executor());
 
-    @Override
-    public void process(FullHttpRequest request, HttpResponseWriter responseWriter) {
+        StatefulHttpResponseWriter statefulWriter = (StatefulHttpResponseWriter) responseWriter;
+
         HttpServletRequestImpl servletRequest;
         HttpServletResponseImpl servletResponse;
         FilterChainImpl filterChain;
         try {
-            ChannelHandlerContext channelHandlerContext = responseWriter.getChannelHandlerContext();
+            ChannelHandlerContext channelHandlerContext = statefulWriter.getChannelHandlerContext();
 
             ServletsAndFiltersHolder.ServletMatchResult servletMatchResult =
-                                                        holder.getMatchingServlet(request, channelHandlerContext);
+                    holder.getMatchingServlet(request, channelHandlerContext);
             if (null == servletMatchResult) {
                 logger.warn("No matching servlet found for request URI: {}. Sending a 404 response.", request.getUri());
-                responseWriter.createResponse(HttpResponseStatus.NOT_FOUND, null);
-                responseWriter.sendResponse();
-                return;
+                statefulWriter.createResponse(HttpResponseStatus.NOT_FOUND, null);
+                statefulWriter.sendResponse();
+                return processingFuture;
             }
 
             HttpServletRequestImpl.PathComponents pathComponents =
-                    new HttpServletRequestImpl.PathComponents(getOrCreateQueryStringDecoder(request, channelHandlerContext),
+                    new HttpServletRequestImpl.PathComponents(getOrCreateQueryStringDecoder(request,
+                                                                                            channelHandlerContext),
                                                               contextPath, servletMatchResult.servletPath());
             servletRequest = new HttpServletRequestImpl(pathComponents, request, sessionManager,
-                                                                               channelHandlerContext, secure);
-            servletResponse = new HttpServletResponseImpl(responseWriter, ERROR_PAGE_GENERATOR, servletRequest);
+                                                        channelHandlerContext, secure);
+            servletResponse = new HttpServletResponseImpl(statefulWriter, ERROR_PAGE_GENERATOR, servletRequest);
             filterChain = new FilterChainImpl(servletMatchResult.servlet(),
                                               holder.getMatchingFilters(request, channelHandlerContext));
         } catch (Exception e) {
-            sendErrorResponseBeforeFilterChainCreation(responseWriter, e);
-            return;
+            sendErrorResponseBeforeFilterChainCreation(statefulWriter, e);
+            return processingFuture;
         }
 
         try {
@@ -98,6 +102,8 @@ public class HttpServletRequestRouter implements HttpRequestRouter {
                 logger.error("Error while sending servlet response.", e);
             }
         }
+
+        return processingFuture;
     }
 
     private static void sendErrorResponseOnFilterchainError(HttpServletResponseImpl response, Exception e) {
@@ -109,7 +115,7 @@ public class HttpServletRequestRouter implements HttpRequestRouter {
         }
     }
 
-    private static void sendErrorResponseBeforeFilterChainCreation(HttpResponseWriter responseWriter,
+    private static void sendErrorResponseBeforeFilterChainCreation(StatefulHttpResponseWriter responseWriter,
                                                             Exception e) {
         logger.error("Error constructing the filter chain. Sending an error response.", e);
         ByteBuf errorPage = ERROR_PAGE_GENERATOR.getErrorPage(500, e.getMessage());
@@ -123,10 +129,6 @@ public class HttpServletRequestRouter implements HttpRequestRouter {
             response.setStatus(HttpResponseStatus.INTERNAL_SERVER_ERROR);
         }
         responseWriter.sendResponse();
-    }
-
-    @Override
-    public void start() {
     }
 
     @VisibleForTesting

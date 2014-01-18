@@ -1,12 +1,17 @@
 package com.netflix.karyon.server.http.jersey.blocking;
 
 import com.google.common.base.Preconditions;
-import com.netflix.karyon.server.http.spi.HttpRequestRouter;
-import com.netflix.karyon.server.http.spi.HttpResponseWriter;
+import com.netflix.karyon.server.http.spi.BlockingHttpRequestRouter;
+import com.netflix.karyon.server.http.spi.StatefulHttpResponseWriter;
+import com.netflix.karyon.server.spi.LifecycleAware;
+import com.netflix.karyon.server.spi.ResponseWriter;
 import com.sun.jersey.api.container.ContainerFactory;
 import com.sun.jersey.api.core.ResourceConfig;
 import com.sun.jersey.spi.container.WebApplication;
 import io.netty.handler.codec.http.FullHttpRequest;
+import io.netty.handler.codec.http.FullHttpResponse;
+import io.netty.util.concurrent.DefaultPromise;
+import io.netty.util.concurrent.Future;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,7 +20,7 @@ import java.io.IOException;
 /**
  * @author Nitesh Kant
  */
-public class JerseyBasedRouter implements HttpRequestRouter {
+public class JerseyBasedRouter implements BlockingHttpRequestRouter<FullHttpRequest, FullHttpResponse>, LifecycleAware {
 
     private static final Logger logger = LoggerFactory.getLogger(JerseyBasedRouter.class);
 
@@ -29,19 +34,17 @@ public class JerseyBasedRouter implements HttpRequestRouter {
     }
 
     @Override
-    public boolean isBlocking() {
-        return true;
-    }
-
-    @Override
-    public void process(FullHttpRequest request, HttpResponseWriter responseWriter) {
+    public Future<Void> process(FullHttpRequest request, ResponseWriter<FullHttpResponse> responseWriter) {
+        Future<Void> processingFuture = new DefaultPromise<Void>(responseWriter.getChannelHandlerContext().executor());
+        StatefulHttpResponseWriter statefulWriter = (StatefulHttpResponseWriter) responseWriter;
         try {
             application.handleRequest(nettyToJerseyBridge.bridgeRequest(request),
-                                      nettyToJerseyBridge.bridgeResponseWriter(responseWriter));
+                                      nettyToJerseyBridge.bridgeResponseWriter(statefulWriter));
         } catch (IOException e) {
             logger.error("Failed to handle request.", e);
             // TODO: Define a default fatal error handler that can send HTTP response.
         }
+        return processingFuture;
     }
 
     @Override
@@ -49,5 +52,11 @@ public class JerseyBasedRouter implements HttpRequestRouter {
         NettyContainer container = ContainerFactory.createContainer(NettyContainer.class, resourceConfig);
         application = container.getApplication();
         nettyToJerseyBridge = container.getNettyToJerseyBridge();
+        logger.info("Started Jersey based request router.");
+    }
+
+    @Override
+    public void stop() {
+        logger.info("Stopped Jersey based request router.");
     }
 }

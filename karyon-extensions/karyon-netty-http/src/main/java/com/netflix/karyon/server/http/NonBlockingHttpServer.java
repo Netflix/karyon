@@ -1,14 +1,12 @@
 package com.netflix.karyon.server.http;
 
-import com.google.common.base.Preconditions;
 import com.netflix.karyon.server.http.interceptor.PipelineFactory;
 import com.netflix.karyon.server.http.spi.HttpRequestRouter;
+import com.netflix.karyon.server.spi.ChannelPipelineConfigurator;
+import com.netflix.karyon.server.spi.ResponseWriterFactory;
 import io.netty.bootstrap.ServerBootstrap;
-import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
-import io.netty.channel.socket.oio.OioServerSocketChannel;
-import io.netty.util.concurrent.DefaultEventExecutorGroup;
-import io.netty.util.concurrent.EventExecutorGroup;
+import io.netty.handler.codec.http.HttpObject;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -19,13 +17,12 @@ import javax.annotation.Nullable;
  *
  * <h2>Blocking routers</h2>
  *
- * If the configured {@link HttpRequestRouter} is blocking as suggested by {@link HttpRequestRouter#isBlocking()} then
- * it is invoked in a different thread pool (netty's event executor). <br/>
+ * If the configured {@link HttpRequestRouter} is blocking then it is invoked in a different thread pool
+ * (netty's event executor). <br/>
  *
  * <h2>Non-blocking routers</h2>
  *
- * If the configured {@link HttpRequestRouter} is non-blocking as suggested by {@link HttpRequestRouter#isBlocking()} then
- * it is invoked in the event loop. <br/>
+ * If the configured {@link HttpRequestRouter} is non-blocking then it is invoked in the event loop. <br/>
  *
  * <h2>Architecture</h2>
  *  See {@link com.netflix.karyon.server.http} for architecture details.
@@ -36,42 +33,18 @@ import javax.annotation.Nullable;
  *
  * @author Nitesh Kant
  */
-public class NonBlockingHttpServer extends HttpServer {
-
-    private final int routerExecutorThreads;
-    @Nullable
-    private final PipelineFactory interceptorFactory;
+public class NonBlockingHttpServer<I extends HttpObject, O extends HttpObject> extends HttpServer<I, O> {
 
     public NonBlockingHttpServer(@Nonnull ServerBootstrap bootstrap,
-                                 @Nonnull HttpRequestRouter httpRequestRouter,
-                                 @Nullable PipelineFactory interceptorFactory,
+                                 @Nonnull ResponseWriterFactory<O> responseWriterFactory,
+                                 @Nullable PipelineFactory<I, O> interceptorFactory,
+                                 @Nonnull ChannelPipelineConfigurator<I, O> pipelineConfigurator,
                                  @Nullable com.netflix.karyon.server.ServerBootstrap karyonBootstrap) {
-        this(bootstrap, httpRequestRouter, 0, interceptorFactory, karyonBootstrap);
-        Preconditions.checkArgument(httpRequestRouter.isBlocking(),
-                                    "The request router is blocking and no threads configured for router event executor.");
-    }
-
-    public NonBlockingHttpServer(@Nonnull ServerBootstrap bootstrap,
-                                 @Nonnull HttpRequestRouter httpRequestRouter,
-                                 int routerExecutorThreads,
-                                 @Nullable PipelineFactory interceptorFactory,
-                                 @Nullable com.netflix.karyon.server.ServerBootstrap karyonBootstrap) {
-        super(bootstrap, httpRequestRouter, karyonBootstrap);
-        this.interceptorFactory = interceptorFactory;
-        if(httpRequestRouter.isBlocking() && routerExecutorThreads <= 0) {
-            throw new IllegalArgumentException(
-                    "The request router is blocking and non-zero/negative number of threads configured for router event executor.");
-        }
-        this.routerExecutorThreads = routerExecutorThreads;
+        super(bootstrap, pipelineConfigurator, responseWriterFactory, interceptorFactory, karyonBootstrap);
     }
 
     @Override
-    protected void addRouterToPipeline(SocketChannel ch) {
-        if (httpRequestRouter.isBlocking()) {
-            EventExecutorGroup eventExecutor = new DefaultEventExecutorGroup(routerExecutorThreads);
-            ch.pipeline().addLast(eventExecutor, "router", new ServerHandler(httpRequestRouter, interceptorFactory));
-        } else {
-            ch.pipeline().addLast("router", new ServerHandler(httpRequestRouter, interceptorFactory));
-        }
+    protected boolean shouldRunBlockingRouterInAnExecutor() {
+        return true;
     }
 }

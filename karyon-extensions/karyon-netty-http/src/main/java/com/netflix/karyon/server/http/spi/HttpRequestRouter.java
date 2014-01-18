@@ -1,42 +1,16 @@
 package com.netflix.karyon.server.http.spi;
 
-import io.netty.handler.codec.http.FullHttpRequest;
+import com.netflix.karyon.server.spi.RequestRouter;
+import io.netty.handler.codec.http.HttpObject;
 
 /**
- * A router that decouples actual HTTP request processing from the netty pipeline. <br/>
- * Once the netty request processing pipeline hands-off the processing to this router, the responsibility of the
- * completion of the request i.e. writing the response lies in the hand of this router. <br/>
+ * A custom router for HTTP based routers. <br/>
  *
  * This typically will be implemented in different modules specific to which framework is used to discover endpoints,
  * eg: Jersey, servlet, custom routing.
  *
  * @author Nitesh Kant
+ * @see com.netflix.karyon.server.http
  */
-public interface HttpRequestRouter {
-
-    /**
-     * Returns whether this router is blocking in nature. In case, it is blocking, the framework will make sure that
-     * this runs in a different executor than the main event loop to avoid performance degradation.
-     *
-     * @return {@code true} if this router is blocking {@code false} otherwise.
-     */
-    boolean isBlocking();
-
-    /**
-     * Processes the passed request and writes the response using the passed {@code responseWriter}. <br/>
-     *
-     * <h2>Errors</h2>
-     * This method does not expect implementations to throw errors, in any case, if they do, the error is completely
-     * ignored by the framework. This means that the framework will <em>NOT</em> try to write any response back to the
-     * client.
-     *
-     * @param request Request to process.
-     * @param responseWriter Response writer to write the response.
-     */
-    void process(FullHttpRequest request, HttpResponseWriter responseWriter);
-
-    /**
-     * Starts the router.
-     */
-    void start();
+public interface HttpRequestRouter<I extends HttpObject, O extends HttpObject> extends RequestRouter<I, O> {
 }

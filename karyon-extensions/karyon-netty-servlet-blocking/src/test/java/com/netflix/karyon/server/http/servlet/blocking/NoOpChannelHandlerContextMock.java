@@ -7,6 +7,8 @@ import io.netty.channel.socket.oio.OioSocketChannel;
 import io.netty.util.Attribute;
 import io.netty.util.AttributeKey;
 import io.netty.util.DefaultAttributeMap;
+import io.netty.util.concurrent.DefaultEventExecutorGroup;
+import io.netty.util.concurrent.EventExecutor;
 
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
@@ -21,6 +23,7 @@ public class NoOpChannelHandlerContextMock extends NoOpChannelHandlerContext {
     private final InetSocketAddress remoteAddr;
     private final InetSocketAddress localAddr;
     private final DefaultAttributeMap attributeMap;
+    private final EventExecutor executor;
 
     public NoOpChannelHandlerContextMock(final String serverAddr, final int serverPort,
                                          final String localAddr, final int localPort,
@@ -51,6 +54,7 @@ public class NoOpChannelHandlerContextMock extends NoOpChannelHandlerContext {
             }
         };
         attributeMap = new DefaultAttributeMap();
+        executor = new DefaultEventExecutorGroup(1).next();
     }
 
     @Override
@@ -61,5 +65,10 @@ public class NoOpChannelHandlerContextMock extends NoOpChannelHandlerContext {
     @Override
     public <T> Attribute<T> attr(AttributeKey<T> key) {
         return attributeMap.attr(key);
+    }
+
+    @Override
+    public EventExecutor executor() {
+        return executor;
     }
 }

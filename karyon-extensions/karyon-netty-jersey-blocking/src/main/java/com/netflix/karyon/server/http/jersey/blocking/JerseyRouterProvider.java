@@ -4,6 +4,8 @@ import com.google.common.collect.Iterators;
 import com.netflix.karyon.server.http.spi.HttpRequestRouter;
 import com.sun.jersey.spi.container.ContainerProvider;
 import com.sun.jersey.spi.service.ServiceFinder;
+import io.netty.handler.codec.http.FullHttpRequest;
+import io.netty.handler.codec.http.FullHttpResponse;
 
 import java.util.Iterator;
 
@@ -15,7 +17,7 @@ public final class JerseyRouterProvider {
     private JerseyRouterProvider() {
     }
 
-    public static HttpRequestRouter createRouter() {
+    public static HttpRequestRouter<FullHttpRequest, FullHttpResponse> createRouter() {
         /**
          * This iterator provider override makes it possible to not mandate the presence of a jar with a META-INF/ based
          * Service provider discovery which is the default for jersey.

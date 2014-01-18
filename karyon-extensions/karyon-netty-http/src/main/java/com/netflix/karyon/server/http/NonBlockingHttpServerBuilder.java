@@ -1,9 +1,13 @@
 package com.netflix.karyon.server.http;
 
-import com.google.common.base.Preconditions;
-import com.netflix.karyon.server.http.spi.HttpRequestRouter;
-import io.netty.channel.nio.NioEventLoopGroup;
-import io.netty.channel.socket.nio.NioServerSocketChannel;
+import com.netflix.karyon.server.NonBlockingServerBuilderAttributes;
+import com.netflix.karyon.server.NonBlockingServerBuilderAttributesImpl;
+import com.netflix.karyon.server.spi.BlockingRequestRouter;
+import io.netty.bootstrap.ServerBootstrap;
+import io.netty.handler.codec.http.HttpObject;
+import io.netty.handler.logging.LogLevel;
+
+import javax.annotation.Nullable;
 
 /**
  * A builder to create a {@link NonBlockingHttpServer} instance. <br/>
@@ -20,46 +24,47 @@ import io.netty.channel.socket.nio.NioServerSocketChannel;
  *
  * @author Nitesh Kant
  */
-public class NonBlockingHttpServerBuilder extends HttpServerBuilder<NonBlockingHttpServerBuilder, NonBlockingHttpServer> {
+public class NonBlockingHttpServerBuilder<I extends HttpObject, O extends HttpObject>
+            extends HttpServerBuilder<NonBlockingHttpServerBuilder<I, O>, NonBlockingHttpServer<I, O>, I, O>
+            implements NonBlockingServerBuilderAttributes<NonBlockingHttpServerBuilder<I, O>, I, O> {
 
-    private static final int NOT_DEFINED = -1;
-
-    private int selectorCount;
-    private int executorThreadCount;
+    private final NonBlockingServerBuilderAttributesImpl<NonBlockingHttpServerBuilder<I, O>, I, O> nonBlockingServerBuilderAttributes;
 
     public NonBlockingHttpServerBuilder(int serverPort) {
-        super(serverPort);
+        this(serverPort, null);
     }
 
-    public NonBlockingHttpServerBuilder withSelectorCount(int selectorCount) {
-        this.selectorCount = selectorCount;
-        return this;
+    public NonBlockingHttpServerBuilder(int serverPort,  @Nullable LogLevel nettyLoggerLevel) {
+        super(serverPort, nettyLoggerLevel);
+        nonBlockingServerBuilderAttributes =
+                new NonBlockingServerBuilderAttributesImpl<NonBlockingHttpServerBuilder<I, O>, I, O>(this, pipelineConfigurator);
     }
 
-    public NonBlockingHttpServerBuilder requestRouter(HttpRequestRouter requestRouter, int executorThreadCount) {
-        this.requestRouter = requestRouter;
-        this.executorThreadCount = executorThreadCount;
-        return this;
+    @Override
+    public NonBlockingHttpServerBuilder<I, O> withSelectorCount(int selectorCount) {
+        return nonBlockingServerBuilderAttributes.withSelectorCount(selectorCount);
+    }
+
+    @Override
+    public NonBlockingHttpServerBuilder<I, O> requestRouter(BlockingRequestRouter<I, O> requestRouter,
+                                                            int executorThreadCount) {
+        return nonBlockingServerBuilderAttributes.requestRouter(requestRouter, executorThreadCount);
     }
 
     @Override
     protected void validate() {
         super.validate();
-        if(requestRouter.isBlocking() && executorThreadCount == NOT_DEFINED) {
-            throw new IllegalArgumentException("Blocking request router must specify executor thread count.");
-        }
-
+        nonBlockingServerBuilderAttributes.validate();
     }
 
     @Override
-    protected NonBlockingHttpServer createServer() {
-        return new NonBlockingHttpServer(nettyBootstrap, requestRouter, executorThreadCount, interceptorFactory,
-                                         karyonBootstrap);
+    protected NonBlockingHttpServer<I, O> createServer() {
+        return new NonBlockingHttpServer<I, O>(nettyBootstrap, responseWriterFactory, interceptorFactory,
+                                               pipelineConfigurator, karyonBootstrap);
     }
 
     @Override
-    protected void configureBootstrap() {
-        nettyBootstrap.group(new NioEventLoopGroup(selectorCount))
-                      .channel(NioServerSocketChannel.class);
+    protected void configureNettyBootstrap(ServerBootstrap nettyBootstrap) {
+        nonBlockingServerBuilderAttributes.configurNIOattributesInBootstrap(nettyBootstrap);
     }
 }

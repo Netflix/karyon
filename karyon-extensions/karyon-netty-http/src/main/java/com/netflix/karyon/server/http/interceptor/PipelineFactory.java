@@ -1,7 +1,8 @@
 package com.netflix.karyon.server.http.interceptor;
 
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.handler.codec.http.FullHttpRequest;
+import io.netty.handler.codec.http.HttpObject;
+import io.netty.handler.codec.http.HttpRequest;
 
 import java.util.List;
 
@@ -12,7 +13,7 @@ import java.util.List;
  *
  * @author Nitesh Kant
  */
-public interface PipelineFactory {
+public interface PipelineFactory<I extends HttpObject, O extends HttpObject> {
 
     /**
      * Returns a list of inbound interceptors to be executed for the passed {@code request}. <br/>
@@ -23,7 +24,7 @@ public interface PipelineFactory {
      *
      * @return The list of inbound interceptors for the passed request.
      */
-    List<InboundInterceptor> getInboundInterceptors(FullHttpRequest request, ChannelHandlerContext handlerContext);
+    List<InboundInterceptor<I, O>> getInboundInterceptors(HttpRequest request, ChannelHandlerContext handlerContext);
 
     /**
      * Returns a list of outbound interceptors to be executed for the passed {@code request}. <br/>
@@ -34,5 +35,5 @@ public interface PipelineFactory {
      *
      * @return The list of outbound interceptors for the passed request.
      */
-    List<OutboundInterceptor> getOutboundInterceptors(FullHttpRequest request, ChannelHandlerContext handlerContext);
+    List<OutboundInterceptor<O>> getOutboundInterceptors(HttpRequest request, ChannelHandlerContext handlerContext);
 }

@@ -19,15 +19,14 @@
  *  |              /|\                                             |                   |
  *  |               |                                             \|/                  |
  *  |    +----------+-----------------+            +-----------+-------------------+   |
- *  |    |{@link InboundInterceptor} n|            | {@link OutboundInterceptor} 1 |   |
+ *  |    |    InboundInterceptor n    |            |     OutboundInterceptor 1     |   |
  *  |    +----------+-----------------+            +-----------+-------------------+   |
  *  |              /|\                                              |                  |
-    |        {@link InterceptorExecutionContext#executeNextInterceptor(FullHttpRequest,|
-    |                              HttpResponseWriter)}                                |
+    |              InterceptorExecutionContext.executeNextInterceptor()                |
  *  |               |                                               |                  |
  *  |               |                                              \|/                 |
  *  |    +----------+-----------------+            +-----------+-------------------+   |
- *  |    |{@link InboundInterceptor} 1|            | {@link OutboundInterceptor} 1 |   |
+ *  |    |   InboundInterceptor 1     |            |     OutboundInterceptor n     |   |
  *  |    +----------+-----------------+            +-----------+-------------------+   |
  *  |              /|\                                              |                  |
  *  |               |                   Karyon Server               |                  |
@@ -51,8 +50,3 @@
  */
 package com.netflix.karyon.server.http;
 
-import com.netflix.karyon.server.http.interceptor.InboundInterceptor;
-import com.netflix.karyon.server.http.interceptor.InterceptorExecutionContext;
-import com.netflix.karyon.server.http.spi.HttpRequestRouter;
-import com.netflix.karyon.server.http.spi.HttpResponseWriter;
-import io.netty.handler.codec.http.FullHttpRequest;

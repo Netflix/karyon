@@ -1,7 +1,8 @@
 package com.netflix.karyon.server.http;
 
 import com.google.common.base.Preconditions;
-import com.netflix.karyon.server.http.interceptor.BidirectionalInterceptorAdapter;
+import com.netflix.karyon.server.KaryonNettyServerBuilder;
+import com.netflix.karyon.server.ServerBootstrap;
 import com.netflix.karyon.server.http.interceptor.InboundInterceptor;
 import com.netflix.karyon.server.http.interceptor.InterceptorPipelineBuilder;
 import com.netflix.karyon.server.http.interceptor.MethodConstraintKey;
@@ -10,11 +11,12 @@ import com.netflix.karyon.server.http.interceptor.PipelineDefinition;
 import com.netflix.karyon.server.http.interceptor.PipelineFactory;
 import com.netflix.karyon.server.http.interceptor.RegexUriConstraintKey;
 import com.netflix.karyon.server.http.interceptor.ServletStyleUriConstraintKey;
-import com.netflix.karyon.server.http.spi.HttpRequestRouter;
-import io.netty.bootstrap.ServerBootstrap;
-import io.netty.channel.ChannelOption;
+import com.netflix.karyon.server.spi.DefaultChannelPipelineConfigurator;
 import io.netty.handler.codec.http.HttpMethod;
+import io.netty.handler.codec.http.HttpObject;
+import io.netty.handler.logging.LogLevel;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -22,128 +24,88 @@ import java.util.List;
  * @author Nitesh Kant
  */
 @SuppressWarnings("rawtypes")
-public abstract class HttpServerBuilder<T extends HttpServerBuilder, S extends HttpServer> {
+public abstract class HttpServerBuilder<B extends HttpServerBuilder, S extends HttpServer<I, O>, I extends HttpObject,
+                                        O extends HttpObject> extends KaryonNettyServerBuilder<B, S, I, O> {
 
-    protected final ServerBootstrap nettyBootstrap;
-    protected final List<InterceptorAttacher> interceptorAttachers;
-    protected com.netflix.karyon.server.ServerBootstrap karyonBootstrap;
-    protected PipelineFactory interceptorFactory;
-    protected HttpRequestRouter requestRouter;
+    protected final List<InterceptorAttacher<I, O>> interceptorAttachers;
+    protected ServerBootstrap karyonBootstrap;
+    protected PipelineFactory<I, O> interceptorFactory;
 
-    protected HttpServerBuilder(int serverPort) {
-        nettyBootstrap = new ServerBootstrap();
-        nettyBootstrap.localAddress(serverPort);
-        interceptorAttachers = new ArrayList<InterceptorAttacher>();
+    protected HttpServerBuilder(int serverPort, @Nullable LogLevel nettyLoggerLevel) {
+        super(serverPort, nettyLoggerLevel);
+        interceptorAttachers = new ArrayList<InterceptorAttacher<I, O>>();
+        pipelineConfigurator(new DefaultChannelPipelineConfigurator<I, O>(createUniqueServerName(serverPort),
+                                                                          null == nettyLoggerLevel
+                                                                          ? LogLevel.DEBUG : nettyLoggerLevel,
+                                                                          new HttpPipelineConfigurator()));
     }
 
-    public T interceptors(PipelineFactory interceptorFactory) {
+    public B interceptors(PipelineFactory<I, O> interceptorFactory) {
         Preconditions.checkNotNull(interceptorFactory, "Interceptor pipeline factory can not be null.");
         this.interceptorFactory = interceptorFactory;
         return returnBuilder();
     }
 
-    public <O> T serverSocketOption(ChannelOption<O> channelOption, O value) {
-        nettyBootstrap.option(channelOption, value);
-        return returnBuilder();
-    }
-
-    public <O> T clientSocketOption(ChannelOption<O> channelOption, O value) {
-        nettyBootstrap.childOption(channelOption, value);
-        return returnBuilder();
-    }
-
-    public T requestRouter(HttpRequestRouter requestRouter) {
-        this.requestRouter = requestRouter;
-        return returnBuilder();
-    }
-
-    public InterceptorAttacher forUri(String uri) {
+    public InterceptorAttacher<I, O> forUri(String uri) {
         Preconditions.checkNotNull(uri, "Uri for intercepting must not be null");
-        InterceptorAttacher interceptorAttacher = new InterceptorAttacher(new ServletStyleUriConstraintKey(uri, ""));
+        InterceptorAttacher<I, O> interceptorAttacher = new InterceptorAttacher<I, O>(new ServletStyleUriConstraintKey(uri, ""));
         interceptorAttachers.add(interceptorAttacher);
         return interceptorAttacher;
     }
 
-    public InterceptorAttacher forUriRegex(String regEx) {
+    public InterceptorAttacher<I, O> forUriRegex(String regEx) {
         Preconditions.checkNotNull(regEx, "URI Regular expression for interception must not be null");
-        InterceptorAttacher interceptorAttacher = new InterceptorAttacher(new RegexUriConstraintKey(regEx));
+        InterceptorAttacher<I, O> interceptorAttacher = new InterceptorAttacher<I, O>(new RegexUriConstraintKey(regEx));
         interceptorAttachers.add(interceptorAttacher);
         return interceptorAttacher;
     }
 
-    public InterceptorAttacher forHttpMethod(HttpMethod method) {
+    public InterceptorAttacher<I, O> forHttpMethod(HttpMethod method) {
         Preconditions.checkNotNull(method, "Http method for intercepting must not be null");
-        InterceptorAttacher interceptorAttacher = new InterceptorAttacher(new MethodConstraintKey(method));
+        InterceptorAttacher<I, O> interceptorAttacher = new InterceptorAttacher<I, O>(new MethodConstraintKey(method));
         interceptorAttachers.add(interceptorAttacher);
         return interceptorAttacher;
     }
 
-    public T karyonBootstrap(com.netflix.karyon.server.ServerBootstrap karyonBootstrap) {
-        this.karyonBootstrap = karyonBootstrap;
-        return returnBuilder();
-    }
-
+    @Override
     public S build() {
-        validate();
-        buildInterceptorFactory();
-        configureBootstrap();
-        return createServer();
-    }
-
-    protected abstract S createServer();
-
-    protected abstract void configureBootstrap();
-
-    @SuppressWarnings("unchecked")
-    private T returnBuilder() {
-        return (T) this;
-    }
-
-    protected void validate() {
-        Preconditions.checkState(null != requestRouter, "Request router is not set.");
+        buildInterceptorFactory(); // This happens before validate in base class which is not ideal but does not hurt
+                                   // & is better than creating stages in the build method itself.
+        return super.build();
     }
 
     protected void buildInterceptorFactory() {
         if (null == interceptorFactory && !interceptorAttachers.isEmpty()) {
-            InterceptorPipelineBuilder builder = new InterceptorPipelineBuilder();
-            for (InterceptorAttacher interceptorAttacher : interceptorAttachers) {
+            InterceptorPipelineBuilder<I, O> builder = new InterceptorPipelineBuilder<I, O>();
+            for (InterceptorAttacher<I, O> interceptorAttacher : interceptorAttachers) {
                 if (null != interceptorAttacher.inboundInterceptors && interceptorAttacher.inboundInterceptors.length != 0) {
                     builder.addIntereceptorMapping(interceptorAttacher.constraint, interceptorAttacher.inboundInterceptors);
                 }
                 if (null != interceptorAttacher.outboundInterceptors && interceptorAttacher.outboundInterceptors.length != 0) {
                     builder.addIntereceptorMapping(interceptorAttacher.constraint, interceptorAttacher.outboundInterceptors);
                 }
-                if (null != interceptorAttacher.bidirectionalInterceptors && interceptorAttacher.bidirectionalInterceptors.length != 0) {
-                    builder.addIntereceptorMapping(interceptorAttacher.constraint, interceptorAttacher.bidirectionalInterceptors);
-                }
             }
             interceptorFactory = builder.buildFactory();
         }
     }
 
-    public class InterceptorAttacher {
+    public class InterceptorAttacher<I extends HttpObject, O extends HttpObject> {
 
         private final PipelineDefinition.Key constraint;
-        private InboundInterceptor[] inboundInterceptors;
-        private OutboundInterceptor[] outboundInterceptors;
-        private BidirectionalInterceptorAdapter[] bidirectionalInterceptors;
+        private InboundInterceptor<I, O>[] inboundInterceptors;
+        private OutboundInterceptor<O>[] outboundInterceptors;
 
         public InterceptorAttacher(PipelineDefinition.Key constraint) {
             this.constraint = constraint;
         }
 
-        public T interceptWith(InboundInterceptor... interceptors) {
+        public B interceptWith(InboundInterceptor<I, O>... interceptors) {
             inboundInterceptors = interceptors;
             return returnBuilder();
         }
 
-        public T interceptWith(OutboundInterceptor... interceptors) {
+        public B interceptWith(OutboundInterceptor<O>... interceptors) {
             outboundInterceptors = interceptors;
-            return returnBuilder();
-        }
-
-        public T interceptWith(BidirectionalInterceptorAdapter... interceptors) {
-            bidirectionalInterceptors = interceptors;
             return returnBuilder();
         }
     }

@@ -43,8 +43,8 @@ public class HttpServletRequestTest {
     public static final HttpMethod HTTP_METHOD = HttpMethod.GET;
     public static final HttpVersion HTTP_VERSION = HttpVersion.HTTP_1_1;
     public static final String JSESSIONID_COOKIE_NAME = "JSESSIONID";
-    public static final String REMOTE_ADDRESS = "1.1.1.1";
-    public static final String LOCAL_ADDRESS = "1.0.0.1";
+    @SuppressWarnings("PMD") public static final String REMOTE_ADDRESS = "1.1.1.1";
+    @SuppressWarnings("PMD") public static final String LOCAL_ADDRESS = "1.0.0.1";
     public static final int SERVER_PORT = 9999;
     public static final int LOCAL_PORT = 9998;
     public static final int REMOTE_PORT = 8888;

@@ -1,12 +1,13 @@
 package com.netflix.karyon.server.http.interceptor;
 
-import com.netflix.karyon.server.http.spi.HttpResponseWriter;
+import com.netflix.karyon.server.spi.ResponseWriter;
 import io.netty.handler.codec.http.FullHttpRequest;
+import io.netty.handler.codec.http.FullHttpResponse;
 
 /**
 * @author Nitesh Kant
 */
-class TestableInboundInterceptor implements InboundInterceptor {
+class TestableInboundInterceptor implements InboundInterceptor<FullHttpRequest, FullHttpResponse> {
 
     private final PipelineDefinition.Key filterKey;
     private volatile boolean wasLastCallValid;
@@ -17,11 +18,11 @@ class TestableInboundInterceptor implements InboundInterceptor {
     }
 
     @Override
-    public void interceptIn(FullHttpRequest httpRequest, HttpResponseWriter responseWriter,
-                            InterceptorExecutionContext executionContext) {
+    public void interceptIn(FullHttpRequest httpRequest, ResponseWriter<FullHttpResponse> responseWriter,
+                            NextInterceptorInvoker<FullHttpRequest, FullHttpResponse> executionContext) {
         wasLastCallValid = filterKey.apply(httpRequest, new PipelineDefinition.Key.KeyEvaluationContext());
         receivedACall = true;
-        executionContext.executeNextInterceptor(httpRequest, responseWriter);
+        executionContext.executeNext(httpRequest, responseWriter);
     }
 
     public boolean wasLastCallValid() {

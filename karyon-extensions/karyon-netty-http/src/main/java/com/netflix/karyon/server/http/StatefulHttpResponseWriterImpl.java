@@ -1,42 +1,43 @@
 package com.netflix.karyon.server.http;
 
 import com.google.common.base.Preconditions;
-import com.netflix.karyon.server.http.spi.HttpResponseWriter;
+import com.netflix.karyon.server.http.spi.StatefulHttpResponseWriter;
+import com.netflix.karyon.server.spi.ResponseWriterFactory;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
-import io.netty.channel.ChannelFuture;
-import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.http.DefaultFullHttpResponse;
-import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.FullHttpResponse;
-import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.handler.codec.http.HttpResponseStatus;
+import io.netty.handler.codec.http.HttpVersion;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nullable;
 
-import static io.netty.handler.codec.http.HttpHeaders.Names.CONNECTION;
-import static io.netty.handler.codec.http.HttpHeaders.Names.CONTENT_LENGTH;
+import static com.netflix.karyon.server.http.spi.RequestContextAttributes.getAttributeValueFromContext;
+import static com.netflix.karyon.server.http.spi.RequestContextAttributes.httpProtocolVersionKey;
 
 /**
+ * An implementation of {@link StatefulHttpResponseWriter}. <br/>
+ * This implementation auto-flushes the response. <br/>
+ * You can use {@link ResponseWriterFactoryImpl} as the {@link ResponseWriterFactory} implementation for creating this
+ * class. <br/>
+ *
  * @author Nitesh Kant
  */
-public class HttpResponseWriterImpl implements HttpResponseWriter {
+public class StatefulHttpResponseWriterImpl extends AutoFlushHTTPResponseWriter<FullHttpResponse>
+        implements StatefulHttpResponseWriter {
 
-    private enum ResponseState { NotCreated, Created, Sent }
+    private static final Logger logger = LoggerFactory.getLogger(StatefulHttpResponseWriterImpl.class);
 
-    private static final Logger logger = LoggerFactory.getLogger(HttpResponseWriterImpl.class);
+    private enum ResponseState { NotCreated, Created, Sent}
 
-    private final FullHttpRequest request;
-    private final ChannelHandlerContext ctx;
     private volatile DefaultFullHttpResponse response;
     private volatile ResponseState responseState = ResponseState.NotCreated;
 
-    public HttpResponseWriterImpl(FullHttpRequest request, ChannelHandlerContext ctx) {
-        this.request = request;
-        this.ctx = ctx;
+    public StatefulHttpResponseWriterImpl(ChannelHandlerContext ctx) {
+        super(ctx);
     }
 
     @Override
@@ -46,7 +47,11 @@ public class HttpResponseWriterImpl implements HttpResponseWriter {
         if (null == content) {
             content = Unpooled.buffer(0);
         }
-        response = new DefaultFullHttpResponse(request.getProtocolVersion(), responseStatus, content);
+        HttpVersion protocolVersion = getAttributeValueFromContext(httpProtocolVersionKey, context);
+        if (null == protocolVersion) {
+            protocolVersion = HttpVersion.HTTP_1_1;
+        }
+        response = new DefaultFullHttpResponse(protocolVersion, responseStatus, content);
         responseState = ResponseState.Created;
         return response;
     }
@@ -61,17 +66,10 @@ public class HttpResponseWriterImpl implements HttpResponseWriter {
             }
             return;
         }
-        boolean keepAlive = HttpHeaders.isKeepAlive(request);
-        if (keepAlive) {
-            response.headers().set(CONTENT_LENGTH, response.content().readableBytes());
-            response.headers().set(CONNECTION, HttpHeaders.Values.KEEP_ALIVE);
-        }
 
-        ChannelFuture writeFuture = ctx.write(response);
+        write(response);
+
         responseState = ResponseState.Sent;
-        if (!keepAlive) {
-            writeFuture.addListener(ChannelFutureListener.CLOSE);
-        }
     }
 
     void validateReadyForSend() {
@@ -95,20 +93,16 @@ public class HttpResponseWriterImpl implements HttpResponseWriter {
         return ResponseState.Sent == responseState;
     }
 
-    @Override
-    public ChannelHandlerContext getChannelHandlerContext() {
-        return ctx;
-    }
-
-    FullHttpRequest getRequest() {
-        return request;
-    }
-
-    ChannelHandlerContext getCtx() {
-        return ctx;
-    }
-
     DefaultFullHttpResponse getResponse() {
         return response;
+    }
+
+    public static class ResponseWriterFactoryImpl
+            implements ResponseWriterFactory<FullHttpResponse> {
+
+        @Override
+        public StatefulHttpResponseWriter newWriter(ChannelHandlerContext channelHandlerContext) {
+            return new StatefulHttpResponseWriterImpl(channelHandlerContext);
+        }
     }
 }

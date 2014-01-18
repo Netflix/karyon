@@ -1,18 +1,20 @@
 package com.netflix.karyon.server.http;
 
+import com.netflix.karyon.server.KaryonNettyServer;
 import com.netflix.karyon.server.http.interceptor.PipelineFactory;
-import com.netflix.karyon.server.http.spi.HttpRequestRouter;
+import com.netflix.karyon.server.spi.ChannelPipelineConfigurator;
+import com.netflix.karyon.server.spi.ResponseWriterFactory;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.oio.OioEventLoopGroup;
-import io.netty.channel.socket.SocketChannel;
-import io.netty.channel.socket.oio.OioServerSocketChannel;
+import io.netty.handler.codec.http.HttpObject;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 /**
- * An {@link HttpServer} using netty's {@link OioServerSocketChannel} i.e. blocking I/O. <br/>
+ * An extension of {@link KaryonNettyServer} for HTTP protocol.
+ *
  * Irrespective of the fact whether the configured router is blocking or non-blocking, the router is invoked in netty's
  * event loop as there is one thread per client connection. <br/>
  *
@@ -35,21 +37,18 @@ import javax.annotation.Nullable;
  *
  * @author Nitesh Kant
  */
-public class BlockingHttpServer extends HttpServer {
-
-    @Nullable
-    private final PipelineFactory interceptorFactory;
+public class BlockingHttpServer<I extends HttpObject, O extends HttpObject> extends HttpServer<I, O> {
 
     BlockingHttpServer(@Nonnull ServerBootstrap bootstrap,
-                       @Nonnull HttpRequestRouter httpRequestRouter,
-                       @Nullable PipelineFactory interceptorFactory,
+                       @Nullable PipelineFactory<I, O> interceptorFactory,
+                       @Nonnull ChannelPipelineConfigurator<I, O> pipelineConfigurator,
+                       @Nonnull ResponseWriterFactory<O> responseWriterFactory,
                        @Nullable com.netflix.karyon.server.ServerBootstrap karyonBootstrap) {
-        super(bootstrap, httpRequestRouter, karyonBootstrap);
-        this.interceptorFactory = interceptorFactory;
+        super(bootstrap, pipelineConfigurator, responseWriterFactory, interceptorFactory, karyonBootstrap);
     }
 
     @Override
-    protected void addRouterToPipeline(SocketChannel ch) {
-        ch.pipeline().addLast("router", new ServerHandler(httpRequestRouter, interceptorFactory));
+    protected boolean shouldRunBlockingRouterInAnExecutor() {
+        return false;
     }
 }

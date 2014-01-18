@@ -1,8 +1,8 @@
 package com.netflix.karyon.server.http.servlet.blocking;
 
 import com.google.common.base.Joiner;
-import com.netflix.karyon.server.http.spi.HttpResponseWriter;
 import com.netflix.karyon.server.http.spi.QueryStringDecoder;
+import com.netflix.karyon.server.http.spi.StatefulHttpResponseWriter;
 import io.netty.buffer.ByteBuf;
 import io.netty.handler.codec.http.CookieDecoder;
 import io.netty.handler.codec.http.DefaultFullHttpRequest;
@@ -43,8 +43,8 @@ public class HttpServletResponseTest {
     public static final HttpVersion HTTP_VERSION = HttpVersion.HTTP_1_1;
     public static final String JSESSIONID_COOKIE_NAME = "JSESSIONID";
 
-    public static final String REMOTE_ADDRESS = "1.1.1.1";
-    public static final String LOCAL_ADDRESS = "1.0.0.1";
+    @SuppressWarnings("PMD") public static final String REMOTE_ADDRESS = "1.1.1.1";
+    @SuppressWarnings("PMD") public static final String LOCAL_ADDRESS = "1.0.0.1";
     public static final int SERVER_PORT = 9999;
     public static final int LOCAL_PORT = 9998;
     public static final int REMOTE_PORT = 8888;
@@ -80,7 +80,7 @@ public class HttpServletResponseTest {
         servletResponse.addCookie(cookieToAdd);
         Assert.assertTrue("Set-Cookie header must be present after adding a cookie",
                           servletResponse.containsHeader(HttpHeaders.Names.SET_COOKIE));
-        HttpResponseWriter responseWriter = servletResponse.responseWriter();
+        StatefulHttpResponseWriter responseWriter = servletResponse.responseWriter();
         FullHttpResponse response = responseWriter.response();
         Assert.assertNotNull("Response is null.", response);
         String setCookieVal = response.headers().get(HttpHeaders.Names.SET_COOKIE);
@@ -391,7 +391,7 @@ public class HttpServletResponseTest {
                                                                           REMOTE_ADDRESS, REMOTE_PORT);
         HttpServletRequestImpl request = new HttpServletRequestImpl(pathComponents, nettyRequest, sessionManager,
                                                                     context, false);
-        return new HttpServletResponseImpl(new HttpResponseWriterMock(HttpVersion.HTTP_1_1, context),
+        return new HttpServletResponseImpl(new StatefulHttpResponseWriterMock(HttpVersion.HTTP_1_1, context),
                                            new DefaultErrorPage(), request);
     }
 

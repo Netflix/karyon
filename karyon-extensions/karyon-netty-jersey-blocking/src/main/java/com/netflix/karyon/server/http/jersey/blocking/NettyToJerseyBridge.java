@@ -1,6 +1,6 @@
 package com.netflix.karyon.server.http.jersey.blocking;
 
-import com.netflix.karyon.server.http.spi.HttpResponseWriter;
+import com.netflix.karyon.server.http.spi.StatefulHttpResponseWriter;
 import com.sun.jersey.core.header.InBoundHeaders;
 import com.sun.jersey.spi.container.ContainerRequest;
 import com.sun.jersey.spi.container.ContainerResponse;
@@ -54,7 +54,7 @@ final class NettyToJerseyBridge {
         }
     }
 
-    ContainerResponseWriter bridgeResponseWriter(final HttpResponseWriter responseWriter) {
+    ContainerResponseWriter bridgeResponseWriter(final StatefulHttpResponseWriter responseWriter) {
         return new ContainerResponseWriter() {
 
             @Override

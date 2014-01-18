@@ -1,8 +1,11 @@
 package com.netflix.karyon.server.http.interceptor;
 
 import io.netty.handler.codec.http.DefaultFullHttpRequest;
+import io.netty.handler.codec.http.DefaultFullHttpResponse;
 import io.netty.handler.codec.http.FullHttpRequest;
+import io.netty.handler.codec.http.FullHttpResponse;
 import io.netty.handler.codec.http.HttpMethod;
+import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.handler.codec.http.HttpVersion;
 import org.junit.Assert;
 import org.junit.Test;
@@ -17,7 +20,8 @@ public class ExecCtxTest {
 
     @Test
     public void testInboundCtx() throws Exception {
-        List<InboundInterceptor> interceptors = new ArrayList<InboundInterceptor>();
+        List<InboundInterceptor<FullHttpRequest, FullHttpResponse>> interceptors =
+                new ArrayList<InboundInterceptor<FullHttpRequest, FullHttpResponse>>();
         TestableInboundInterceptor intercept1 = new TestableInboundInterceptor(new ServletStyleUriConstraintKey("*", ""));
         TestableInboundInterceptor intercept2 = new TestableInboundInterceptor(new ServletStyleUriConstraintKey("*", ""));
         TestableInboundInterceptor intercept3 = new TestableInboundInterceptor(new ServletStyleUriConstraintKey("*", ""));
@@ -26,9 +30,10 @@ public class ExecCtxTest {
         interceptors.add(intercept2);
         interceptors.add(intercept3);
 
-        InterceptorExecutionContextImpl ctx = new InterceptorExecutionContextImpl(interceptors, tail);
+        NextInterceptorInvoker<FullHttpRequest, FullHttpResponse> ctx =
+                new InboundNextInterceptorInvoker<FullHttpRequest, FullHttpResponse>(interceptors, tail);
         FullHttpRequest request = new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "/abc/def"); // contents do not matter as we do not run filtering
-        ctx.executeNextInterceptor(request, new HttpResponseWriterMock());
+        ctx.executeNext(request, new StatefulHttpResponseWriterMock());
 
 
         Assert.assertTrue("1st interceptor did not get invoked.", intercept1.isReceivedACall());
@@ -39,21 +44,36 @@ public class ExecCtxTest {
 
     @Test
     public void testOutboundCtx() throws Exception {
-        List<OutboundInterceptor> interceptors = new ArrayList<OutboundInterceptor>();
-        TestableOutboundInterceptor intercept1 = new TestableOutboundInterceptor(new ServletStyleUriConstraintKey("*",
-                                                                                                                  ""));
-        TestableOutboundInterceptor intercept2 = new TestableOutboundInterceptor(new ServletStyleUriConstraintKey("*",
-                                                                                                                  ""));
-        TestableOutboundInterceptor intercept3 = new TestableOutboundInterceptor(new ServletStyleUriConstraintKey("*",
-                                                                                                                  ""));
-        TestableOutboundInterceptor tail = new TestableOutboundInterceptor(new ServletStyleUriConstraintKey("*", ""));
+
+        FullHttpRequest testRequest = new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "/abc/");
+
+        List<OutboundInterceptor<FullHttpResponse>> interceptors =
+                new ArrayList<OutboundInterceptor<FullHttpResponse>>();
+        TestableOutboundInterceptor<FullHttpRequest, FullHttpResponse> intercept1 =
+                new TestableOutboundInterceptor<FullHttpRequest, FullHttpResponse>(new ServletStyleUriConstraintKey("*",
+                                                                                                                    ""));
+        intercept1.setLastInCallRequest(testRequest);
+        TestableOutboundInterceptor<FullHttpRequest, FullHttpResponse> intercept2 =
+                new TestableOutboundInterceptor<FullHttpRequest, FullHttpResponse>(new ServletStyleUriConstraintKey("*",
+                                                                                                                    ""));
+        intercept2.setLastInCallRequest(testRequest);
+        TestableOutboundInterceptor<FullHttpRequest, FullHttpResponse> intercept3 =
+                new TestableOutboundInterceptor<FullHttpRequest, FullHttpResponse>(new ServletStyleUriConstraintKey("*",
+                                                                                                                    ""));
+        intercept3.setLastInCallRequest(testRequest);
+        TestableOutboundInterceptor<FullHttpRequest, FullHttpResponse> tail =
+                new TestableOutboundInterceptor<FullHttpRequest, FullHttpResponse>(new ServletStyleUriConstraintKey("*",
+                                                                                                                    ""));
+        tail.setLastInCallRequest(testRequest);
+
         interceptors.add(intercept1);
         interceptors.add(intercept2);
         interceptors.add(intercept3);
 
-        InterceptorExecutionContextImpl ctx = new InterceptorExecutionContextImpl(interceptors, tail);
-        FullHttpRequest request = new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "/abc/def"); // contents do not matter as we do not run filtering
-        ctx.executeNextInterceptor(request, new HttpResponseWriterMock());
+        NextInterceptorInvoker<FullHttpResponse, FullHttpResponse> ctx =
+                new OutboundNextInterceptorInvoker<FullHttpResponse>(interceptors, tail);
+        FullHttpResponse request = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK);
+        ctx.executeNext(request, new StatefulHttpResponseWriterMock());
 
 
         Assert.assertTrue("1st interceptor did not get invoked.", intercept1.isReceivedACall());

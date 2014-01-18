@@ -1,7 +1,6 @@
 package com.netflix.karyon.server.http.interceptor;
 
 import com.google.common.base.Preconditions;
-import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.HttpRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -66,7 +65,7 @@ public class ServletStyleUriConstraintKey implements PipelineDefinition.Key {
     }
 
     @Override
-    public boolean apply(FullHttpRequest request, KeyEvaluationContext context) {
+    public boolean apply(HttpRequest request, KeyEvaluationContext context) {
         String requestUriPath = context.getRequestUriPath(request);
         boolean matches = false;
         if (null != requestUriPath) {
@@ -76,7 +75,7 @@ public class ServletStyleUriConstraintKey implements PipelineDefinition.Key {
     }
 
     /**
-     * This must be called if and only if {@link #apply(FullHttpRequest, PipelineDefinition.Key.KeyEvaluationContext)}
+     * This must be called if and only if {@link #apply(HttpRequest, PipelineDefinition.Key.KeyEvaluationContext)}
      * returned for the same request.
      *
      * @param request Request which satisfies this key.
@@ -114,7 +113,7 @@ public class ServletStyleUriConstraintKey implements PipelineDefinition.Key {
             boolean matches = requestUriPath.equals(constraint);
             if (!noLog && logger.isDebugEnabled()) {
                 logger.debug("Exact match result for servlet style uri constraint for uri path {} and constraint {} : {}",
-                             new Object[] {requestUriPath, constraint, matches});
+                             requestUriPath, constraint, matches);
             }
             return matches;
         }
@@ -148,7 +147,7 @@ public class ServletStyleUriConstraintKey implements PipelineDefinition.Key {
             boolean matches = requestUriPath.startsWith(constraint);
             if (!noLog && logger.isDebugEnabled()) {
                 logger.debug("Prefix match result for servlet style uri constraint for uri path {} and constraint {} : {}",
-                             new Object[] {requestUriPath, constraint, matches});
+                             requestUriPath, constraint, matches);
             }
             return matches;
         }
@@ -173,7 +172,7 @@ public class ServletStyleUriConstraintKey implements PipelineDefinition.Key {
             boolean matches = requestUriPath.contains(constraint);// The constructor removes the preciding * in the constraint.
             if (!noLog && logger.isDebugEnabled()) {
                 logger.debug("Extension match result for servlet style uri constraint for uri path {} and constraint {} : {}",
-                             new Object[] {requestUriPath, constraint, matches});
+                             requestUriPath, constraint, matches);
             }
             return matches;
         }

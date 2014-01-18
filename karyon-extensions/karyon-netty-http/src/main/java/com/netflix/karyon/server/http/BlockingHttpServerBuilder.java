@@ -1,7 +1,12 @@
 package com.netflix.karyon.server.http;
 
-import io.netty.channel.oio.OioEventLoopGroup;
-import io.netty.channel.socket.oio.OioServerSocketChannel;
+import com.netflix.karyon.server.BlockingServerBuilderAttributes;
+import com.netflix.karyon.server.BlockingServerBuilderAttributesImpl;
+import io.netty.bootstrap.ServerBootstrap;
+import io.netty.handler.codec.http.HttpObject;
+import io.netty.handler.logging.LogLevel;
+
+import javax.annotation.Nullable;
 
 /**
  * A builder to create a {@link BlockingHttpServer} instance. <br/>
@@ -18,28 +23,34 @@ import io.netty.channel.socket.oio.OioServerSocketChannel;
  *
  * @author Nitesh Kant
  */
-public class BlockingHttpServerBuilder extends HttpServerBuilder<BlockingHttpServerBuilder, BlockingHttpServer> {
+public class BlockingHttpServerBuilder<I extends HttpObject, O extends HttpObject>
+        extends HttpServerBuilder<BlockingHttpServerBuilder<I, O>, BlockingHttpServer<I, O>, I, O>
+        implements BlockingServerBuilderAttributes<BlockingHttpServerBuilder<I, O>>{
 
-    private int workerCount = 200;
+    private final BlockingServerBuilderAttributesImpl<BlockingHttpServerBuilder<I, O>> blockingServerBuilderAttributes;
 
     public BlockingHttpServerBuilder(int serverPort) {
-        super(serverPort);
+        this(serverPort, null);
     }
 
-    public BlockingHttpServerBuilder withWorkerCount(int workerCount) {
-        this.workerCount = workerCount;
-        return this;
-    }
-
-    @Override
-    protected BlockingHttpServer createServer() {
-        return new BlockingHttpServer(nettyBootstrap, requestRouter, interceptorFactory, karyonBootstrap);
+    public BlockingHttpServerBuilder(int serverPort, @Nullable LogLevel nettyLoggerLevel) {
+        super(serverPort, nettyLoggerLevel);
+        blockingServerBuilderAttributes = new BlockingServerBuilderAttributesImpl<BlockingHttpServerBuilder<I, O>>(this);
     }
 
     @Override
-    protected void configureBootstrap() {
-        nettyBootstrap.group(new OioEventLoopGroup(workerCount))
-                      .channel(OioServerSocketChannel.class);
+    protected BlockingHttpServer<I, O> createServer() {
+        return new BlockingHttpServer<I, O>(nettyBootstrap, interceptorFactory, pipelineConfigurator,
+                                            responseWriterFactory, karyonBootstrap);
     }
 
+    @Override
+    protected void configureNettyBootstrap(ServerBootstrap nettyBootstrap) {
+        blockingServerBuilderAttributes.configurOIOattributesInBootstrap(nettyBootstrap);
+    }
+
+    @Override
+    public BlockingHttpServerBuilder<I, O> withWorkerCount(int workerCount) {
+        return blockingServerBuilderAttributes.withWorkerCount(workerCount);
+    }
 }

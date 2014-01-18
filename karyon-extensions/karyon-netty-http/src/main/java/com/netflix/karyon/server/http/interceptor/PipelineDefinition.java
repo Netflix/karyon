@@ -3,10 +3,10 @@ package com.netflix.karyon.server.http.interceptor;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Multimap;
-import com.netflix.karyon.server.http.spi.RequestContextAttributes;
 import com.netflix.karyon.server.http.spi.QueryStringDecoder;
+import com.netflix.karyon.server.http.spi.RequestContextAttributes;
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.handler.codec.http.FullHttpRequest;
+import io.netty.handler.codec.http.HttpObject;
 import io.netty.handler.codec.http.HttpRequest;
 
 import javax.annotation.Nullable;
@@ -19,25 +19,25 @@ import javax.annotation.Nullable;
  *
  * @author Nitesh Kant
  */
-public interface PipelineDefinition {
+public interface PipelineDefinition<I extends HttpObject, O extends HttpObject> {
 
     /**
      * Returns a super set of all interceptors defined for the application. <br/>
-     * {@link Key#apply(FullHttpRequest, Key.KeyEvaluationContext)} will be invoked on the returned keys to determine which interceptors apply for a
+     * {@link Key#apply(HttpRequest, Key.KeyEvaluationContext)} will be invoked on the returned keys to determine which interceptors apply for a
      * particular request.
      *
      * @return A super set of all interceptors defined for the application.
      */
-    Multimap<Key, InboundInterceptor> getInboundInterceptors();
+    Multimap<Key, InboundInterceptor<I, O>> getInboundInterceptors();
 
     /**
      * Returns a super set of all interceptors defined for the application. <br/>
-     * {@link Key#apply(FullHttpRequest, Key.KeyEvaluationContext)} will be invoked on the returned keys to determine which interceptors apply for a
-     * particular request.
+     * {@link Key#apply(HttpRequest, Key.KeyEvaluationContext)} will be invoked on the returned keys
+     * to determine which interceptors apply for a particular request.
      *
      * @return A super set of all interceptors defined for the application.
      */
-    Multimap<Key, OutboundInterceptor> getOutboundInterceptors();
+    Multimap<Key, OutboundInterceptor<O>> getOutboundInterceptors();
 
     /**
      * Key for a {@link InboundInterceptor} or {@link OutboundInterceptor} which determines whether a interceptor must
@@ -58,7 +58,7 @@ public interface PipelineDefinition {
          *
          * @return {@code true} if the interceptor must be applied for this request.
          */
-        boolean apply(FullHttpRequest request, KeyEvaluationContext context);
+        boolean apply(HttpRequest request, KeyEvaluationContext context);
 
         /**
          * A context to store results of costly operations during evaluation of filter keys, eg: request URI parsing. <p/>
