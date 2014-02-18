@@ -19,8 +19,7 @@ package com.netflix.adminresources.resources;
 import com.netflix.adminresources.AdminResourcesContainer;
 import com.netflix.config.ConcurrentCompositeConfiguration;
 import com.netflix.config.ConfigurationManager;
-import com.netflix.karyon.spi.Component;
-import org.apache.commons.configuration.AbstractConfiguration;
+import com.netflix.karyon.governator.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

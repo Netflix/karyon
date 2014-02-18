@@ -32,5 +32,4 @@ dependencies {
     runtime 'org.slf4j:slf4j-simple:1.7.0'
     compile 'com.netflix.servo:servo-core:0.5.2'
     compile 'io.netty:netty-handler:4.0.13.Final'
-    compile 'io.netty:netty-codec-http:4.0.13.Final'
 }

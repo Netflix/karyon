@@ -28,7 +28,7 @@ apply from: file('../../gradle/check.gradle')
 apply from: file('../../gradle/license.gradle')
 
 dependencies {
-    compile project(':karyon-core')
+    compile project(':karyon-governator')
     compile 'javax.servlet:servlet-api:2.5'
     compile 'com.google.inject.extensions:guice-servlet:3.0'
 }

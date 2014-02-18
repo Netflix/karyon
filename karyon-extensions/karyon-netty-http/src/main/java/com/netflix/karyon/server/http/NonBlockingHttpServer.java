@@ -1,5 +1,6 @@
 package com.netflix.karyon.server.http;
 
+import com.netflix.karyon.server.bootstrap.KaryonBootstrap;
 import com.netflix.karyon.server.http.interceptor.PipelineFactory;
 import com.netflix.karyon.server.http.spi.HttpRequestRouter;
 import com.netflix.karyon.server.spi.ChannelPipelineConfigurator;
@@ -39,7 +40,7 @@ public class NonBlockingHttpServer<I extends HttpObject, O extends HttpObject> e
                                  @Nonnull ResponseWriterFactory<O> responseWriterFactory,
                                  @Nullable PipelineFactory<I, O> interceptorFactory,
                                  @Nonnull ChannelPipelineConfigurator<I, O> pipelineConfigurator,
-                                 @Nullable com.netflix.karyon.server.ServerBootstrap karyonBootstrap) {
+                                 @Nullable KaryonBootstrap karyonBootstrap) {
         super(bootstrap, pipelineConfigurator, responseWriterFactory, interceptorFactory, karyonBootstrap);
     }
 

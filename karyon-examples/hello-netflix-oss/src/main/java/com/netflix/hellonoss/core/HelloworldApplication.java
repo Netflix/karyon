@@ -15,7 +15,7 @@
  */
 package com.netflix.hellonoss.core;
 
-import com.netflix.karyon.spi.Application;
+import com.netflix.karyon.governator.Application;
 
 import javax.annotation.PostConstruct;
 

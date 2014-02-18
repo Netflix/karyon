@@ -97,7 +97,6 @@ final class NettyToJerseyBridge {
 
         @Override
         public <A> List<A> get(String key, Class<A> type) {
-            // TODO: See if it is required to return int & date type values.
             if (!type.isAssignableFrom(String.class)) {
                 return Collections.emptyList();
             }

@@ -1,7 +1,9 @@
 package com.netflix.karyon.server;
 
+import com.netflix.karyon.server.bootstrap.KaryonBootstrap;
 import com.netflix.karyon.server.spi.ChannelPipelineConfigurator;
 import com.netflix.karyon.server.spi.ResponseWriterFactory;
+import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.oio.OioEventLoopGroup;
 import io.netty.channel.socket.oio.OioServerSocketChannel;
@@ -35,10 +37,10 @@ import javax.annotation.Nullable;
  */
 public class BlockingKaryonServer<I, O> extends KaryonNettyServer<I, O> {
 
-    protected BlockingKaryonServer(@Nonnull io.netty.bootstrap.ServerBootstrap bootstrap,
+    protected BlockingKaryonServer(@Nonnull ServerBootstrap bootstrap,
                                    @Nonnull ChannelPipelineConfigurator<I, O> pipelineConfigurator,
                                    @Nonnull ResponseWriterFactory<O> responseWriterFactory,
-                                   @Nullable ServerBootstrap karyonBootstrap) {
+                                   @Nullable KaryonBootstrap karyonBootstrap) {
         super(bootstrap, pipelineConfigurator, responseWriterFactory, karyonBootstrap);
     }
 

@@ -2,6 +2,7 @@ package com.netflix.karyon.server.http;
 
 import com.netflix.karyon.server.ApplicationPipelineConfigurator;
 import com.netflix.karyon.server.KaryonNettyServer;
+import com.netflix.karyon.server.bootstrap.KaryonBootstrap;
 import com.netflix.karyon.server.http.interceptor.InterceptorsNettyHandler;
 import com.netflix.karyon.server.http.interceptor.PipelineFactory;
 import com.netflix.karyon.server.spi.ChannelPipelineConfigurator;
@@ -29,7 +30,7 @@ public abstract class HttpServer<I extends HttpObject, O extends HttpObject> ext
                @Nonnull ChannelPipelineConfigurator<I, O> pipelineConfigurator,
                @Nonnull ResponseWriterFactory<O> responseWriterFactory,
                @Nullable final PipelineFactory<I, O> interceptorFactory,
-               @Nullable com.netflix.karyon.server.ServerBootstrap karyonBootstrap) {
+               @Nullable KaryonBootstrap karyonBootstrap) {
         super(bootstrap, pipelineConfigurator, responseWriterFactory, karyonBootstrap);
         this.interceptorFactory = interceptorFactory;
     }

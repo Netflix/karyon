@@ -17,41 +17,28 @@
 package com.netflix.karyon.server.eureka;
 
 import com.google.common.base.Preconditions;
-import com.google.inject.Inject;
 import com.netflix.appinfo.ApplicationInfoManager;
 import com.netflix.appinfo.CloudInstanceConfig;
 import com.netflix.appinfo.DataCenterInfo;
 import com.netflix.appinfo.EurekaInstanceConfig;
 import com.netflix.appinfo.InstanceInfo;
 import com.netflix.appinfo.MyDataCenterInstanceConfig;
-import com.netflix.config.ConfigurationManager;
 import com.netflix.discovery.DefaultEurekaClientConfig;
 import com.netflix.discovery.DiscoveryManager;
-import com.netflix.governator.annotations.Configuration;
-import com.netflix.governator.guice.lazy.LazySingleton;
-import com.netflix.karyon.spi.PropertyNames;
-import com.netflix.karyon.spi.ServiceRegistryClient;
+import com.netflix.karyon.server.bootstrap.AsyncHealthCheckInvocationStrategy;
+import com.netflix.karyon.server.bootstrap.HealthCheckInvocationStrategy;
+import com.netflix.karyon.server.bootstrap.ServiceRegistryClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.PostConstruct;
+import javax.annotation.Nullable;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import static com.netflix.karyon.spi.PropertyNames.EUREKA_CLIENT_PROPERTIES_NAME_PREFIX_PROP_NAME;
-import static com.netflix.karyon.spi.PropertyNames.EUREKA_DATACENTER_TYPE_PROP_NAME;
-import static com.netflix.karyon.spi.PropertyNames.EUREKA_PROPERTIES_NAME_PREFIX_PROP_NAME;
-
 /**
- * A handler for integrating with <a href="https://github.com/Netflix/eureka/">Eureka</a>. This handler can be disabled
- * by setting a property {@link PropertyNames#DISABLE_EUREKA_INTEGRATION} as <code>true</code>. <br/>
- * If enabled, this class registers the application with eureka as a cloud instance iff the value of the property
- * {@link PropertyNames#EUREKA_DATACENTER_TYPE_PROP_NAME} is set to {@link DataCenterInfo.Name#Amazon} or
- * {@link DataCenterInfo.Name#Netflix}. In such a case, this class uses {@link CloudInstanceConfig} to register with
- * eureka. Otherwise {@link MyDataCenterInstanceConfig} is used as eureka config.
+ * A handler for integrating with <a href="https://github.com/Netflix/eureka/">Eureka</a>. <br/>
  *
  * @author Nitesh Kant
  */
-@LazySingleton
 public class EurekaHandler implements ServiceRegistryClient {
 
     protected static final Logger logger = LoggerFactory.getLogger(EurekaHandler.class);
@@ -61,81 +48,30 @@ public class EurekaHandler implements ServiceRegistryClient {
 
     private AtomicBoolean registered = new AtomicBoolean();
 
-    @Configuration(
-            value = EUREKA_PROPERTIES_NAME_PREFIX_PROP_NAME,
-            documentation = "Namespace for eureka related properties."
-    )
-    protected String eurekaNamespace = "eureka";
+    protected final String eurekaNamespace;
+    protected final String eurekaClientNamespace;
+    protected final DataCenterInfo.Name datacenterType;
 
-    @Configuration(
-            value = EUREKA_CLIENT_PROPERTIES_NAME_PREFIX_PROP_NAME,
-            documentation = "Namespace for eureka client related properties."
-    )
-    protected String eurekaClientNamespace;
-
-    @Configuration(
-            value = EUREKA_DATACENTER_TYPE_PROP_NAME,
-            documentation = "Datacenter type used for initializing appropriate eureka instance configuration."
-    )
-    protected String datacenterType;
-
-    @Inject
     public EurekaHandler(EurekaHealthCheckCallback eurekaHealthCheckCallback,
-                         HealthCheckInvocationStrategy healthCheckInvocationStrategy) {
+                         HealthCheckInvocationStrategy healthCheckInvocationStrategy,
+                         @Nullable String eurekaNamespace, @Nullable String eurekaClientNamespace,
+                         @Nullable DataCenterInfo.Name datacenterType) {
+        this.eurekaNamespace = sanitizeNamespace(null == eurekaNamespace ? "eureka" : eurekaNamespace);
+        this.eurekaClientNamespace = null == eurekaClientNamespace ? eurekaNamespace : sanitizeNamespace(eurekaClientNamespace);
+        this.datacenterType = null == datacenterType ? DataCenterInfo.Name.MyOwn : datacenterType;
         this.eurekaHealthCheckCallback = eurekaHealthCheckCallback;
         this.healthCheckInvocationStrategy = healthCheckInvocationStrategy;
     }
 
-    @PostConstruct
-    public void postConfig() {
-        if (!eurekaNamespace.endsWith(".")) {
-            eurekaNamespace = eurekaNamespace + "."; // Eureka requires this.
-        }
-
-        if (null == eurekaClientNamespace) {
-            eurekaClientNamespace = eurekaNamespace;
-        } else if (!eurekaClientNamespace.endsWith(".")) {
-            eurekaClientNamespace = eurekaClientNamespace + "."; // Eureka requires this.
-        }
+    @Override
+    public void start() {
         register();
-    }
-
-    public void register() {
-        if (isEurekaDisabled()) {
-            logger.info("Eureka is disabled, skipping instance's eureka registration.");
-            return;
-        }
-
-        if (!registered.compareAndSet(false, true)) {
-            logger.info("Eureka handler already registered, skipping registration.");
-            return;
-        }
-
-        EurekaInstanceConfig eurekaInstanceConfig = createEurekaInstanceConfig();
-
-        DiscoveryManager.getInstance().initComponent(eurekaInstanceConfig, new DefaultEurekaClientConfig(eurekaClientNamespace));
-        if (null != eurekaHealthCheckCallback) {
-            // We always register the callback with eureka, the handler in turn checks if the unification is enabled, if yes,
-            // the underlying handler is used else returns healthy.
-            DiscoveryManager.getInstance().getDiscoveryClient().registerHealthCheckCallback(eurekaHealthCheckCallback);
-        }
     }
 
     protected EurekaInstanceConfig createEurekaInstanceConfig() {
         EurekaInstanceConfig eurekaInstanceConfig;
 
-        DataCenterInfo.Name dcType = DataCenterInfo.Name.MyOwn;
-        if (null != datacenterType) {
-            try {
-                dcType = DataCenterInfo.Name.valueOf(datacenterType);
-            } catch (IllegalArgumentException e) {
-                logger.warn(String.format(
-                        "Illegal value %s for eureka datacenter provided in property %s. Ignoring the same and defaulting to %s",
-                        datacenterType, EUREKA_DATACENTER_TYPE_PROP_NAME, DataCenterInfo.Name.MyOwn));
-            }
-        }
-
-        switch (dcType) {
+        switch (datacenterType) {
             case Amazon:
                 eurekaInstanceConfig = new CloudInstanceConfig(eurekaNamespace);
                 break;
@@ -156,20 +92,10 @@ public class EurekaHandler implements ServiceRegistryClient {
     }
 
     public void markAsUp() {
-        if (isEurekaDisabled()) {
-            logger.info("Eureka is disabled, skipping instance's eureka update to up.");
-            return;
-        }
-
         ApplicationInfoManager.getInstance().setInstanceStatus(InstanceInfo.InstanceStatus.UP);
     }
 
     public void markAsDown() {
-        if (isEurekaDisabled()) {
-            logger.info("Eureka is disabled, skipping instance's eureka update to down.");
-            return;
-        }
-
         DiscoveryManager.getInstance().shutdownComponent();
         if (null != healthCheckInvocationStrategy
                 && AsyncHealthCheckInvocationStrategy.class.isAssignableFrom(healthCheckInvocationStrategy.getClass())) {
@@ -196,7 +122,60 @@ public class EurekaHandler implements ServiceRegistryClient {
         }
     }
 
-    private boolean isEurekaDisabled() {
-        return ConfigurationManager.getConfigInstance().getBoolean(PropertyNames.DISABLE_EUREKA_INTEGRATION, false);
+    private static String sanitizeNamespace(String providedNamespace) {
+        if (!providedNamespace.endsWith(".")) {
+            return providedNamespace + '.';
+        }
+        return providedNamespace;
+    }
+
+    protected void register() {
+        if (!registered.compareAndSet(false, true)) {
+            logger.info("Eureka handler already registered, skipping registration.");
+            return;
+        }
+
+        EurekaInstanceConfig eurekaInstanceConfig = createEurekaInstanceConfig();
+
+        DiscoveryManager.getInstance().initComponent(eurekaInstanceConfig, new DefaultEurekaClientConfig(eurekaClientNamespace));
+        if (null != eurekaHealthCheckCallback) {
+            // We always register the callback with eureka, the handler in turn checks if the unification is enabled, if yes,
+            // the underlying handler is used else returns healthy.
+            DiscoveryManager.getInstance().getDiscoveryClient().registerHealthCheckCallback(eurekaHealthCheckCallback);
+        }
+    }
+
+    public static class Builder {
+
+        private String namespace;
+        private String clientNamespace;
+        private DataCenterInfo.Name datacenterType;
+        private final HealthCheckInvocationStrategy strategy;
+        private final EurekaHealthCheckCallback callback;
+
+        public Builder(HealthCheckInvocationStrategy strategy) {
+            Preconditions.checkNotNull(strategy, "Health check strategy can not be null.");
+            this.strategy = strategy;
+            callback = new EurekaHealthCheckCallback(strategy);
+        }
+
+        public Builder namespace(String namespace) {
+            this.namespace = namespace;
+            return this;
+        }
+
+        public Builder clientNamespace(String clientNamespace) {
+            this.clientNamespace = clientNamespace;
+            return this;
+        }
+
+        public Builder datacenterType(DataCenterInfo.Name datacenterType) {
+            this.datacenterType = datacenterType;
+            return this;
+        }
+
+        public EurekaHandler build() {
+            return new EurekaHandler(callback, strategy, namespace, clientNamespace, datacenterType);
+        }
     }
 }

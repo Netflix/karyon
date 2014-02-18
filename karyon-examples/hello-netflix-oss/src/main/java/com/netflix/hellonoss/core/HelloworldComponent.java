@@ -16,7 +16,7 @@
 
 package com.netflix.hellonoss.core;
 
-import com.netflix.karyon.spi.Component;
+import com.netflix.karyon.governator.Component;
 
 import javax.annotation.PostConstruct;
 

@@ -1,6 +1,7 @@
 package com.netflix.karyon.server;
 
 import com.google.common.base.Preconditions;
+import com.netflix.karyon.server.bootstrap.KaryonBootstrap;
 import com.netflix.karyon.server.spi.BlockingRequestRouter;
 import com.netflix.karyon.server.spi.ChannelPipelineConfigurator;
 import com.netflix.karyon.server.spi.DefaultChannelPipelineConfigurator;
@@ -26,7 +27,7 @@ public abstract class KaryonNettyServerBuilder<B extends KaryonNettyServerBuilde
 
     protected final ServerBootstrap nettyBootstrap;
     private final String uniqueServerName;
-    protected com.netflix.karyon.server.ServerBootstrap karyonBootstrap;
+    protected KaryonBootstrap karyonBootstrap;
     protected ChannelPipelineConfigurator<I, O> pipelineConfigurator;
     protected ResponseWriterFactory<O> responseWriterFactory;
 
@@ -59,7 +60,7 @@ public abstract class KaryonNettyServerBuilder<B extends KaryonNettyServerBuilde
         return returnBuilder();
     }
 
-    public B karyonBootstrap(com.netflix.karyon.server.ServerBootstrap karyonBootstrap) {
+    public B karyonBootstrap(KaryonBootstrap karyonBootstrap) {
         this.karyonBootstrap = karyonBootstrap;
         return returnBuilder();
     }

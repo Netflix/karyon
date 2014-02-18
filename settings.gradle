@@ -15,7 +15,7 @@
  */
 
 rootProject.name='karyon'
-include 'karyon-spi',\
+include 'karyon-governator',\
  'karyon-eureka',\
  'karyon-core',\
  'karyon-extensions:karyon-servlet', \

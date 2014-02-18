@@ -19,12 +19,12 @@ package com.netflix.karyon.server.guice;
 import com.google.common.base.Throwables;
 import com.google.inject.Injector;
 import com.google.inject.servlet.GuiceServletContextListener;
+import com.netflix.karyon.governator.KaryonGovernatorBootstrap;
 import com.netflix.karyon.server.KaryonServer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.servlet.ServletContextEvent;
-import java.io.IOException;
 
 /**
  * An extension of {@link KaryonServer} to hook on to the guice servlet module. In order for this to work you must have
@@ -55,16 +55,22 @@ public class KaryonGuiceContextListener extends GuiceServletContextListener {
 
     protected static final Logger logger = LoggerFactory.getLogger(KaryonGuiceContextListener.class);
 
-    private final KaryonServer server;
+    protected final KaryonServer server;
+    private final KaryonGovernatorBootstrap bootstrap;
 
     @SuppressWarnings("unused")
     public KaryonGuiceContextListener() {
-        server = new KaryonServer();
+        this(new KaryonGovernatorBootstrap.Builder().build());
+    }
+
+    protected KaryonGuiceContextListener(KaryonGovernatorBootstrap bootstrap) {
+        this.bootstrap = bootstrap;
+        server = new KaryonServer(bootstrap);
     }
 
     @Override
     protected Injector getInjector() {
-        return server.initialize();
+        return bootstrap.getInjector();
     }
 
     @Override
@@ -82,8 +88,8 @@ public class KaryonGuiceContextListener extends GuiceServletContextListener {
     public void contextDestroyed(ServletContextEvent servletContextEvent) {
         super.contextDestroyed(servletContextEvent);
         try {
-            server.close();
-        } catch (IOException e) {
+            server.stop();
+        } catch (Exception e) {
             logger.error("Error while stopping karyon.", e);
             throw Throwables.propagate(e);
         }

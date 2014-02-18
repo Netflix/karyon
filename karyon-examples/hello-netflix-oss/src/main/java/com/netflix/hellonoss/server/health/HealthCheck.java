@@ -18,7 +18,7 @@ package com.netflix.hellonoss.server.health;
 
 import com.google.inject.Inject;
 import com.netflix.hellonoss.core.HelloworldComponent;
-import com.netflix.karyon.spi.HealthCheckHandler;
+import com.netflix.karyon.server.bootstrap.HealthCheckHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

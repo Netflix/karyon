@@ -2,7 +2,7 @@ package com.netflix.karyon.server.http;
 
 import com.google.common.base.Preconditions;
 import com.netflix.karyon.server.KaryonNettyServerBuilder;
-import com.netflix.karyon.server.ServerBootstrap;
+import com.netflix.karyon.server.bootstrap.KaryonBootstrap;
 import com.netflix.karyon.server.http.interceptor.InboundInterceptor;
 import com.netflix.karyon.server.http.interceptor.InterceptorPipelineBuilder;
 import com.netflix.karyon.server.http.interceptor.MethodConstraintKey;
@@ -28,7 +28,7 @@ public abstract class HttpServerBuilder<B extends HttpServerBuilder, S extends H
                                         O extends HttpObject> extends KaryonNettyServerBuilder<B, S, I, O> {
 
     protected final List<InterceptorAttacher<I, O>> interceptorAttachers;
-    protected ServerBootstrap karyonBootstrap;
+    protected KaryonBootstrap karyonBootstrap;
     protected PipelineFactory<I, O> interceptorFactory;
 
     protected HttpServerBuilder(int serverPort, @Nullable LogLevel nettyLoggerLevel) {

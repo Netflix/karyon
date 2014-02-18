@@ -2,6 +2,7 @@ package com.netflix.karyon.server;
 
 import com.google.common.base.Preconditions;
 import com.google.common.reflect.TypeToken;
+import com.netflix.karyon.server.bootstrap.KaryonBootstrap;
 import com.netflix.karyon.server.spi.BlockingRequestRouter;
 import com.netflix.karyon.server.spi.ChannelPipelineConfigurator;
 import com.netflix.karyon.server.spi.LifecycleAware;
@@ -33,8 +34,10 @@ public abstract class KaryonNettyServer<I, O> extends KaryonServer {
     protected final ResponseWriterFactory<O> responseWriterFactory;
     protected final ServerBootstrap bootstrap;
     protected final ProcessingTaskRegistry taskRegistry;
-    @Nullable protected final EventExecutorGroup routerExecutorGroup;
     protected final RequestRouter<I,O> router;
+
+    @Nullable protected final EventExecutorGroup routerExecutorGroup;
+
     private ChannelFuture serverShutdownFuture;
     protected final Class<I> inputType;
     protected final Class<O> outputType;
@@ -43,7 +46,7 @@ public abstract class KaryonNettyServer<I, O> extends KaryonServer {
     protected KaryonNettyServer(@Nonnull ServerBootstrap bootstrap,
                                 @Nonnull ChannelPipelineConfigurator<I, O> pipelineConfigurator,
                                 @Nonnull ResponseWriterFactory<O> responseWriterFactory,
-                                @Nullable com.netflix.karyon.server.ServerBootstrap karyonBootstrap) {
+                                @Nullable KaryonBootstrap karyonBootstrap) {
         super(karyonBootstrap);
         Preconditions.checkNotNull(responseWriterFactory, "Response writer factory can not be null.");
         inputType = (Class<I>) new TypeToken<I>(getClass()) {}.getRawType();
@@ -71,13 +74,16 @@ public abstract class KaryonNettyServer<I, O> extends KaryonServer {
      */
     @Override
     public void start() throws Exception {
-        startWithoutWaitingForShutdown();
+        super.start();
         serverShutdownFuture.sync();
     }
 
     public void startWithoutWaitingForShutdown() throws Exception {
-        initialize();
         super.start();
+    }
+
+    @Override
+    protected void internalStart() throws Exception {
         if (RequestRouter.RoutersNatureIdentifier.isLifecycleAware(router)) {
             ((LifecycleAware) router).start();
         }
@@ -89,7 +95,7 @@ public abstract class KaryonNettyServer<I, O> extends KaryonServer {
             public void run() {
                 try {
                     stop();
-                } catch (InterruptedException e) {
+                } catch (Exception e) {
                     logger.error("Error while shutting down.", e);
                 }
             }
@@ -97,8 +103,8 @@ public abstract class KaryonNettyServer<I, O> extends KaryonServer {
         serverShutdownFuture = channel.closeFuture();
     }
 
-    public void stop() throws InterruptedException {
-
+    @Override
+    protected void internalStop() throws Exception {
         logger.info("Shutting down server.");
         Future<?> acceptorTermFuture = bootstrap.group().shutdownGracefully();
         Future<?> workerTermFuture = bootstrap.childGroup().shutdownGracefully();

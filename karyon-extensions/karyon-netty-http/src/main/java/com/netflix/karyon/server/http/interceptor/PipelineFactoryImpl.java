@@ -8,7 +8,6 @@ import io.netty.handler.codec.http.HttpRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -23,7 +22,7 @@ public class PipelineFactoryImpl<I extends HttpObject, O extends HttpObject> imp
     private final Multimap<PipelineDefinition.Key, InboundInterceptor<I, O>> inboundInterceptors;
     private final Multimap<PipelineDefinition.Key, OutboundInterceptor<O>> outboundInterceptors;
 
-    public PipelineFactoryImpl(@NotNull PipelineDefinition<I, O> pipelineDefinition) {
+    public PipelineFactoryImpl(PipelineDefinition<I, O> pipelineDefinition) {
         Preconditions.checkNotNull(pipelineDefinition, "Pipeline definition can not be null.");
         inboundInterceptors = pipelineDefinition.getInboundInterceptors();
         outboundInterceptors = pipelineDefinition.getOutboundInterceptors();

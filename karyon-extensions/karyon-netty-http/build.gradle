@@ -29,5 +29,6 @@ apply from: file('../../gradle/license.gradle')
 
 dependencies {
     compile project(':karyon-extensions:karyon-netty')
+    compile 'io.netty:netty-codec-http:4.0.13.Final'
     testCompile 'org.apache.httpcomponents:httpclient:4.1.2'
 }

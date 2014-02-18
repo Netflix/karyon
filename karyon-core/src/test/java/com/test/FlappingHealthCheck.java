@@ -16,9 +16,8 @@
 
 package com.test;
 
-import com.netflix.karyon.spi.HealthCheckHandler;
+import com.netflix.karyon.server.bootstrap.HealthCheckHandler;
 
-import javax.annotation.PostConstruct;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -27,11 +26,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class FlappingHealthCheck implements HealthCheckHandler {
 
     private AtomicBoolean returnSuccess = new AtomicBoolean(true);
-
-    @PostConstruct
-    public void init() {
-        RegistrationSequence.addClass(this.getClass());
-    }
 
     @Override
     public int getStatus() {

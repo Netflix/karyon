@@ -8,8 +8,7 @@ import com.netflix.explorers.ExplorerManager;
 import com.netflix.explorers.ExplorersManagerImpl;
 import com.netflix.explorers.context.GlobalModelContext;
 import com.netflix.explorers.providers.FreemarkerTemplateProvider;
-import com.netflix.karyon.server.HealthCheckModule;
-import com.netflix.karyon.server.eureka.HealthCheckInvocationStrategy;
+import com.netflix.karyon.server.bootstrap.HealthCheckInvocationStrategy;
 
 class AdminResourcesModule
         extends AbstractModule {
@@ -31,9 +30,10 @@ class AdminResourcesModule
 
         if (healthCheckInvocationStrategyProvider != null) {
             bind(HealthCheckInvocationStrategy.class).toProvider(healthCheckInvocationStrategyProvider);
-        } else {
-            install(new HealthCheckModule());
-        }
+        } /*else {
+            // TODO: Is Healthcheck module required anymore?
+            //install(new HealthCheckModule());
+        }*/
 
     }
 }

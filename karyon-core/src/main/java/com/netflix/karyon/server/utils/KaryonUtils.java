@@ -17,24 +17,27 @@
 package com.netflix.karyon.server.utils;
 
 import com.netflix.config.ConfigurationManager;
-import com.netflix.karyon.spi.PropertyNames;
+import com.netflix.karyon.server.bootstrap.PropertyNames;
 
 /**
  * Utility methods for karyon
  *
  * @author Nitesh Kant
  */
-public class KaryonUtils {
+public final class KaryonUtils {
+
+    private KaryonUtils() {
+    }
 
     /**
      * Karyon provides a few core components like eureka which can be enabled/disabled using a property of the form:
-     * {@link com.netflix.karyon.spi.PropertyNames#KARYON_PROPERTIES_PREFIX}.[component_name].disable with the value
+     * {@link PropertyNames#KARYON_PROPERTIES_PREFIX}.[component_name].disable with the value
      * set to true for disabling. By default all core components are enabled.
      *
      *
      * @param componentName Name of the component for which the flag is to be retrieved.
      *
-     * @return <code>true</code> if the component is enabled.
+     * @return {@code true} if the component is enabled.
      */
     public static boolean isCoreComponentEnabled(String componentName) {
         return !ConfigurationManager.getConfigInstance().getBoolean(getPropname(componentName), false);

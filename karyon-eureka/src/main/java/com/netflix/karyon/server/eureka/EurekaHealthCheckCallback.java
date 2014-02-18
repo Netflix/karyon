@@ -16,11 +16,11 @@
 
 package com.netflix.karyon.server.eureka;
 
-import com.google.inject.Inject;
 import com.netflix.appinfo.HealthCheckCallback;
 import com.netflix.config.DynamicBooleanProperty;
 import com.netflix.config.DynamicPropertyFactory;
-import com.netflix.karyon.spi.PropertyNames;
+import com.netflix.karyon.server.bootstrap.HealthCheckInvocationStrategy;
+import com.netflix.karyon.server.bootstrap.PropertyNames;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,7 +38,6 @@ public class EurekaHealthCheckCallback implements HealthCheckCallback {
     private static final DynamicBooleanProperty UNIFY_HEALTHCHECK_WITH_EUREKA =
             DynamicPropertyFactory.getInstance().getBooleanProperty(PropertyNames.UNIFY_HEALTHCHECK_WITH_EUREKA, true);
 
-    @Inject
     public EurekaHealthCheckCallback(HealthCheckInvocationStrategy healthCheckInvocationStrategy) {
         this.healthCheckInvocationStrategy = healthCheckInvocationStrategy;
     }
@@ -64,7 +63,7 @@ public class EurekaHealthCheckCallback implements HealthCheckCallback {
      *
      * @param healthStatus Health status to assert.
      *
-     * @return <code>true</code> if the status means healthy.
+     * @return {@code true} if the status means healthy.
      */
     protected boolean isHealthy(int healthStatus) {
         return healthStatus >= 200 && healthStatus < 300;

@@ -53,7 +53,6 @@ public final class JerseyRouterProvider {
         @SuppressWarnings("unchecked")
         public Iterator<Class<T>> createClassIterator(Class<T> service, String serviceName, ClassLoader loader,
                                                       boolean ignoreOnClassNotFound) {
-            // TODO: Not sure if we need any change in this for our usecase.
             return defaultProvider.createClassIterator(service, serviceName, loader, ignoreOnClassNotFound);
         }
     }

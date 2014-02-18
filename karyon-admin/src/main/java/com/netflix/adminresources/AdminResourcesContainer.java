@@ -19,14 +19,17 @@ package com.netflix.adminresources;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Provider;
+import com.netflix.adminresources.resources.EmbeddedContentResource;
+import com.netflix.adminresources.resources.HealthcheckResource;
 import com.netflix.config.DynamicPropertyFactory;
 import com.netflix.config.DynamicStringProperty;
 import com.netflix.governator.annotations.Configuration;
 import com.netflix.governator.guice.LifecycleInjector;
 import com.netflix.governator.lifecycle.LifecycleManager;
-import com.netflix.karyon.server.eureka.HealthCheckInvocationStrategy;
-import com.netflix.karyon.spi.Component;
-import com.netflix.karyon.spi.PropertyNames;
+import com.netflix.karyon.governator.Component;
+import com.netflix.karyon.server.bootstrap.HealthCheckHandler;
+import com.netflix.karyon.server.bootstrap.HealthCheckInvocationStrategy;
+import com.netflix.karyon.server.bootstrap.PropertyNames;
 import org.eclipse.jetty.server.DispatcherType;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.session.SessionHandler;
@@ -46,11 +49,7 @@ import java.util.EnumSet;
  * {@link AdminResourcesContainer#LISTEN_PORT_DEFAULT}. <br/>
  *
  * The embedded server uses jersey so any jersey resources available in packages
- * specified via properties {@link AdminResourcesContainer#JERSEY_CORE_PACKAGES} and
- * {@link AdminResourcesContainer#JERSEY_APP_PACKAGES} will be scanned and initialized. <br/>
- * <b>This server does not use guice/governator to initialize jersey resources as guice has an
- * <a href="https://code.google.com/p/google-guice/issues/detail?id=635">open issue</a> which makes it difficult to have
- * multiple {@link com.google.inject.servlet.GuiceFilter} in the same JVM.</b>
+ * specified via properties {@link AdminResourcesContainer#JERSEY_CORE_PACKAGES}will be scanned and initialized. <br/>
  *
  * Karyon admin starts in an embedded container to have a "always available" endpoint for any application. This helps
  * in a homogeneous admin view for all applications. <br/>
@@ -60,9 +59,9 @@ import java.util.EnumSet;
  * The following resources are available by default:
  *
  * <ul>
- <li>Healthcheck: A healthcheck is available at path {@link HealthCheckServlet#PATH}. This utilizes the configured
- {@link com.netflix.karyon.spi.HealthCheckHandler} for karyon.</li>
- <li>Admin resource: Any url starting with "/adminres" is served via {@link com.netflix.adminresources.resources.EmbeddedContentResource}</li>
+ <li>Healthcheck: A healthcheck is available at path {@link HealthcheckResource#PATH}. This utilizes the configured
+ {@link HealthCheckHandler} for karyon.</li>
+ <li>Admin resource: Any url starting with "/adminres" is served via {@link EmbeddedContentResource}</li>
  </ul>
  *
  * @author pkamath

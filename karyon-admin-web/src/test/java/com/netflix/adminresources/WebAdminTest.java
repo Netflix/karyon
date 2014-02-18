@@ -16,13 +16,12 @@
 
 package com.netflix.adminresources;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-
-import java.util.Map;
-
-import javax.ws.rs.core.MediaType;
-
+import com.google.common.collect.ImmutableMap;
+import com.netflix.adminresources.resources.MaskedResourceHelper;
+import com.netflix.config.ConfigurationManager;
+import com.netflix.karyon.governator.KaryonGovernatorBootstrap;
+import com.netflix.karyon.server.KaryonServer;
+import com.netflix.karyon.server.bootstrap.PropertyNames;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
@@ -34,12 +33,11 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.collect.ImmutableMap;
-import com.google.inject.Injector;
-import com.netflix.adminresources.resources.MaskedResourceHelper;
-import com.netflix.config.ConfigurationManager;
-import com.netflix.karyon.server.KaryonServer;
-import com.netflix.karyon.spi.PropertyNames;
+import javax.ws.rs.core.MediaType;
+import java.util.Map;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author Amit Joshi
@@ -82,7 +80,7 @@ public class WebAdminTest {
         ConfigurationManager.getConfigInstance().clearProperty(MaskedResourceHelper.MASKED_PROPERTY_NAMES);
 
         if (server != null) {
-            server.close();
+            server.stop();
         }
     }
 
@@ -123,10 +121,8 @@ public class WebAdminTest {
         EntityUtils.consume(response.getEntity());
     }
         
-    private static Injector startServer() throws Exception {
-        server = new KaryonServer();
-        Injector injector = server.initialize();
+    private static void startServer() throws Exception {
+        server = new KaryonServer(new KaryonGovernatorBootstrap.Builder().build());
         server.start();
-        return injector;
     }
 }

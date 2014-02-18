@@ -14,6 +14,6 @@
     </filter-mapping>
 
     <listener>
-        <listener-class>com.netflix.karyon.server.guice.KaryonGuiceContextListener</listener-class>
+        <listener-class>com.netflix.hellonoss.server.HelloWorldServletListener</listener-class>
     </listener>
 </web-app>

@@ -1,12 +1,12 @@
 package com.netflix.karyon.server.http;
 
 import com.netflix.config.ConfigurationManager;
+import com.netflix.karyon.server.bootstrap.PropertyNames;
 import com.netflix.karyon.server.http.interceptor.MethodConstraintKey;
 import com.netflix.karyon.server.http.interceptor.RegexUriConstraintKey;
 import com.netflix.karyon.server.http.interceptor.ServletStyleUriConstraintKey;
 import com.netflix.karyon.server.http.interceptor.TestableBidirectionalInterceptor;
 import com.netflix.karyon.server.spi.DefaultChannelPipelineConfigurator;
-import com.netflix.karyon.spi.PropertyNames;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.FullHttpResponse;
 import io.netty.handler.codec.http.HttpMethod;

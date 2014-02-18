@@ -29,5 +29,7 @@ apply from: file('../../gradle/license.gradle')
 
 dependencies {
     compile project(':karyon-extensions:karyon-netty-http')
+    compile 'io.netty:netty-codec-http:4.0.13.Final'
+    compile 'com.sun.jersey:jersey-core:1.11'
     compile 'com.sun.jersey:jersey-server:1.11'
 }
