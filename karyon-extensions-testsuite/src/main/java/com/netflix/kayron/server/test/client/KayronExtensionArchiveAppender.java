@@ -16,13 +16,23 @@
 package com.netflix.kayron.server.test.client;
 
 import com.netflix.kayron.server.test.RunInKaryon;
+import com.netflix.kayron.server.test.configuration.ConfigurationExporter;
+import com.netflix.kayron.server.test.configuration.ConfigurationParser;
+import com.netflix.kayron.server.test.configuration.Configurations;
+import com.netflix.kayron.server.test.configuration.KayronExtensionConfiguration;
+import com.netflix.kayron.server.test.server.KayronExtensionConfigurationProducer;
 import com.netflix.kayron.server.test.server.KayronRemoteExtension;
 import com.netflix.kayron.server.test.server.KayronServerInitializer;
 import com.netflix.kayron.server.test.server.KayronTestEnricher;
+import com.netflix.kayron.server.test.server.SecurityActions;
+import org.jboss.arquillian.config.descriptor.api.ArquillianDescriptor;
 import org.jboss.arquillian.container.test.spi.RemoteLoadableExtension;
 import org.jboss.arquillian.container.test.spi.client.deployment.CachedAuxilliaryArchiveAppender;
+import org.jboss.arquillian.core.api.Instance;
+import org.jboss.arquillian.core.api.annotation.Inject;
 import org.jboss.shrinkwrap.api.Archive;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
+import org.jboss.shrinkwrap.api.asset.StringAsset;
 import org.jboss.shrinkwrap.api.spec.JavaArchive;
 
 /**
@@ -34,6 +44,12 @@ import org.jboss.shrinkwrap.api.spec.JavaArchive;
  * @author Jakub Narloch (jmnarloch@gmail.com)
  */
 public class KayronExtensionArchiveAppender extends CachedAuxilliaryArchiveAppender {
+
+    /**
+     * The arquillian descriptor.
+     */
+    @Inject
+    private Instance<ArquillianDescriptor> descriptor;
 
     /**
      * Builds the archive.
@@ -52,6 +68,9 @@ public class KayronExtensionArchiveAppender extends CachedAuxilliaryArchiveAppen
         // adds the all needed classes required by the extension
         addExtensionClasses(archive);
 
+        // adds additional properties
+        addExtensionProperties(archive);
+
         // returns the created archive
         return archive;
     }
@@ -67,9 +86,16 @@ public class KayronExtensionArchiveAppender extends CachedAuxilliaryArchiveAppen
         archive.addClass(RunInKaryon.class);
 
         // adds the implementation classes
+        archive.addClass(ConfigurationExporter.class);
+        archive.addClass(ConfigurationParser.class);
+        archive.addClass(Configurations.class);
+        archive.addClass(KayronExtensionConfiguration.class);
+        archive.addClass(KayronExtensionConfigurationProducer.class);
+        archive.addClass(KayronRemoteExtension.class);
         archive.addClass(KayronRemoteExtension.class);
         archive.addClass(KayronServerInitializer.class);
         archive.addClass(KayronTestEnricher.class);
+        archive.addClass(SecurityActions.class);
 
         // registers the 'in container' extension
         archive.addAsServiceProvider(RemoteLoadableExtension.class, KayronRemoteExtension.class);
@@ -83,6 +109,23 @@ public class KayronExtensionArchiveAppender extends CachedAuxilliaryArchiveAppen
     private void addRequiredPackages(JavaArchive archive) {
 
         archive.addPackages(true, getDependantPackagesNames());
+    }
+
+    /**
+     * Adds the the properties required by the extension.
+     *
+     * @param archive the archive
+     */
+    private void addExtensionProperties(JavaArchive archive) {
+
+        // loads the properties from the arquillian descriptor
+        KayronExtensionConfiguration configuration = Configurations.fromDescriptor(descriptor.get()).parse();
+
+        // exports the properties
+        String properties = Configurations.toProperties(configuration).exportAsString();
+
+        // adds the properties to the archive
+        archive.addAsResource(new StringAsset(properties), "kayron-testsuite.properties");
     }
 
     /**

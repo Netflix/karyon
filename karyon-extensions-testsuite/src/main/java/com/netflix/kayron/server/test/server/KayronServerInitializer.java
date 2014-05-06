@@ -16,6 +16,9 @@
 package com.netflix.kayron.server.test.server;
 
 import com.netflix.kayron.server.test.RunInKaryon;
+import com.netflix.kayron.server.test.configuration.KayronExtensionConfiguration;
+import org.jboss.arquillian.core.api.Instance;
+import org.jboss.arquillian.core.api.annotation.Inject;
 import org.jboss.arquillian.core.api.annotation.Observes;
 import org.jboss.arquillian.test.spi.event.suite.BeforeClass;
 
@@ -27,23 +30,77 @@ import org.jboss.arquillian.test.spi.event.suite.BeforeClass;
 public class KayronServerInitializer {
 
     /**
+     * Represents the default application id.
+     */
+    private static final String DEFAULT_APPLICATION_ID = "";
+
+    /**
+     * Represents the default environment value.
+     */
+    private static final String DEFAULT_ENVIRONMENT = "dev";
+
+    /**
+     * The extension configuration.
+     */
+    @Inject
+    private Instance<KayronExtensionConfiguration> configuration;
+
+    /**
      * Handles the before test event.
      *
      * @param event the before test event
      */
     public void initializeProperties(@Observes BeforeClass event) {
 
+        String applicationId;
+        String environment;
+
         RunInKaryon annotation = event.getTestClass().getAnnotation(RunInKaryon.class);
 
         if (annotation != null) {
 
-            if (!annotation.applicationId().isEmpty()) {
-                System.setProperty("archaius.deployment.applicationId", annotation.applicationId());
+            applicationId = getValue(annotation.applicationId(), configuration.get().getApplicationId(),
+                    DEFAULT_APPLICATION_ID);
+            environment = getValue(annotation.environment(), configuration.get().getEnvironment(), DEFAULT_ENVIRONMENT);
+
+            if (!applicationId.isEmpty()) {
+                System.setProperty("archaius.deployment.applicationId", applicationId);
             }
 
-            if (!annotation.environment().isEmpty()) {
-                System.setProperty("archaius.deployment.environment", annotation.environment());
+            if (!environment.isEmpty()) {
+                System.setProperty("archaius.deployment.environment", environment);
             }
         }
+    }
+
+    /**
+     * Retrieves the value of the property, taking the annotation value with higher precedence over the configuration.
+     * If neither the annotation or configuration specifies the property, the default value is being returned.
+     *
+     * @param annotationValue the annotation value
+     * @param configValue     the config value
+     * @param defaultValue    the default value
+     *
+     * @return the property value
+     */
+    private String getValue(String annotationValue, String configValue, String defaultValue) {
+
+        String result = getValue(annotationValue, configValue);
+
+        return getValue(result, defaultValue);
+    }
+
+    /**
+     * Returns the passed {@code value} if it's not null and non empty, in order case the {@code defaultValue} is being
+     * returned.
+     *
+     * @param value        the value
+     * @param defaultValue the default value
+     *
+     * @return property value
+     */
+    private String getValue(String value, String defaultValue) {
+
+        return value != null && !value.isEmpty() ? value : defaultValue;
     }
 }

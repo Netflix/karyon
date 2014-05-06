@@ -13,29 +13,20 @@
  *      See the License for the specific language governing permissions and
  *      limitations under the License.
  */
-package com.netflix.kayron.server.test.server;
-
-import org.jboss.arquillian.container.test.spi.RemoteLoadableExtension;
-import org.jboss.arquillian.test.spi.TestEnricher;
+package com.netflix.kayron.server.test.configuration;
 
 /**
- * Registers the remote extension in the executing container.
+ * Parses the configuration. The implementation classes can support different storage mechanisms and data
+ * representations.
  *
  * @author Jakub Narloch (jmnarloch@gmail.com)
  */
-public class KayronRemoteExtension implements RemoteLoadableExtension {
+public interface ConfigurationParser {
 
     /**
-     * Registers the extension.
+     * Parses the configuration.
      *
-     * @param builder the extension builder
+     * @return the configuration
      */
-    @Override
-    public void register(ExtensionBuilder builder) {
-
-        // registers the test enricher
-        builder.service(TestEnricher.class, KayronTestEnricher.class)
-                .observer(KayronServerInitializer.class)
-                .observer(KayronExtensionConfigurationProducer.class);
-    }
+    KayronExtensionConfiguration parse();
 }
