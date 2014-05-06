@@ -17,6 +17,13 @@
 // Establish version and status
 ext.githubProjectName = rootProject.name // Change if github project name is not the same as the root project's name
 
+ext {
+    governatorVersion="[1.2.7,2.0)"
+    archaiusVersion="[0.5.4,1.0)"
+    pytheasVersion="[1.11,2.0)"
+    eurekaVersion="[1.1.73,2.0)"
+}
+
 buildscript {
     repositories {
         mavenLocal()
@@ -56,7 +63,7 @@ subprojects {
 
 project(':karyon-spi') {
     dependencies {
-        compile('com.netflix.governator:governator:1.1.1') {
+        compile("com.netflix.governator:governator:$governatorVersion") {
             exclude module: 'archaius-core'
         }
     }
@@ -65,10 +72,10 @@ project(':karyon-spi') {
 project(':karyon-eureka') {
     dependencies {
         compile project(':karyon-spi')
-        compile('com.netflix.archaius:archaius-core:0.5.4') {
+        compile("com.netflix.archaius:archaius-core:$archaiusVersion") {
             force = true
         }
-        compile 'com.netflix.eureka:eureka-client:1.1.73'
+        compile "com.netflix.eureka:eureka-client:$eurekaVersion"
     }
 }
 
@@ -112,7 +119,7 @@ project(':karyon-admin') {
         compile 'org.eclipse.jetty:jetty-servlet:7.6.7.v20120910'
         compile 'com.sun.jersey.contribs:jersey-guice:1.8'
         compile 'com.google.inject.extensions:guice-servlet:3.0'
-        compile 'com.netflix.pytheas:pytheas-core:1.11'
+        compile "com.netflix.pytheas:pytheas-core:$pytheasVersion"
         runtime 'org.codehaus.jackson:jackson-mapper-asl:1.9.11'
     }
 }
@@ -121,7 +128,6 @@ project(':karyon-admin-web') {
     dependencies {
         compile project(':karyon-admin')
         compile 'com.google.code.gson:gson:2.1'
-        compile 'com.netflix.pytheas:pytheas-core:1.11'
         runtime 'org.freemarker:freemarker:2.3.15'
         runtime 'org.codehaus.jackson:jackson-mapper-asl:1.9.11'
     }
