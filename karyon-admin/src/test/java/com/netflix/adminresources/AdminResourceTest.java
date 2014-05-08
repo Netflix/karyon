@@ -17,17 +17,18 @@
 package com.netflix.adminresources;
 
 import com.google.inject.Injector;
+import com.netflix.config.ConcurrentCompositeConfiguration;
 import com.netflix.config.ConfigurationManager;
 import com.netflix.karyon.server.KaryonServer;
 import com.netflix.karyon.server.eureka.SyncHealthCheckInvocationStrategy;
 import com.netflix.karyon.spi.PropertyNames;
-import junit.framework.Assert;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.conn.HttpHostConnectException;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -51,6 +52,8 @@ public class AdminResourceTest {
     public void tearDown() throws Exception {
         ConfigurationManager.getConfigInstance().clearProperty(PropertyNames.DISABLE_APPLICATION_DISCOVERY_PROP_NAME);
         ConfigurationManager.getConfigInstance().clearProperty(PropertyNames.EXPLICIT_APPLICATION_CLASS_PROP_NAME);
+        ((ConcurrentCompositeConfiguration) ConfigurationManager.getConfigInstance())
+                .clearOverrideProperty(AdminResourcesContainer.CONTAINER_LISTEN_PORT);
         server.close();
     }
 
@@ -66,7 +69,8 @@ public class AdminResourceTest {
 
     @Test (expected = HttpHostConnectException.class)
     public void testCustomPort() throws Exception {
-        ConfigurationManager.getConfigInstance().setProperty(AdminResourcesContainer.CONTAINER_LISTEN_PORT, CUSTOM_LISTEN_PORT);
+        ((ConcurrentCompositeConfiguration) ConfigurationManager.getConfigInstance())
+                .setOverrideProperty(AdminResourcesContainer.CONTAINER_LISTEN_PORT, CUSTOM_LISTEN_PORT);
         startServer();
         HttpClient client = new DefaultHttpClient();
         HttpGet healthGet = new HttpGet("http://localhost:"+ AdminResourcesContainer.LISTEN_PORT_DEFAULT + "/healthcheck");

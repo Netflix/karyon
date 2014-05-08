@@ -17,7 +17,6 @@
 package com.netflix.karyon.server;
 
 import com.google.inject.Injector;
-import com.netflix.config.ConfigurationManager;
 import com.netflix.karyon.server.eureka.AsyncHealthCheckInvocationStrategy;
 import com.netflix.karyon.server.eureka.EurekaHealthCheckCallback;
 import com.netflix.karyon.server.eureka.SyncHealthCheckInvocationStrategy;
@@ -31,8 +30,8 @@ import com.test.TestApplication;
 import com.test.TestComponent;
 import com.testmulti.TestApplication2;
 import com.testmulti.TestApplication3;
-import junit.framework.Assert;
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -54,6 +53,10 @@ public class KaryonServerTest {
     @After
     public void tearDown() throws Exception {
         KaryonTestSetupUtil.tearDown(server);
+        KaryonTestSetupUtil.clearOverrideProperties(PropertyNames.DISABLE_APPLICATION_DISCOVERY_PROP_NAME);
+        KaryonTestSetupUtil.clearOverrideProperties(PropertyNames.HEALTH_CHECK_HANDLER_CLASS_PROP_NAME);
+        KaryonTestSetupUtil.clearOverrideProperties(PropertyNames.SERVER_BOOTSTRAP_BASE_PACKAGES_OVERRIDE);
+        KaryonTestSetupUtil.clearOverrideProperties(PropertyNames.EXPLICIT_APPLICATION_CLASS_PROP_NAME);
     }
 
     @Test
@@ -75,8 +78,8 @@ public class KaryonServerTest {
 
     @Test
     public void testOnlyAnnotatedComponent() throws Exception {
-        ConfigurationManager.getConfigInstance().setProperty(PropertyNames.DISABLE_APPLICATION_DISCOVERY_PROP_NAME,
-                true);
+        KaryonTestSetupUtil.setOverrideProperty(PropertyNames.DISABLE_APPLICATION_DISCOVERY_PROP_NAME,
+                                                true);
 
         startServer();
         Assert.assertTrue("Component not initialized.", RegistrationSequence.contains(TestComponent.class));
@@ -85,8 +88,8 @@ public class KaryonServerTest {
 
     @Test
     public void testHealthCheck() throws Exception {
-        ConfigurationManager.getConfigInstance().setProperty(PropertyNames.HEALTH_CHECK_HANDLER_CLASS_PROP_NAME,
-                HealthCheckGuy.class.getName());
+        KaryonTestSetupUtil.setOverrideProperty(PropertyNames.HEALTH_CHECK_HANDLER_CLASS_PROP_NAME,
+                                                HealthCheckGuy.class.getName());
 
         Injector injector = startServer();
         injector.getInstance(EurekaHealthCheckCallback.class);
@@ -95,11 +98,11 @@ public class KaryonServerTest {
 
     @Test
     public void testHealthCheckTimeout() throws Exception {
-        ConfigurationManager.getConfigInstance().setProperty(PropertyNames.HEALTH_CHECK_STRATEGY,
-                AsyncHealthCheckInvocationStrategy.class.getName());
+        KaryonTestSetupUtil.setOverrideProperty(PropertyNames.HEALTH_CHECK_STRATEGY,
+                                                AsyncHealthCheckInvocationStrategy.class.getName());
 
-        ConfigurationManager.getConfigInstance().setProperty(PropertyNames.HEALTH_CHECK_HANDLER_CLASS_PROP_NAME,
-                RogueHealthCheck.class.getName());
+        KaryonTestSetupUtil.setOverrideProperty(PropertyNames.HEALTH_CHECK_HANDLER_CLASS_PROP_NAME,
+                                                RogueHealthCheck.class.getName());
 
         Injector injector = startServer();
         EurekaHealthCheckCallback eurekaHealthCheckCallback = injector.getInstance(EurekaHealthCheckCallback.class);
@@ -108,11 +111,11 @@ public class KaryonServerTest {
 
     @Test
     public void testFlappingHealthCheck() throws Exception {
-        ConfigurationManager.getConfigInstance().setProperty(PropertyNames.HEALTH_CHECK_STRATEGY,
-                SyncHealthCheckInvocationStrategy.class.getName());
+        KaryonTestSetupUtil.setOverrideProperty(PropertyNames.HEALTH_CHECK_STRATEGY,
+                                                SyncHealthCheckInvocationStrategy.class.getName());
 
-        ConfigurationManager.getConfigInstance().setProperty(PropertyNames.HEALTH_CHECK_HANDLER_CLASS_PROP_NAME,
-                FlappingHealthCheck.class.getName());
+        KaryonTestSetupUtil.setOverrideProperty(PropertyNames.HEALTH_CHECK_HANDLER_CLASS_PROP_NAME,
+                                                FlappingHealthCheck.class.getName());
 
         Injector injector = startServer();
         EurekaHealthCheckCallback eurekaHealthCheckCallback = injector.getInstance(EurekaHealthCheckCallback.class);
@@ -122,8 +125,8 @@ public class KaryonServerTest {
 
     @Test
     public void testHealthCheckSuccess() throws Exception {
-        ConfigurationManager.getConfigInstance().setProperty(PropertyNames.HEALTH_CHECK_HANDLER_CLASS_PROP_NAME,
-                HealthCheckGuy.class.getName());
+        KaryonTestSetupUtil.setOverrideProperty(PropertyNames.HEALTH_CHECK_HANDLER_CLASS_PROP_NAME,
+                                                HealthCheckGuy.class.getName());
 
         Injector injector = startServer();
         EurekaHealthCheckCallback eurekaHealthCheckCallback = injector.getInstance(EurekaHealthCheckCallback.class);
@@ -132,9 +135,10 @@ public class KaryonServerTest {
 
     @Test
     public void testMultipleApps() throws Exception {
-        ConfigurationManager.getConfigInstance().setProperty(PropertyNames.SERVER_BOOTSTRAP_BASE_PACKAGES_OVERRIDE, "com.test,com.testmulti");
-        ConfigurationManager.getConfigInstance().setProperty(PropertyNames.EXPLICIT_APPLICATION_CLASS_PROP_NAME,
-                TestApplication3.class.getName());
+        KaryonTestSetupUtil.setOverrideProperty(PropertyNames.SERVER_BOOTSTRAP_BASE_PACKAGES_OVERRIDE,
+                                                "com.test,com.testmulti");
+        KaryonTestSetupUtil.setOverrideProperty(PropertyNames.EXPLICIT_APPLICATION_CLASS_PROP_NAME,
+                                                TestApplication3.class.getName());
         startServer();
 
         Assert.assertTrue("Component not initialized.", RegistrationSequence.contains(TestComponent.class));

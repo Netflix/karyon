@@ -17,12 +17,12 @@
 package com.netflix.karyon.server;
 
 import com.netflix.appinfo.InstanceInfo;
-import com.netflix.config.ConfigurationManager;
 import com.netflix.discovery.DiscoveryManager;
 import com.netflix.karyon.spi.PropertyNames;
 import com.netflix.karyon.util.EurekaResourceMock;
-import junit.framework.Assert;
+import com.netflix.karyon.util.KaryonTestSetupUtil;
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -54,7 +54,7 @@ public class EurekaIntegrationTest {
     @After
     public void tearDown() throws Exception {
         eurekaResourceMock.stop();
-        ConfigurationManager.getConfigInstance().setProperty(PropertyNames.DISABLE_EUREKA_INTEGRATION, "true");
+        KaryonTestSetupUtil.setOverrideProperty(PropertyNames.DISABLE_EUREKA_INTEGRATION, "true");
     }
 
     @Test
