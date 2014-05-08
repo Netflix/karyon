@@ -17,6 +17,7 @@
 package com.netflix.karyon.util;
 
 import com.google.inject.Injector;
+import com.netflix.config.ConcurrentCompositeConfiguration;
 import com.netflix.config.ConfigurationManager;
 import com.netflix.karyon.server.KaryonServer;
 import com.netflix.karyon.spi.PropertyNames;
@@ -44,5 +45,14 @@ public class KaryonTestSetupUtil {
         Injector injector = server.initialize();
         server.start();
         return injector;
+    }
+
+    public static void clearOverrideProperties(String name) {
+        ((ConcurrentCompositeConfiguration) ConfigurationManager.getConfigInstance()).clearOverrideProperty(name);
+    }
+
+    public static <T> void setOverrideProperty(String name, T value) {
+        ((ConcurrentCompositeConfiguration) ConfigurationManager.getConfigInstance())
+                .setOverrideProperty(name, value);
     }
 }
