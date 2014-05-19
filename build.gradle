@@ -18,10 +18,10 @@
 ext.githubProjectName = rootProject.name // Change if github project name is not the same as the root project's name
 
 ext {
-    governatorVersion="[1.2.7,2.0)"
-    archaiusVersion="[0.5.4,1.0)"
+    governatorVersion="1.2.12"
+    archaiusVersion="0.6.0"
     pytheasVersion="1.11"
-    eurekaVersion="[1.1.73,2.0)"
+    eurekaVersion="1.1.132"
 }
 
 buildscript {
