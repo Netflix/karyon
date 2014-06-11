@@ -214,7 +214,7 @@ public class KaryonServer implements Closeable {
         if (null != initializer) {
             initializer.close();
         }
-        Closeables.closeQuietly(lifecycleManager);
+        Closeables.close(lifecycleManager, true);
         logger.info("Successfully shut down karyon.");
     }
 
