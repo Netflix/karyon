@@ -36,8 +36,8 @@ public abstract class AutoFlushHTTPResponseWriter<T extends HttpObject> extends 
         if (response.getClass().isAssignableFrom(FullHttpResponse.class)) {
             FullHttpResponse httpResponse = (FullHttpResponse) response;
             if (keepAlive) {
-                httpResponse.headers().set(CONTENT_LENGTH, httpResponse.content().readableBytes());
-                httpResponse.headers().set(CONNECTION, HttpHeaders.Values.KEEP_ALIVE);
+                httpResponse.headers().set(Names.CONTENT_LENGTH, httpResponse.content().readableBytes());
+                httpResponse.headers().set(Names.CONNECTION, HttpHeaders.Values.KEEP_ALIVE);
             }
         }
 

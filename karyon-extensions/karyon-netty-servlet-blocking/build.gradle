@@ -28,7 +28,7 @@ apply from: file('../../gradle/check.gradle')
 apply from: file('../../gradle/license.gradle')
 
 dependencies {
-    compile project(':karyon-extensions:karyon-netty-http')
+    compile project(':karyon-transport')
     compile 'javax.servlet:servlet-api:2.5'
     compile 'org.simpleframework:simple:5.1.6' // Used for http header parsing
 }
