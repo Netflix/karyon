@@ -18,9 +18,8 @@ rootProject.name='karyon'
 include 'karyon-governator',\
  'karyon-eureka',\
  'karyon-core',\
+ 'karyon-transport',\
  'karyon-extensions:karyon-servlet', \
- 'karyon-extensions:karyon-netty', \
- 'karyon-extensions:karyon-netty-http', \
  'karyon-extensions:karyon-netty-jersey-blocking', \
  'karyon-extensions:karyon-netty-servlet-blocking', \
  'karyon-extensions-testsuite', \

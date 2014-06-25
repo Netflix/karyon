@@ -1,124 +1,36 @@
-/*
- * Copyright 2013 Netflix, Inc.
- *
- *      Licensed under the Apache License, Version 2.0 (the "License");
- *      you may not use this file except in compliance with the License.
- *      You may obtain a copy of the License at
- *
- *          http://www.apache.org/licenses/LICENSE-2.0
- *
- *      Unless required by applicable law or agreed to in writing, software
- *      distributed under the License is distributed on an "AS IS" BASIS,
- *      WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *      See the License for the specific language governing permissions and
- *      limitations under the License.
- */
-
-// Establish version and status
-ext.githubProjectName = rootProject.name // Change if github project name is not the same as the root project's name
+ext.githubProjectName = "karyon"
 
 buildscript {
     repositories {
         mavenLocal()
         mavenCentral() // maven { url 'http://jcenter.bintray.com' }
     }
-    apply from: file('gradle/buildscript.gradle'), to: buildscript 
+    apply from: file('gradle/buildscript.gradle'), to: buildscript
 }
 
 allprojects {
-    repositories { 
+    repositories {
+        mavenLocal()
         mavenCentral() // maven { url: 'http://jcenter.bintray.com' }
-    }
-}
-
-configurations.all {
-    resolutionStrategy {
-        force 'javax.servlet:javax.servlet-api:3.0.1'
     }
 }
 
 apply from: file('gradle/convention.gradle')
 apply from: file('gradle/maven.gradle')
-apply from: file('gradle/check.gradle')
+//apply from: file('gradle/check.gradle')
 apply from: file('gradle/license.gradle')
 apply from: file('gradle/release.gradle')
 
 subprojects {
-    group = "com.netflix.${githubProjectName}" // TEMPLATE: Set to organization of project
+    group = "com.netflix.karyon"
+
+    apply plugin: 'java'
+    apply plugin: 'eclipse'
+    apply plugin: 'idea'
 
     dependencies {
         compile 'org.slf4j:slf4j-api:1.6.4'
-        compile 'com.google.guava:guava:11.0.2'
         testCompile 'junit:junit:4.10'
     }
 }
 
-project(':karyon-core') {
-    dependencies {
-        compile('com.netflix.archaius:archaius-core:[0.1,)') {
-            force = true
-        }
-    }
-}
-
-project(':karyon-governator') {
-    dependencies {
-        compile project(':karyon-core')
-        compile('com.netflix.governator:governator:[1.1,)') {
-            exclude module: 'archaius-core'
-        }
-    }
-}
-
-project(':karyon-eureka') {
-    dependencies {
-        compile project(':karyon-core')
-        compile 'com.netflix.eureka:eureka-client:[1.1,)'
-        testCompile 'org.apache.httpcomponents:httpclient:4.1.2'
-        testCompile 'org.mortbay.jetty:jetty:6.1H.22'
-    }
-}
-
-project(':karyon-extensions-testsuite') {
-    dependencies {
-        compile project(':karyon-extensions:karyon-servlet')
-        compile 'com.google.inject.extensions:guice-servlet:3.0'
-        compile 'org.jboss.arquillian.core:arquillian-core-spi:1.1.1.Final'
-        compile 'org.jboss.arquillian.container:arquillian-container-spi:1.1.1.Final'
-        compile 'org.jboss.arquillian.container:arquillian-container-test-spi:1.1.1.Final'
-        compile 'org.jboss.arquillian.container:arquillian-container-test-impl-base:1.1.1.Final'
-        compile 'org.jboss.arquillian.test:arquillian-test-spi:1.1.1.Final'
-        compile 'org.jboss.shrinkwrap:shrinkwrap-impl-base:1.1.2'
-        testCompile 'org.mockito:mockito-all:1.9.0'
-        testCompile 'org.jboss.arquillian.core:arquillian-core-impl-base:1.1.1.Final'
-        testCompile 'org.jboss.arquillian.core:arquillian-core-impl-base:1.1.1.Final:tests'
-        testCompile 'org.jboss.arquillian.test:arquillian-test-impl-base:1.1.1.Final'
-        testCompile 'org.jboss.arquillian.test:arquillian-test-impl-base:1.1.1.Final:tests'
-    }
-}
-
-project(':karyon-admin') {
-    dependencies {
-        compile project(':karyon-governator')
-        compile project(':karyon-eureka')
-        compile 'javax.ws.rs:jsr311-api:1.1.1'
-        compile 'javax.servlet:servlet-api:2.5'
-        compile 'org.eclipse.jetty:jetty-server:7.6.7.v20120910'
-        compile 'org.eclipse.jetty:jetty-servlet:7.6.7.v20120910'
-        compile 'com.sun.jersey.contribs:jersey-guice:1.18'
-        compile 'com.sun.jersey:jersey-servlet:1.18'
-        compile 'com.google.inject.extensions:guice-servlet:3.0'
-        compile 'com.netflix.pytheas:pytheas-core:1.11'
-        runtime 'org.codehaus.jackson:jackson-mapper-asl:1.9.11'
-    }
-}
-
-project(':karyon-admin-web') {
-    dependencies {
-        compile project(':karyon-admin')
-        compile 'com.google.code.gson:gson:2.1'
-        compile 'com.netflix.pytheas:pytheas-core:1.11'
-        runtime 'org.freemarker:freemarker:2.3.15'
-        runtime 'org.codehaus.jackson:jackson-mapper-asl:1.9.11'
-    }
-}
