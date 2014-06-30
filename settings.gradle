@@ -15,16 +15,9 @@
  */
 
 rootProject.name='karyon'
-include 'karyon-governator',\
- 'karyon-eureka',\
- 'karyon-core',\
- 'karyon-transport',\
- 'karyon-extensions:karyon-servlet', \
- 'karyon-extensions:karyon-netty-jersey-blocking', \
- 'karyon-extensions:karyon-netty-servlet-blocking', \
- 'karyon-extensions-testsuite', \
- 'karyon-admin',\
- 'karyon-admin-web',\
- 'karyon-examples:hello-netflix-oss',\
- 'karyon-examples:hello-karyon-netty',\
- 'karyon-examples:hello-karyon-netty-servlet'
+include 'karyon-core', 'karyon-eureka', \
+ 'karyon-admin', \
+ 'karyon-admin-web', \
+ 'karyon-extensions:karyon-jersey-blocking', \
+ 'karyon-extensions:karyon-servlet-blocking', \
+ 'karyon-examples:hello-netflix-oss'

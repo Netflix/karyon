@@ -16,11 +16,12 @@
 
 package com.netflix.adminresources;
 
-import com.google.inject.Injector;
+import com.google.inject.Provider;
 import com.netflix.config.ConcurrentCompositeConfiguration;
 import com.netflix.config.ConfigurationManager;
-import com.netflix.karyon.governator.KaryonGovernatorBootstrap;
-import com.netflix.karyon.server.KaryonServer;
+import com.netflix.karyon.health.AlwaysHealthyHealthCheck;
+import com.netflix.karyon.health.HealthCheckInvocationStrategy;
+import com.netflix.karyon.health.SyncHealthCheckInvocationStrategy;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
@@ -36,13 +37,13 @@ import org.junit.Test;
 public class AdminResourceTest {
 
     public static final String CUSTOM_LISTEN_PORT = "9999";
-    private KaryonServer server;
+    private AdminResourcesContainer container;
 
     @After
     public void tearDown() throws Exception {
         ((ConcurrentCompositeConfiguration) ConfigurationManager.getConfigInstance())
                 .clearOverrideProperty(AdminResourcesContainer.CONTAINER_LISTEN_PORT);
-        server.stop();
+        container.shutdown();
     }
 
     @Test
@@ -67,11 +68,13 @@ public class AdminResourceTest {
                                  ", instead listened to default port: " + AdminResourcesContainer.LISTEN_PORT_DEFAULT);
     }
 
-    private Injector startServer() throws Exception {
-        KaryonGovernatorBootstrap bootstrap = new KaryonGovernatorBootstrap.Builder("com.netflix").build();
-        server = new KaryonServer(bootstrap);
-        Injector injector = bootstrap.getInjector();
-        server.start();
-        return injector;
+    private void startServer() throws Exception {
+        container = new AdminResourcesContainer(new Provider<HealthCheckInvocationStrategy>() {
+            @Override
+            public HealthCheckInvocationStrategy get() {
+                return new SyncHealthCheckInvocationStrategy(AlwaysHealthyHealthCheck.INSTANCE);
+            }
+        });
+        container.init();
     }
 }

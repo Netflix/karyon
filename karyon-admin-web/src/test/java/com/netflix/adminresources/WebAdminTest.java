@@ -17,11 +17,12 @@
 package com.netflix.adminresources;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.inject.Provider;
 import com.netflix.adminresources.resources.MaskedResourceHelper;
 import com.netflix.config.ConfigurationManager;
-import com.netflix.karyon.governator.KaryonGovernatorBootstrap;
-import com.netflix.karyon.server.KaryonServer;
-import com.netflix.karyon.server.bootstrap.PropertyNames;
+import com.netflix.karyon.health.AlwaysHealthyHealthCheck;
+import com.netflix.karyon.health.HealthCheckInvocationStrategy;
+import com.netflix.karyon.health.SyncHealthCheckInvocationStrategy;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
@@ -45,7 +46,7 @@ import static org.junit.Assert.assertTrue;
 public class WebAdminTest {
     private static final Logger LOG = LoggerFactory.getLogger(WebAdminTest.class);
 
-    private static KaryonServer server;
+    private static AdminResourcesContainer container;
 
     private static final Map<String, String> REST_END_POINTS = new ImmutableMap.Builder<String, String>()
             .put("http://localhost:8077/webadmin/props", MediaType.APPLICATION_JSON)
@@ -62,8 +63,6 @@ public class WebAdminTest {
 
     @BeforeClass
     public static void setUp() throws Exception {
-        System.setProperty(PropertyNames.SERVER_BOOTSTRAP_BASE_PACKAGES_OVERRIDE, "com.netflix.adminresources");
-        System.setProperty(PropertyNames.DISABLE_EUREKA_INTEGRATION, "true");
         System.setProperty("AWS_SECRET_KEY", "super-secret-aws-key");
         System.setProperty("AWS_ACCESS_ID", "super-aws-access-id");
         System.setProperty(MaskedResourceHelper.MASKED_PROPERTY_NAMES, "AWS_SECRET_KEY");
@@ -73,14 +72,12 @@ public class WebAdminTest {
 
     @AfterClass
     public static void tearDown() throws Exception {
-        ConfigurationManager.getConfigInstance().clearProperty(PropertyNames.DISABLE_APPLICATION_DISCOVERY_PROP_NAME);
-        ConfigurationManager.getConfigInstance().clearProperty(PropertyNames.EXPLICIT_APPLICATION_CLASS_PROP_NAME);        
         ConfigurationManager.getConfigInstance().clearProperty("AWS_SECRET_KEY");
         ConfigurationManager.getConfigInstance().clearProperty("AWS_ACCESS_ID");
         ConfigurationManager.getConfigInstance().clearProperty(MaskedResourceHelper.MASKED_PROPERTY_NAMES);
 
-        if (server != null) {
-            server.stop();
+        if (container != null) {
+            container.shutdown();
         }
     }
 
@@ -122,7 +119,12 @@ public class WebAdminTest {
     }
         
     private static void startServer() throws Exception {
-        server = new KaryonServer(new KaryonGovernatorBootstrap.Builder().build());
-        server.start();
+        container = new AdminResourcesContainer(new Provider<HealthCheckInvocationStrategy>() {
+            @Override
+            public HealthCheckInvocationStrategy get() {
+                return new SyncHealthCheckInvocationStrategy(AlwaysHealthyHealthCheck.INSTANCE);
+            }
+        });
+        container.init();
     }
 }

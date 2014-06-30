@@ -8,7 +8,7 @@ import com.netflix.explorers.ExplorerManager;
 import com.netflix.explorers.ExplorersManagerImpl;
 import com.netflix.explorers.context.GlobalModelContext;
 import com.netflix.explorers.providers.FreemarkerTemplateProvider;
-import com.netflix.karyon.server.bootstrap.HealthCheckInvocationStrategy;
+import com.netflix.karyon.health.HealthCheckInvocationStrategy;
 
 class AdminResourcesModule
         extends AbstractModule {

@@ -26,10 +26,8 @@ import com.netflix.config.DynamicStringProperty;
 import com.netflix.governator.annotations.Configuration;
 import com.netflix.governator.guice.LifecycleInjector;
 import com.netflix.governator.lifecycle.LifecycleManager;
-import com.netflix.karyon.governator.Component;
-import com.netflix.karyon.server.bootstrap.HealthCheckHandler;
-import com.netflix.karyon.server.bootstrap.HealthCheckInvocationStrategy;
-import com.netflix.karyon.server.bootstrap.PropertyNames;
+import com.netflix.karyon.health.HealthCheckHandler;
+import com.netflix.karyon.health.HealthCheckInvocationStrategy;
 import org.eclipse.jetty.server.DispatcherType;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.session.SessionHandler;
@@ -68,12 +66,11 @@ import java.util.EnumSet;
  * @author Nitesh Kant
  * @author Jordan Zimmerman
  */
-@Component(disableProperty = "netflix.platform.admin.resources.disable")
 public class AdminResourcesContainer {
 
     private static final Logger logger = LoggerFactory.getLogger(AdminResourcesContainer.class);
 
-    public static final String DEFAULT_PAGE_PROP_NAME = PropertyNames.KARYON_PROPERTIES_PREFIX + "admin.default.page";
+    public static final String DEFAULT_PAGE_PROP_NAME = "com.netflix.karyon.admin.default.page";
 
     public static final DynamicStringProperty DEFAULT_PAGE =
             DynamicPropertyFactory.getInstance().getStringProperty(DEFAULT_PAGE_PROP_NAME, "/healthcheck");

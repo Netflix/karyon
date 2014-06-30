@@ -24,8 +24,9 @@ tasks.withType(Javadoc).each {
 
 dependencies {
     dependencies {
-        compile project(':karyon-governator')
+        compile project(':karyon-core')
         compile project(':karyon-eureka')
+        compile 'com.netflix.governator:governator:1.2.12'
         compile 'javax.ws.rs:jsr311-api:1.1.1'
         compile 'javax.servlet:servlet-api:2.5'
         compile 'org.eclipse.jetty:jetty-server:7.6.7.v20120910'

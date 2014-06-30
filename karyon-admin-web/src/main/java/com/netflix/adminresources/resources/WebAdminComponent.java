@@ -19,7 +19,6 @@ package com.netflix.adminresources.resources;
 import com.netflix.adminresources.AdminResourcesContainer;
 import com.netflix.config.ConcurrentCompositeConfiguration;
 import com.netflix.config.ConfigurationManager;
-import com.netflix.karyon.governator.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,7 +27,6 @@ import javax.annotation.PostConstruct;
 /**
  * @author Nitesh Kant
  */
-@Component
 public class WebAdminComponent {
 
     private static final Logger logger = LoggerFactory.getLogger(WebAdminComponent.class);

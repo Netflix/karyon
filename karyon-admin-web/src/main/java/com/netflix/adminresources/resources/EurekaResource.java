@@ -24,8 +24,6 @@ import com.netflix.discovery.DiscoveryClient;
 import com.netflix.discovery.DiscoveryManager;
 import com.netflix.discovery.shared.Application;
 import com.netflix.discovery.shared.Applications;
-import com.netflix.karyon.server.bootstrap.PropertyNames;
-import com.netflix.karyon.server.utils.KaryonUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -53,16 +51,12 @@ public class EurekaResource {
     public Response getEurekaDetails() {
         List<EurekaInstanceInfo> instanceInfoList = new ArrayList<EurekaInstanceInfo>();
 
-        if (!KaryonUtils.isCoreComponentEnabled(PropertyNames.EUREKA_COMPONENT_NAME)) {
-            logger.info("Eureka is not enabled, so not fetching eureka details.");
-        } else {
-            DiscoveryClient discoveryClient = DiscoveryManager.getInstance().getDiscoveryClient();
-            if (null != discoveryClient) {
-                Applications apps = discoveryClient.getApplications();
-                for (Application app : apps.getRegisteredApplications()) {
-                    for (InstanceInfo inst : app.getInstances()) {
-                        instanceInfoList.add(new EurekaInstanceInfo(inst.getAppName(), inst.getId(), inst.getStatus().name(), inst.getIPAddr(), inst.getHostName()));
-                    }
+        DiscoveryClient discoveryClient = DiscoveryManager.getInstance().getDiscoveryClient();
+        if (null != discoveryClient) {
+            Applications apps = discoveryClient.getApplications();
+            for (Application app : apps.getRegisteredApplications()) {
+                for (InstanceInfo inst : app.getInstances()) {
+                    instanceInfoList.add(new EurekaInstanceInfo(inst.getAppName(), inst.getId(), inst.getStatus().name(), inst.getIPAddr(), inst.getHostName()));
                 }
             }
         }

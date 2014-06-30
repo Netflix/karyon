@@ -16,9 +16,7 @@
 
 package com.netflix.hellonoss.server.health;
 
-import com.google.inject.Inject;
-import com.netflix.hellonoss.core.HelloworldComponent;
-import com.netflix.karyon.server.bootstrap.HealthCheckHandler;
+import com.netflix.karyon.health.HealthCheckHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,12 +28,6 @@ import javax.annotation.PostConstruct;
 public class HealthCheck implements HealthCheckHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(HealthCheck.class);
-    private final HelloworldComponent component;
-
-    @Inject
-    public HealthCheck(HelloworldComponent component) {
-        this.component = component;
-    }
 
     @PostConstruct
     public void init() {
@@ -46,7 +38,6 @@ public class HealthCheck implements HealthCheckHandler {
     public int getStatus() {
         // TODO: Health check logic.
         logger.info("Health check invoked.");
-        logger.info("Message from component: " + component.getHelloString());
         return 200;
     }
 }

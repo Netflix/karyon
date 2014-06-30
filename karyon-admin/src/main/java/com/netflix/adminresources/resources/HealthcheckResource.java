@@ -1,7 +1,7 @@
 package com.netflix.adminresources.resources;
 
 import com.google.inject.Inject;
-import com.netflix.karyon.server.bootstrap.HealthCheckInvocationStrategy;
+import com.netflix.karyon.health.HealthCheckInvocationStrategy;
 import com.sun.jersey.spi.resource.Singleton;
 
 import javax.ws.rs.GET;

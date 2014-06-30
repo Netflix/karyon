@@ -43,20 +43,7 @@ war {
 dependencies {
     compile 'org.slf4j:slf4j-api:1.7.0'
     runtime 'org.slf4j:slf4j-simple:1.7.0'
-    compile project(':karyon-extensions')
-    compile project(':karyon-extensions-testsuite')
     compile project(':karyon-admin-web')
-
-    testCompile 'org.jboss.arquillian.junit:arquillian-junit-container:1.1.0.Final'
-    testCompile 'org.jboss.shrinkwrap:shrinkwrap-impl-base:1.1.2'
-    testCompile 'org.jboss.shrinkwrap.resolver:shrinkwrap-resolver-impl-maven:2.0.0'
-    testCompile 'org.jboss.shrinkwrap.descriptors:shrinkwrap-descriptors-impl-javaee:2.0.0-alpha-3'
-    testRuntime 'org.jboss.arquillian.container:arquillian-tomcat-embedded-7:1.0.0.CR5'
-    testRuntime 'org.apache.tomcat.embed:tomcat-embed-core:7.0.42'
-    testRuntime 'org.apache.tomcat.embed:tomcat-embed-logging-juli:7.0.42'
-    testRuntime('org.apache.tomcat.embed:tomcat-embed-jasper:7.0.42') {
-        exclude group: 'org.eclipse.jdt.core.compiler', module: 'ecj'
-    }
 }
 
 jettyRun.doFirst {

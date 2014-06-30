@@ -19,8 +19,7 @@ package com.netflix.karyon.server.eureka;
 import com.netflix.appinfo.HealthCheckCallback;
 import com.netflix.config.DynamicBooleanProperty;
 import com.netflix.config.DynamicPropertyFactory;
-import com.netflix.karyon.server.bootstrap.HealthCheckInvocationStrategy;
-import com.netflix.karyon.server.bootstrap.PropertyNames;
+import com.netflix.karyon.health.HealthCheckInvocationStrategy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,12 +30,13 @@ import java.util.concurrent.TimeoutException;
  */
 public class EurekaHealthCheckCallback implements HealthCheckCallback {
 
-    protected static final Logger logger = LoggerFactory.getLogger(EurekaHandler.class);
+    protected static final Logger logger = LoggerFactory.getLogger(EurekaHealthCheckCallback.class);
 
     private HealthCheckInvocationStrategy healthCheckInvocationStrategy;
 
     private static final DynamicBooleanProperty UNIFY_HEALTHCHECK_WITH_EUREKA =
-            DynamicPropertyFactory.getInstance().getBooleanProperty(PropertyNames.UNIFY_HEALTHCHECK_WITH_EUREKA, true);
+            DynamicPropertyFactory.getInstance().getBooleanProperty("com.netflix.karyon.unify.health.check.with.eureka",
+                                                                    true);
 
     public EurekaHealthCheckCallback(HealthCheckInvocationStrategy healthCheckInvocationStrategy) {
         this.healthCheckInvocationStrategy = healthCheckInvocationStrategy;
