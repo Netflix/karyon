@@ -67,11 +67,11 @@ public class ServletAndFilterHolderTest {
         HttpServerRequest<ByteBuf> rxRequest = new HttpServerRequest<ByteBuf>(request,
                                                                               PublishSubject.<ByteBuf>create());
         ServletsAndFiltersHolder.ServletMatchResult result =
-                router.servletsAndFiltersHolder().getMatchingServlet(rxRequest, new NoOpChannelHandlerContext());
+                router.servletsAndFiltersHolder().getMatchingServlet(rxRequest, new MockChannelHandlerContext());
         Assert.assertNotNull("No matching servlet found.", result);
         Assert.assertEquals("Unexpected matching servlet found.", TestableServlet.class, result.servlet().getClass());
 
-        List<Filter> filters = router.servletsAndFiltersHolder().getMatchingFilters(rxRequest, new NoOpChannelHandlerContext());
+        List<Filter> filters = router.servletsAndFiltersHolder().getMatchingFilters(rxRequest, new MockChannelHandlerContext());
         Assert.assertNotNull("No matching filters found.", filters);
         Assert.assertEquals("Unexpected number of matching filters found.", 1, filters.size());
         Assert.assertEquals("Unexpected matching filter found.", TestableFilter.class, filters.get(0).getClass());
@@ -89,7 +89,7 @@ public class ServletAndFilterHolderTest {
         HttpServerRequest<ByteBuf> rxRequest = new HttpServerRequest<ByteBuf>(request,
                                                                               PublishSubject.<ByteBuf>create());
         ServletsAndFiltersHolder.ServletMatchResult result =
-                router.servletsAndFiltersHolder().getMatchingServlet(rxRequest, new NoOpChannelHandlerContext());
+                router.servletsAndFiltersHolder().getMatchingServlet(rxRequest, new MockChannelHandlerContext());
         Assert.assertNotNull("No matching servlet found.", result);
         Assert.assertEquals("Unexpected matching servlet found.", TestableServlet.class, result.servlet().getClass());
     }
@@ -107,7 +107,7 @@ public class ServletAndFilterHolderTest {
                                                                               PublishSubject.<ByteBuf>create());
 
         List<Filter> filters = router.servletsAndFiltersHolder()
-                                     .getMatchingFilters(rxRequest, new NoOpChannelHandlerContext());
+                                     .getMatchingFilters(rxRequest, new MockChannelHandlerContext());
         Assert.assertNotNull("No matching filters found.", filters);
         Assert.assertEquals("Unexpected number of matching filters found.", 1, filters.size());
         Assert.assertEquals("Unexpected matching filter found.", TestableFilter.class, filters.get(0).getClass());

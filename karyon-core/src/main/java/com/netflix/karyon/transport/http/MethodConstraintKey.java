@@ -1,6 +1,5 @@
 package com.netflix.karyon.transport.http;
 
-import com.google.common.base.Preconditions;
 import io.netty.handler.codec.http.HttpMethod;
 import io.reactivex.netty.protocol.http.server.HttpServerRequest;
 import org.slf4j.Logger;
@@ -16,7 +15,9 @@ public class MethodConstraintKey<I> implements HttpInterceptorKey<I> {
     private final HttpMethod method;
 
     public MethodConstraintKey(HttpMethod method) {
-        Preconditions.checkNotNull(method, "HTTP method in the interceptor constraint can not be null.");
+        if (null == method) {
+            throw new NullPointerException("HTTP method in the interceptor constraint can not be null.");
+        }
         this.method = method;
     }
 

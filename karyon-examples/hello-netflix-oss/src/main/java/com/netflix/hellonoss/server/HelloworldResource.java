@@ -36,6 +36,10 @@ public class HelloworldResource {
     private static final Logger logger = LoggerFactory.getLogger(HelloworldResource.class);
     private final HealthCheck healthCheck;
 
+    public HelloworldResource() {
+        healthCheck = new HealthCheck();
+    }
+
     @Inject
     public HelloworldResource(HealthCheck healthCheck) {
         this.healthCheck = healthCheck; // This is just to demo injection in jersey.

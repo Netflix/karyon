@@ -1,4 +1,4 @@
-package com.netflix.karyon.server;
+package com.netflix.karyon.server.http.servlet.blocking;
 
 import io.netty.buffer.ByteBufAllocator;
 import io.netty.buffer.UnpooledByteBufAllocator;
@@ -12,7 +12,9 @@ import io.netty.channel.ChannelProgressivePromise;
 import io.netty.channel.ChannelPromise;
 import io.netty.channel.DefaultChannelProgressivePromise;
 import io.netty.channel.DefaultChannelPromise;
-import io.netty.channel.local.LocalChannel;
+import io.netty.channel.socket.ServerSocketChannel;
+import io.netty.channel.socket.oio.OioServerSocketChannel;
+import io.netty.channel.socket.oio.OioSocketChannel;
 import io.netty.util.Attribute;
 import io.netty.util.AttributeKey;
 import io.netty.util.AttributeMap;
@@ -20,27 +22,69 @@ import io.netty.util.DefaultAttributeMap;
 import io.netty.util.concurrent.EventExecutor;
 import io.netty.util.concurrent.GlobalEventExecutor;
 
+import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 
 /**
+ * A no-op implementation for {@link ChannelHandlerContext} so that any mock can implement whichever method is required.
+ *
  * @author Nitesh Kant
  */
 public class MockChannelHandlerContext implements ChannelHandlerContext {
 
     private final Channel channel;
-    private final String name;
     private final ChannelDuplexHandler handler;
+    private final InetSocketAddress serverSockAddr;
+    private final InetSocketAddress remoteAddr;
+    private final InetSocketAddress localAddr;
     private final UnpooledByteBufAllocator bufAllocator = new UnpooledByteBufAllocator(true);
     private final AttributeMap attributeMap = new DefaultAttributeMap();
 
-    public MockChannelHandlerContext(String name) {
-        this(new LocalChannel(), name, null);
+    public MockChannelHandlerContext() {
+        this("localhost", 0, "localhost", 0, "localhost", 0, null);
     }
 
-    public MockChannelHandlerContext(Channel channel, String name, ChannelDuplexHandler handler) {
-        this.channel = channel;
-        this.name = name;
+    public MockChannelHandlerContext(final String serverAddr, final int serverPort,
+                                     final String localAddr, final int localPort,
+                                     final String remoteAddr, final int remotePort) {
+        this(serverAddr, serverPort, localAddr, localPort, remoteAddr, remotePort, null);
+    }
+
+    public MockChannelHandlerContext(final String serverAddr, final int serverPort,
+                                     final String localAddr, final int localPort,
+                                     final String remoteAddr, final int remotePort, ChannelDuplexHandler handler) {
         this.handler = handler;
+        serverSockAddr = InetSocketAddress.createUnresolved(serverAddr, serverPort);
+        this.localAddr = new InetSocketAddress(localAddr, localPort);
+        this.remoteAddr = new InetSocketAddress(remoteAddr, remotePort);
+        final ServerSocketChannel parent = new OioServerSocketChannel() {
+            @Override
+            protected SocketAddress localAddress0() {
+                return serverSockAddr;
+            }
+        };
+        channel = new OioSocketChannel() {
+            @Override
+            public ServerSocketChannel parent() {
+                return parent;
+            }
+
+            @Override
+            public InetSocketAddress localAddress() {
+                return MockChannelHandlerContext.this.localAddr;
+            }
+
+            @Override
+            public InetSocketAddress remoteAddress() {
+                return MockChannelHandlerContext.this.remoteAddr;
+            }
+
+            @Override
+            public ChannelFuture write(Object msg) {
+                // Eat the writes as this is a test.
+                return new DefaultChannelPromise(this);
+            }
+        };
     }
 
     @Override
@@ -55,7 +99,7 @@ public class MockChannelHandlerContext implements ChannelHandlerContext {
 
     @Override
     public String name() {
-        return name;
+        return "";
     }
 
     @Override

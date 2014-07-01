@@ -1,12 +1,9 @@
 package com.netflix.karyon.transport.http;
 
-import com.google.common.base.Preconditions;
 import com.netflix.karyon.transport.interceptor.InterceptorKey;
 import io.reactivex.netty.protocol.http.server.HttpServerRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import javax.annotation.Nullable;
 
 /**
  * Provides constraint implementation for {@link InterceptorKey} similar to java servlet specifications. <p/>
@@ -46,18 +43,24 @@ public class ServletStyleUriConstraintKey<I> implements HttpInterceptorKey<I> {
     private final String contextPath;
 
     public ServletStyleUriConstraintKey(final String constraint, final String contextPath) {
-        Preconditions.checkNotNull(constraint, "Constraint can not be null.");
-        this.contextPath = contextPath.startsWith("/") ? contextPath : '/' + contextPath; // uri & constraint always starts with a /
+        if (null == constraint) {
+            throw new NullPointerException("Constraint can not be null.");
+        }
+        this.contextPath = contextPath.startsWith("/") ? contextPath
+                                                       : '/' + contextPath; // uri & constraint always starts with a /
         String normalizedConstraint = constraint;
         if (!constraint.startsWith("/")) { // URI always comes with a leading '/'
             normalizedConstraint = '/' + constraint;
         }
 
         if (normalizedConstraint.startsWith("/*.")) {
-            matcher = new ExtensionMatcher(constraint); // not normalizedConstraint as then we will have to ignore the first character.
+            matcher = new ExtensionMatcher(
+                    constraint); // not normalizedConstraint as then we will have to ignore the first character.
         } else if (normalizedConstraint.endsWith("/*")) {
             matcher = new PrefixMatcher(normalizedConstraint.substring(0, normalizedConstraint.length() - 1),
-                                        new Matcher(normalizedConstraint.substring(0, normalizedConstraint.length() - 2), null)); // Prefix match removing * or exact match removing /*
+                                        new Matcher(normalizedConstraint.substring(0,
+                                                                                   normalizedConstraint.length() - 2),
+                                                    null)); // Prefix match removing * or exact match removing /*
         } else if (normalizedConstraint.endsWith("*")) {
             matcher = new PrefixMatcher(normalizedConstraint.substring(0, normalizedConstraint.length() - 1), null);
         } else {
@@ -97,9 +100,9 @@ public class ServletStyleUriConstraintKey<I> implements HttpInterceptorKey<I> {
         protected final String constraint;
         protected final String constraintWithoutContextPath;
 
-        @Nullable private final Matcher nextMatcher;
+        private final Matcher nextMatcher;
 
-        private Matcher(String constraint, @Nullable Matcher nextMatcher) {
+        private Matcher(String constraint, Matcher nextMatcher) {
             this.constraint = constraint;
             constraintWithoutContextPath = constraint.isEmpty() ? constraint : constraint.substring(contextPath.length());
             this.nextMatcher = nextMatcher;
@@ -134,7 +137,7 @@ public class ServletStyleUriConstraintKey<I> implements HttpInterceptorKey<I> {
 
     private class PrefixMatcher extends Matcher {
 
-        private PrefixMatcher(String prefix, @Nullable Matcher nextMatcher) {
+        private PrefixMatcher(String prefix, Matcher nextMatcher) {
             super(prefix, nextMatcher);
         }
 

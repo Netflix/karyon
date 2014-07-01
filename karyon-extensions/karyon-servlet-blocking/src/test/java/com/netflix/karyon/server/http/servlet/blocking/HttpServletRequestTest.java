@@ -3,6 +3,7 @@ package com.netflix.karyon.server.http.servlet.blocking;
 import com.google.common.base.Joiner;
 import com.netflix.karyon.transport.http.QueryStringDecoder;
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
 import io.netty.handler.codec.http.DefaultHttpRequest;
 import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.handler.codec.http.HttpMethod;
@@ -186,6 +187,9 @@ public class HttpServletRequestTest {
         int index = 0;
         while (names.hasMoreElements()) {
             String name = names.nextElement();
+            if (HttpHeaders.Names.CONTENT_LENGTH.equals(name)) {
+                continue;
+            }
             Assert.assertEquals("Header names not as expected.", headerNames[index++], name);
         }
     }
@@ -328,7 +332,7 @@ public class HttpServletRequestTest {
     @Test
     public void testContentLength() throws Exception {
         HttpServletRequestImpl servletRequest = createServletRequest();
-        Assert.assertEquals("Unexpected request content length.", CONTENT.length(), servletRequest.getContentLength());
+        Assert.assertEquals("Unexpected request content length.", CONTENT.getBytes().length, servletRequest.getContentLength());
     }
 
     @Test
@@ -556,14 +560,21 @@ public class HttpServletRequestTest {
             throws ExecutionException, InterruptedException {
         sessionManager = null == sessionManager ? new HttpSessionManager(600) : sessionManager;
         nettyRequest = new DefaultHttpRequest(HTTP_VERSION, HTTP_METHOD, testUri);
-        HttpServerRequest<ByteBuf> rxRequest = new HttpServerRequest<ByteBuf>(nettyRequest,
-                                                                              PublishSubject.<ByteBuf>create());
+        PublishSubject<ByteBuf> contentSub = PublishSubject.create();
+        HttpServerRequest<ByteBuf> rxRequest = new HttpServerRequest<ByteBuf>(nettyRequest, contentSub);
+        byte[] bytes = CONTENT.getBytes();
+        nettyRequest.headers().set(HttpHeaders.Names.CONTENT_LENGTH, bytes.length);
         QueryStringDecoder decoder = new QueryStringDecoder(nettyRequest.getUri());
         HttpServletRequestImpl.PathComponents pathComponents =
                 new HttpServletRequestImpl.PathComponents(decoder, CONTEXT_PATH, SERVLET_PATH);
-        return new HttpServletRequestImpl(pathComponents, rxRequest, sessionManager,
-                                          new NoOpChannelHandlerContextMock(LOCAL_ADDRESS, SERVER_PORT,
-                                                                        LOCAL_ADDRESS, LOCAL_PORT,
-                                                                        REMOTE_ADDRESS, REMOTE_PORT), false);
+        HttpServletRequestImpl httpServletRequest = new HttpServletRequestImpl(pathComponents, rxRequest,
+                                                                               sessionManager,
+                                                                               new MockChannelHandlerContext(
+                                                                                       LOCAL_ADDRESS, SERVER_PORT,
+                                                                                       LOCAL_ADDRESS, LOCAL_PORT,
+                                                                                       REMOTE_ADDRESS, REMOTE_PORT),
+                                                                               false);
+        contentSub.onNext(Unpooled.buffer().writeBytes(bytes));
+        return httpServletRequest;
     }
 }

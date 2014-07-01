@@ -203,6 +203,7 @@ public class HttpServletResponseImpl implements HttpServletResponse {
                                                               _getCharsetNameWithDefaults()), true) {
             @Override
             public void flush() {
+                super.flush();
                 serverResponse.writeAndFlush(outputWriterBuffer);
             }
         };
@@ -310,6 +311,7 @@ public class HttpServletResponseImpl implements HttpServletResponse {
         if (null != message) {
             setHeader(HttpHeaders.Names.CONTENT_TYPE, "text/html");
             getWriter().write(message);
+            getWriter().flush();
         }
     }
 

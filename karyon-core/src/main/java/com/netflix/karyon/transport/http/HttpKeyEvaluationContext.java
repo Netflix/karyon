@@ -1,14 +1,11 @@
 package com.netflix.karyon.transport.http;
 
-import com.google.common.base.Preconditions;
 import com.netflix.karyon.transport.interceptor.KeyEvaluationContext;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.http.HttpRequest;
 import io.netty.util.Attribute;
 import io.netty.util.AttributeKey;
 import io.reactivex.netty.protocol.http.server.HttpServerRequest;
-
-import javax.annotation.Nullable;
 
 /**
  * @author Nitesh Kant
@@ -55,8 +52,9 @@ public class HttpKeyEvaluationContext extends KeyEvaluationContext {
     }
 
     private QueryStringDecoder getOrCreateQueryStringDecoder(HttpServerRequest<?> request) {
-        Preconditions.checkNotNull(request, "Request can not be null.");
-
+        if (null == request) {
+            throw new NullPointerException("Request can not be null.");
+        }
         String uri = request.getUri();
         if (null == uri) {
             return null;
@@ -64,7 +62,7 @@ public class HttpKeyEvaluationContext extends KeyEvaluationContext {
 
         Attribute<QueryStringDecoder> queryDecoderAttr = channelHandlerContext.attr(queryDecoderKey);
 
-        @Nullable QueryStringDecoder _queryStringDecoder = queryDecoderAttr.get();
+        QueryStringDecoder _queryStringDecoder = queryDecoderAttr.get();
 
         if (null == _queryStringDecoder) {
             _queryStringDecoder = new QueryStringDecoder(uri);
@@ -75,7 +73,9 @@ public class HttpKeyEvaluationContext extends KeyEvaluationContext {
 
     public static QueryStringDecoder getOrCreateQueryStringDecoder(HttpServerRequest<?> request,
                                                                    ChannelHandlerContext channelHandlerContext) {
-        Preconditions.checkNotNull(request, "Request can not be null.");
+        if (null == request) {
+            throw new NullPointerException("Request can not be null.");
+        }
 
         String uri = request.getUri();
         if (null == uri) {
@@ -84,7 +84,7 @@ public class HttpKeyEvaluationContext extends KeyEvaluationContext {
 
         Attribute<QueryStringDecoder> queryDecoderAttr = channelHandlerContext.attr(queryDecoderKey);
 
-        @Nullable QueryStringDecoder _queryStringDecoder = queryDecoderAttr.get();
+        QueryStringDecoder _queryStringDecoder = queryDecoderAttr.get();
 
         if (null == _queryStringDecoder) {
             _queryStringDecoder = new QueryStringDecoder(uri);

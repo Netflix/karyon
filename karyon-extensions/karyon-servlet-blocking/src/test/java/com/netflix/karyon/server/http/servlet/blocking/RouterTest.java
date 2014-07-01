@@ -11,6 +11,8 @@ import io.reactivex.netty.protocol.http.server.HttpServerRequest;
 import io.reactivex.netty.protocol.http.server.HttpServerResponse;
 import org.junit.Assert;
 import org.junit.Test;
+import rx.Observer;
+import rx.functions.Action0;
 import rx.subjects.PublishSubject;
 
 import javax.servlet.Filter;
@@ -18,6 +20,8 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author Nitesh Kant
@@ -60,9 +64,8 @@ public class RouterTest {
         HttpServletRequestRouter router = builder.build();
         DefaultHttpRequest request = new DefaultHttpRequest(HTTP_VERSION, HTTP_METHOD, testUri);
         HttpServerRequest<ByteBuf> rxRequest = new HttpServerRequest<ByteBuf>(request, PublishSubject.<ByteBuf>create());
-        NoOpChannelHandlerContextMock contextMock = new NoOpChannelHandlerContextMock(LOCAL_ADDRESS, SERVER_PORT, LOCAL_ADDRESS,
-                                                                                      LOCAL_PORT, REMOTE_ADDRESS,
-                                                                                      REMOTE_PORT);
+        MockChannelHandlerContext contextMock = new MockChannelHandlerContext(LOCAL_ADDRESS, SERVER_PORT, LOCAL_ADDRESS,
+                                                                              LOCAL_PORT, REMOTE_ADDRESS, REMOTE_PORT);
 
         HttpServerResponse<ByteBuf> rxResponse = new HttpServerResponse<ByteBuf>(contextMock);
         router.route(rxRequest, rxResponse);
@@ -87,7 +90,7 @@ public class RouterTest {
                             invokedWithReq.getServletPath());
 
         HttpServletResponseImpl invokedWithResp = (HttpServletResponseImpl) servlet.resp;
-        Assert.assertEquals("Unexpected response code.", 204, invokedWithResp.serverResponse().getStatus().code());
+        Assert.assertEquals("Unexpected response code.", 200, invokedWithResp.serverResponse().getStatus().code());
     }
 
     @Test
@@ -95,12 +98,10 @@ public class RouterTest {
         TestableServlet servlet = new TestableServlet();
         TestableFilter filter = new TestableFilter(0, null, true);
         RouterAndAccomplice routerAndAccomplice = new RouterAndAccomplice(servlet, filter).invoke();
-        processRequest(routerAndAccomplice);
+        TestableObserver observer = processRequest(routerAndAccomplice);
         Assert.assertTrue("Expected filter not invoked.", filter.invoked);
         Assert.assertFalse("Unexpected servlet invoked when filter threw an error.", servlet.invoked);
-
-        HttpServletResponseImpl invokedWithResp = (HttpServletResponseImpl) filter.resp;
-        Assert.assertEquals("Unexpected response code.", 500, invokedWithResp.serverResponse().getStatus().code());
+        Assert.assertTrue("Observer's onError not invoked on filter's error.", observer.onError);
     }
 
     @Test
@@ -108,24 +109,53 @@ public class RouterTest {
         TestableServlet servlet = new TestableServlet(true);
         TestableFilter filter = new TestableFilter(0, null, false);
         RouterAndAccomplice routerAndAccomplice = new RouterAndAccomplice(servlet, filter).invoke();
-        processRequest(routerAndAccomplice);
+        TestableObserver observer = processRequest(routerAndAccomplice);
         Assert.assertTrue("Expected filter not invoked.", filter.invoked);
         Assert.assertTrue("Expected servlet not invoked.", servlet.invoked);
-
-        HttpServletResponseImpl invokedWithResp = (HttpServletResponseImpl) filter.resp;
-        Assert.assertEquals("Unexpected response code.", 500, invokedWithResp.serverResponse().getStatus().code());
+        Assert.assertTrue("Observer's onError not invoked on servlet's error.", observer.onError);
     }
 
-    private void processRequest(RouterAndAccomplice routerAndAccomplice) {
+    private TestableObserver processRequest(RouterAndAccomplice routerAndAccomplice) throws InterruptedException {
         HttpServletRequestRouter router = routerAndAccomplice.getRouter();
         DefaultFullHttpRequest request = new DefaultFullHttpRequest(HTTP_VERSION, HTTP_METHOD, testUri);
         HttpServerRequest<ByteBuf> rxRequest = new HttpServerRequest<ByteBuf>(request, PublishSubject.<ByteBuf>create());
-        NoOpChannelHandlerContextMock contextMock = new NoOpChannelHandlerContextMock(LOCAL_ADDRESS, SERVER_PORT, LOCAL_ADDRESS,
-                                                                                      LOCAL_PORT, REMOTE_ADDRESS,
-                                                                                      REMOTE_PORT);
+        MockChannelHandlerContext contextMock = new MockChannelHandlerContext(LOCAL_ADDRESS, SERVER_PORT, LOCAL_ADDRESS,
+                                                                              LOCAL_PORT, REMOTE_ADDRESS, REMOTE_PORT);
 
         HttpServerResponse<ByteBuf> rxResponse = new HttpServerResponse<ByteBuf>(contextMock);
-        router.route(rxRequest, rxResponse);
+        final CountDownLatch completionLatch = new CountDownLatch(1);
+        TestableObserver observer = new TestableObserver();
+        router.route(rxRequest, rxResponse).finallyDo(new Action0() {
+            @Override
+            public void call() {
+                completionLatch.countDown();
+            }
+        }).subscribe(observer);
+
+        completionLatch.await(1, TimeUnit.MINUTES);
+        return observer;
+    }
+
+    private static class TestableObserver implements Observer<Void> {
+
+        private boolean onCompleted;
+        private boolean onError;
+        private boolean onNext;
+
+        @Override
+        public void onCompleted() {
+            onCompleted = true;
+        }
+
+        @Override
+        public void onError(Throwable e) {
+            onError = true;
+        }
+
+        @Override
+        public void onNext(Void aVoid) {
+            onNext = true;
+        }
     }
 
     private class RouterAndAccomplice {

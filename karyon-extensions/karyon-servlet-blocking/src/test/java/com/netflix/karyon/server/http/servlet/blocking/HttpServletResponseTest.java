@@ -100,7 +100,7 @@ public class HttpServletResponseTest {
         String errMsg = "What a mess!";
         servletResponse.sendError(500, errMsg);
         Assert.assertEquals("Error code not set in response.", 500, servletResponse.serverResponse().getStatus().code());
-        byte[] content = new byte[servletResponse.getOutputStreamBuffer().readableBytes()];
+        byte[] content = new byte[servletResponse.getOutputWriterBuffer().readableBytes()];
         servletResponse.getOutputWriterBuffer().readBytes(content);
 
         Assert.assertEquals("Unexpected content length.", errMsg,
@@ -112,7 +112,7 @@ public class HttpServletResponseTest {
         HttpServletResponseImpl servletResponse = createServletResponse();
         servletResponse.sendError(500);
         Assert.assertEquals("Error code not set in response.", 500, servletResponse.serverResponse().getStatus().code());
-        Assert.assertEquals("Content present for error, when not set.", 0, servletResponse.getOutputWriterBuffer().readableBytes());
+        Assert.assertNull("Content present for error, when not set.", servletResponse.getOutputWriterBuffer());
     }
 
     @Test
@@ -298,7 +298,7 @@ public class HttpServletResponseTest {
     public void testEmptyContent() throws Exception {
         HttpServletResponseImpl servletResponse = createServletResponse();
         servletResponse.flushBuffer();
-        Assert.assertEquals("Unexpected response status code for empty response.", HttpResponseStatus.NO_CONTENT.code(),
+        Assert.assertEquals("Unexpected response status code for empty response.", HttpResponseStatus.OK.code(),
                             servletResponse.serverResponse().getStatus().code());
     }
 
@@ -324,7 +324,7 @@ public class HttpServletResponseTest {
         QueryStringDecoder decoder = new QueryStringDecoder(nettyRequest.getUri());
         HttpServletRequestImpl.PathComponents pathComponents =
                 new HttpServletRequestImpl.PathComponents(decoder, CONTEXT_PATH, SERVLET_PATH);
-        NoOpChannelHandlerContextMock context = new NoOpChannelHandlerContextMock(LOCAL_ADDRESS, SERVER_PORT,
+        MockChannelHandlerContext context = new MockChannelHandlerContext(LOCAL_ADDRESS, SERVER_PORT,
                                                                           LOCAL_ADDRESS, LOCAL_PORT,
                                                                           REMOTE_ADDRESS, REMOTE_PORT);
         HttpServerRequest<ByteBuf> rxRequest = new HttpServerRequest<ByteBuf>(nettyRequest,

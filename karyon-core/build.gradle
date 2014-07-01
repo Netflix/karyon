@@ -24,11 +24,7 @@ tasks.withType(Javadoc).each {
 
 dependencies {
     dependencies {
-        compile 'com.google.guava:guava:11.0.2'
-        compile 'com.netflix.rxnetty:rx-netty:0.3.6'
-        compile('com.netflix.archaius:archaius-core:0.6.0') {
-            force = true
-        }
+        compile 'com.netflix.rxnetty:rx-netty-contexts:0.3.6'
     }
 }
 

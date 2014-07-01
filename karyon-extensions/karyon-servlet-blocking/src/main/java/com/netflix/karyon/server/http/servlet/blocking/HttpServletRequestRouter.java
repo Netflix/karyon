@@ -31,7 +31,6 @@ public class HttpServletRequestRouter implements HttpRequestRouter<ByteBuf, Byte
 
     public static final int DEFAULT_SESSION_INACTIVE_PERIOD = (int) TimeUnit.SECONDS.convert(1, TimeUnit.DAYS);
     public static final String SESSION_INACTIVITY_SECONDS_PROP_NAME = "com.netflix.karyon.servlet.session.inactivity.period.seconds";
-    private static final ErrorPageGenerator ERROR_PAGE_GENERATOR = new DefaultErrorPage();
 
     private final HttpSessionManager sessionManager;
     private final String contextPath;

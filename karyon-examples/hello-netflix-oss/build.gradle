@@ -43,7 +43,11 @@ war {
 dependencies {
     compile 'org.slf4j:slf4j-api:1.7.0'
     runtime 'org.slf4j:slf4j-simple:1.7.0'
-    compile project(':karyon-admin-web')
+    //compile project(':karyon-admin-web')
+    compile 'org.codehaus.jettison:jettison:1.3.5'
+    compile 'com.google.inject:guice:3.0'
+    compile project(':karyon-extensions:karyon-jersey-blocking')
+    compile project(':karyon-extensions:karyon-servlet-blocking')
 }
 
 jettyRun.doFirst {

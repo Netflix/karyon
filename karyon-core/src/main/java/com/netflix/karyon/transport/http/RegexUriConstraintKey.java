@@ -1,6 +1,5 @@
 package com.netflix.karyon.transport.http;
 
-import com.google.common.base.Preconditions;
 import com.netflix.karyon.transport.interceptor.InterceptorKey;
 import io.reactivex.netty.protocol.http.server.HttpServerRequest;
 import org.slf4j.Logger;
@@ -23,7 +22,9 @@ public class RegexUriConstraintKey<I> implements HttpInterceptorKey<I> {
     private final Pattern regEx;
 
     public RegexUriConstraintKey(String constraint) {
-        Preconditions.checkNotNull(constraint, "Constraint can not be null.");
+        if (null == constraint) {
+            throw new NullPointerException("Constraint can not be null.");
+        }
         regEx = Pattern.compile(constraint);
     }
 

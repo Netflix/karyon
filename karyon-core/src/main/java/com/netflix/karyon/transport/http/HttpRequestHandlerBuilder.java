@@ -16,8 +16,13 @@ public class HttpRequestHandlerBuilder<I, O> {
     private final HttpRequestRouter<I, O> router;
 
     public HttpRequestHandlerBuilder(HttpRequestRouter<I, O> router) {
+        this(new HttpInterceptorSupport<I, O>(), router);
+    }
+
+    public HttpRequestHandlerBuilder(HttpInterceptorSupport<I, O> interceptorSupport,
+                                     HttpRequestRouter<I, O> router) {
+        this.interceptorSupport = interceptorSupport;
         this.router = router;
-        interceptorSupport = new HttpInterceptorSupport<I, O>();
     }
 
     public InterceptorSupport.Attacher forKey(InterceptorKey<HttpServerRequest<I>, HttpKeyEvaluationContext> key) {
@@ -34,6 +39,14 @@ public class HttpRequestHandlerBuilder<I, O> {
 
     public HttpInterceptorSupport.HttpAttacher forHttpMethod(HttpMethod method) {
         return interceptorSupport.forHttpMethod(method);
+    }
+
+    public HttpInterceptorSupport<I, O> getInterceptorSupport() {
+        return interceptorSupport;
+    }
+
+    public HttpRequestRouter<I, O> getRouter() {
+        return router;
     }
 
     public HttpRequestHandler<I, O> build() {

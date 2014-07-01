@@ -45,7 +45,7 @@ public class InterceptorSupport<I, O, C extends KeyEvaluationContext> {
     }
 
     public boolean hasAtleastOneInterceptor() {
-        return inboundInterceptors.isEmpty() && outboundInterceptors.isEmpty();
+        return !inboundInterceptors.isEmpty() || !outboundInterceptors.isEmpty();
     }
 
     public InterceptorSupport<I, O, C> finish() {

@@ -6,7 +6,9 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.Iterators;
 import com.netflix.karyon.transport.http.HttpKeyEvaluationContext;
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.ByteBufAllocator;
 import io.netty.buffer.ByteBufInputStream;
+import io.netty.buffer.UnpooledByteBufAllocator;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.http.CookieDecoder;
@@ -18,6 +20,7 @@ import org.simpleframework.http.parse.ContentTypeParser;
 import org.simpleframework.http.parse.LanguageParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import rx.Observer;
 
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.GuardedBy;
@@ -145,7 +148,31 @@ public class HttpServletRequestImpl implements HttpServletRequest {
         } else {
             headerNamesEnum = EMPTY_ENUMERATION;
         }
-        content = serverRequest.getContent().toBlocking().toFuture().get();
+        ByteBufAllocator allocator;
+
+        if (null != channelHandlerContext) {
+            allocator = channelHandlerContext.alloc();
+        } else {
+            allocator = new UnpooledByteBufAllocator(true);
+        }
+
+        content = allocator.buffer();
+        serverRequest.getContent().subscribe(new Observer<ByteBuf>() {
+            @Override
+            public void onCompleted() {
+                // No Op
+            }
+
+            @Override
+            public void onError(Throwable e) {
+                logger.error("Error while reading request content.", e);
+            }
+
+            @Override
+            public void onNext(ByteBuf byteBuf) {
+                content.writeBytes(byteBuf);
+            }
+        });
     }
 
     /**

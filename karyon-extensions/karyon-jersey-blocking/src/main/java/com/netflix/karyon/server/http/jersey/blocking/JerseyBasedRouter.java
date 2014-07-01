@@ -1,6 +1,5 @@
 package com.netflix.karyon.server.http.jersey.blocking;
 
-import com.google.common.base.Preconditions;
 import com.netflix.karyon.transport.http.HttpRequestRouter;
 import com.sun.jersey.api.container.ContainerFactory;
 import com.sun.jersey.api.core.ResourceConfig;
@@ -26,7 +25,9 @@ public class JerseyBasedRouter implements HttpRequestRouter<ByteBuf, ByteBuf> {
     private NettyToJerseyBridge nettyToJerseyBridge;
 
     public JerseyBasedRouter(ResourceConfig resourceConfig) {
-        Preconditions.checkNotNull(resourceConfig);
+        if (null == resourceConfig) {
+            throw new NullPointerException("Resource config can not be null.");
+        }
         this.resourceConfig = resourceConfig;
     }
 
@@ -37,7 +38,7 @@ public class JerseyBasedRouter implements HttpRequestRouter<ByteBuf, ByteBuf> {
                                       nettyToJerseyBridge.bridgeResponse(response));
         } catch (IOException e) {
             logger.error("Failed to handle request.", e);
-            // TODO: Define a default fatal error handler that can send HTTP response.
+            return Observable.error(e);
         }
 
         return Observable.empty(); // Since execution is blocking, if this stmt is reached, it means execution is over.

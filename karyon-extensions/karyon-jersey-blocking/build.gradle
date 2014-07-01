@@ -29,6 +29,8 @@ apply from: file('../../gradle/license.gradle')
 
 dependencies {
     compile project(':karyon-core')
+    compile 'com.google.guava:guava:11.0.2'
+    compile 'com.netflix.archaius:archaius-core:0.6.0'
     compile 'com.sun.jersey:jersey-core:1.11'
     compile 'com.sun.jersey:jersey-server:1.11'
 }

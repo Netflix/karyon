@@ -17,6 +17,10 @@ public class HttpRequestHandler<I, O> implements RequestHandler<I, O> {
     private final RequestRouter<HttpServerRequest<I>, HttpServerResponse<O>> router;
     private final InterceptorExecutor<HttpServerRequest<I>, HttpServerResponse<O>, HttpKeyEvaluationContext> executor;
 
+    public HttpRequestHandler(HttpRequestRouter<I, O> router) {
+        this(router, new HttpInterceptorSupport<I, O>());
+    }
+
     public HttpRequestHandler(HttpRequestRouter<I, O> router, HttpInterceptorSupport<I, O> interceptorSupport) {
         this.router = router;
         if (interceptorSupport.hasAtleastOneInterceptor()) {

@@ -1,7 +1,5 @@
 package com.netflix.karyon.transport.http;
 
-import com.google.common.base.Preconditions;
-
 /**
  * A simple wrapper over {@link io.netty.handler.codec.http.QueryStringDecoder} to also provide access to the uri string.
  *
@@ -13,7 +11,9 @@ public class QueryStringDecoder {
     private final String uri;
 
     public QueryStringDecoder(String uri) {
-        Preconditions.checkNotNull(uri, "Uri can not be null.");
+        if (null == uri) {
+            throw new NullPointerException("Uri can not be null.");
+        }
         this.uri = uri;
         uri = io.netty.handler.codec.http.QueryStringDecoder.decodeComponent(uri);
         if (!uri.endsWith("/") && !uri.contains(".") && !uri.contains("?")) {
