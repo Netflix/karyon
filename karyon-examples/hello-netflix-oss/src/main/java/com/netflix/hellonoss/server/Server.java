@@ -1,10 +1,10 @@
 package com.netflix.hellonoss.server;
 
+import com.google.inject.AbstractModule;
+import com.google.inject.Guice;
+import com.netflix.hellonoss.server.health.HealthCheck;
+import com.netflix.karyon.health.HealthCheckHandler;
 import com.netflix.karyon.server.http.jersey.blocking.JerseyServer;
-import com.netflix.karyon.server.http.servlet.blocking.HTTPServletRequestRouterBuilder;
-import com.netflix.karyon.server.http.servlet.blocking.KaryonServlets;
-import com.netflix.karyon.transport.http.HttpInterceptorSupport;
-import io.netty.buffer.ByteBuf;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -20,18 +20,12 @@ public final class Server {
 
     public static void main(String[] args) throws Exception {
         System.setProperty("com.sun.jersey.config.property.packages", "com.netflix"); // TODO: Karyon bootstrap
-
-        JerseyServer.fromDefaults(8888).start();
-
-        HTTPServletRequestRouterBuilder servletRouterBuilder = new HTTPServletRequestRouterBuilder()
-                .forUri("/hello").serveWith(HelloWorldServlet.class);
-
-        KaryonServlets.from(9999, servletRouterBuilder.build()).start();
-
-        HttpInterceptorSupport<ByteBuf, ByteBuf> interceptorSupport = new HttpInterceptorSupport<ByteBuf, ByteBuf>();
-        interceptorSupport.forUriRegex(".*").intercept(new LoggingInterceptor());
-
-        KaryonServlets.from(8899, servletRouterBuilder.build(), interceptorSupport).startAndWait();
+        JerseyServer.fromDefaults(8888, Guice.createInjector(new AbstractModule() {
+            @Override
+            protected void configure() {
+                bind(HealthCheckHandler.class).to(HealthCheck.class);
+            }
+        })).startAndWait();
     }
 
     public static class HelloWorldServlet extends HttpServlet {

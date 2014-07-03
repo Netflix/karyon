@@ -1,6 +1,7 @@
 package com.netflix.karyon.server.http.jersey.blocking;
 
 import com.google.common.collect.Iterators;
+import com.google.inject.Injector;
 import com.sun.jersey.spi.container.ContainerProvider;
 import com.sun.jersey.spi.service.ServiceFinder;
 
@@ -24,6 +25,10 @@ public final class JerseyRouterProvider {
 
     public static JerseyBasedRouter createRouter() {
         return new JerseyBasedRouter(new PropertiesBasedResourceConfig());
+    }
+
+    public static JerseyBasedRouter createRouter(Injector injector) {
+        return new JerseyBasedRouter(new PropertiesBasedResourceConfig(), injector);
     }
 
     private static class ServiceIteratorProviderImpl<T> extends ServiceFinder.ServiceIteratorProvider<T> {

@@ -1,5 +1,6 @@
 package com.netflix.karyon.server.http.jersey.blocking;
 
+import com.google.inject.Injector;
 import com.netflix.karyon.transport.KaryonTransport;
 import com.netflix.karyon.transport.http.HttpInterceptorSupport;
 import com.netflix.karyon.transport.http.HttpRequestHandler;
@@ -46,12 +47,23 @@ public class JerseyServer {
         return newServerBuilder(port, router);
     }
 
+    public static JerseyServer fromDefaults(int port, Injector guiceInjector) {
+        JerseyBasedRouter router = JerseyRouterProvider.createRouter(guiceInjector);
+        return newServerBuilder(port, router);
+    }
+
     public static JerseyServer from(int port, JerseyBasedRouter router) {
         return newServerBuilder(port, router);
     }
 
     public static JerseyServer from(int port, HttpInterceptorSupport<ByteBuf, ByteBuf> interceptorSupport) {
         JerseyBasedRouter router = JerseyRouterProvider.createRouter();
+        return newServerBuilder(port, new HttpRequestHandlerBuilder<ByteBuf, ByteBuf>(interceptorSupport, router));
+    }
+
+    public static JerseyServer from(int port, HttpInterceptorSupport<ByteBuf, ByteBuf> interceptorSupport,
+                                    Injector guiceInjector) {
+        JerseyBasedRouter router = JerseyRouterProvider.createRouter(guiceInjector);
         return newServerBuilder(port, new HttpRequestHandlerBuilder<ByteBuf, ByteBuf>(interceptorSupport, router));
     }
 
