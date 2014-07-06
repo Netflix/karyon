@@ -29,33 +29,11 @@ apply from: file('../../gradle/maven.gradle')
 apply from: file('../../gradle/check.gradle')
 apply from: file('../../gradle/license.gradle')
 
-apply plugin: 'war'
-apply plugin: 'jetty'
-
-war {
-    from('resources')  {
-        include '*.properties'
-        into 'WEB-INF/classes/'
-    }
-    webXml = file('src/main/webapp/WEB-INF/web.xml')
-}
-
 dependencies {
     compile 'org.slf4j:slf4j-api:1.7.0'
     runtime 'org.slf4j:slf4j-simple:1.7.0'
-    //compile project(':karyon-admin-web')
+    compile project(':karyon-admin-web')
     compile 'org.codehaus.jettison:jettison:1.3.5'
     compile 'com.google.inject:guice:3.0'
-    compile project(':karyon-extensions:karyon-jersey-blocking')
-    compile project(':karyon-extensions:karyon-servlet-blocking')
-}
-
-jettyRun.doFirst {
-    // use the default port of the ws-backend-simulation module
-    System.setProperty("archaius.deployment.applicationId","hello-netflix-oss")
-    System.setProperty("archaius.deployment.environment","dev")
-}
-
-jettyRun {
-    httpPort = 8989
+    compile project(':karyon-jersey-blocking')
 }

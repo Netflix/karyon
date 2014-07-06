@@ -18,6 +18,6 @@ rootProject.name='karyon'
 include 'karyon-core', 'karyon-eureka', \
  'karyon-admin', \
  'karyon-admin-web', \
- 'karyon-extensions:karyon-jersey-blocking', \
- 'karyon-extensions:karyon-servlet-blocking', \
+ 'karyon-jersey-blocking', \
+ 'karyon-servlet-blocking', \
  'karyon-examples:hello-netflix-oss'
