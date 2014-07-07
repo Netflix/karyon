@@ -95,6 +95,14 @@ project(':karyon-extensions') {
     }
 }
 
+project(':karyon-governator') {
+    dependencies {
+        compile project(':karyon-core')
+        compile 'javax.servlet:servlet-api:2.5'
+        compile 'com.google.inject.extensions:guice-servlet:3.0'
+    }
+}
+
 project(':karyon-extensions-testsuite') {
     dependencies {
         compile project(':karyon-extensions')
