@@ -1,7 +1,6 @@
 package com.netflix.karyon.transport.http;
 
 import com.netflix.karyon.transport.interceptor.InterceptorKey;
-import com.netflix.karyon.transport.interceptor.InterceptorSupport;
 import io.netty.handler.codec.http.HttpMethod;
 import io.reactivex.netty.protocol.http.server.HttpServerRequest;
 
@@ -25,19 +24,19 @@ public class HttpRequestHandlerBuilder<I, O> {
         this.router = router;
     }
 
-    public InterceptorSupport.Attacher forKey(InterceptorKey<HttpServerRequest<I>, HttpKeyEvaluationContext> key) {
+    public HttpInterceptorSupport.HttpAttacher<I, O> forKey(InterceptorKey<HttpServerRequest<I>, HttpKeyEvaluationContext> key) {
         return interceptorSupport.forKey(key);
     }
 
-    public HttpInterceptorSupport.HttpAttacher forUri(String uri) {
+    public HttpInterceptorSupport.HttpAttacher<I, O> forUri(String uri) {
         return interceptorSupport.forUri(uri);
     }
 
-    public HttpInterceptorSupport.HttpAttacher forUriRegex(String uriRegEx) {
+    public HttpInterceptorSupport.HttpAttacher<I, O> forUriRegex(String uriRegEx) {
         return interceptorSupport.forUriRegex(uriRegEx);
     }
 
-    public HttpInterceptorSupport.HttpAttacher forHttpMethod(HttpMethod method) {
+    public HttpInterceptorSupport.HttpAttacher<I, O> forHttpMethod(HttpMethod method) {
         return interceptorSupport.forHttpMethod(method);
     }
 
@@ -50,6 +49,7 @@ public class HttpRequestHandlerBuilder<I, O> {
     }
 
     public HttpRequestHandler<I, O> build() {
+        interceptorSupport.finish();
         return new HttpRequestHandler<I, O>(router, interceptorSupport);
     }
 }

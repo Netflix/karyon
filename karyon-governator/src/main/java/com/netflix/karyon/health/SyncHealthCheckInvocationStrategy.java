@@ -16,6 +16,7 @@
 
 package com.netflix.karyon.health;
 
+import javax.inject.Inject;
 import java.util.concurrent.TimeoutException;
 
 /**
@@ -29,6 +30,7 @@ public class SyncHealthCheckInvocationStrategy implements HealthCheckInvocationS
 
     private final HealthCheckHandler handler;
 
+    @Inject
     public SyncHealthCheckInvocationStrategy(HealthCheckHandler handler) {
         this.handler = handler;
     }

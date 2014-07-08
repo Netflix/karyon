@@ -2,6 +2,7 @@ ext.githubProjectName = "karyon"
 
 buildscript {
     repositories {
+        mavenLocal()
         mavenCentral() // maven { url 'http://jcenter.bintray.com' }
     }
     apply from: file('gradle/buildscript.gradle'), to: buildscript
@@ -9,6 +10,7 @@ buildscript {
 
 allprojects {
     repositories {
+        mavenLocal()
         mavenCentral() // maven { url: 'http://jcenter.bintray.com' }
     }
 }

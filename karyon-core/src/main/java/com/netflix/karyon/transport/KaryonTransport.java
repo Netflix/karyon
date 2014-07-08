@@ -2,7 +2,6 @@ package com.netflix.karyon.transport;
 
 import com.netflix.karyon.transport.http.HttpRequestHandler;
 import com.netflix.karyon.transport.http.HttpRequestRouter;
-import io.netty.buffer.ByteBuf;
 import io.reactivex.netty.contexts.RxContexts;
 import io.reactivex.netty.protocol.http.server.HttpServer;
 import io.reactivex.netty.protocol.http.server.HttpServerBuilder;
@@ -24,22 +23,21 @@ public final class KaryonTransport {
     private KaryonTransport() {
     }
 
-    public static HttpServerBuilder<ByteBuf, ByteBuf> newHttpServerBuilder(int port, HttpRequestRouter<ByteBuf, ByteBuf> router) {
-        return RxContexts.newHttpServerBuilder(port, new HttpRequestHandler<ByteBuf, ByteBuf>(router),
+    public static <I, O> HttpServerBuilder<I, O> newHttpServerBuilder(int port, HttpRequestRouter<I, O> router) {
+        return RxContexts.newHttpServerBuilder(port, new HttpRequestHandler<I, O>(router),
                                                RxContexts.DEFAULT_CORRELATOR /*TODO: Use the specific correlator*/);
     }
 
-    public static HttpServerBuilder<ByteBuf, ByteBuf> newHttpServerBuilder(int port,
-                                                                           HttpRequestHandler<ByteBuf, ByteBuf> requestHandler) {
+    public static <I, O> HttpServerBuilder<I, O> newHttpServerBuilder(int port, HttpRequestHandler<I, O> requestHandler) {
         return RxContexts.newHttpServerBuilder(port, requestHandler,
                                                RxContexts.DEFAULT_CORRELATOR /*TODO: Use the specific correlator*/);
     }
 
-    public static HttpServer<ByteBuf, ByteBuf> newHttpServer(int port, HttpRequestRouter<ByteBuf, ByteBuf> router) {
+    public static <I, O> HttpServer<I, O> newHttpServer(int port, HttpRequestRouter<I, O> router) {
         return newHttpServerBuilder(port, router).build();
     }
 
-    public static HttpServer<ByteBuf, ByteBuf> newHttpServer(int port, HttpRequestHandler<ByteBuf, ByteBuf> requestHandler) {
+    public static <I, O> HttpServer<I, O> newHttpServer(int port, HttpRequestHandler<I, O> requestHandler) {
         return newHttpServerBuilder(port, requestHandler).build();
     }
 

@@ -13,6 +13,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import rx.Observable;
 
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
+import javax.inject.Inject;
 import java.io.IOException;
 
 /**
@@ -27,16 +30,15 @@ public class JerseyBasedRouter implements HttpRequestRouter<ByteBuf, ByteBuf> {
     private WebApplication application;
     private NettyToJerseyBridge nettyToJerseyBridge;
 
-    public JerseyBasedRouter(ResourceConfig resourceConfig, Injector injector) {
-        this.injector = injector;
-        if (null == resourceConfig) {
-            throw new NullPointerException("Resource config can not be null.");
-        }
-        this.resourceConfig = resourceConfig;
+    public JerseyBasedRouter() {
+        this(null);
     }
 
-    public JerseyBasedRouter(ResourceConfig resourceConfig) {
-        this(resourceConfig, null);
+    @Inject
+    public JerseyBasedRouter(Injector injector) {
+        this.injector = injector;
+        resourceConfig = new PropertiesBasedResourceConfig();
+        ServiceIteratorProviderImpl.registerWithJersey();
     }
 
     @Override
@@ -52,15 +54,21 @@ public class JerseyBasedRouter implements HttpRequestRouter<ByteBuf, ByteBuf> {
         return Observable.empty(); // Since execution is blocking, if this stmt is reached, it means execution is over.
     }
 
+    @PostConstruct
     public void start() {
-        NettyContainer container = ContainerFactory.createContainer(NettyContainer.class, resourceConfig,
-                                                                    new GuiceComponentProviderFactory(resourceConfig,
-                                                                                                      injector));
+        NettyContainer container;
+        if (null != injector) {
+            container = ContainerFactory.createContainer(NettyContainer.class, resourceConfig,
+                                                         new GuiceComponentProviderFactory(resourceConfig, injector));
+        } else {
+            container = ContainerFactory.createContainer(NettyContainer.class, resourceConfig);
+        }
         application = container.getApplication();
         nettyToJerseyBridge = container.getNettyToJerseyBridge();
         logger.info("Started Jersey based request router.");
     }
 
+    @PreDestroy
     public void stop() {
         logger.info("Stopped Jersey based request router.");
     }

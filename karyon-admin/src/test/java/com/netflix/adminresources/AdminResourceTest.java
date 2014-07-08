@@ -16,12 +16,8 @@
 
 package com.netflix.adminresources;
 
-import com.google.inject.Provider;
 import com.netflix.config.ConcurrentCompositeConfiguration;
 import com.netflix.config.ConfigurationManager;
-import com.netflix.karyon.health.AlwaysHealthyHealthCheck;
-import com.netflix.karyon.health.HealthCheckInvocationStrategy;
-import com.netflix.karyon.health.SyncHealthCheckInvocationStrategy;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
@@ -68,12 +64,7 @@ public class AdminResourceTest {
     }
 
     private void startServer() throws Exception {
-        container = new AdminResourcesContainer(new Provider<HealthCheckInvocationStrategy>() {
-            @Override
-            public HealthCheckInvocationStrategy get() {
-                return new SyncHealthCheckInvocationStrategy(AlwaysHealthyHealthCheck.INSTANCE);
-            }
-        });
+        container = new AdminResourcesContainer();
         container.init();
     }
 }

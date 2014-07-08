@@ -15,6 +15,8 @@
  */
 ext.githubProjectName = rootProject.name // Change if github project name is not the same as the root project's name
 
+apply plugin: 'application'
+
 buildscript {
     repositories { mavenCentral() }
     apply from: file('../../gradle/buildscript.gradle'), to: buildscript
@@ -37,3 +39,10 @@ dependencies {
     compile 'com.google.inject:guice:3.0'
     compile project(':karyon-jersey-blocking')
 }
+
+run {
+    systemProperty 'java.awt.headless', 'true'
+    args "com.netflix.hellonoss.server.HelloNossApp"
+}
+
+mainClassName = "com.netflix.karyon.KaryonServer"

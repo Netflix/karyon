@@ -28,7 +28,7 @@ apply from: file('../gradle/check.gradle')
 apply from: file('../gradle/license.gradle')
 
 dependencies {
-    compile project(':karyon-core')
+    compile project(':karyon-governator')
     compile 'com.google.guava:guava:11.0.2'
     compile 'com.netflix.archaius:archaius-core:0.6.0'
     compile 'javax.servlet:servlet-api:2.5'

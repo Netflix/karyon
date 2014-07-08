@@ -16,6 +16,7 @@
 
 rootProject.name='karyon'
 include 'karyon-core', 'karyon-eureka', \
+ 'karyon-governator', \
  'karyon-admin', \
  'karyon-admin-web', \
  'karyon-jersey-blocking', \

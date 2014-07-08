@@ -24,10 +24,10 @@ tasks.withType(Javadoc).each {
 
 dependencies {
     dependencies {
+        compile 'com.netflix.governator:governator:1.2.15-SNAPSHOT'
+        compile 'com.netflix.eureka:eureka-client:1.1.135'
         compile project(':karyon-core')
-        compile 'com.netflix.eureka:eureka-client:1.1.134'
-        testCompile 'org.apache.httpcomponents:httpclient:4.1.2'
-        testCompile 'org.mortbay.jetty:jetty:6.1H.22'
+        compile project(':karyon-eureka')
     }
 }
 

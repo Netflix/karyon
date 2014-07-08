@@ -26,7 +26,7 @@ public class AlwaysHealthyHealthCheck implements HealthCheckHandler {
 
     public static final AlwaysHealthyHealthCheck INSTANCE = new AlwaysHealthyHealthCheck();
 
-    private AlwaysHealthyHealthCheck() {
+    public AlwaysHealthyHealthCheck() {
     }
 
     @Override

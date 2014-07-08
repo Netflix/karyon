@@ -16,9 +16,7 @@
 
 package com.netflix.adminresources;
 
-import com.google.inject.Inject;
 import com.google.inject.Injector;
-import com.google.inject.Provider;
 import com.netflix.adminresources.resources.EmbeddedContentResource;
 import com.netflix.adminresources.resources.HealthcheckResource;
 import com.netflix.config.DynamicPropertyFactory;
@@ -27,7 +25,6 @@ import com.netflix.governator.annotations.Configuration;
 import com.netflix.governator.guice.LifecycleInjector;
 import com.netflix.governator.lifecycle.LifecycleManager;
 import com.netflix.karyon.health.HealthCheckHandler;
-import com.netflix.karyon.health.HealthCheckInvocationStrategy;
 import org.eclipse.jetty.server.DispatcherType;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.session.SessionHandler;
@@ -80,8 +77,6 @@ public class AdminResourcesContainer {
     private static final String JERSEY_CORE_PACKAGES = "netflix.platform.admin.resources.core.packages";
     public static final String JERSEY_CORE_PACKAGES_DEAULT = "com.netflix.adminresources;com.netflix.explorers.resources;com.netflix.explorers.providers";
 
-    private final Provider<HealthCheckInvocationStrategy> healthCheckInvocationStrategyProvider;
-
     @Configuration(
             value = JERSEY_CORE_PACKAGES,
             documentation = "Property defining the list of core packages which contains jersey resources for karyon admin. com.netflix.adminresources is always added to this."
@@ -98,12 +93,6 @@ public class AdminResourcesContainer {
 
     private Server server;
 
-    @Inject
-    public AdminResourcesContainer(Provider<HealthCheckInvocationStrategy> healthCheckInvocationStrategyProvider) {
-        this.healthCheckInvocationStrategyProvider = healthCheckInvocationStrategyProvider;
-
-    }
-
     /**
      * Starts the container and hence the embedded jetty server.
      *
@@ -115,7 +104,7 @@ public class AdminResourcesContainer {
         Injector injector = LifecycleInjector
                 .builder()
                 .usingBasePackages("com.netflix.explorers")
-                .withModules(new AdminResourcesModule(healthCheckInvocationStrategyProvider)).createInjector();
+                .withModules(new AdminResourcesModule()).createInjector();
         try {
             injector.getInstance(LifecycleManager.class).start();
             AdminResourcesFilter adminResourcesFilter = injector.getInstance(AdminResourcesFilter.class);

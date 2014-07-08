@@ -6,7 +6,6 @@ import rx.Subscriber;
 import rx.subscriptions.SerialSubscription;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -16,13 +15,12 @@ import java.util.List;
  */
 public class InterceptorExecutor<I, O, C extends KeyEvaluationContext> {
 
-    private final List<InterceptorSupport<I, O, C>.InterceptorHolder<InboundInterceptor<I, O>>> allIn;
-    private final List<InterceptorSupport<I, O, C>.InterceptorHolder<OutboundInterceptor<O>>> allOut;
+    private final List<InterceptorHolder<I, C, InboundInterceptor<I, O>>> allIn;
+    private final List<InterceptorHolder<I, C, OutboundInterceptor<O>>> allOut;
     private final RequestRouter<I, O> router;
 
-    public InterceptorExecutor(InterceptorSupport<I, O, C> support, RequestRouter<I, O> router) {
+    public InterceptorExecutor(AbstractInterceptorSupport<I, O, C, ?, ?> support, RequestRouter<I, O> router) {
         this.router = router;
-        support.finish();
         allIn = support.getInboundInterceptors();
         allOut = support.getOutboundInterceptors();
     }
@@ -77,10 +75,10 @@ public class InterceptorExecutor<I, O, C extends KeyEvaluationContext> {
             this.keyEvaluationContext = keyEvaluationContext;
             applicableOutInterceptors = new ArrayList<OutboundInterceptor<O>>(); // Execution is not multi-threaded.
 
-            for (InterceptorSupport<I, O, C>.InterceptorHolder<OutboundInterceptor<O>> holder : allOut) {
+            for (InterceptorHolder<I, C, OutboundInterceptor<O>> holder : allOut) {
                 switch (keyEvaluationContext.getEvaluationResult(holder.getKey())) { // Result is cached.
                     case Apply:
-                        Collections.addAll(applicableOutInterceptors, holder.getInterceptors());
+                        applicableOutInterceptors.addAll(holder.getInterceptors());
                         break;
                     case Skip:
                         break;
@@ -88,7 +86,7 @@ public class InterceptorExecutor<I, O, C extends KeyEvaluationContext> {
                         boolean apply = holder.getKey().apply(request, keyEvaluationContext);
                         keyEvaluationContext.updateKeyEvaluationResult(holder.getKey(), apply);
                         if (apply) {
-                            Collections.addAll(applicableOutInterceptors, holder.getInterceptors());
+                            applicableOutInterceptors.addAll(holder.getInterceptors());
                         }
                         break;
                 }
@@ -110,7 +108,7 @@ public class InterceptorExecutor<I, O, C extends KeyEvaluationContext> {
                         nextExecutionState = NextExecutionState.Router;
                         return null;
                     } else {
-                        InterceptorSupport<I, O, C>.InterceptorHolder<InboundInterceptor<I, O>> holder =
+                        InterceptorHolder<I, C, InboundInterceptor<I, O>> holder =
                                 allIn.get( currentHolderIndex);
                         switch (keyEvaluationContext.getEvaluationResult(holder.getKey())) { // Result is cached.
                             case Apply:
@@ -144,13 +142,13 @@ public class InterceptorExecutor<I, O, C extends KeyEvaluationContext> {
         }
 
         private InboundInterceptor<I, O> returnNextInterceptor(I request,
-                                                               InterceptorSupport<I, O, C>.InterceptorHolder<InboundInterceptor<I, O>> holder) {
-            InboundInterceptor<I, O>[] interceptors = holder.getInterceptors();
-            if (currentInterceptorIndex >= interceptors.length) {
+                                                               InterceptorHolder<I, C, InboundInterceptor<I, O>> holder) {
+            List<InboundInterceptor<I, O>> interceptors = holder.getInterceptors();
+            if (currentInterceptorIndex >= interceptors.size()) {
                 nextExecutionState = NextExecutionState.NextInHolder;
                 return nextIn(request);
             }
-            return interceptors[currentInterceptorIndex++];
+            return interceptors.get(currentInterceptorIndex++);
         }
 
         public boolean invokeRouter() {
