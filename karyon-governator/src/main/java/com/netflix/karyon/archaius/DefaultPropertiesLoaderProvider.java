@@ -6,6 +6,7 @@ import com.netflix.karyon.KaryonBootstrap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.inject.Inject;
 import java.io.IOException;
 
 /**
@@ -16,6 +17,7 @@ public class DefaultPropertiesLoaderProvider implements Provider<PropertiesLoade
     private static final Logger logger = LoggerFactory.getLogger(DefaultPropertiesLoaderProvider.class);
     private String appName;
 
+    @Inject
     public DefaultPropertiesLoaderProvider(KaryonBootstrap karyonBootstrap) {
         this.appName = karyonBootstrap.name();
     }
@@ -23,6 +25,7 @@ public class DefaultPropertiesLoaderProvider implements Provider<PropertiesLoade
     @Override
     public PropertiesLoader get() {
         return new PropertiesLoader() {
+
             @Override
             public void load() {
                 try {

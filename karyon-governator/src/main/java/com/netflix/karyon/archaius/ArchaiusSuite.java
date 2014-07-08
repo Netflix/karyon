@@ -16,11 +16,11 @@ import javax.inject.Inject;
  */
 public class ArchaiusSuite implements LifecycleInjectorBuilderSuite {
 
-    private final Archaius archaius;
+    private final ArchaiusBootstrap archaiusBootstrap;
 
     @Inject
-    public ArchaiusSuite(Archaius archaius) {
-        this.archaius = archaius;
+    public ArchaiusSuite(ArchaiusBootstrap archaiusBootstrap) {
+        this.archaiusBootstrap = archaiusBootstrap;
     }
 
     @Override
@@ -29,13 +29,22 @@ public class ArchaiusSuite implements LifecycleInjectorBuilderSuite {
 
             @Override
             public void configure(BootstrapBinder bootstrapBinder) {
-                bootstrapBinder.bind(Archaius.class).toInstance(archaius);
-                bootstrapBinder.bind(PropertiesLoader.class).toProvider(archaius.loader());
+                bootstrapBinder.bind(ArchaiusBootstrap.class).toInstance(archaiusBootstrap);
+                bootstrapBinder.bind(PropertiesLoader.class).toProvider(archaiusBootstrap.loader());
+                bootstrapBinder.bind(PropertiesInitializer.class).asEagerSingleton();
                 ArchaiusConfigurationProvider.Builder builder = ArchaiusConfigurationProvider.builder();
                 builder.withOwnershipPolicy(ConfigurationOwnershipPolicies.ownsAll());
                 bootstrapBinder.bindConfigurationProvider().toInstance(builder.build());
             }
         });
+    }
+
+    public static class PropertiesInitializer {
+
+        @Inject
+        public PropertiesInitializer(PropertiesLoader loader) {
+            loader.load();
+        }
     }
 
 }

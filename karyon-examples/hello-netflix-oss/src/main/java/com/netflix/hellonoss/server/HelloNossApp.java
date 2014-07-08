@@ -6,32 +6,36 @@ import com.netflix.hellonoss.server.auth.AuthInterceptor;
 import com.netflix.hellonoss.server.auth.AuthenticationService;
 import com.netflix.hellonoss.server.auth.AuthenticationServiceImpl;
 import com.netflix.karyon.KaryonBootstrap;
-import com.netflix.karyon.archaius.Archaius;
+import com.netflix.karyon.archaius.ArchaiusBootstrap;
+import com.netflix.karyon.eureka.KaryonEurekaModule;
 import com.netflix.karyon.server.http.jersey.blocking.KaryonJerseyModule;
 import com.netflix.karyon.transport.http.GovernatorHttpInterceptorSupport;
 import io.netty.buffer.ByteBuf;
 
-import javax.inject.Inject;
-
 /**
  * @author Nitesh Kant
  */
-@Archaius
-@KaryonBootstrap(name = "hello-netflix-oss", port = 8888, shutdownPort = 9999)
-@Modules(include = {HelloNossApp.KaryonJerseyModuleImpl.class, KaryonWebAdminModule.class})
+@ArchaiusBootstrap
+@KaryonBootstrap(name = "hello-netflix-oss")
+@Modules(include = {HelloNossApp.KaryonJerseyModuleImpl.class, KaryonWebAdminModule.class, KaryonEurekaModule.class})
 public final class HelloNossApp  {
 
-    public class KaryonJerseyModuleImpl extends KaryonJerseyModule {
-
-        @Inject
-        public KaryonJerseyModuleImpl(KaryonBootstrap karyonBootstrap) {
-            super(karyonBootstrap);
-        }
+    public static class KaryonJerseyModuleImpl extends KaryonJerseyModule {
 
         @Override
         protected void configure() {
             super.configure();
             bind(AuthenticationService.class).to(AuthenticationServiceImpl.class);
+        }
+
+        @Override
+        public int serverPort() {
+            return 8888;
+        }
+
+        @Override
+        public int shutdownPort() {
+            return 8899;
         }
 
         @Override

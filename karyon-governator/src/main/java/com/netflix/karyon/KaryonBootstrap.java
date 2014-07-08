@@ -17,8 +17,4 @@ import java.lang.annotation.Target;
 public @interface KaryonBootstrap {
 
     String name();
-
-    int port();
-
-    int shutdownPort();
 }

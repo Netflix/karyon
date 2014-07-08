@@ -3,6 +3,8 @@ package com.netflix.karyon;
 import com.google.inject.AbstractModule;
 import com.google.inject.binder.AnnotatedBindingBuilder;
 import com.google.inject.binder.LinkedBindingBuilder;
+import com.netflix.governator.guice.BootstrapBinder;
+import com.netflix.governator.guice.BootstrapModule;
 import com.netflix.governator.guice.LifecycleInjectorBuilder;
 import com.netflix.governator.guice.LifecycleInjectorBuilderSuite;
 import com.netflix.karyon.health.AlwaysHealthyHealthCheck;
@@ -28,6 +30,12 @@ public class KaryonBootstrapSuite implements LifecycleInjectorBuilderSuite {
 
     @Override
     public void configure(LifecycleInjectorBuilder builder) {
+        builder.withAdditionalBootstrapModules(new BootstrapModule() {
+            @Override
+            public void configure(BootstrapBinder bootstrapBinder) {
+                bootstrapBinder.bind(KaryonBootstrap.class).toInstance(karyonBootstrap);
+            }
+        });
         builder.withAdditionalModules(new AbstractModule() {
             @Override
             protected void configure() {

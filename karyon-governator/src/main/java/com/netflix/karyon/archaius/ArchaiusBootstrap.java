@@ -15,7 +15,7 @@ import java.lang.annotation.Target;
 @Retention(java.lang.annotation.RetentionPolicy.RUNTIME)
 @Target({ElementType.TYPE})
 @Bootstrap(ArchaiusSuite.class)
-public @interface Archaius {
+public @interface ArchaiusBootstrap {
 
     Class<? extends Provider<PropertiesLoader>> loader() default DefaultPropertiesLoaderProvider.class;
 }

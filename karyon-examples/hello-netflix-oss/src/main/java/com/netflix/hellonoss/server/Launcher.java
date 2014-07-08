@@ -8,6 +8,6 @@ import com.netflix.karyon.KaryonServer;
 public class Launcher {
 
     public static void main(String[] args) throws ClassNotFoundException {
-        KaryonServer.main(new String[] {"com.netflix.hellonoss.server.Server"});
+        KaryonServer.main(new String[] {HelloNossApp.class.getCanonicalName()});
     }
 }
