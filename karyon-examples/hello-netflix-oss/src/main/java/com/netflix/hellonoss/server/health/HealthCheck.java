@@ -16,6 +16,7 @@
 
 package com.netflix.hellonoss.server.health;
 
+import com.google.inject.Singleton;
 import com.netflix.karyon.health.HealthCheckHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,6 +26,7 @@ import javax.annotation.PostConstruct;
 /**
  * @author Nitesh Kant (nkant@netflix.com)
  */
+@Singleton
 public class HealthCheck implements HealthCheckHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(HealthCheck.class);

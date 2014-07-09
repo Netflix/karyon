@@ -30,15 +30,18 @@ public class EurekaHealthCheckHandler implements com.netflix.appinfo.HealthCheck
 
     protected static final Logger logger = LoggerFactory.getLogger(EurekaHealthCheckHandler.class);
     private final HealthCheckHandler healthCheckHandler;
+    private final EurekaKaryonStatusBridge eurekaKaryonStatusBridge;
 
     @Inject
-    public EurekaHealthCheckHandler(HealthCheckHandler healthCheckHandler) {
+    public EurekaHealthCheckHandler(HealthCheckHandler healthCheckHandler,
+                                    EurekaKaryonStatusBridge eurekaKaryonStatusBridge) {
         this.healthCheckHandler = healthCheckHandler;
+        this.eurekaKaryonStatusBridge = eurekaKaryonStatusBridge;
     }
 
     @Override
     public InstanceInfo.InstanceStatus getStatus(InstanceInfo.InstanceStatus currentStatus) {
         int healthStatus = healthCheckHandler.getStatus();
-        return null;
+        return eurekaKaryonStatusBridge.interpretKaryonStatus(healthStatus);
     }
 }

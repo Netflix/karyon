@@ -24,7 +24,7 @@ tasks.withType(Javadoc).each {
 
 dependencies {
     dependencies {
-        compile 'com.netflix.governator:governator:1.2.15-SNAPSHOT'
+        compile 'com.netflix.governator:governator:1.2.16'
         compile 'com.netflix.eureka:eureka-client:1.1.135'
         compile project(':karyon-core')
         compile project(':karyon-eureka')

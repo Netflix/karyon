@@ -12,13 +12,10 @@ import com.netflix.karyon.server.http.jersey.blocking.KaryonJerseyModule;
 import com.netflix.karyon.transport.http.GovernatorHttpInterceptorSupport;
 import io.netty.buffer.ByteBuf;
 
-/**
- * @author Nitesh Kant
- */
 @ArchaiusBootstrap
 @KaryonBootstrap(name = "hello-netflix-oss")
-@Modules(include = {HelloNossApp.KaryonJerseyModuleImpl.class, KaryonWebAdminModule.class, KaryonEurekaModule.class})
-public final class HelloNossApp  {
+@Modules(include = {HelloWorldApp.KaryonJerseyModuleImpl.class, KaryonWebAdminModule.class, KaryonEurekaModule.class})
+public final class HelloWorldApp {
 
     public static class KaryonJerseyModuleImpl extends KaryonJerseyModule {
 

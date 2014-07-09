@@ -16,8 +16,13 @@
 
 package com.netflix.adminresources;
 
+import com.google.inject.Provider;
 import com.netflix.config.ConcurrentCompositeConfiguration;
 import com.netflix.config.ConfigurationManager;
+import com.netflix.karyon.health.AlwaysHealthyHealthCheck;
+import com.netflix.karyon.health.HealthCheckHandler;
+import com.netflix.karyon.health.HealthCheckInvocationStrategy;
+import com.netflix.karyon.health.SyncHealthCheckInvocationStrategy;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
@@ -31,7 +36,6 @@ import org.junit.Test;
  */
 public class AdminResourceTest {
 
-    public static final String CUSTOM_LISTEN_PORT = "9999";
     private AdminResourcesContainer container;
 
     @After
@@ -51,20 +55,18 @@ public class AdminResourceTest {
         Assert.assertEquals("admin resource health check failed.", 200, response.getStatusLine().getStatusCode());
     }
 
-    //@Test (expected = HttpHostConnectException.class)
-    public void testCustomPort() throws Exception {
-        ((ConcurrentCompositeConfiguration) ConfigurationManager.getConfigInstance()).setOverrideProperty(
-                AdminResourcesContainer.CONTAINER_LISTEN_PORT, CUSTOM_LISTEN_PORT);
-        startServer();
-        HttpClient client = new DefaultHttpClient();
-        HttpGet healthGet = new HttpGet("http://localhost:"+ AdminResourcesContainer.LISTEN_PORT_DEFAULT + "/healthcheck");
-        client.execute(healthGet);
-        throw new AssertionError("Admin container did not bind to the custom port " + CUSTOM_LISTEN_PORT +
-                                 ", instead listened to default port: " + AdminResourcesContainer.LISTEN_PORT_DEFAULT);
-    }
-
     private void startServer() throws Exception {
-        container = new AdminResourcesContainer();
+        container = new AdminResourcesContainer(new Provider<HealthCheckInvocationStrategy>() {
+            @Override
+            public HealthCheckInvocationStrategy get() {
+                return new SyncHealthCheckInvocationStrategy(AlwaysHealthyHealthCheck.INSTANCE);
+            }
+        }, new Provider<HealthCheckHandler>() {
+            @Override
+            public HealthCheckHandler get() {
+                return AlwaysHealthyHealthCheck.INSTANCE;
+            }
+        });
         container.init();
     }
 }

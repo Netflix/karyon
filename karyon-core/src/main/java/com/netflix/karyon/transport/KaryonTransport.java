@@ -24,13 +24,11 @@ public final class KaryonTransport {
     }
 
     public static <I, O> HttpServerBuilder<I, O> newHttpServerBuilder(int port, HttpRequestRouter<I, O> router) {
-        return RxContexts.newHttpServerBuilder(port, new HttpRequestHandler<I, O>(router),
-                                               RxContexts.DEFAULT_CORRELATOR /*TODO: Use the specific correlator*/);
+        return RxContexts.newHttpServerBuilder(port, new HttpRequestHandler<I, O>(router), RxContexts.DEFAULT_CORRELATOR);
     }
 
     public static <I, O> HttpServerBuilder<I, O> newHttpServerBuilder(int port, HttpRequestHandler<I, O> requestHandler) {
-        return RxContexts.newHttpServerBuilder(port, requestHandler,
-                                               RxContexts.DEFAULT_CORRELATOR /*TODO: Use the specific correlator*/);
+        return RxContexts.newHttpServerBuilder(port, requestHandler, RxContexts.DEFAULT_CORRELATOR);
     }
 
     public static <I, O> HttpServer<I, O> newHttpServer(int port, HttpRequestRouter<I, O> router) {

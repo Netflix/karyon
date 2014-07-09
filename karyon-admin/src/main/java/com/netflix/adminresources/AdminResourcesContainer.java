@@ -17,6 +17,7 @@
 package com.netflix.adminresources;
 
 import com.google.inject.Injector;
+import com.google.inject.Provider;
 import com.netflix.adminresources.resources.EmbeddedContentResource;
 import com.netflix.adminresources.resources.HealthcheckResource;
 import com.netflix.config.DynamicPropertyFactory;
@@ -25,6 +26,7 @@ import com.netflix.governator.annotations.Configuration;
 import com.netflix.governator.guice.LifecycleInjector;
 import com.netflix.governator.lifecycle.LifecycleManager;
 import com.netflix.karyon.health.HealthCheckHandler;
+import com.netflix.karyon.health.HealthCheckInvocationStrategy;
 import org.eclipse.jetty.server.DispatcherType;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.session.SessionHandler;
@@ -36,6 +38,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
+import javax.inject.Inject;
 import java.util.EnumSet;
 
 /**
@@ -93,6 +96,17 @@ public class AdminResourcesContainer {
 
     private Server server;
 
+
+    private final Provider<HealthCheckInvocationStrategy> strategy;
+    private final Provider<HealthCheckHandler> handlerProvider;
+
+    @Inject
+    public AdminResourcesContainer(Provider<HealthCheckInvocationStrategy> strategy,
+                                   Provider<HealthCheckHandler> handlerProvider) {
+        this.strategy = strategy;
+        this.handlerProvider = handlerProvider;
+    }
+
     /**
      * Starts the container and hence the embedded jetty server.
      *
@@ -104,7 +118,7 @@ public class AdminResourcesContainer {
         Injector injector = LifecycleInjector
                 .builder()
                 .usingBasePackages("com.netflix.explorers")
-                .withModules(new AdminResourcesModule()).createInjector();
+                .withModules(new AdminResourcesModule(strategy, handlerProvider)).createInjector();
         try {
             injector.getInstance(LifecycleManager.class).start();
             AdminResourcesFilter adminResourcesFilter = injector.getInstance(AdminResourcesFilter.class);

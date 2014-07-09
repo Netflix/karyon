@@ -7,6 +7,7 @@ import com.netflix.governator.guice.BootstrapBinder;
 import com.netflix.governator.guice.BootstrapModule;
 import com.netflix.governator.guice.LifecycleInjectorBuilder;
 import com.netflix.governator.guice.LifecycleInjectorBuilderSuite;
+import com.netflix.governator.guice.LifecycleInjectorMode;
 import com.netflix.karyon.health.AlwaysHealthyHealthCheck;
 import com.netflix.karyon.health.HealthCheckHandler;
 import com.netflix.karyon.health.HealthCheckInvocationStrategy;
@@ -30,6 +31,7 @@ public class KaryonBootstrapSuite implements LifecycleInjectorBuilderSuite {
 
     @Override
     public void configure(LifecycleInjectorBuilder builder) {
+        builder.withMode(LifecycleInjectorMode.SIMULATED_CHILD_INJECTORS);
         builder.withAdditionalBootstrapModules(new BootstrapModule() {
             @Override
             public void configure(BootstrapBinder bootstrapBinder) {

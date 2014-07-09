@@ -1,23 +1,23 @@
 package com.netflix.karyon;
 
-import io.netty.buffer.ByteBuf;
-import io.netty.channel.socket.DatagramPacket;
-import io.netty.handler.codec.http.HttpResponseStatus;
 import io.reactivex.netty.RxNetty;
 import io.reactivex.netty.channel.ConnectionHandler;
 import io.reactivex.netty.channel.ObservableConnection;
-import io.reactivex.netty.protocol.http.server.HttpServerRequest;
-import io.reactivex.netty.protocol.http.server.HttpServerResponse;
-import io.reactivex.netty.protocol.http.server.RequestHandler;
-import io.reactivex.netty.protocol.udp.server.UdpServer;
+import io.reactivex.netty.pipeline.PipelineConfigurators;
 import io.reactivex.netty.server.RxServer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import rx.Observable;
-import rx.Subscriber;
+import rx.functions.Action0;
+import rx.functions.Action1;
 import rx.functions.Func1;
 
-import java.nio.charset.Charset;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 
 
 /**
@@ -29,64 +29,107 @@ public class ShutdownListener {
 
     private static final Logger logger = LoggerFactory.getLogger(ShutdownListener.class);
 
-    private UdpServer<DatagramPacket, DatagramPacket> server;
+    private final RxServer<String, String> shutdownCmdServer;
 
     public ShutdownListener(int shutdownPort, final Func1<String, Observable<Void>> commandHandler) {
-        server = RxNetty.createUdpServer(shutdownPort, new ConnectionHandler<DatagramPacket, DatagramPacket>() {
-            @Override
-            public Observable<Void> handle(ObservableConnection<DatagramPacket, DatagramPacket> newConnection) {
-                return newConnection.getInput().map(new Func1<DatagramPacket, String>() {
-                    @Override
-                    public String call(DatagramPacket datagramPacket) {
-                        String command = datagramPacket.content().toString(Charset.defaultCharset());
-                        logger.info("Received a shutdown command: " + command);
-                        return command;
-                    }
-                }).flatMap(commandHandler);
-            }
-        });
+        shutdownCmdServer = RxNetty.createTcpServer(shutdownPort,
+                                         PipelineConfigurators.stringMessageConfigurator(),
+                                         new ShutdownConnectionHandler(commandHandler));
     }
 
-    public ShutdownListener(int shutdownPort, final RxServer<?, ?> server) {
-        this(shutdownPort, new Func1<String, Observable<Void>>() {
-            @Override
-            public Observable<Void> call(String cmd) {
-                if ("shutdown".equalsIgnoreCase(cmd)) {
-                    return shutdownAsync(server);
-                }
-                return Observable.error(new UnsupportedOperationException("Unknown command: " + cmd));
-            }
-        });
+    public ShutdownListener(int shutdownPort, final Action0 shutdownAction) {
+        this(shutdownPort, new DefaultCommandHandler(shutdownAction));
     }
 
     public void start() {
-        server.start();
+        shutdownCmdServer.start();
     }
 
-    private static Observable<Void> shutdownAsync(final RxServer<?, ?> server) {
-        return Observable.create(new Observable.OnSubscribe<Void>() {
-            @Override
-            public void call(Subscriber<? super Void> subscriber) {
-                try {
-                    server.shutdown();
-                    server.waitTillShutdown();
-                    subscriber.onCompleted();
-                } catch (InterruptedException e) {
-                    subscriber.onError(e);
+    public void shutdown() throws InterruptedException {
+        shutdownCmdServer.shutdown();
+    }
+
+    private static class DefaultCommandHandler implements Func1<String, Observable<Void>> {
+
+        private final ExecutorService shutdownExec;
+        private final Action0 shutdownAction;
+
+        public DefaultCommandHandler(Action0 shutdownAction) {
+            this.shutdownAction = shutdownAction;
+            shutdownExec = Executors.newFixedThreadPool(1);
+        }
+
+        @Override
+        public Observable<Void> call(String cmd) {
+            if ("shutdown".equalsIgnoreCase(cmd)) {
+                return shutdownAsync();
+            }
+            return Observable.error(new UnsupportedOperationException("Unknown command: " + cmd));
+        }
+
+        private Observable<Void> shutdownAsync() {
+            final Future<Void> submitFuture = shutdownExec.submit(new Callable<Void>() {
+                @Override
+                public Void call() throws Exception {
+                    shutdownAction.call();
+                    return null;
                 }
-            }
-        });
+            });
+            return Observable.interval(10, TimeUnit.SECONDS)
+                             .take(1)
+                             .map(new Func1<Long, Void>() {
+                                 @Override
+                                 public Void call(Long aLong) {
+                                     logger.info("Checking if shutdown is done..");
+                                     if (submitFuture.isDone()) {
+                                         try {
+                                             submitFuture.get();
+                                             logger.info("Shutdown is done..");
+                                         } catch (InterruptedException e) {
+                                             logger.info("Shutdown returned error. ", e);
+                                         } catch (ExecutionException e) {
+                                             if (e.getCause() instanceof IllegalStateException) {
+                                                 logger.info("Server already shutdown. ", e);
+                                             } else {
+                                                 logger.info("Shutdown returned error. ", e);
+                                             }
+                                         }
+                                     } else {
+                                         logger.debug("Shutdown not yet done.");
+                                     }
+                                     return null;
+                                 }
+                             });
+        }
     }
 
-    public static void main(String[] args) throws InterruptedException {
-        ShutdownListener listener = new ShutdownListener(8888, RxNetty.createHttpServer(8877, new RequestHandler<ByteBuf, ByteBuf>() {
-            @Override
-            public Observable<Void> handle(HttpServerRequest<ByteBuf> request, HttpServerResponse<ByteBuf> response) {
-                response.setStatus(HttpResponseStatus.NOT_FOUND);
-                return response.close();
-            }
-        }));
-        listener.start();
-        listener.server.waitTillShutdown();
+    private class ShutdownConnectionHandler implements ConnectionHandler<String, String> {
+        private final Func1<String, Observable<Void>> commandHandler;
+
+        public ShutdownConnectionHandler(Func1<String, Observable<Void>> commandHandler) {
+            this.commandHandler = commandHandler;
+        }
+
+        @Override
+        public Observable<Void> handle(final ObservableConnection<String, String> conn) {
+            return conn.getInput().take(1) /*Take only one command per connection*/
+                       .doOnNext(new Action1<String>() {
+                           @Override
+                           public void call(String s) {
+                               logger.info("Received a command: " + s);
+                           }
+                       })
+                       .flatMap(commandHandler)
+                       .doOnCompleted(new Action0() {
+                           @Override
+                           public void call() {
+                               try {
+                                   shutdown();
+                               } catch (InterruptedException e) {
+                                   logger.error("Interrupted while shutting down the shutdown command listener.");
+                               }
+                           }
+                       });
+        }
     }
 }

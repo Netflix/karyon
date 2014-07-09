@@ -14,7 +14,6 @@ import io.reactivex.netty.protocol.http.server.HttpServerResponse;
 import rx.functions.Action1;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -100,25 +99,56 @@ public class GovernatorHttpInterceptorSupport<I, O> extends
             super(support, key);
         }
 
+        public GovernatorHttpInterceptorSupport<I, O> interceptIn(Class<? extends InboundInterceptor<HttpServerRequest<I>, HttpServerResponse<O>>> interceptor) {
+            ArrayList<Class<? extends InboundInterceptor<HttpServerRequest<I>, HttpServerResponse<O>>>> interceptors =
+                    new ArrayList<Class<? extends InboundInterceptor<HttpServerRequest<I>, HttpServerResponse<O>>>>();
+            interceptors.add(interceptor);
+            return interceptIn(interceptors);
+        }
+
         public GovernatorHttpInterceptorSupport<I, O> interceptIn(
-                Class<? extends InboundInterceptor<HttpServerRequest<I>, HttpServerResponse<O>>>... interceptors) {
+                List<Class<? extends InboundInterceptor<HttpServerRequest<I>, HttpServerResponse<O>>>> interceptors) {
             HttpInClassHolder<I, O> holder = new HttpInClassHolder<I, O>(key, interceptors);
             interceptorSupport.inboundInterceptorClasses.add(holder);
             return interceptorSupport;
         }
 
-        public GovernatorHttpInterceptorSupport<I, O> interceptOut(
-                Class<? extends OutboundInterceptor<HttpServerResponse<O>>>... interceptors) {
+        public GovernatorHttpInterceptorSupport<I, O> interceptOut(Class<? extends OutboundInterceptor<HttpServerResponse<O>>> interceptor) {
+            ArrayList<Class<? extends OutboundInterceptor<HttpServerResponse<O>>>> interceptors =
+                    new ArrayList<Class<? extends OutboundInterceptor<HttpServerResponse<O>>>>();
+            interceptors.add(interceptor);
+            return interceptOut(interceptors);
+        }
+
+        public GovernatorHttpInterceptorSupport<I, O> interceptOut(List<Class<? extends OutboundInterceptor<HttpServerResponse<O>>>> interceptors) {
             HttpOutClassHolder<I, O> holder = new HttpOutClassHolder<I, O>(key, interceptors);
             interceptorSupport.outboundInterceptorClasses.add(holder);
             return interceptorSupport;
         }
 
-        public GovernatorHttpInterceptorSupport<I, O> intercept(
-                Class<? extends DuplexInterceptor<HttpServerRequest<I>, HttpServerResponse<O>>>... interceptors) {
-            HttpInClassHolder<I, O> inHolder = new HttpInClassHolder<I, O>(key, interceptors);
+        @SuppressWarnings("unchecked")
+        public GovernatorHttpInterceptorSupport<I, O> intercept(Class<? extends DuplexInterceptor<HttpServerRequest<I>, HttpServerResponse<O>>> interceptor) {
+            ArrayList<Class<? extends DuplexInterceptor<HttpServerRequest<I>, HttpServerResponse<O>>>> interceptors =
+                    new ArrayList<Class<? extends DuplexInterceptor<HttpServerRequest<I>, HttpServerResponse<O>>>>();
+            interceptors.add(interceptor);
+            return intercept(interceptors);
+        }
+
+        public GovernatorHttpInterceptorSupport<I, O> intercept(List<Class<? extends DuplexInterceptor<HttpServerRequest<I>, HttpServerResponse<O>>>> interceptors) {
+            ArrayList<Class<? extends InboundInterceptor<HttpServerRequest<I>, HttpServerResponse<O>>>> ins =
+                    new ArrayList<Class<? extends InboundInterceptor<HttpServerRequest<I>, HttpServerResponse<O>>>>();
+            ArrayList<Class<? extends OutboundInterceptor<HttpServerResponse<O>>>> outs =
+                    new ArrayList<Class<? extends OutboundInterceptor<HttpServerResponse<O>>>>();
+
+            for (Class<? extends DuplexInterceptor<HttpServerRequest<I>, HttpServerResponse<O>>> interceptor : interceptors) {
+                ins.add(interceptor);
+                outs.add(interceptor);
+            }
+
+            HttpInClassHolder<I, O> inHolder = new HttpInClassHolder<I, O>(key, ins);
             interceptorSupport.inboundInterceptorClasses.add(inHolder);
-            HttpOutClassHolder<I, O> outHolder = new HttpOutClassHolder<I, O>(key, interceptors);
+
+            HttpOutClassHolder<I, O> outHolder = new HttpOutClassHolder<I, O>(key, outs);
             interceptorSupport.outboundInterceptorClasses.add(outHolder);
             return interceptorSupport;
         }
@@ -167,8 +197,8 @@ public class GovernatorHttpInterceptorSupport<I, O> extends
                               Class<? extends InboundInterceptor<HttpServerRequest<I>, HttpServerResponse<O>>>> {
 
         public HttpInClassHolder(InterceptorKey<HttpServerRequest<I>, HttpKeyEvaluationContext> key,
-                                 Class<? extends InboundInterceptor<HttpServerRequest<I>, HttpServerResponse<O>>>[] interceptors) {
-            super(key, Arrays.asList(interceptors));
+                                 List<Class<? extends InboundInterceptor<HttpServerRequest<I>, HttpServerResponse<O>>>> interceptors) {
+            super(key, interceptors);
         }
     }
 
@@ -176,8 +206,8 @@ public class GovernatorHttpInterceptorSupport<I, O> extends
             InterceptorHolder<HttpServerRequest<I>, HttpKeyEvaluationContext,
                               Class<? extends OutboundInterceptor<HttpServerResponse<O>>>> {
         public HttpOutClassHolder(InterceptorKey<HttpServerRequest<I>, HttpKeyEvaluationContext> key,
-                                  Class<? extends OutboundInterceptor<HttpServerResponse<O>>>[] interceptors) {
-            super(key, Arrays.asList(interceptors));
+                                  List<Class<? extends OutboundInterceptor<HttpServerResponse<O>>>> interceptors) {
+            super(key, interceptors);
         }
     }
 }

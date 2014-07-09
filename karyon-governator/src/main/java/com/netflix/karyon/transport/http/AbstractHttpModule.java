@@ -32,6 +32,10 @@ public abstract class AbstractHttpModule<I, O> extends AbstractModule {
     @Override
     protected void configure() {
         int listenPort = serverPort();
+        int shutdownPort = shutdownPort();
+
+        bind(Ports.class).toInstance(new Ports(listenPort, shutdownPort));
+
         GovernatorHttpInterceptorSupport<I, O> interceptorSupport = new GovernatorHttpInterceptorSupport<I, O>();
         LazyDelegateRouterImpl<I, O> lazyRouter = new LazyDelegateRouterImpl<I, O>(interceptorSupport);
         final LazyHttpRequestHandler<I, O> requestHandler = new LazyHttpRequestHandler<I, O>(lazyRouter);

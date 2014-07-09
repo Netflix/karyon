@@ -17,8 +17,13 @@
 package com.netflix.adminresources;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.inject.Provider;
 import com.netflix.adminresources.resources.MaskedResourceHelper;
 import com.netflix.config.ConfigurationManager;
+import com.netflix.karyon.health.AlwaysHealthyHealthCheck;
+import com.netflix.karyon.health.HealthCheckHandler;
+import com.netflix.karyon.health.HealthCheckInvocationStrategy;
+import com.netflix.karyon.health.SyncHealthCheckInvocationStrategy;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
@@ -40,6 +45,7 @@ import static org.junit.Assert.assertTrue;
  * @author Amit Joshi
  */
 public class WebAdminTest {
+
     private static final Logger LOG = LoggerFactory.getLogger(WebAdminTest.class);
 
     private static AdminResourcesContainer container;
@@ -115,7 +121,17 @@ public class WebAdminTest {
     }
         
     private static void startServer() throws Exception {
-        container = new AdminResourcesContainer();
+        container = new AdminResourcesContainer(new Provider<HealthCheckInvocationStrategy>() {
+            @Override
+            public HealthCheckInvocationStrategy get() {
+                return new SyncHealthCheckInvocationStrategy(AlwaysHealthyHealthCheck.INSTANCE);
+            }
+        }, new Provider<HealthCheckHandler>() {
+            @Override
+            public HealthCheckHandler get() {
+                return AlwaysHealthyHealthCheck.INSTANCE;
+            }
+        });
         container.init();
     }
 }

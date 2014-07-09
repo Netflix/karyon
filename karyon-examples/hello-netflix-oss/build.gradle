@@ -42,7 +42,7 @@ dependencies {
 
 run {
     systemProperty 'java.awt.headless', 'true'
-    args "com.netflix.hellonoss.server.HelloNossApp"
+    args "com.netflix.hellonoss.server.HelloWorldApp"
 }
 
 mainClassName = "com.netflix.karyon.KaryonServer"

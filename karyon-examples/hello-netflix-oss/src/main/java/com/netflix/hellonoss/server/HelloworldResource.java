@@ -17,6 +17,7 @@
 package com.netflix.hellonoss.server;
 
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import com.netflix.hellonoss.server.health.HealthCheck;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
@@ -30,6 +31,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+@Singleton
 @Path("/hello")
 public class HelloworldResource {
 
@@ -41,8 +43,8 @@ public class HelloworldResource {
     }
 
     @Inject
-    public HelloworldResource(HealthCheck healthCheck) {
-        this.healthCheck = healthCheck; // This is just to demo injection in jersey.
+    public HelloworldResource(HealthCheck check) {
+        this.healthCheck = check; // This is just to demo injection in jersey.
     }
 
     @Path("to/{name}")

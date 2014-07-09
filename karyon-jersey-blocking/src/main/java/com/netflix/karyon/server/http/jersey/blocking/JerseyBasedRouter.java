@@ -71,5 +71,6 @@ public class JerseyBasedRouter implements HttpRequestRouter<ByteBuf, ByteBuf> {
     @PreDestroy
     public void stop() {
         logger.info("Stopped Jersey based request router.");
+        application.destroy();
     }
 }
