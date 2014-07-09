@@ -8,19 +8,28 @@ import com.netflix.explorers.ExplorerManager;
 import com.netflix.explorers.ExplorersManagerImpl;
 import com.netflix.explorers.context.GlobalModelContext;
 import com.netflix.explorers.providers.FreemarkerTemplateProvider;
-import com.netflix.karyon.server.HealthCheckModule;
-import com.netflix.karyon.server.eureka.HealthCheckInvocationStrategy;
+import com.netflix.karyon.health.HealthCheckHandler;
+import com.netflix.karyon.health.HealthCheckInvocationStrategy;
 
-class AdminResourcesModule
-        extends AbstractModule {
-    private final Provider<HealthCheckInvocationStrategy> healthCheckInvocationStrategyProvider;
+import javax.inject.Inject;
 
-    public AdminResourcesModule(Provider<HealthCheckInvocationStrategy> healthCheckInvocationStrategyProvider) {
-        this.healthCheckInvocationStrategyProvider = healthCheckInvocationStrategyProvider;
+class AdminResourcesModule extends AbstractModule {
+
+    private final Provider<HealthCheckInvocationStrategy> strategy;
+    private final Provider<HealthCheckHandler> handlerProvider;
+
+    @Inject
+    AdminResourcesModule(Provider<HealthCheckInvocationStrategy> strategy, Provider<HealthCheckHandler> handlerProvider) {
+        this.strategy = strategy;
+        this.handlerProvider = handlerProvider;
     }
 
     @Override
     protected void configure() {
+
+        bind(HealthCheckInvocationStrategy.class).toProvider(strategy);
+        bind(HealthCheckHandler.class).toProvider(handlerProvider);
+
         bind(String.class).annotatedWith(Names.named("explorerAppName")).toInstance("admin");
         bind(GlobalModelContext.class).to(AppConfigGlobalModelContext.class);
         bind(ExplorerManager.class).to(ExplorersManagerImpl.class);
@@ -28,12 +37,5 @@ class AdminResourcesModule
         bind(AdminResourceExplorer.class);
         bind(FreemarkerTemplateProvider.class);
         bind(AdminResourcesFilter.class).asEagerSingleton();
-
-        if (healthCheckInvocationStrategyProvider != null) {
-            bind(HealthCheckInvocationStrategy.class).toProvider(healthCheckInvocationStrategyProvider);
-        } else {
-            install(new HealthCheckModule());
-        }
-
     }
 }

@@ -30,8 +30,3 @@ Have a question?
 ===============
 
 We have a discussion group for karyon users (i.e. you!) here: https://groups.google.com/forum/?fromgroups#!forum/karyon-users
-
-Karyon 2.0
-===============
-
-We are working towards a next major release, high level overview and status of which is detailed [here] (https://github.com/Netflix/karyon/wiki/Karyon-2.0).  

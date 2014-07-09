@@ -16,20 +16,19 @@
 
 package com.netflix.adminresources;
 
-import com.google.inject.Injector;
+import com.google.inject.Provider;
 import com.netflix.config.ConcurrentCompositeConfiguration;
 import com.netflix.config.ConfigurationManager;
-import com.netflix.karyon.server.KaryonServer;
-import com.netflix.karyon.server.eureka.SyncHealthCheckInvocationStrategy;
-import com.netflix.karyon.spi.PropertyNames;
+import com.netflix.karyon.health.AlwaysHealthyHealthCheck;
+import com.netflix.karyon.health.HealthCheckHandler;
+import com.netflix.karyon.health.HealthCheckInvocationStrategy;
+import com.netflix.karyon.health.SyncHealthCheckInvocationStrategy;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.conn.HttpHostConnectException;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.junit.After;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
 
 /**
@@ -37,24 +36,13 @@ import org.junit.Test;
  */
 public class AdminResourceTest {
 
-    public static final String CUSTOM_LISTEN_PORT = "9999";
-    private KaryonServer server;
-
-    @Before
-    public void setUp() throws Exception {
-        System.setProperty(PropertyNames.SERVER_BOOTSTRAP_BASE_PACKAGES_OVERRIDE, "com.test");
-        System.setProperty(PropertyNames.HEALTH_CHECK_TIMEOUT_MILLIS, "60000");
-        System.setProperty(PropertyNames.HEALTH_CHECK_STRATEGY, SyncHealthCheckInvocationStrategy.class.getName());
-        System.setProperty(PropertyNames.DISABLE_EUREKA_INTEGRATION, "true");
-    }
+    private AdminResourcesContainer container;
 
     @After
     public void tearDown() throws Exception {
-        ConfigurationManager.getConfigInstance().clearProperty(PropertyNames.DISABLE_APPLICATION_DISCOVERY_PROP_NAME);
-        ConfigurationManager.getConfigInstance().clearProperty(PropertyNames.EXPLICIT_APPLICATION_CLASS_PROP_NAME);
         ((ConcurrentCompositeConfiguration) ConfigurationManager.getConfigInstance())
                 .clearOverrideProperty(AdminResourcesContainer.CONTAINER_LISTEN_PORT);
-        server.close();
+        container.shutdown();
     }
 
     @Test
@@ -67,22 +55,18 @@ public class AdminResourceTest {
         Assert.assertEquals("admin resource health check failed.", 200, response.getStatusLine().getStatusCode());
     }
 
-    @Test (expected = HttpHostConnectException.class)
-    public void testCustomPort() throws Exception {
-        ((ConcurrentCompositeConfiguration) ConfigurationManager.getConfigInstance())
-                .setOverrideProperty(AdminResourcesContainer.CONTAINER_LISTEN_PORT, CUSTOM_LISTEN_PORT);
-        startServer();
-        HttpClient client = new DefaultHttpClient();
-        HttpGet healthGet = new HttpGet("http://localhost:"+ AdminResourcesContainer.LISTEN_PORT_DEFAULT + "/healthcheck");
-        client.execute(healthGet);
-        throw new AssertionError("Admin container did not bind to the custom port " + CUSTOM_LISTEN_PORT +
-                                 ", instead listened to default port: " + AdminResourcesContainer.LISTEN_PORT_DEFAULT);
-    }
-
-    private Injector startServer() throws Exception {
-        server = new KaryonServer();
-        Injector injector = server.initialize();
-        server.start();
-        return injector;
+    private void startServer() throws Exception {
+        container = new AdminResourcesContainer(new Provider<HealthCheckInvocationStrategy>() {
+            @Override
+            public HealthCheckInvocationStrategy get() {
+                return new SyncHealthCheckInvocationStrategy(AlwaysHealthyHealthCheck.INSTANCE);
+            }
+        }, new Provider<HealthCheckHandler>() {
+            @Override
+            public HealthCheckHandler get() {
+                return AlwaysHealthyHealthCheck.INSTANCE;
+            }
+        });
+        container.init();
     }
 }
