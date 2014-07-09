@@ -7,14 +7,16 @@ import com.netflix.hellonoss.server.auth.AuthenticationService;
 import com.netflix.hellonoss.server.auth.AuthenticationServiceImpl;
 import com.netflix.karyon.KaryonBootstrap;
 import com.netflix.karyon.archaius.ArchaiusBootstrap;
-import com.netflix.karyon.eureka.KaryonEurekaModule;
-import com.netflix.karyon.server.http.jersey.blocking.KaryonJerseyModule;
+import com.netflix.karyon.jersey.blocking.KaryonJerseyModule;
 import com.netflix.karyon.transport.http.GovernatorHttpInterceptorSupport;
 import io.netty.buffer.ByteBuf;
 
 @ArchaiusBootstrap
 @KaryonBootstrap(name = "hello-netflix-oss")
-@Modules(include = {HelloWorldApp.KaryonJerseyModuleImpl.class, KaryonWebAdminModule.class, KaryonEurekaModule.class})
+@Modules(include = {HelloWorldApp.KaryonJerseyModuleImpl.class, KaryonWebAdminModule.class
+                    // Uncomment the following line to enable eureka. Make sure eureka-client.properties is configured to point to your eureka server.
+                    //, KaryonEurekaModule.class
+        })
 public final class HelloWorldApp {
 
     public static class KaryonJerseyModuleImpl extends KaryonJerseyModule {
