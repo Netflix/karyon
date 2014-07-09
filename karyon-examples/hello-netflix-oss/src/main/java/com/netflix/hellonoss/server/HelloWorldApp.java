@@ -7,6 +7,7 @@ import com.netflix.hellonoss.server.auth.AuthenticationService;
 import com.netflix.hellonoss.server.auth.AuthenticationServiceImpl;
 import com.netflix.karyon.KaryonBootstrap;
 import com.netflix.karyon.archaius.ArchaiusBootstrap;
+import com.netflix.karyon.eureka.KaryonEurekaModule;
 import com.netflix.karyon.jersey.blocking.KaryonJerseyModule;
 import com.netflix.karyon.transport.http.GovernatorHttpInterceptorSupport;
 import io.netty.buffer.ByteBuf;
