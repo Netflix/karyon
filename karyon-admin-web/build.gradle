@@ -26,7 +26,6 @@ dependencies {
     dependencies {
         compile project(':karyon-admin')
         compile 'com.google.code.gson:gson:2.1'
-        compile 'com.netflix.pytheas:pytheas-core:1.11'
         runtime 'org.freemarker:freemarker:2.3.15'
         runtime 'org.codehaus.jackson:jackson-mapper-asl:1.9.11'
     }
