@@ -1,7 +1,7 @@
 package com.netflix.adminresources.resources;
 
 import com.google.inject.Inject;
-import com.netflix.karyon.server.eureka.HealthCheckInvocationStrategy;
+import com.netflix.karyon.health.HealthCheckInvocationStrategy;
 import com.sun.jersey.spi.resource.Singleton;
 
 import javax.ws.rs.GET;
@@ -12,9 +12,11 @@ import java.util.concurrent.TimeoutException;
 /**
  * @author Nitesh Kant
  */
-@Path("/healthcheck")
+@Path(HealthcheckResource.PATH)
 @Singleton
 public class HealthcheckResource {
+
+    public static final String PATH = "/healthcheck";
 
     @Inject(optional = true)
     private HealthCheckInvocationStrategy invocationStrategy;

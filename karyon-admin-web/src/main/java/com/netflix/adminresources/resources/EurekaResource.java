@@ -24,9 +24,6 @@ import com.netflix.discovery.DiscoveryClient;
 import com.netflix.discovery.DiscoveryManager;
 import com.netflix.discovery.shared.Application;
 import com.netflix.discovery.shared.Applications;
-import com.netflix.karyon.server.utils.KaryonUtils;
-import com.netflix.karyon.spi.PropertyNames;
-import com.sun.jersey.api.view.Viewable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,9 +33,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * @author pkamath
@@ -56,16 +51,12 @@ public class EurekaResource {
     public Response getEurekaDetails() {
         List<EurekaInstanceInfo> instanceInfoList = new ArrayList<EurekaInstanceInfo>();
 
-        if (!KaryonUtils.isCoreComponentEnabled(PropertyNames.EUREKA_COMPONENT_NAME)) {
-            logger.info("Eureka is not enabled, so not fetching eureka details.");
-        } else {
-            DiscoveryClient discoveryClient = DiscoveryManager.getInstance().getDiscoveryClient();
-            if (null != discoveryClient) {
-                Applications apps = discoveryClient.getApplications();
-                for (Application app : apps.getRegisteredApplications()) {
-                    for (InstanceInfo inst : app.getInstances()) {
-                        instanceInfoList.add(new EurekaInstanceInfo(inst.getAppName(), inst.getId(), inst.getStatus().name(), inst.getIPAddr(), inst.getHostName()));
-                    }
+        DiscoveryClient discoveryClient = DiscoveryManager.getInstance().getDiscoveryClient();
+        if (null != discoveryClient) {
+            Applications apps = discoveryClient.getApplications();
+            for (Application app : apps.getRegisteredApplications()) {
+                for (InstanceInfo inst : app.getInstances()) {
+                    instanceInfoList.add(new EurekaInstanceInfo(inst.getAppName(), inst.getId(), inst.getStatus().name(), inst.getIPAddr(), inst.getHostName()));
                 }
             }
         }

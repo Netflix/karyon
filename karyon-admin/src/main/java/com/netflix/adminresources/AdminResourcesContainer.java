@@ -16,17 +16,17 @@
 
 package com.netflix.adminresources;
 
-import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Provider;
+import com.netflix.adminresources.resources.EmbeddedContentResource;
+import com.netflix.adminresources.resources.HealthcheckResource;
 import com.netflix.config.DynamicPropertyFactory;
 import com.netflix.config.DynamicStringProperty;
 import com.netflix.governator.annotations.Configuration;
 import com.netflix.governator.guice.LifecycleInjector;
 import com.netflix.governator.lifecycle.LifecycleManager;
-import com.netflix.karyon.server.eureka.HealthCheckInvocationStrategy;
-import com.netflix.karyon.spi.Component;
-import com.netflix.karyon.spi.PropertyNames;
+import com.netflix.karyon.health.HealthCheckHandler;
+import com.netflix.karyon.health.HealthCheckInvocationStrategy;
 import org.eclipse.jetty.server.DispatcherType;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.session.SessionHandler;
@@ -38,6 +38,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
+import javax.inject.Inject;
 import java.util.EnumSet;
 
 /**
@@ -46,11 +47,7 @@ import java.util.EnumSet;
  * {@link AdminResourcesContainer#LISTEN_PORT_DEFAULT}. <br/>
  *
  * The embedded server uses jersey so any jersey resources available in packages
- * specified via properties {@link AdminResourcesContainer#JERSEY_CORE_PACKAGES} and
- * {@link AdminResourcesContainer#JERSEY_APP_PACKAGES} will be scanned and initialized. <br/>
- * <b>This server does not use guice/governator to initialize jersey resources as guice has an
- * <a href="https://code.google.com/p/google-guice/issues/detail?id=635">open issue</a> which makes it difficult to have
- * multiple {@link com.google.inject.servlet.GuiceFilter} in the same JVM.</b>
+ * specified via properties {@link AdminResourcesContainer#JERSEY_CORE_PACKAGES}will be scanned and initialized. <br/>
  *
  * Karyon admin starts in an embedded container to have a "always available" endpoint for any application. This helps
  * in a homogeneous admin view for all applications. <br/>
@@ -60,21 +57,20 @@ import java.util.EnumSet;
  * The following resources are available by default:
  *
  * <ul>
- <li>Healthcheck: A healthcheck is available at path {@link HealthCheckServlet#PATH}. This utilizes the configured
- {@link com.netflix.karyon.spi.HealthCheckHandler} for karyon.</li>
- <li>Admin resource: Any url starting with "/adminres" is served via {@link com.netflix.adminresources.resources.EmbeddedContentResource}</li>
+ <li>Healthcheck: A healthcheck is available at path {@link HealthcheckResource#PATH}. This utilizes the configured
+ {@link HealthCheckHandler} for karyon.</li>
+ <li>Admin resource: Any url starting with "/adminres" is served via {@link EmbeddedContentResource}</li>
  </ul>
  *
  * @author pkamath
  * @author Nitesh Kant
  * @author Jordan Zimmerman
  */
-@Component(disableProperty = "netflix.platform.admin.resources.disable")
 public class AdminResourcesContainer {
 
     private static final Logger logger = LoggerFactory.getLogger(AdminResourcesContainer.class);
 
-    public static final String DEFAULT_PAGE_PROP_NAME = PropertyNames.KARYON_PROPERTIES_PREFIX + "admin.default.page";
+    public static final String DEFAULT_PAGE_PROP_NAME = "com.netflix.karyon.admin.default.page";
 
     public static final DynamicStringProperty DEFAULT_PAGE =
             DynamicPropertyFactory.getInstance().getStringProperty(DEFAULT_PAGE_PROP_NAME, "/healthcheck");
@@ -83,8 +79,6 @@ public class AdminResourcesContainer {
     public static final int LISTEN_PORT_DEFAULT = 8077;
     private static final String JERSEY_CORE_PACKAGES = "netflix.platform.admin.resources.core.packages";
     public static final String JERSEY_CORE_PACKAGES_DEAULT = "com.netflix.adminresources;com.netflix.explorers.resources;com.netflix.explorers.providers";
-
-    private final Provider<HealthCheckInvocationStrategy> healthCheckInvocationStrategyProvider;
 
     @Configuration(
             value = JERSEY_CORE_PACKAGES,
@@ -102,10 +96,15 @@ public class AdminResourcesContainer {
 
     private Server server;
 
-    @Inject
-    public AdminResourcesContainer(Provider<HealthCheckInvocationStrategy> healthCheckInvocationStrategyProvider) {
-        this.healthCheckInvocationStrategyProvider = healthCheckInvocationStrategyProvider;
 
+    private final Provider<HealthCheckInvocationStrategy> strategy;
+    private final Provider<HealthCheckHandler> handlerProvider;
+
+    @Inject
+    public AdminResourcesContainer(Provider<HealthCheckInvocationStrategy> strategy,
+                                   Provider<HealthCheckHandler> handlerProvider) {
+        this.strategy = strategy;
+        this.handlerProvider = handlerProvider;
     }
 
     /**
@@ -119,7 +118,7 @@ public class AdminResourcesContainer {
         Injector injector = LifecycleInjector
                 .builder()
                 .usingBasePackages("com.netflix.explorers")
-                .withModules(new AdminResourcesModule(healthCheckInvocationStrategyProvider)).createInjector();
+                .withModules(new AdminResourcesModule(strategy, handlerProvider)).createInjector();
         try {
             injector.getInstance(LifecycleManager.class).start();
             AdminResourcesFilter adminResourcesFilter = injector.getInstance(AdminResourcesFilter.class);

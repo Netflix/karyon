@@ -15,14 +15,10 @@
  */
 
 rootProject.name='karyon'
-include 'karyon-spi',\
- 'karyon-eureka',\
- 'karyon-core',\
- 'karyon-extensions:karyon-servlet', \
- 'karyon-extensions:karyon-netty-http', \
- 'karyon-extensions:karyon-netty-jersey-blocking', \
- 'karyon-extensions-testsuite', \
- 'karyon-admin',\
- 'karyon-admin-web',\
- 'karyon-examples:hello-netflix-oss',\
- 'karyon-examples:hello-karyon-netty'
+include 'karyon-core', 'karyon-eureka', \
+ 'karyon-governator', \
+ 'karyon-admin', \
+ 'karyon-admin-web', \
+ 'karyon-jersey-blocking', \
+ 'karyon-servlet-blocking', \
+ 'karyon-examples:hello-netflix-oss'
