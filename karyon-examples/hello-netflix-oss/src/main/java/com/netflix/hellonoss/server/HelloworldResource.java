@@ -74,13 +74,13 @@ public class HelloworldResource {
         }
     }
 
-    @Path("from/healthcheck")
+    @Path("healthcheck")
     @GET
     @Produces({MediaType.APPLICATION_JSON})
     public Response helloFromComponent() {
         JSONObject response = new JSONObject();
         try {
-            response.put("Message", healthCheck.getStatus());
+            response.put("Status", healthCheck.getStatus());
             return Response.ok(response.toString()).build();
         } catch (JSONException e) {
             logger.error("Error creating json response.", e);

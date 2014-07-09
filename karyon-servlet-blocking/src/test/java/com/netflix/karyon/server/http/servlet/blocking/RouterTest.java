@@ -7,8 +7,10 @@ import io.netty.handler.codec.http.DefaultHttpRequest;
 import io.netty.handler.codec.http.HttpMethod;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.handler.codec.http.HttpVersion;
+import io.reactivex.netty.metrics.MetricEventsSubject;
 import io.reactivex.netty.protocol.http.server.HttpServerRequest;
 import io.reactivex.netty.protocol.http.server.HttpServerResponse;
+import io.reactivex.netty.server.ServerMetricsEvent;
 import org.junit.Assert;
 import org.junit.Test;
 import rx.Observer;
@@ -67,7 +69,7 @@ public class RouterTest {
         MockChannelHandlerContext contextMock = new MockChannelHandlerContext(LOCAL_ADDRESS, SERVER_PORT, LOCAL_ADDRESS,
                                                                               LOCAL_PORT, REMOTE_ADDRESS, REMOTE_PORT);
 
-        HttpServerResponse<ByteBuf> rxResponse = new HttpServerResponse<ByteBuf>(contextMock);
+        HttpServerResponse<ByteBuf> rxResponse = new HttpServerResponse<ByteBuf>(contextMock, HTTP_VERSION, new MetricEventsSubject<ServerMetricsEvent<?>>()){};
         router.route(rxRequest, rxResponse);
         Assert.assertEquals("Unexpected response status.", HttpResponseStatus.NOT_FOUND, rxResponse.getStatus());
     }
@@ -122,7 +124,7 @@ public class RouterTest {
         MockChannelHandlerContext contextMock = new MockChannelHandlerContext(LOCAL_ADDRESS, SERVER_PORT, LOCAL_ADDRESS,
                                                                               LOCAL_PORT, REMOTE_ADDRESS, REMOTE_PORT);
 
-        HttpServerResponse<ByteBuf> rxResponse = new HttpServerResponse<ByteBuf>(contextMock);
+        HttpServerResponse<ByteBuf> rxResponse = new HttpServerResponse<ByteBuf>(contextMock, new MetricEventsSubject<ServerMetricsEvent<?>>()) {};
         final CountDownLatch completionLatch = new CountDownLatch(1);
         TestableObserver observer = new TestableObserver();
         router.route(rxRequest, rxResponse).finallyDo(new Action0() {

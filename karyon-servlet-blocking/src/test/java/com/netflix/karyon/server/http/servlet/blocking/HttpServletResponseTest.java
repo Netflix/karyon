@@ -9,9 +9,11 @@ import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.handler.codec.http.HttpMethod;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.handler.codec.http.HttpVersion;
+import io.reactivex.netty.metrics.MetricEventsSubject;
 import io.reactivex.netty.protocol.http.server.HttpResponseHeaders;
 import io.reactivex.netty.protocol.http.server.HttpServerRequest;
 import io.reactivex.netty.protocol.http.server.HttpServerResponse;
+import io.reactivex.netty.server.ServerMetricsEvent;
 import org.junit.Assert;
 import org.junit.Test;
 import rx.subjects.PublishSubject;
@@ -331,9 +333,8 @@ public class HttpServletResponseTest {
                                                                               PublishSubject.<ByteBuf>create());
         HttpServletRequestImpl request = new HttpServletRequestImpl(pathComponents, rxRequest, sessionManager,
                                                                     context, false);
-        return new HttpServletResponseImpl(new HttpServerResponse<ByteBuf>(context, HTTP_VERSION) {
-
-        }, request);
+        return new HttpServletResponseImpl(new HttpServerResponse<ByteBuf>(context, HTTP_VERSION,
+                                                                           new MetricEventsSubject<ServerMetricsEvent<?>>()) { }, request);
     }
 
 }
