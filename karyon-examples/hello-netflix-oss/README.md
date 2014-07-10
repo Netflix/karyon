@@ -41,7 +41,7 @@ Which will produce the output:
 {"Message":"Hello Netflix OSS component!"}
 ```
 
-* _Hello to Healthcheck:
+* _Hello to Healthcheck_:
 
 ```
  curl -H"MY-USER-ID: nkant"  "http://localhost:8888/hello/healthcheck"
