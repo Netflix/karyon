@@ -24,8 +24,8 @@ tasks.withType(Javadoc).each {
 
 dependencies {
     dependencies {
-        compile 'com.netflix.rxnetty:rx-netty-contexts:0.3.10'
-        compile 'com.netflix.rxnetty:rx-netty-servo:0.3.10'
+        compile project(':karyon-governator')
+        compile 'com.netflix.eureka:eureka-client:1.1.135'
     }
 }
 
@@ -49,7 +49,7 @@ idea {
 
 jar {
     manifest {
-        name = 'karyon-core'
+        name = 'karyon-eureka'
         instruction 'Bundle-Vendor', 'Netflix'
         instruction 'Bundle-DocURL', 'https://github.com/Netflix/karyon'
         instruction 'Import-Package', '!org.junit,!junit.framework,!org.mockito.*,*'

@@ -28,7 +28,6 @@ import javax.inject.Inject;
  */
 public class EurekaHealthCheckHandler implements com.netflix.appinfo.HealthCheckHandler {
 
-    protected static final Logger logger = LoggerFactory.getLogger(EurekaHealthCheckHandler.class);
     private final HealthCheckHandler healthCheckHandler;
     private final EurekaKaryonStatusBridge eurekaKaryonStatusBridge;
 

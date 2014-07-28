@@ -52,6 +52,6 @@ public class KaryonBootstrapSuite implements LifecycleInjectorBuilderSuite {
     }
 
     protected void bindHealthCheck(LinkedBindingBuilder<HealthCheckHandler> bindingBuilder) {
-        bindingBuilder.to(AlwaysHealthyHealthCheck.class);
+        bindingBuilder.to(karyonBootstrap.healthcheck());
     }
 }

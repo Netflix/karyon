@@ -4,10 +4,11 @@ import com.google.inject.AbstractModule;
 import com.google.inject.binder.LinkedBindingBuilder;
 import com.netflix.appinfo.ApplicationInfoManager;
 import com.netflix.appinfo.EurekaInstanceConfig;
+import com.netflix.appinfo.providers.CloudInstanceConfigProvider;
 import com.netflix.discovery.DiscoveryClient;
 import com.netflix.discovery.EurekaClientConfig;
 import com.netflix.discovery.EurekaNamespace;
-import com.netflix.discovery.shared.LookupService;
+import com.netflix.discovery.providers.DefaultEurekaClientConfigProvider;
 
 /**
  * @author Nitesh Kant
@@ -18,15 +19,15 @@ public class KaryonEurekaModule extends AbstractModule {
     protected void configure() {
         bind(com.netflix.appinfo.HealthCheckHandler.class).to(EurekaHealthCheckHandler.class);
         bind(ApplicationInfoManager.class).asEagerSingleton();
-        bind(LookupService.class).to(DiscoveryClient.class).asEagerSingleton();
+        bind(DiscoveryClient.class).asEagerSingleton();
 
         configureEureka();
-
-        // We should be able to write code that checks whether bindings were supplied and bind default
-        // implementations if not
     }
 
     protected void configureEureka() {
+        bindEurekaNamespace().toInstance("eureka.");
+        bindEurekaInstanceConfig().toProvider(CloudInstanceConfigProvider.class);
+        bindEurekaClientConfig().toProvider(DefaultEurekaClientConfigProvider.class);
     }
 
     protected LinkedBindingBuilder<EurekaInstanceConfig> bindEurekaInstanceConfig() {

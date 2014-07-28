@@ -38,7 +38,7 @@ Which will produce the output:
 ```
 Which will produce the output:
 ```
-{"Message":"Hello Netflix OSS component!"}
+{"Message":"Hello from Netflix OSS"}
 ```
 
 * _Hello to Healthcheck:

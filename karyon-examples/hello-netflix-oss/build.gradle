@@ -38,10 +38,13 @@ dependencies {
     compile 'org.codehaus.jettison:jettison:1.2'
     compile 'com.google.inject:guice:3.0'
     compile project(':karyon-jersey-blocking')
+    compile project(':karyon-eureka')
+    compile project(':karyon-archaius')
 }
 
 run {
     systemProperty 'java.awt.headless', 'true'
+    systemProperty 'archaius.deployment.environment', 'dev'
     args "com.netflix.hellonoss.server.HelloWorldApp"
 }
 

@@ -7,14 +7,6 @@ This module provides bootstrapping for karyon using [Governator](https://github.
 
 This annotation is used to provide an application name and does the necessary bindings using [KaryonBootstrapSuite](src/main/java/com/netflix/karyon/KaryonBootstrapSuite.java)
 
-##### @ArchaiusBootstrap
-
-This annotation is the integration with archiaus and sets up the necessary bindings using [ArchaiusSuite](src/main/java/com/netflix/karyon/archaius/ArchaiusSuite.java)
-
-#### KaryonEurekaModule
-
-This module is for integration with eureka. Install this in your application to guice to enable eureka.
-
 #### AbstractHttpModule
 
 [AbstractHttpModule](src/main/java/com/netflix/karyon/transport/http/AbstractHttpModule.java) provides an abstract 
