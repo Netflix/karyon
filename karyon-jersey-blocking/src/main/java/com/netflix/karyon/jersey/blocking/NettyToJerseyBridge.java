@@ -11,6 +11,7 @@ import io.netty.buffer.ByteBufInputStream;
 import io.netty.buffer.ByteBufOutputStream;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.reactivex.netty.protocol.http.server.HttpRequestHeaders;
+import io.reactivex.netty.protocol.http.server.HttpResponseHeaders;
 import io.reactivex.netty.protocol.http.server.HttpServerRequest;
 import io.reactivex.netty.protocol.http.server.HttpServerResponse;
 import org.slf4j.Logger;
@@ -66,6 +67,10 @@ final class NettyToJerseyBridge {
             public OutputStream writeStatusAndHeaders(long contentLength, ContainerResponse response) {
                 int responseStatus = response.getStatus();
                 serverResponse.setStatus(HttpResponseStatus.valueOf(responseStatus));
+                HttpResponseHeaders responseHeaders = serverResponse.getHeaders();
+                for(Map.Entry<String, List<Object>> header : response.getHttpHeaders().entrySet()){
+                    responseHeaders.setHeader(header.getKey(), header.getValue());
+                }
                 return new ByteBufOutputStream(contentBuffer);
             }
 
