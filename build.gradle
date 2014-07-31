@@ -2,7 +2,7 @@ ext.githubProjectName = "karyon"
 
 buildscript {
     repositories {
-        mavenLocal()
+        //mavenLocal()  //Maven local repo can cause issues when the local repo is corrupted. This becomes really difficult to get over on our CI server: cloudbees.
         mavenCentral() // maven { url 'http://jcenter.bintray.com' }
     }
     apply from: file('gradle/buildscript.gradle'), to: buildscript
@@ -10,7 +10,7 @@ buildscript {
 
 allprojects {
     repositories {
-        mavenLocal()
+        //mavenLocal()//Maven local repo can cause issues when the local repo is corrupted. This becomes really difficult to get over on our CI server: cloudbees.
         mavenCentral() // maven { url: 'http://jcenter.bintray.com' }
     }
 }

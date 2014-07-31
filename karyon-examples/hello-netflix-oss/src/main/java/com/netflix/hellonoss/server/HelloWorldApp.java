@@ -5,6 +5,7 @@ import com.netflix.governator.annotations.Modules;
 import com.netflix.hellonoss.server.auth.AuthInterceptor;
 import com.netflix.hellonoss.server.auth.AuthenticationService;
 import com.netflix.hellonoss.server.auth.AuthenticationServiceImpl;
+import com.netflix.hellonoss.server.health.HealthCheck;
 import com.netflix.karyon.KaryonBootstrap;
 import com.netflix.karyon.archaius.ArchaiusBootstrap;
 import com.netflix.karyon.eureka.KaryonEurekaModule;
@@ -13,10 +14,10 @@ import com.netflix.karyon.transport.http.GovernatorHttpInterceptorSupport;
 import io.netty.buffer.ByteBuf;
 
 @ArchaiusBootstrap
-@KaryonBootstrap(name = "hello-netflix-oss")
+@KaryonBootstrap(name = "hello-netflix-oss", healthcheck = HealthCheck.class)
 @Modules(include = {HelloWorldApp.KaryonJerseyModuleImpl.class, KaryonWebAdminModule.class
                     // Uncomment the following line to enable eureka. Make sure eureka-client.properties is configured to point to your eureka server.
-                    //, KaryonEurekaModule.class
+                    , KaryonEurekaModule.class
         })
 public final class HelloWorldApp {
 
@@ -36,6 +37,11 @@ public final class HelloWorldApp {
         @Override
         public int shutdownPort() {
             return 8899;
+        }
+
+        @Override
+        protected int requestProcessingThreadsCount() {
+            return 100;
         }
 
         @Override

@@ -18,7 +18,7 @@ package com.netflix.hellonoss.server;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.netflix.hellonoss.server.health.HealthCheck;
+import com.netflix.karyon.health.HealthCheckHandler;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import org.slf4j.Logger;
@@ -36,15 +36,11 @@ import javax.ws.rs.core.Response;
 public class HelloworldResource {
 
     private static final Logger logger = LoggerFactory.getLogger(HelloworldResource.class);
-    private final HealthCheck healthCheck;
-
-    public HelloworldResource() {
-        healthCheck = new HealthCheck();
-    }
+    private final HealthCheckHandler healthCheck;
 
     @Inject
-    public HelloworldResource(HealthCheck check) {
-        this.healthCheck = check; // This is just to demo injection in jersey.
+    public HelloworldResource(HealthCheckHandler healthCheckHandler) {
+        this.healthCheck = healthCheckHandler; // This is just to demo injection in jersey.
     }
 
     @Path("to/{name}")
@@ -66,7 +62,7 @@ public class HelloworldResource {
     public Response hello() {
         JSONObject response = new JSONObject();
         try {
-            response.put("Message", "Hello Netflix OSS component!");
+            response.put("Message", "Hello from Netflix OSS");
             return Response.ok(response.toString()).build();
         } catch (JSONException e) {
             logger.error("Error creating json response.", e);
