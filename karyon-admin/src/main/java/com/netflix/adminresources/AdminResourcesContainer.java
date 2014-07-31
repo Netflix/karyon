@@ -78,13 +78,13 @@ public class AdminResourcesContainer {
     public static final String CONTAINER_LISTEN_PORT = "netflix.platform.admin.resources.port";
     public static final int LISTEN_PORT_DEFAULT = 8077;
     private static final String JERSEY_CORE_PACKAGES = "netflix.platform.admin.resources.core.packages";
-    public static final String JERSEY_CORE_PACKAGES_DEAULT = "com.netflix.adminresources;com.netflix.explorers.resources;com.netflix.explorers.providers";
+    public static final String JERSEY_CORE_PACKAGES_DEFAULT = "com.netflix.adminresources;com.netflix.explorers.resources;com.netflix.explorers.providers";
 
     @Configuration(
             value = JERSEY_CORE_PACKAGES,
             documentation = "Property defining the list of core packages which contains jersey resources for karyon admin. com.netflix.adminresources is always added to this."
     )
-    private String coreJerseyPackages = JERSEY_CORE_PACKAGES_DEAULT;
+    private String coreJerseyPackages = JERSEY_CORE_PACKAGES_DEFAULT;
 
 
     @Configuration(
