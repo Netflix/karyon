@@ -40,6 +40,11 @@ public final class HelloWorldApp {
         }
 
         @Override
+        protected int requestProcessingThreadsCount() {
+            return 100;
+        }
+
+        @Override
         public void configureInterceptors(GovernatorHttpInterceptorSupport<ByteBuf, ByteBuf> interceptorSupport) {
             interceptorSupport.forUri("/*").intercept(LoggingInterceptor.class);
             interceptorSupport.forUri("/hello").interceptIn(AuthInterceptor.class);
