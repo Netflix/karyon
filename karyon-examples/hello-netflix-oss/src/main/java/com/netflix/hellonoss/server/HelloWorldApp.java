@@ -17,7 +17,7 @@ import io.netty.buffer.ByteBuf;
 @KaryonBootstrap(name = "hello-netflix-oss", healthcheck = HealthCheck.class)
 @Modules(include = {HelloWorldApp.KaryonJerseyModuleImpl.class, KaryonWebAdminModule.class
                     // Uncomment the following line to enable eureka. Make sure eureka-client.properties is configured to point to your eureka server.
-                    , KaryonEurekaModule.class
+                    //, KaryonEurekaModule.class
         })
 public final class HelloWorldApp {
 
