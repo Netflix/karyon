@@ -1,14 +1,13 @@
-package com.netflix.hellonoss.server;
+package com.netflix.karyon.examples.hellonoss.server;
 
 import com.netflix.adminresources.resources.KaryonWebAdminModule;
 import com.netflix.governator.annotations.Modules;
-import com.netflix.hellonoss.server.auth.AuthInterceptor;
-import com.netflix.hellonoss.server.auth.AuthenticationService;
-import com.netflix.hellonoss.server.auth.AuthenticationServiceImpl;
-import com.netflix.hellonoss.server.health.HealthCheck;
+import com.netflix.karyon.examples.hellonoss.server.auth.AuthInterceptor;
+import com.netflix.karyon.examples.hellonoss.server.auth.AuthenticationService;
+import com.netflix.karyon.examples.hellonoss.server.auth.AuthenticationServiceImpl;
+import com.netflix.karyon.examples.hellonoss.server.health.HealthCheck;
 import com.netflix.karyon.KaryonBootstrap;
 import com.netflix.karyon.archaius.ArchaiusBootstrap;
-import com.netflix.karyon.eureka.KaryonEurekaModule;
 import com.netflix.karyon.jersey.blocking.KaryonJerseyModule;
 import com.netflix.karyon.transport.http.GovernatorHttpInterceptorSupport;
 import io.netty.buffer.ByteBuf;

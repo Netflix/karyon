@@ -45,7 +45,7 @@ dependencies {
 run {
     systemProperty 'java.awt.headless', 'true'
     systemProperty 'archaius.deployment.environment', 'dev'
-    args "com.netflix.hellonoss.server.HelloWorldApp"
+    args "com.netflix.karyon.examples.hellonoss.server.HelloWorldApp"
 }
 
 mainClassName = "com.netflix.karyon.KaryonServer"
