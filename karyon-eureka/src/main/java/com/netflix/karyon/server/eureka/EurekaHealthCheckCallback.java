@@ -28,7 +28,9 @@ import java.util.concurrent.TimeoutException;
 
 /**
  * @author Nitesh Kant
+ * @deprecated Use {@link EurekaHealthCheckHandler} instead.
  */
+@Deprecated
 public class EurekaHealthCheckCallback implements HealthCheckCallback {
 
     protected static final Logger logger = LoggerFactory.getLogger(EurekaHandler.class);

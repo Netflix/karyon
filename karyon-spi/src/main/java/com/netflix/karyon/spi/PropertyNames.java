@@ -45,6 +45,11 @@ public class PropertyNames {
     public static final String EUREKA_PROPERTIES_NAME_PREFIX_PROP_NAME = KARYON_PROPERTIES_PREFIX + "eureka.properties.prefix";
 
     /**
+     * Prefix for all eureka related properties. Default is "eureka"
+     */
+    public static final String USE_EUREKA_HEALTHCHECK_HANDLER = KARYON_PROPERTIES_PREFIX + "eureka.use.healthcheck.handler";
+
+    /**
      * Prefix for all eureka related properties. Default to the value set in {@link PropertyNames#EUREKA_PROPERTIES_NAME_PREFIX_PROP_NAME}
      */
     public static final String EUREKA_CLIENT_PROPERTIES_NAME_PREFIX_PROP_NAME = KARYON_PROPERTIES_PREFIX + "eureka.client.properties.prefix";
