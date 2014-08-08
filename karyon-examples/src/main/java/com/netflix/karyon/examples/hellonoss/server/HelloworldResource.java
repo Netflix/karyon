@@ -14,7 +14,7 @@
  *      limitations under the License.
  */
 
-package com.netflix.hellonoss.server;
+package com.netflix.karyon.examples.hellonoss.server;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;

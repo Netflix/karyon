@@ -19,33 +19,33 @@ apply plugin: 'application'
 
 buildscript {
     repositories { mavenCentral() }
-    apply from: file('../../gradle/buildscript.gradle'), to: buildscript
+    apply from: file('../gradle/buildscript.gradle'), to: buildscript
 }
 
 allprojects {
     repositories { mavenCentral() }
 }
 
-apply from: file('../../gradle/convention.gradle')
-apply from: file('../../gradle/maven.gradle')
-apply from: file('../../gradle/check.gradle')
-apply from: file('../../gradle/license.gradle')
+apply from: file('../gradle/convention.gradle')
+apply from: file('../gradle/maven.gradle')
+apply from: file('../gradle/check.gradle')
+apply from: file('../gradle/license.gradle')
 
 dependencies {
-    compile 'org.slf4j:slf4j-api:1.7.0'
-    runtime 'org.slf4j:slf4j-simple:1.7.0'
     compile project(':karyon-admin-web')
-    compile 'org.codehaus.jettison:jettison:1.2'
-    compile 'com.google.inject:guice:3.0'
     compile project(':karyon-jersey-blocking')
     compile project(':karyon-eureka')
     compile project(':karyon-archaius')
+    compile 'org.codehaus.jettison:jettison:1.2'
+    compile 'com.google.inject:guice:3.0'
+    compile 'org.slf4j:slf4j-api:1.7.0'
+    runtime 'org.slf4j:slf4j-simple:1.7.0'
 }
 
 run {
     systemProperty 'java.awt.headless', 'true'
     systemProperty 'archaius.deployment.environment', 'dev'
-    args "com.netflix.hellonoss.server.HelloWorldApp"
+    args "com.netflix.karyon.examples.hellonoss.server.HelloWorldApp"
 }
 
 mainClassName = "com.netflix.karyon.KaryonServer"

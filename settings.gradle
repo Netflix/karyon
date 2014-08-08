@@ -22,4 +22,4 @@ include 'karyon-core', \
  'karyon-admin', \
  'karyon-admin-web', \
  'karyon-jersey-blocking', \
- 'karyon-examples:hello-netflix-oss'
+ 'karyon-examples'
