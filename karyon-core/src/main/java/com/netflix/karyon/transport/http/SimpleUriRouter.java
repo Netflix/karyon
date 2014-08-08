@@ -1,8 +1,5 @@
-package com.netflix.karyon.transport;
+package com.netflix.karyon.transport.http;
 
-import com.netflix.karyon.transport.http.HttpKeyEvaluationContext;
-import com.netflix.karyon.transport.http.RegexUriConstraintKey;
-import com.netflix.karyon.transport.http.ServletStyleUriConstraintKey;
 import com.netflix.karyon.transport.interceptor.InterceptorKey;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.reactivex.netty.protocol.http.server.HttpServerRequest;
@@ -21,7 +18,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
  *
  * @author Nitesh Kant
  */
-public class SimpleUriRouter<I, O> implements RequestRouter<HttpServerRequest<I>, HttpServerResponse<O>> {
+public class SimpleUriRouter<I, O> implements HttpRequestRouter<I, O> {
 
     private final CopyOnWriteArrayList<Route> routes;
 
