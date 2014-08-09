@@ -4,6 +4,7 @@ import com.netflix.karyon.transport.interceptor.InterceptorKey;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.reactivex.netty.protocol.http.server.HttpServerRequest;
 import io.reactivex.netty.protocol.http.server.HttpServerResponse;
+import io.reactivex.netty.protocol.http.server.RequestHandler;
 import rx.Observable;
 
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -31,7 +32,7 @@ public class SimpleUriRouter<I, O> implements HttpRequestRouter<I, O> {
         HttpKeyEvaluationContext context = new HttpKeyEvaluationContext(response.getChannelHandlerContext());
         for (Route route : routes) {
             if (route.key.apply(request, context)) {
-                return route.getHandler().route(request, response);
+                return route.getHandler().handle(request, response);
             }
         }
 
@@ -40,12 +41,24 @@ public class SimpleUriRouter<I, O> implements HttpRequestRouter<I, O> {
         return response.close();
     }
 
-    public SimpleUriRouter<I, O> forUri(String uri, RequestHandler<I, O> handler) {
+    /**
+     * Add a new URI -> Handler route to this router.
+     * @param uri URI to match.
+     * @param handler Request handler.
+     * @return The updated router.
+     */
+    public SimpleUriRouter<I, O> addUri(String uri, RequestHandler<I, O> handler) {
         routes.add(new Route(new ServletStyleUriConstraintKey<I>(uri, ""), handler));
         return this;
     }
 
-    public SimpleUriRouter<I, O> forUriRegex(String uriRegEx, RequestHandler<I, O> handler) {
+    /**
+     * Add a new URI regex -> Handler route to this router.
+     * @param uriRegEx URI regex to match
+     * @param handler Request handler.
+     * @return The updated router.
+     */
+    public SimpleUriRouter<I, O> addUriRegex(String uriRegEx, RequestHandler<I, O> handler) {
         routes.add(new Route(new RegexUriConstraintKey<I>(uriRegEx), handler));
         return this;
     }
@@ -68,11 +81,5 @@ public class SimpleUriRouter<I, O> implements HttpRequestRouter<I, O> {
         public RequestHandler<I, O> getHandler() {
             return handler;
         }
-    }
-
-    public static interface RequestHandler<I, O> {
-
-        Observable<Void> route(HttpServerRequest<I> request, HttpServerResponse<O> Response);
-
     }
 }
