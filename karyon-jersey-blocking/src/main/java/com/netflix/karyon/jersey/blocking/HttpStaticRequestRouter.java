@@ -9,6 +9,7 @@ import io.reactivex.netty.protocol.http.server.HttpServerResponse;
 
 import java.io.File;
 import java.io.InputStream;
+import java.net.URL;
 import java.net.URLDecoder;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -44,7 +45,13 @@ public class HttpStaticRequestRouter implements HttpRequestRouter<ByteBuf, ByteB
             final String uri = request.getUri();
             final String path = sanitizeUri(uri);
             
-            File file = new File(Thread.currentThread().getContextClassLoader().getResource(path).toURI());
+            URL resource = Thread.currentThread().getContextClassLoader().getResource(path);
+            if (resource == null) {
+                response.setStatus(HttpResponseStatus.NOT_FOUND);
+                return Observable.empty();
+            }
+            
+            File file = new File(resource.toURI());
             if (file.isHidden() || !file.exists()) {
                 response.setStatus(HttpResponseStatus.NOT_FOUND);
                 return Observable.empty();

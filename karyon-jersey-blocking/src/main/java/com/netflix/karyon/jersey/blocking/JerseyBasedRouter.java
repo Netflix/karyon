@@ -35,7 +35,8 @@ public class JerseyBasedRouter implements HttpRequestRouter<ByteBuf, ByteBuf> {
     private final Pattern staticContentPattern;
     private WebApplication application;
     private NettyToJerseyBridge nettyToJerseyBridge;
-
+    private HttpStaticRequestRouter staticRequestRouter = new HttpStaticRequestRouter();
+    
     public JerseyBasedRouter() {
         this(null);
     }
@@ -66,7 +67,7 @@ public class JerseyBasedRouter implements HttpRequestRouter<ByteBuf, ByteBuf> {
     public Observable<Void> route(HttpServerRequest<ByteBuf> request, HttpServerResponse<ByteBuf> response) {
         try {
             if (this.staticContentPattern != null && this.staticContentPattern.matcher(request.getUri()).matches()) {
-                return Observable.empty();
+                return staticRequestRouter.route(request, response);
             }
 
             application.handleRequest(nettyToJerseyBridge.bridgeRequest(request, response.getAllocator()),
