@@ -65,5 +65,5 @@ task runTcpHelloNOSS (dependsOn: [classes], type: JavaExec) {
     systemProperty 'java.awt.headless', 'true'
     systemProperty 'archaius.deployment.environment', 'dev'
 
-    args = ["com.netflix.karyon.examples.rx.server.SampleRxNettyTcpServer"]
+    args = ["com.netflix.karyon.examples.rx.tcp.SampleRxNettyTcpServer"]
 }

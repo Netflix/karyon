@@ -13,7 +13,7 @@ import org.slf4j.LoggerFactory;
  * @author Tomasz Bak
  */
 public class KaryonTcpServer {
-    private static final Logger logger = LoggerFactory.getLogger(KaryonServer.class);
+    private static final Logger logger = LoggerFactory.getLogger(KaryonTcpServer.class);
 
     private final Class<?> mainClass;
 
@@ -31,7 +31,7 @@ public class KaryonTcpServer {
 
     public static void main(String[] args) {
         if (args.length == 0) {
-            System.out.println("Usage: " + KaryonServer.class.getCanonicalName() + " <main classs name>");
+            System.out.println("Usage: " + KaryonTcpServer.class.getCanonicalName() + " <main classs name>");
             System.exit(-1);
         }
 
