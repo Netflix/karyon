@@ -2,7 +2,7 @@ package com.netflix.karyon.transport.interceptor;
 
 /**
  * Key for a {@link InboundInterceptor} or {@link OutboundInterceptor} which determines whether a interceptor must
- * be applied for a particular request. <br/>
+ * be applied for a particular request. <br>
  * Any implementation for the key must be aware that it will be invoked for every request so it should always optimize
  * for speed of evaluation.
  *

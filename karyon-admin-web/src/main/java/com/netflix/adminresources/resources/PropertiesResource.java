@@ -47,13 +47,7 @@ public class PropertiesResource {
 
     /**
      * List all properties
-    @GET
-    public Viewable showIndex() {
-        Map<String, Object> model = new HashMap<String, Object>();
-        return new Viewable("/webadmin/props/index.ftl", model);
-    }
      */
-
     @GET
     public Response getAllProperties() {
         Map<String, String> allPropsAsString = new TreeMap<String, String>();

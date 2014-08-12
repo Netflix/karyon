@@ -10,7 +10,7 @@ import java.util.regex.Pattern;
 
 /**
  * Provides constraint implementation for {@link InterceptorKey} for matching URI paths as regular expressions as
- * supported by {@link java.util.regex.Pattern}. <p/>
+ * supported by {@link java.util.regex.Pattern}. <p></p>
  * The request URI path is as retrieved using: {@link HttpKeyEvaluationContext#getRequestUriPath(HttpServerRequest)}
  *
  * @author Nitesh Kant

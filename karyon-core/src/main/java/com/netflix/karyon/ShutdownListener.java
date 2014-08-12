@@ -21,7 +21,7 @@ import java.util.concurrent.TimeUnit;
 
 
 /**
- * A shutdown listener for karyon which aids shutdown of a server using a remote command over a socket. <br/>
+ * A shutdown listener for karyon which aids shutdown of a server using a remote command over a socket.
  *
  * @author Nitesh Kant
  */
