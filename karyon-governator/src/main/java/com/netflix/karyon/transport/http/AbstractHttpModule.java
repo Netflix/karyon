@@ -5,6 +5,7 @@ import com.google.inject.TypeLiteral;
 import com.google.inject.binder.AnnotatedBindingBuilder;
 import com.google.inject.util.Types;
 import com.netflix.karyon.transport.KaryonTransport;
+import com.netflix.karyon.transport.Ports;
 import io.netty.handler.logging.LogLevel;
 import io.reactivex.netty.protocol.http.server.HttpServerBuilder;
 import io.reactivex.netty.protocol.http.server.HttpServerRequest;

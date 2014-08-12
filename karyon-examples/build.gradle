@@ -42,10 +42,28 @@ dependencies {
     runtime 'org.slf4j:slf4j-simple:1.7.0'
 }
 
-run {
+task runJerseyHelloNOSS (dependsOn: [classes], type: JavaExec) {
+    group = "Examples"
+    description = "Run Hello NOSS server"
+
+    main = "com.netflix.karyon.KaryonServer"
+    classpath = sourceSets.main.runtimeClasspath
+
     systemProperty 'java.awt.headless', 'true'
     systemProperty 'archaius.deployment.environment', 'dev'
-    args "com.netflix.karyon.examples.hellonoss.server.HelloWorldApp"
+
+    args = ["com.netflix.karyon.examples.hellonoss.server.HelloWorldApp"]
 }
 
-mainClassName = "com.netflix.karyon.KaryonServer"
+task runTcpHelloNOSS (dependsOn: [classes], type: JavaExec) {
+    group = "Examples"
+    description = "Run TCP Hello NOSS Server"
+
+    main = "com.netflix.karyon.KaryonTcpServer"
+    classpath = sourceSets.main.runtimeClasspath
+
+    systemProperty 'java.awt.headless', 'true'
+    systemProperty 'archaius.deployment.environment', 'dev'
+
+    args = ["com.netflix.karyon.examples.rx.server.SampleRxNettyTcpServer"]
+}

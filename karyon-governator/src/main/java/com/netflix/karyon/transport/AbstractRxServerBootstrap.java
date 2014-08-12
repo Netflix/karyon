@@ -1,40 +1,36 @@
-package com.netflix.karyon.transport.http;
+package com.netflix.karyon.transport;
 
 import com.google.inject.Injector;
-import com.netflix.governator.guice.lazy.FineGrainedLazySingleton;
 import com.netflix.governator.lifecycle.LifecycleManager;
 import com.netflix.karyon.ShutdownListener;
-import com.netflix.karyon.transport.Ports;
-import io.reactivex.netty.protocol.http.server.HttpServer;
-import io.reactivex.netty.protocol.http.server.HttpServerBuilder;
-import io.reactivex.netty.servo.ServoEventsListenerFactory;
-import io.reactivex.netty.servo.http.HttpServerListener;
+import io.reactivex.netty.server.ConnectionBasedServerBuilder;
+import io.reactivex.netty.server.RxServer;
+import io.reactivex.netty.server.ServerMetricsEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import rx.functions.Action0;
 
-import javax.inject.Inject;
-
 /**
- * @author Nitesh Kant
+ * @author Tomasz Bak
  */
-@FineGrainedLazySingleton
-public class ServerBootstrap<I, O> {
+public abstract class AbstractRxServerBootstrap<I, O, B extends ConnectionBasedServerBuilder<I, O, B>,
+        M extends ServerMetricsEvent<? extends Enum<?>>> {
 
-    private static final Logger logger = LoggerFactory.getLogger(ServerBootstrap.class);
+    private static final Logger logger = LoggerFactory.getLogger(AbstractRxServerBootstrap.class);
 
     private final int shutdownPort;
-    private final HttpServerBuilder<I, O> serverBuilder;
+    private final B serverBuilder;
+    private final MetricEventsListenerFactory<I, O, M> metricEventsListenerFactory;
     private ShutdownListener shutdownListener; // To avoid GC
-    private HttpServer<I, O> server; // To avoid GC
+    private RxServer<I, O> server; // To avoid GC
     private final LifecycleManager lifecycleManager;
 
-    @Inject
-    public ServerBootstrap(Ports ports, Injector injector, HttpRequestRouter<I, O> router,
-                           LazyDelegateRouter<I, O> lazyDelegateRouter, HttpServerBuilder<I, O> serverBuilder) {
+    protected AbstractRxServerBootstrap(Ports ports, Injector injector,
+                                        MetricEventsListenerFactory<I, O, M> metricEventsListenerFactory,
+                                        B serverBuilder) {
         shutdownPort = ports.getShutdownPort();
+        this.metricEventsListenerFactory = metricEventsListenerFactory;
         this.serverBuilder = serverBuilder;
-        lazyDelegateRouter.setRouter(injector, router);
         lifecycleManager = injector.getInstance(LifecycleManager.class);
     }
 
@@ -50,9 +46,7 @@ public class ServerBootstrap<I, O> {
 
     protected void _start() throws Exception {
         server = serverBuilder.build();
-        ServoEventsListenerFactory factory = new ServoEventsListenerFactory();
-        HttpServerListener listener = factory.forHttpServer(server);
-        server.subscribe(listener);
+        server.subscribe(metricEventsListenerFactory.createListener(server));
 
         shutdownListener = new ShutdownListener(shutdownPort, new Action0() {
             @Override
@@ -68,4 +62,5 @@ public class ServerBootstrap<I, O> {
         shutdownListener.start();
         lifecycleManager.start();
     }
+
 }

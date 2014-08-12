@@ -1,4 +1,4 @@
-package com.netflix.karyon.transport.http;
+package com.netflix.karyon.transport;
 
 /**
  * @author Nitesh Kant
