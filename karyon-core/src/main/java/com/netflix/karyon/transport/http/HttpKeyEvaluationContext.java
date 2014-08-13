@@ -14,7 +14,7 @@ public class HttpKeyEvaluationContext extends KeyEvaluationContext {
 
     /**
      * In order to optimize for request URI parsing, karyon stores the {@link QueryStringDecoder} instances, if created,
-     * in the {@link io.netty.channel.ChannelHandlerContext} as an {@link io.netty.util.Attribute}. <br/>
+     * in the {@link io.netty.channel.ChannelHandlerContext} as an {@link io.netty.util.Attribute}. <br>
      * This attribute is not always available and hence the users must always check for availability. It is always a
      * good practice to store the decoder back in the context, once created so that other code can use it if required.
      */

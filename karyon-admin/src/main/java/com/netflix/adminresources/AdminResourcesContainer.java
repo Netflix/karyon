@@ -44,13 +44,13 @@ import java.util.EnumSet;
 /**
  * This class starts an embedded jetty server, listening at port specified by property
  * {@link AdminResourcesContainer#CONTAINER_LISTEN_PORT} and defaulting to
- * {@link AdminResourcesContainer#LISTEN_PORT_DEFAULT}. <br/>
+ * {@link AdminResourcesContainer#LISTEN_PORT_DEFAULT}. <br>
  *
  * The embedded server uses jersey so any jersey resources available in packages
- * specified via properties {@link AdminResourcesContainer#JERSEY_CORE_PACKAGES}will be scanned and initialized. <br/>
+ * specified via properties {@link AdminResourcesContainer#JERSEY_CORE_PACKAGES}will be scanned and initialized. <br>
  *
  * Karyon admin starts in an embedded container to have a "always available" endpoint for any application. This helps
- * in a homogeneous admin view for all applications. <br/>
+ * in a homogeneous admin view for all applications. <br>
  *
  * <h3>Available resources</h3>
  *

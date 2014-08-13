@@ -19,7 +19,7 @@ import static com.netflix.config.ConfigurationManager.getConfigInstance;
 
 /**
  * An implementation of {@link ResourceConfig} that enables users to define all jersey properties in a property file
- * loaded by karyon via archaius. <br/>
+ * loaded by karyon via archaius. <br>
  * This supports scanning of classpath (using {@link ScanningResourceConfig}) to discover provider and other resource
  * classes. The scanning of classpath is done lazily, at the first call to {@link #getClasses()} in order to make sure
  * that we do not do scanning too early, even before all properties are loaded.
