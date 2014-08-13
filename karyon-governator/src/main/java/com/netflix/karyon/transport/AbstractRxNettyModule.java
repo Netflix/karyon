@@ -4,12 +4,11 @@ import java.lang.reflect.ParameterizedType;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.TypeLiteral;
+import com.google.inject.util.Types;
 import io.netty.handler.logging.LogLevel;
 import io.reactivex.netty.channel.ConnectionHandler;
-import io.reactivex.netty.channel.ObservableConnection;
 import io.reactivex.netty.server.ConnectionBasedServerBuilder;
 import io.reactivex.netty.server.ServerMetricsEvent;
-import rx.Observable;
 
 /**
  * @author Tomasz Bak
@@ -17,26 +16,39 @@ import rx.Observable;
 public abstract class AbstractRxNettyModule<I, O, B extends ConnectionBasedServerBuilder<I, O, B>,
         M extends ServerMetricsEvent<? extends Enum<?>>> extends AbstractModule {
 
+    private final Class<I> iType;
+    private final Class<O> oType;
     private final ParameterizedType builderType;
     private final ParameterizedType bootstrapType;
     private final ParameterizedType metricsListenerFactoryType;
+    private final ParameterizedType connectionHandlerType;
 
-    protected AbstractRxNettyModule(ParameterizedType builderType,
+    protected AbstractRxNettyModule(Class<I> iType, Class<O> oType,
+                                    ParameterizedType builderType,
                                     ParameterizedType bootstrapType,
-                                    ParameterizedType metricsListenerFactoryType) {
+                                    ParameterizedType metricsListenerFactoryType,
+                                    ParameterizedType connectionHandlerType) {
+        this.iType = iType;
+        this.oType = oType;
         this.builderType = builderType;
         this.bootstrapType = bootstrapType;
         this.metricsListenerFactoryType = metricsListenerFactoryType;
+        this.connectionHandlerType = connectionHandlerType;
     }
 
+    public abstract int serverPort();
+
+    @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
     protected void configure() {
         int listenPort = serverPort();
-        int shutdownPort = shutdownPort();
 
-        bind(Ports.class).toInstance(new Ports(listenPort, shutdownPort));
+        LazyDelegateConnectionHandler<I, O> lazyDelegateConnectionHandler = new LazyDelegateConnectionHandler<I, O>();
+        B serverBuilder = newServerBuilder(listenPort, lazyDelegateConnectionHandler);
 
-        B serverBuilder = newServerBuilder(listenPort, connectionHandler());
+        ParameterizedType lazyDelegateType = Types.newParameterizedType(LazyDelegateConnectionHandler.class, iType, oType);
+        TypeLiteral<LazyDelegateConnectionHandler<I, O>> lazyDelegateTypeLiteral = (TypeLiteral<LazyDelegateConnectionHandler<I, O>>) TypeLiteral.get(lazyDelegateType);
+        bind(lazyDelegateTypeLiteral).toInstance(lazyDelegateConnectionHandler);
 
         configureEventLoops(serverBuilder);
         configureChannelOptions(serverBuilder);
@@ -47,24 +59,19 @@ public abstract class AbstractRxNettyModule<I, O, B extends ConnectionBasedServe
             serverBuilder.enableWireLogging(logLevel);
         }
 
-        @SuppressWarnings("unchecked")
+        ParameterizedType type = Types.newParameterizedType(ConnectionHandler.class, iType, oType);
+        TypeLiteral<ConnectionHandler<I, O>> baseConnectionHandleTypeLiteral = (TypeLiteral<ConnectionHandler<I, O>>) TypeLiteral.get(type);
+        bind(baseConnectionHandleTypeLiteral).to((TypeLiteral<? extends ConnectionHandler<I, O>>) TypeLiteral.get(connectionHandlerType));
+
         TypeLiteral<AbstractRxServerBootstrap<I, O, B, M>> bootstrapTypeLiteral = (TypeLiteral<AbstractRxServerBootstrap<I, O, B, M>>) TypeLiteral.get(bootstrapType);
         bind(bootstrapTypeLiteral).asEagerSingleton();
 
-        @SuppressWarnings("unchecked")
         TypeLiteral<B> builderTypeLiteral = (TypeLiteral<B>) TypeLiteral.get(builderType);
         bind(builderTypeLiteral).toInstance(serverBuilder);
 
-        @SuppressWarnings("unchecked")
         TypeLiteral<MetricEventsListenerFactory> matricsListenerTypeLiteral = (TypeLiteral<MetricEventsListenerFactory>) TypeLiteral.get(metricsListenerFactoryType);
         bind(matricsListenerTypeLiteral).toInstance(metricsEventsListenerFactory());
     }
-
-    public abstract int serverPort();
-
-    public abstract int shutdownPort();
-
-    public abstract ConnectionHandler<I, O> connectionHandler();
 
     public abstract MetricEventsListenerFactory<I, O, M> metricsEventsListenerFactory();
 
@@ -86,16 +93,4 @@ public abstract class AbstractRxNettyModule<I, O, B extends ConnectionBasedServe
         return LogLevel.DEBUG; // Add the wire logging handler by default so that it can be turned on at runtime.
     }
 
-    public static class LazyDelegateConnectionHandler<I, O> implements ConnectionHandler<I, O> {
-        private ConnectionHandler<I, O> connectionHandler;
-
-        @Override
-        public Observable<Void> handle(ObservableConnection<I, O> connection) {
-            return connectionHandler.handle(connection);
-        }
-
-        public void setHandler(ConnectionHandler<I, O> connectionHandler) {
-            this.connectionHandler = connectionHandler;
-        }
-    }
 }

@@ -5,7 +5,6 @@ import com.google.inject.TypeLiteral;
 import com.google.inject.binder.AnnotatedBindingBuilder;
 import com.google.inject.util.Types;
 import com.netflix.karyon.transport.KaryonTransport;
-import com.netflix.karyon.transport.Ports;
 import io.netty.handler.logging.LogLevel;
 import io.reactivex.netty.protocol.http.server.HttpServerBuilder;
 import io.reactivex.netty.protocol.http.server.HttpServerRequest;
@@ -22,8 +21,8 @@ import java.lang.reflect.ParameterizedType;
  */
 public abstract class AbstractHttpModule<I, O> extends AbstractModule {
 
-    private Class<I> iType;
-    private Class<O> oType;
+    private final Class<I> iType;
+    private final Class<O> oType;
 
     protected AbstractHttpModule(Class<I> iType, Class<O> oType) {
         this.iType = iType;
@@ -33,9 +32,6 @@ public abstract class AbstractHttpModule<I, O> extends AbstractModule {
     @Override
     protected void configure() {
         int listenPort = serverPort();
-        int shutdownPort = shutdownPort();
-
-        bind(Ports.class).toInstance(new Ports(listenPort, shutdownPort));
 
         GovernatorHttpInterceptorSupport<I, O> interceptorSupport = new GovernatorHttpInterceptorSupport<I, O>();
         LazyDelegateRouterImpl<I, O> lazyRouter = new LazyDelegateRouterImpl<I, O>(interceptorSupport);
@@ -72,9 +68,9 @@ public abstract class AbstractHttpModule<I, O> extends AbstractModule {
             serverBuilder.enableWireLogging(logLevel);
         }
 
-        ParameterizedType bootstrapParametrizedType = Types.newParameterizedType(ServerBootstrap.class, iType, oType);
+        ParameterizedType bootstrapParametrizedType = Types.newParameterizedType(HttpServerBootstrap.class, iType, oType);
         @SuppressWarnings("unchecked")
-        TypeLiteral<ServerBootstrap<I, O>> bootstrapTypeLiteral = (TypeLiteral<ServerBootstrap<I, O>>) TypeLiteral.get(bootstrapParametrizedType);
+        TypeLiteral<HttpServerBootstrap<I, O>> bootstrapTypeLiteral = (TypeLiteral<HttpServerBootstrap<I, O>>) TypeLiteral.get(bootstrapParametrizedType);
         bind(bootstrapTypeLiteral).asEagerSingleton();
 
         ParameterizedType builderParametrizedType = Types.newParameterizedType(HttpServerBuilder.class, iType, oType);
@@ -89,8 +85,6 @@ public abstract class AbstractHttpModule<I, O> extends AbstractModule {
      * @return The port at which the transport server created by this module will listen.
      */
     public abstract int serverPort();
-
-    public abstract int shutdownPort();
 
     protected abstract void bindRequestRouter(AnnotatedBindingBuilder<HttpRequestRouter<I,O>> bind);
 
@@ -118,12 +112,12 @@ public abstract class AbstractHttpModule<I, O> extends AbstractModule {
         // No op by default
     }
 
-    private static class LazyHttpRequestHandler<I, O> extends HttpRequestHandler<I, O> {
+    static class LazyHttpRequestHandler<I, O> extends HttpRequestHandler<I, O> {
 
         private final LazyDelegateRouterImpl<I, O> lazyRouter;
         private HttpRequestHandler<I, O> delegate;
 
-        public LazyHttpRequestHandler(LazyDelegateRouterImpl<I, O> lazyRouter) {
+        LazyHttpRequestHandler(LazyDelegateRouterImpl<I, O> lazyRouter) {
             super(lazyRouter);
             this.lazyRouter = lazyRouter;
         }

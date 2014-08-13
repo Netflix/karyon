@@ -59,11 +59,11 @@ task runTcpHelloNOSS (dependsOn: [classes], type: JavaExec) {
     group = "Examples"
     description = "Run TCP Hello NOSS Server"
 
-    main = "com.netflix.karyon.KaryonTcpServer"
+    main = "com.netflix.karyon.KaryonServer"
     classpath = sourceSets.main.runtimeClasspath
 
     systemProperty 'java.awt.headless', 'true'
     systemProperty 'archaius.deployment.environment', 'dev'
 
-    args = ["com.netflix.karyon.examples.rx.tcp.SampleRxNettyTcpServer"]
+    args = ["com.netflix.karyon.examples.rx.tcp.TcpPipelineServers"]
 }
