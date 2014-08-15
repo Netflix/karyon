@@ -3,9 +3,9 @@ package com.netflix.karyon.jersey.blocking;
 import com.google.inject.binder.AnnotatedBindingBuilder;
 import com.netflix.karyon.transport.http.AbstractHttpModule;
 import com.netflix.karyon.transport.http.HttpRequestHandler;
-import com.netflix.karyon.transport.http.HttpRequestRouter;
 import io.netty.buffer.ByteBuf;
 import io.reactivex.netty.protocol.http.server.HttpServerBuilder;
+import io.reactivex.netty.protocol.http.server.RequestHandler;
 import rx.internal.util.RxThreadFactory;
 
 /**
@@ -18,7 +18,7 @@ public abstract class KaryonJerseyModule extends AbstractHttpModule<ByteBuf, Byt
     }
 
     @Override
-    protected void bindRequestRouter(AnnotatedBindingBuilder<HttpRequestRouter<ByteBuf, ByteBuf>> bind) {
+    protected void bindRequestRouter(AnnotatedBindingBuilder<RequestHandler<ByteBuf, ByteBuf>> bind) {
         bind.to(JerseyBasedRouter.class);
     }
 

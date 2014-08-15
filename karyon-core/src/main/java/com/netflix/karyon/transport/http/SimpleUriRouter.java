@@ -19,7 +19,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
  *
  * @author Nitesh Kant
  */
-public class SimpleUriRouter<I, O> implements HttpRequestRouter<I, O> {
+public class SimpleUriRouter<I, O> implements RequestHandler<I, O> {
 
     private final CopyOnWriteArrayList<Route> routes;
 
@@ -28,7 +28,7 @@ public class SimpleUriRouter<I, O> implements HttpRequestRouter<I, O> {
     }
 
     @Override
-    public Observable<Void> route(HttpServerRequest<I> request, HttpServerResponse<O> response) {
+    public Observable<Void> handle(HttpServerRequest<I> request, HttpServerResponse<O> response) {
         HttpKeyEvaluationContext context = new HttpKeyEvaluationContext(response.getChannelHandlerContext());
         for (Route route : routes) {
             if (route.key.apply(request, context)) {
@@ -42,7 +42,7 @@ public class SimpleUriRouter<I, O> implements HttpRequestRouter<I, O> {
     }
 
     /**
-     * Add a new URI -> Handler route to this router.
+     * Add a new URI to Handler route to this router.
      * @param uri URI to match.
      * @param handler Request handler.
      * @return The updated router.
@@ -53,7 +53,7 @@ public class SimpleUriRouter<I, O> implements HttpRequestRouter<I, O> {
     }
 
     /**
-     * Add a new URI regex -> Handler route to this router.
+     * Add a new URI regex to Handler route to this router.
      * @param uriRegEx URI regex to match
      * @param handler Request handler.
      * @return The updated router.
