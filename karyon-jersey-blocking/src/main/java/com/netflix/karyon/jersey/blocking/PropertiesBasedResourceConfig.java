@@ -11,6 +11,7 @@ import javax.ws.rs.core.MediaType;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
@@ -29,7 +30,8 @@ import static com.netflix.config.ConfigurationManager.getConfigInstance;
 public class PropertiesBasedResourceConfig extends ScanningResourceConfig {
 
     private static final Logger logger = LoggerFactory.getLogger(PropertiesBasedResourceConfig.class);
-
+    private static final String JERSEY_ROOT_PACKAGE = "com.sun.jersey";
+    
     private volatile boolean initialized;
 
     @Override
@@ -105,7 +107,13 @@ public class PropertiesBasedResourceConfig extends ScanningResourceConfig {
     }
 
     private static Map<String, Object> createPropertiesMap() {
-        Properties properties = getConfigInstance().getProperties("com.sun.jersey");
+        Properties properties = new Properties();
+        Iterator<String> iter = getConfigInstance().getKeys(JERSEY_ROOT_PACKAGE);
+        while (iter.hasNext()) {
+            String key = iter.next();
+            properties.setProperty(key, getConfigInstance().getString(key));
+        }
+
         return new TypeSafePropertiesDelegate(properties);
     }
 
