@@ -46,7 +46,6 @@ public class HealthCheck implements HealthCheckHandler {
     public int getStatus() {
         // TODO: Health check logic.
         logger.info("Health check invoked.");
-        logger.info("Message from component: " + component.getHelloString());
-        return 200;
+        return component.isReady() ? 200 : 204;
     }
 }

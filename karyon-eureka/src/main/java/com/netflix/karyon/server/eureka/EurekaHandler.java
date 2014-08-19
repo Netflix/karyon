@@ -40,6 +40,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import static com.netflix.karyon.spi.PropertyNames.EUREKA_CLIENT_PROPERTIES_NAME_PREFIX_PROP_NAME;
 import static com.netflix.karyon.spi.PropertyNames.EUREKA_DATACENTER_TYPE_PROP_NAME;
 import static com.netflix.karyon.spi.PropertyNames.EUREKA_PROPERTIES_NAME_PREFIX_PROP_NAME;
+import static com.netflix.karyon.spi.PropertyNames.USE_EUREKA_HEALTHCHECK_HANDLER;
 
 /**
  * A handler for integrating with <a href="https://github.com/Netflix/eureka/">Eureka</a>. This handler can be disabled
@@ -58,6 +59,7 @@ public class EurekaHandler implements ServiceRegistryClient {
 
     private EurekaHealthCheckCallback eurekaHealthCheckCallback;
     private HealthCheckInvocationStrategy healthCheckInvocationStrategy;
+    private final EurekaHealthCheckHandler healthCheckHandler;
 
     private AtomicBoolean registered = new AtomicBoolean();
 
@@ -66,6 +68,12 @@ public class EurekaHandler implements ServiceRegistryClient {
             documentation = "Namespace for eureka related properties."
     )
     protected String eurekaNamespace = "eureka";
+
+    @Configuration(
+            value = USE_EUREKA_HEALTHCHECK_HANDLER,
+            documentation = "Uses the eureka healthcheck handler semantics as opposed to a binary handler."
+    )
+    protected boolean useEurekaHealthCheckHandler = false;
 
     @Configuration(
             value = EUREKA_CLIENT_PROPERTIES_NAME_PREFIX_PROP_NAME,
@@ -81,9 +89,11 @@ public class EurekaHandler implements ServiceRegistryClient {
 
     @Inject
     public EurekaHandler(EurekaHealthCheckCallback eurekaHealthCheckCallback,
-                         HealthCheckInvocationStrategy healthCheckInvocationStrategy) {
+                         HealthCheckInvocationStrategy healthCheckInvocationStrategy,
+                         EurekaHealthCheckHandler healthCheckHandler) {
         this.eurekaHealthCheckCallback = eurekaHealthCheckCallback;
         this.healthCheckInvocationStrategy = healthCheckInvocationStrategy;
+        this.healthCheckHandler = healthCheckHandler;
     }
 
     @PostConstruct
@@ -114,7 +124,10 @@ public class EurekaHandler implements ServiceRegistryClient {
         EurekaInstanceConfig eurekaInstanceConfig = createEurekaInstanceConfig();
 
         DiscoveryManager.getInstance().initComponent(eurekaInstanceConfig, new DefaultEurekaClientConfig(eurekaClientNamespace));
-        if (null != eurekaHealthCheckCallback) {
+
+        if (useEurekaHealthCheckHandler) {
+            DiscoveryManager.getInstance().getDiscoveryClient().registerHealthCheck(healthCheckHandler);
+        } else if (null != eurekaHealthCheckCallback) {
             // We always register the callback with eureka, the handler in turn checks if the unification is enabled, if yes,
             // the underlying handler is used else returns healthy.
             DiscoveryManager.getInstance().getDiscoveryClient().registerHealthCheckCallback(eurekaHealthCheckCallback);

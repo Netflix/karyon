@@ -82,5 +82,19 @@ public class HelloworldResource {
         }
     }
 
+    @Path("start")
+    @GET
+    @Produces({MediaType.APPLICATION_JSON})
+    public Response start() {
+        component.setReady(true);
+        return Response.noContent().build();
+    }
 
+    @Path("stop")
+    @GET
+    @Produces({MediaType.APPLICATION_JSON})
+    public Response stop() {
+        component.setReady(false);
+        return Response.noContent().build();
+    }
 }
