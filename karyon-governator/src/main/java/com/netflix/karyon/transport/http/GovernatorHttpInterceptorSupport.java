@@ -29,7 +29,7 @@ public class GovernatorHttpInterceptorSupport<I, O> extends
     protected final List<HttpOutClassHolder<I, O>> outboundInterceptorClasses;
     private Action1<GovernatorHttpInterceptorSupport<I, O>> finishListener;
 
-    GovernatorHttpInterceptorSupport() {
+    public GovernatorHttpInterceptorSupport() {
         inboundInterceptorClasses = new ArrayList<HttpInClassHolder<I, O>>();
         outboundInterceptorClasses = new ArrayList<HttpOutClassHolder<I, O>>();
     }
@@ -86,7 +86,7 @@ public class GovernatorHttpInterceptorSupport<I, O> extends
         return this;
     }
 
-    void setFinishListener(Action1<GovernatorHttpInterceptorSupport<I, O>> finishListener) {
+    public void setFinishListener(Action1<GovernatorHttpInterceptorSupport<I, O>> finishListener) {
         this.finishListener = finishListener;
     }
 
