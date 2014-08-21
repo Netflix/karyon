@@ -1,5 +1,6 @@
 package com.netflix.karyon.experimental;
 
+import javax.annotation.PreDestroy;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
@@ -18,11 +19,15 @@ import io.reactivex.netty.metrics.MetricEventsListenerFactory;
 import io.reactivex.netty.pipeline.PipelineConfigurator;
 import io.reactivex.netty.server.RxServer;
 import io.reactivex.netty.server.ServerBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author Tomasz Bak
  */
 public class TcpRxServerProvider<I, O, S extends RxServer<I, O>> implements ProviderWithDependencies<S> {
+
+    private static final Logger logger = LoggerFactory.getLogger(TcpRxServerProvider.class);
 
     private final Named nameAnnotation;
 
@@ -63,6 +68,13 @@ public class TcpRxServerProvider<I, O, S extends RxServer<I, O>> implements Prov
         return (S) server;
     }
 
+    @PreDestroy
+    public void shutdown() throws InterruptedException {
+        if (server != null) {
+            server.shutdown();
+        }
+    }
+
     @Inject
     public void setInjector(Injector injector) {
         ServerConfig config = injector.getInstance(serverConfigKey);
@@ -79,6 +91,7 @@ public class TcpRxServerProvider<I, O, S extends RxServer<I, O>> implements Prov
             builder.withMetricEventsListenerFactory(injector.getInstance(metricEventsListenerFactoryKey));
         }
 
-        server = builder.build();
+        server = builder.build().start();
+        logger.info("Starting server {} on port {}...", nameAnnotation.value(), server.getServerPort());
     }
 }

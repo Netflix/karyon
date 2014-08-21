@@ -2,14 +2,17 @@ package com.netflix.karyon.experimental;
 
 import com.google.inject.Key;
 import com.google.inject.TypeLiteral;
+import com.google.inject.binder.LinkedBindingBuilder;
+import com.google.inject.multibindings.MapBinder;
 import com.google.inject.util.Types;
 import com.netflix.karyon.transport.http.HttpRequestRouter;
 import io.reactivex.netty.protocol.http.server.HttpServer;
+import io.reactivex.netty.server.RxServer;
 
 /**
  * @author Tomasz Bak
  */
-public abstract class ExpHttpModule<I, O> extends ExpServerModule {
+public abstract class ExpHttpModule<I, O> extends ExpServerModule<I, O> {
 
 
     protected final Key<HttpRequestRouter> routerKey;
@@ -28,12 +31,12 @@ public abstract class ExpHttpModule<I, O> extends ExpServerModule {
     @Override
     protected void configure() {
         configureServer();
-        bind(httpServerKey).toProvider(new HttpRxServerProvider(nameAnnotation.value()));
+        MapBinder.newMapBinder(binder(), String.class, RxServer.class).addBinding(nameAnnotation.value()).toProvider(
+                new HttpRxServerProvider<I, O, HttpServer<I, O>>(nameAnnotation.value())
+        ).asEagerSingleton();
     }
 
-    protected abstract void configureServer();
-
-    protected void bindRouter(Class<? extends HttpRequestRouter<I, O>> routerClass) {
-        bind(routerKey).to(routerClass);
+    protected LinkedBindingBuilder<HttpRequestRouter> bindRouter() {
+        return bind(routerKey);
     }
 }

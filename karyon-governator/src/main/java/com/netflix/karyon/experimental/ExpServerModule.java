@@ -2,6 +2,7 @@ package com.netflix.karyon.experimental;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Key;
+import com.google.inject.binder.LinkedBindingBuilder;
 import com.google.inject.name.Named;
 import com.google.inject.name.Names;
 import io.reactivex.netty.metrics.MetricEventsListenerFactory;
@@ -30,8 +31,10 @@ public abstract class ExpServerModule<I, O> extends AbstractModule {
         serverConfigBuilder = new ServerConfigBuilder();
     }
 
-    protected void bindEventsListenerFactory(Class<? extends MetricEventsListenerFactory> eventsListenerFactoryClass) {
-        bind(metricEventsListenerFactoryKey).to(eventsListenerFactoryClass);
+    protected abstract void configureServer();
+
+    protected LinkedBindingBuilder<MetricEventsListenerFactory> bindEventsListenerFactory() {
+        return bind(metricEventsListenerFactoryKey);
     }
 
     protected ServerConfigBuilder server() {
