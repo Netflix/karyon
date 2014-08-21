@@ -1,10 +1,10 @@
 package com.netflix.karyon.transport;
 
 import com.netflix.karyon.transport.http.HttpRequestHandler;
-import com.netflix.karyon.transport.http.HttpRequestRouter;
 import io.reactivex.netty.contexts.RxContexts;
 import io.reactivex.netty.protocol.http.server.HttpServer;
 import io.reactivex.netty.protocol.http.server.HttpServerBuilder;
+import io.reactivex.netty.protocol.http.server.RequestHandler;
 
 /**
  * A factory class for creating karyon transport servers which are created using
@@ -23,7 +23,7 @@ public final class KaryonTransport {
     private KaryonTransport() {
     }
 
-    public static <I, O> HttpServerBuilder<I, O> newHttpServerBuilder(int port, HttpRequestRouter<I, O> router) {
+    public static <I, O> HttpServerBuilder<I, O> newHttpServerBuilder(int port, RequestHandler<I, O> router) {
         return RxContexts.newHttpServerBuilder(port, new HttpRequestHandler<I, O>(router), RxContexts.DEFAULT_CORRELATOR);
     }
 
@@ -31,7 +31,7 @@ public final class KaryonTransport {
         return RxContexts.newHttpServerBuilder(port, requestHandler, RxContexts.DEFAULT_CORRELATOR);
     }
 
-    public static <I, O> HttpServer<I, O> newHttpServer(int port, HttpRequestRouter<I, O> router) {
+    public static <I, O> HttpServer<I, O> newHttpServer(int port, RequestHandler<I, O> router) {
         return newHttpServerBuilder(port, router).build();
     }
 

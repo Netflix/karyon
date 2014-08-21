@@ -1,6 +1,7 @@
 package com.netflix.karyon.transport.interceptor;
 
-import com.netflix.karyon.transport.RequestRouter;
+import io.reactivex.netty.channel.Handler;
+import io.reactivex.netty.protocol.http.server.RequestHandler;
 import rx.Observable;
 import rx.Subscriber;
 import rx.subscriptions.SerialSubscription;
@@ -17,9 +18,9 @@ public class InterceptorExecutor<I, O, C extends KeyEvaluationContext> {
 
     private final List<InterceptorHolder<I, C, InboundInterceptor<I, O>>> allIn;
     private final List<InterceptorHolder<I, C, OutboundInterceptor<O>>> allOut;
-    private final RequestRouter<I, O> router;
+    private final Handler<I, O> router;
 
-    public InterceptorExecutor(AbstractInterceptorSupport<I, O, C, ?, ?> support, RequestRouter<I, O> router) {
+    public InterceptorExecutor(AbstractInterceptorSupport<I, O, C, ?, ?> support, Handler<I, O> router) {
         this.router = router;
         allIn = support.getInboundInterceptors();
         allOut = support.getOutboundInterceptors();
@@ -42,7 +43,7 @@ public class InterceptorExecutor<I, O, C extends KeyEvaluationContext> {
         if (null != nextIn) {
             startingPoint = nextIn.in(request, response);
         } else if (context.invokeRouter()){
-            startingPoint = router.route(request, response);
+            startingPoint = router.handle(request, response);
         } else {
             return Observable.error(new IllegalStateException("No router defined.")); // No router defined.
         }
@@ -187,7 +188,7 @@ public class InterceptorExecutor<I, O, C extends KeyEvaluationContext> {
                 Observable<Void> interceptorResult = nextIn.in(request, response);
                 handleResult(interceptorResult);
             } else if (context.invokeRouter()) {
-                handleResult(router.route(request, response));
+                handleResult(router.handle(request, response));
             } else if (null != (nextOut = context.nextOut())) {
                 handleResult(nextOut.out(response));
             } else {

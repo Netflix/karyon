@@ -6,6 +6,7 @@ import com.netflix.governator.lifecycle.LifecycleManager;
 import com.netflix.karyon.ShutdownListener;
 import io.reactivex.netty.protocol.http.server.HttpServer;
 import io.reactivex.netty.protocol.http.server.HttpServerBuilder;
+import io.reactivex.netty.protocol.http.server.RequestHandler;
 import io.reactivex.netty.servo.ServoEventsListenerFactory;
 import io.reactivex.netty.servo.http.HttpServerListener;
 import org.slf4j.Logger;
@@ -29,7 +30,7 @@ public class ServerBootstrap<I, O> {
     private final LifecycleManager lifecycleManager;
 
     @Inject
-    public ServerBootstrap(Ports ports, Injector injector, HttpRequestRouter<I, O> router,
+    public ServerBootstrap(Ports ports, Injector injector, RequestHandler<I, O> router,
                            LazyDelegateRouter<I, O> lazyDelegateRouter, HttpServerBuilder<I, O> serverBuilder) {
         shutdownPort = ports.getShutdownPort();
         this.serverBuilder = serverBuilder;

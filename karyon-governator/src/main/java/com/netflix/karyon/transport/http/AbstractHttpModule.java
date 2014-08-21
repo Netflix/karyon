@@ -9,6 +9,7 @@ import io.netty.handler.logging.LogLevel;
 import io.reactivex.netty.protocol.http.server.HttpServerBuilder;
 import io.reactivex.netty.protocol.http.server.HttpServerRequest;
 import io.reactivex.netty.protocol.http.server.HttpServerResponse;
+import io.reactivex.netty.protocol.http.server.RequestHandler;
 import rx.Observable;
 import rx.functions.Action1;
 
@@ -51,9 +52,9 @@ public abstract class AbstractHttpModule<I, O> extends AbstractModule {
         TypeLiteral<LazyDelegateRouter<I, O>> lazyRouterTypeLiteral = (TypeLiteral<LazyDelegateRouter<I, O>>) TypeLiteral.get(lazyRouterParametrizedType);
         bind(lazyRouterTypeLiteral).toInstance(lazyRouter);
 
-        ParameterizedType routerParametrizedType = Types.newParameterizedType(HttpRequestRouter.class, iType, oType);
+        ParameterizedType routerParametrizedType = Types.newParameterizedType(RequestHandler.class, iType, oType);
         @SuppressWarnings("unchecked")
-        TypeLiteral<HttpRequestRouter<I, O>> routerTypeLiteral = (TypeLiteral<HttpRequestRouter<I, O>>) TypeLiteral.get(routerParametrizedType);
+        TypeLiteral<RequestHandler<I, O>> routerTypeLiteral = (TypeLiteral<RequestHandler<I, O>>) TypeLiteral.get(routerParametrizedType);
         bindRequestRouter(bind(routerTypeLiteral));
 
         HttpServerBuilder<I, O> serverBuilder = newServerBuilder(listenPort, requestHandler);
@@ -91,7 +92,7 @@ public abstract class AbstractHttpModule<I, O> extends AbstractModule {
 
     public abstract int shutdownPort();
 
-    protected abstract void bindRequestRouter(AnnotatedBindingBuilder<HttpRequestRouter<I,O>> bind);
+    protected abstract void bindRequestRouter(AnnotatedBindingBuilder<RequestHandler<I,O>> bind);
 
     protected HttpServerBuilder<I, O> newServerBuilder(int port, HttpRequestHandler<I, O> requestHandler) {
         return KaryonTransport.newHttpServerBuilder(port, requestHandler);
