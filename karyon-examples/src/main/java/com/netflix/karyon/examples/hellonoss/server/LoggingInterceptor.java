@@ -11,7 +11,7 @@ import rx.Observable;
 /**
  * @author Nitesh Kant
  */
-class LoggingInterceptor implements DuplexInterceptor<HttpServerRequest<ByteBuf>, HttpServerResponse<ByteBuf>> {
+public class LoggingInterceptor implements DuplexInterceptor<HttpServerRequest<ByteBuf>, HttpServerResponse<ByteBuf>> {
 
     private static final Logger logger = LoggerFactory.getLogger(LoggingInterceptor.class);
 

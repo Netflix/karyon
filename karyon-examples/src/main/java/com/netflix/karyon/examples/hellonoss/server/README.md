@@ -1,10 +1,12 @@
-hello-netflix-oss
+Hello Netflix OSS
 ======
 
-This is the simplest example of karyon using jersey. This showcases, the following components:
+Two simple HTTP server examples using jersey and rx style ```HttpRequestRouter```. This showcases the following components:
 
+* _[karyon-core](../../karyon-core)_ HTTP request router API 
 * _[karyon-jersey-blocking](../../karyon-jersey-blocking) extension_: For jersey based resources. 
-* _eureka_: Uncomment addition of `KaryonEurekaModule` in the class [HelloWorldApp](src/main/java/com/netflix/hellonoss/server/HelloWorldApp.java)
+* _eureka_: Uncomment addition of `KaryonEurekaModule` in the classes [JerseyHelloWorldApp](src/main/java/com/netflix/hellonoss/server/jersey/JerseyHelloWorldApp.java)
+ and [RxRouterHelloWorldApp](src/main/java/com/netflix/hellonoss/server/rxrouter/RxRouterHelloWorldApp.java)
  and update [eureka-client.properties](src/main/resources/eureka-client.properties), available in this example, with proper eureka endpoints in your environment.
 * _[karyon-admin-web](../../karyon-admin-web)_: Starts an embedded jetty server having an admin console available at http://localhost:8077/
 * _karyon health check_: Provides a "always healthy" handler where the implementor can add any logic to signify health of
@@ -14,12 +16,17 @@ the application. The handler class is: [HealthCheck](src/main/java/com/netflix/h
 Running the example
 ===================
 
-`../../gradlew run`
+Jersey example:
+`../gradlew runJerseyHelloNOSS`
+
+
+```HttpRequestRouter``` example:
+`../gradlew runRxRouterHelloNOSS`
 
 What to see
 ===========
 
-After the server starts, you can use the following commands to invoke the Jersey _Hello world_ resource:
+After the server starts, you can use the following commands to invoke the Jersey or ```HttpRequestRouter``` _Hello world_ resource:
 
 * _Hello to 'newbee'_:
 

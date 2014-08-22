@@ -1,83 +1,81 @@
-package com.netflix.karyon.experimental;
+package com.netflix.karyon.transport;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Key;
 import com.google.inject.binder.LinkedBindingBuilder;
 import com.google.inject.name.Named;
 import com.google.inject.name.Names;
+import com.netflix.karyon.transport.AbstractServerModule.ServerConfigBuilder;
 import io.reactivex.netty.metrics.MetricEventsListenerFactory;
 import io.reactivex.netty.pipeline.PipelineConfigurator;
 
 /**
  * @author Tomasz Bak
  */
-public abstract class ExpServerModule<I, O> extends AbstractModule {
+@SuppressWarnings("rawtypes")
+public abstract class AbstractServerModule<I, O, B extends ServerConfigBuilder> extends AbstractModule {
 
-    protected Named nameAnnotation;
+    protected final Named nameAnnotation;
+    protected final Class<I> iType;
+    protected final Class<O> oType;
 
     protected final Key<PipelineConfigurator> pipelineConfiguratorKey;
     protected final Key<MetricEventsListenerFactory> metricEventsListenerFactoryKey;
 
     protected final Key<ServerConfig> serverConfigKey;
-    protected final ServerConfigBuilder serverConfigBuilder;
+    protected final B serverConfigBuilder;
 
-    protected ExpServerModule(String moduleName) {
+    protected AbstractServerModule(String moduleName, Class<I> iType, Class<O> oType) {
         nameAnnotation = Names.named(moduleName);
+        this.iType = iType;
+        this.oType = oType;
 
         pipelineConfiguratorKey = Key.get(PipelineConfigurator.class, nameAnnotation);
         metricEventsListenerFactoryKey = Key.get(MetricEventsListenerFactory.class, nameAnnotation);
         serverConfigKey = Key.get(ServerConfig.class, nameAnnotation);
 
-        serverConfigBuilder = new ServerConfigBuilder();
+        serverConfigBuilder = newServerConfigBuilder();
     }
 
     protected abstract void configureServer();
+
+    protected abstract B newServerConfigBuilder();
+
+    protected LinkedBindingBuilder<PipelineConfigurator> bindPipelineConfigurator() {
+        return bind(pipelineConfiguratorKey);
+    }
 
     protected LinkedBindingBuilder<MetricEventsListenerFactory> bindEventsListenerFactory() {
         return bind(metricEventsListenerFactoryKey);
     }
 
-    protected ServerConfigBuilder server() {
+    protected B server() {
         return serverConfigBuilder;
     }
 
     public static class ServerConfig {
         private final int port;
-        private final int threadPoolSize;
 
-        public ServerConfig(int port, int threadPoolSize) {
+        public ServerConfig(int port) {
             this.port = port;
-            this.threadPoolSize = threadPoolSize;
         }
 
         public int getPort() {
             return port;
         }
-
-        public int getThreadPoolSize() {
-            return threadPoolSize;
-        }
     }
 
-    public class ServerConfigBuilder {
+    public static class ServerConfigBuilder<B extends ServerConfigBuilder, C extends ServerConfig> {
 
-        private int port = 8080;
-        private int poolSize = Runtime.getRuntime().availableProcessors();
+        protected int port = 8080;
 
-        public ServerConfigBuilder port(int port) {
+        public B port(int port) {
             this.port = port;
-            return this;
+            return (B) this;
         }
 
-        public ServerConfigBuilder threadPoolSize(int poolSize) {
-            this.poolSize = poolSize;
-            return this;
-        }
-
-        public void bind() {
-            ServerConfig config = new ServerConfig(port, poolSize);
-            ExpServerModule.this.bind(serverConfigKey).toInstance(config);
+        public C build() {
+            return (C) new ServerConfig(port);
         }
     }
-
 }

@@ -44,7 +44,7 @@ dependencies {
 
 task runJerseyHelloNOSS (dependsOn: [classes], type: JavaExec) {
     group = "Examples"
-    description = "Run Hello NOSS server"
+    description = "Run Jersey Hello NOSS server"
 
     main = "com.netflix.karyon.KaryonServer"
     classpath = sourceSets.main.runtimeClasspath
@@ -52,12 +52,12 @@ task runJerseyHelloNOSS (dependsOn: [classes], type: JavaExec) {
     systemProperty 'java.awt.headless', 'true'
     systemProperty 'archaius.deployment.environment', 'dev'
 
-    args = ["com.netflix.karyon.examples.hellonoss.server.HelloWorldApp"]
+    args = ["com.netflix.karyon.examples.hellonoss.server.jersey.JerseyHelloWorldApp"]
 }
 
-task runTcpHelloNOSS (dependsOn: [classes], type: JavaExec) {
+task runRxRouterHelloNOSS (dependsOn: [classes], type: JavaExec) {
     group = "Examples"
-    description = "Run TCP Hello NOSS Server"
+    description = "Run RX router Hello NOSS server"
 
     main = "com.netflix.karyon.KaryonServer"
     classpath = sourceSets.main.runtimeClasspath
@@ -65,5 +65,19 @@ task runTcpHelloNOSS (dependsOn: [classes], type: JavaExec) {
     systemProperty 'java.awt.headless', 'true'
     systemProperty 'archaius.deployment.environment', 'dev'
 
-    args = ["com.netflix.karyon.examples.rx.tcp.TcpPipelineServers"]
+    args = ["com.netflix.karyon.examples.hellonoss.server.rxrouter.RxRouterHelloWorldApp"]
+}
+
+
+task runTcpPipelineApp (dependsOn: [classes], type: JavaExec) {
+    group = "Examples"
+    description = "Run TCP pipeline server"
+
+    main = "com.netflix.karyon.KaryonServer"
+    classpath = sourceSets.main.runtimeClasspath
+
+    systemProperty 'java.awt.headless', 'true'
+    systemProperty 'archaius.deployment.environment', 'dev'
+
+    args = ["com.netflix.karyon.examples.rx.tcp.TcpPipelineApp"]
 }

@@ -14,7 +14,7 @@
  *      limitations under the License.
  */
 
-package com.netflix.karyon.examples.hellonoss.server;
+package com.netflix.karyon.examples.hellonoss.server.jersey;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -74,6 +74,7 @@ public class HelloworldResource {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public Response helloFromComponent() {
+
         JSONObject response = new JSONObject();
         try {
             response.put("Status", healthCheckHandler.getStatus());

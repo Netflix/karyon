@@ -6,5 +6,5 @@ This module provides examples to get started with karyon.
 Hello Netflix OSS
 ===============
 
-A simple hello world for karyon: [hello-netflix-oss](src/main/java/com/netflix/karyon/examples/hellonoss/server)
-A simple TCP server example: [tcp-netflix-oss](src/main/java/com/netflix/karyon/examples/rx/tcp)
+* Two simple HTTP hello world examples: [hello-netflix-oss](src/main/java/com/netflix/karyon/examples/hellonoss/server)
+* A simple TCP server example: [tcp-netflix-oss](src/main/java/com/netflix/karyon/examples/rx/tcp)
