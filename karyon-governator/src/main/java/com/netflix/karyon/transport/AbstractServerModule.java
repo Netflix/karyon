@@ -65,6 +65,7 @@ public abstract class AbstractServerModule<I, O, B extends ServerConfigBuilder> 
         }
     }
 
+    @SuppressWarnings("unchecked")
     public static class ServerConfigBuilder<B extends ServerConfigBuilder, C extends ServerConfig> {
 
         protected int port = 8080;

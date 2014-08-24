@@ -9,7 +9,6 @@ import com.google.inject.Provider;
 import com.google.inject.name.Named;
 import com.google.inject.name.Names;
 import com.netflix.karyon.transport.AbstractServerModule.ServerConfig;
-import com.netflix.karyon.utils.TypeUtils;
 import io.reactivex.netty.RxNetty;
 import io.reactivex.netty.channel.ConnectionHandler;
 import io.reactivex.netty.metrics.MetricEventsListenerFactory;
@@ -24,6 +23,7 @@ import static com.netflix.karyon.utils.TypeUtils.keyFor;
 /**
  * @author Tomasz Bak
  */
+@SuppressWarnings("unchecked")
 public class TcpRxServerProvider<I, O, S extends RxServer<I, O>> implements Provider<S> {
 
     private static final Logger logger = LoggerFactory.getLogger(TcpRxServerProvider.class);
@@ -31,6 +31,7 @@ public class TcpRxServerProvider<I, O, S extends RxServer<I, O>> implements Prov
     private final Named nameAnnotation;
 
     protected final Key<ConnectionHandler<I, O>> connectionHandlerKey;
+    @SuppressWarnings("rawtypes")
     private final Key<PipelineConfigurator> pipelineConfiguratorKey;
     private final Key<MetricEventsListenerFactory> metricEventsListenerFactoryKey;
     private final Key<ServerConfig> serverConfigKey;

@@ -7,7 +7,6 @@ import com.netflix.karyon.transport.AbstractServerModule;
 import com.netflix.karyon.transport.AbstractServerModule.ServerConfig;
 import com.netflix.karyon.transport.AbstractServerModule.ServerConfigBuilder;
 import com.netflix.karyon.transport.http.KaryonHttpModule.HttpServerConfigBuilder;
-import com.netflix.karyon.utils.TypeUtils;
 import io.reactivex.netty.protocol.http.server.HttpServer;
 import io.reactivex.netty.server.RxServer;
 

@@ -32,6 +32,7 @@ public class WebSocketsRxServerProvider<I extends WebSocketFrame, O extends WebS
     private final Named nameAnnotation;
 
     protected final Key<ConnectionHandler<I, O>> connectionHandlerKey;
+    @SuppressWarnings("rawtypes")
     private final Key<PipelineConfigurator> pipelineConfiguratorKey;
     private final Key<MetricEventsListenerFactory> metricEventsListenerFactoryKey;
     private final Key<ServerConfig> serverConfigKey;
@@ -47,6 +48,7 @@ public class WebSocketsRxServerProvider<I extends WebSocketFrame, O extends WebS
         serverConfigKey = Key.get(ServerConfig.class, nameAnnotation);
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public S get() {
         return (S) server;
@@ -61,6 +63,7 @@ public class WebSocketsRxServerProvider<I extends WebSocketFrame, O extends WebS
     }
 
     @Inject
+    @SuppressWarnings("unchecked")
     public void setInjector(Injector injector) {
         WebSocketsServerConfig config = (WebSocketsServerConfig) injector.getInstance(serverConfigKey);
 

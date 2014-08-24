@@ -6,14 +6,11 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.Provider;
-import com.google.inject.TypeLiteral;
 import com.google.inject.name.Named;
 import com.google.inject.name.Names;
-import com.google.inject.util.Types;
 import com.netflix.karyon.transport.AbstractServerModule.ServerConfig;
 import com.netflix.karyon.transport.KaryonTransport;
 import com.netflix.karyon.transport.http.KaryonHttpModule.HttpServerConfig;
-import com.netflix.karyon.utils.TypeUtils;
 import io.reactivex.netty.metrics.MetricEventsListenerFactory;
 import io.reactivex.netty.pipeline.PipelineConfigurator;
 import io.reactivex.netty.protocol.http.server.HttpServer;
@@ -21,11 +18,12 @@ import io.reactivex.netty.protocol.http.server.HttpServerBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static com.netflix.karyon.utils.TypeUtils.keyFor;
+import static com.netflix.karyon.utils.TypeUtils.*;
 
 /**
  * @author Tomasz Bak
  */
+@SuppressWarnings("unchecked")
 public class HttpRxServerProvider<I, O, S extends HttpServer<I, O>> implements Provider<S> {
 
     private static final Logger logger = LoggerFactory.getLogger(HttpRxServerProvider.class);
@@ -34,6 +32,7 @@ public class HttpRxServerProvider<I, O, S extends HttpServer<I, O>> implements P
 
     private final Key<HttpRequestRouter<I, O>> routerKey;
     private final Key<GovernatorHttpInterceptorSupport<I, O>> interceptorSupportKey;
+    @SuppressWarnings("rawtypes")
     private final Key<PipelineConfigurator> pipelineConfiguratorKey;
     private final Key<MetricEventsListenerFactory> metricEventsListenerFactoryKey;
     private final Key<ServerConfig> serverConfigKey;
@@ -62,6 +61,7 @@ public class HttpRxServerProvider<I, O, S extends HttpServer<I, O>> implements P
         }
     }
 
+    @SuppressWarnings("rawtypes")
     @Inject
     public void setInjector(Injector injector) {
         HttpServerConfig config = (HttpServerConfig) injector.getInstance(serverConfigKey);
