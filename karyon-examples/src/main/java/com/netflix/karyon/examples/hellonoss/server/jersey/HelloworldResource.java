@@ -14,7 +14,7 @@
  *      limitations under the License.
  */
 
-package com.netflix.karyon.examples.hellonoss.server;
+package com.netflix.karyon.examples.hellonoss.server.jersey;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -36,16 +36,16 @@ import javax.ws.rs.core.Response;
 public class HelloworldResource {
 
     private static final Logger logger = LoggerFactory.getLogger(HelloworldResource.class);
-    private final HealthCheckHandler healthCheck;
+    private final HealthCheckHandler healthCheckHandler;
 
     @Inject
     public HelloworldResource(HealthCheckHandler healthCheckHandler) {
-        this.healthCheck = healthCheckHandler; // This is just to demo injection in jersey.
+        this.healthCheckHandler = healthCheckHandler; // This is just to demo injection in jersey.
     }
 
     @Path("to/{name}")
     @GET
-    @Produces({MediaType.APPLICATION_JSON})
+    @Produces(MediaType.APPLICATION_JSON)
     public Response helloTo(@PathParam("name") String name) {
         JSONObject response = new JSONObject();
         try {
@@ -58,7 +58,7 @@ public class HelloworldResource {
     }
 
     @GET
-    @Produces({MediaType.APPLICATION_JSON})
+    @Produces(MediaType.APPLICATION_JSON)
     public Response hello() {
         JSONObject response = new JSONObject();
         try {
@@ -72,11 +72,12 @@ public class HelloworldResource {
 
     @Path("healthcheck")
     @GET
-    @Produces({MediaType.APPLICATION_JSON})
+    @Produces(MediaType.APPLICATION_JSON)
     public Response helloFromComponent() {
+
         JSONObject response = new JSONObject();
         try {
-            response.put("Status", healthCheck.getStatus());
+            response.put("Status", healthCheckHandler.getStatus());
             return Response.ok(response.toString()).build();
         } catch (JSONException e) {
             logger.error("Error creating json response.", e);

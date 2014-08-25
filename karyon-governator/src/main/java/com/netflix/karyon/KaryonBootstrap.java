@@ -7,14 +7,15 @@ import com.netflix.karyon.health.HealthCheckHandler;
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
  * @author Nitesh Kant
  */
 @Documented
-@Retention(java.lang.annotation.RetentionPolicy.RUNTIME)
-@Target({ElementType.TYPE})
+@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.TYPE)
 @Bootstrap(KaryonBootstrapSuite.class)
 public @interface KaryonBootstrap {
 
