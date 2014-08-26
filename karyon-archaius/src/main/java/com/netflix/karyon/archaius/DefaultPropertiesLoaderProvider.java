@@ -11,6 +11,8 @@ import java.io.IOException;
 
 /**
  * @author Nitesh Kant
+ * 
+ * @deprecated  Behavior is implicit in ArchaiusConfigurationSuite
  */
 public class DefaultPropertiesLoaderProvider implements Provider<PropertiesLoader> {
 
