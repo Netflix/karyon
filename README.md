@@ -11,7 +11,7 @@ Karyon can be thought of as a nucleus that contains the following main ingredien
 
 * Bootstrapping , dependency and Lifecycle Management (via [Governator](https://github.com/Netflix/governator))
 * Runtime Insights and Diagnostics (via `karyon-admin-web` module)
-* Configuration Management (via [Archaius](https://github.com/Netflix/eureka))
+* Configuration Management (via [Archaius](https://github.com/Netflix/archaius))
 * Service discovery (via [Eureka](https://github.com/Netflix/eureka))
 * Powerful transport module (via [RxNetty](https://github.com/Netflix/RxNetty))
 
@@ -19,7 +19,7 @@ Getting Started
 ===============
 
 Easiest way to get started with karyon is to see the examples provided with karyon under karyon-examples module.
-[This] (https://github.com/Netflix/karyon/tree/master/karyon-examples/hello-netflix-oss) is a simple "hello world" application
+[This] (https://github.com/Netflix/karyon/tree/master/karyon-examples) is a simple "hello world" application
 built using karyon.
 
 Documentation

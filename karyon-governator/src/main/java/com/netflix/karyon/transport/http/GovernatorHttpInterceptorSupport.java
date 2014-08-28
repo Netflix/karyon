@@ -29,7 +29,7 @@ public class GovernatorHttpInterceptorSupport<I, O> extends
     protected final List<HttpOutClassHolder<I, O>> outboundInterceptorClasses;
     private Action1<GovernatorHttpInterceptorSupport<I, O>> finishListener;
 
-    GovernatorHttpInterceptorSupport() {
+    public GovernatorHttpInterceptorSupport() {
         inboundInterceptorClasses = new ArrayList<HttpInClassHolder<I, O>>();
         outboundInterceptorClasses = new ArrayList<HttpOutClassHolder<I, O>>();
     }
@@ -86,7 +86,7 @@ public class GovernatorHttpInterceptorSupport<I, O> extends
         return this;
     }
 
-    void setFinishListener(Action1<GovernatorHttpInterceptorSupport<I, O>> finishListener) {
+    public void setFinishListener(Action1<GovernatorHttpInterceptorSupport<I, O>> finishListener) {
         this.finishListener = finishListener;
     }
 
@@ -196,8 +196,8 @@ public class GovernatorHttpInterceptorSupport<I, O> extends
             InterceptorHolder<HttpServerRequest<I>, HttpKeyEvaluationContext,
                               Class<? extends InboundInterceptor<HttpServerRequest<I>, HttpServerResponse<O>>>> {
 
-        public HttpInClassHolder(InterceptorKey<HttpServerRequest<I>, HttpKeyEvaluationContext> key,
-                                 List<Class<? extends InboundInterceptor<HttpServerRequest<I>, HttpServerResponse<O>>>> interceptors) {
+        private HttpInClassHolder(InterceptorKey<HttpServerRequest<I>, HttpKeyEvaluationContext> key,
+                                  List<Class<? extends InboundInterceptor<HttpServerRequest<I>, HttpServerResponse<O>>>> interceptors) {
             super(key, interceptors);
         }
     }
@@ -205,8 +205,8 @@ public class GovernatorHttpInterceptorSupport<I, O> extends
     private static class HttpOutClassHolder<I, O> extends
             InterceptorHolder<HttpServerRequest<I>, HttpKeyEvaluationContext,
                               Class<? extends OutboundInterceptor<HttpServerResponse<O>>>> {
-        public HttpOutClassHolder(InterceptorKey<HttpServerRequest<I>, HttpKeyEvaluationContext> key,
-                                  List<Class<? extends OutboundInterceptor<HttpServerResponse<O>>>> interceptors) {
+        private HttpOutClassHolder(InterceptorKey<HttpServerRequest<I>, HttpKeyEvaluationContext> key,
+                                   List<Class<? extends OutboundInterceptor<HttpServerResponse<O>>>> interceptors) {
             super(key, interceptors);
         }
     }

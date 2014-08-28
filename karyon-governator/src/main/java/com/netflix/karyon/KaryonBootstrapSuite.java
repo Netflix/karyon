@@ -1,5 +1,7 @@
 package com.netflix.karyon;
 
+import javax.inject.Inject;
+
 import com.google.inject.AbstractModule;
 import com.google.inject.binder.AnnotatedBindingBuilder;
 import com.google.inject.binder.LinkedBindingBuilder;
@@ -8,12 +10,9 @@ import com.netflix.governator.guice.BootstrapModule;
 import com.netflix.governator.guice.LifecycleInjectorBuilder;
 import com.netflix.governator.guice.LifecycleInjectorBuilderSuite;
 import com.netflix.governator.guice.LifecycleInjectorMode;
-import com.netflix.karyon.health.AlwaysHealthyHealthCheck;
 import com.netflix.karyon.health.HealthCheckHandler;
 import com.netflix.karyon.health.HealthCheckInvocationStrategy;
 import com.netflix.karyon.health.SyncHealthCheckInvocationStrategy;
-
-import javax.inject.Inject;
 
 /**
  * A guice module that defines all bindings required by karyon. Applications must use this to bootstrap karyon.
@@ -47,7 +46,7 @@ public class KaryonBootstrapSuite implements LifecycleInjectorBuilderSuite {
         });
     }
 
-    private void bindHealthCheckInvocationStrategy(AnnotatedBindingBuilder<HealthCheckInvocationStrategy> bindingBuilder) {
+    private static void bindHealthCheckInvocationStrategy(AnnotatedBindingBuilder<HealthCheckInvocationStrategy> bindingBuilder) {
         bindingBuilder.to(SyncHealthCheckInvocationStrategy.class);
     }
 
