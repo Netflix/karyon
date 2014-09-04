@@ -1,5 +1,7 @@
 package com.netflix.karyon.ws.rs;
 
+import com.netflix.karyon.ws.rs.rx.RxUtil;
+
 import rx.Observable;
 import rx.functions.Func1;
 import io.netty.buffer.ByteBuf;
@@ -24,7 +26,7 @@ public class WsRsRequestHandler implements io.reactivex.netty.protocol.http.serv
         RequestContext context = new RequestContext(request, response);
         return root
             .call(context)
-            .singleOrDefault("Not found")
+            .doOnError(RxUtil.error("Failed to process message"))
             .flatMap(new Func1<Object, Observable<Void>>() {
                 @Override
                 public Observable<Void> call(Object t1) {

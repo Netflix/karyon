@@ -33,7 +33,7 @@ public class RequestContext {
     private String fragment;
     
     public RequestContext(HttpServerRequest<ByteBuf> request, HttpServerResponse<ByteBuf> response) {
-        this(request, response, Maps.<String, String>newHashMap(), request.getUri());
+        this(request, response, Maps.<String, String>newHashMap(), request.getPath());
     }
     
     public RequestContext(HttpServerRequest<ByteBuf> request, HttpServerResponse<ByteBuf> response, Map<String, String> vars, String fragment) {

@@ -8,7 +8,7 @@ import javax.inject.Provider;
  * @author elandau
  *
  */
-public interface InjectionSpi {
+public interface IoCProviderFactory {
     /**
      * Construct an instance of the specified type.
      * 
@@ -16,12 +16,4 @@ public interface InjectionSpi {
      * @return
      */
     public <T> Provider<T> getProvider(Class<T> type);
-    
-    /**
-     * Construct an instance of type given a InjectionSpi for the request scope
-     * @param type
-     * @param scoped
-     * @return
-     */
-    public <T> Provider<T> getProvider(Class<T> type, InjectionSpi scoped);
 }

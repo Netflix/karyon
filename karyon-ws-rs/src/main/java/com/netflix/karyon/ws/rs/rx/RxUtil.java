@@ -1,4 +1,4 @@
-package com.netflix.karyon.ws.rs;
+package com.netflix.karyon.ws.rs.rx;
 
 import java.util.Collection;
 import java.util.List;
@@ -155,6 +155,15 @@ public class RxUtil {
         return new Action1<T>() {
             @Override
             public void call(T t1) {
+                latch.countDown();
+            }
+        };            
+    }
+
+    public static Action0 countdown0(final CountDownLatch latch) {
+        return new Action0() {
+            @Override
+            public void call() {
                 latch.countDown();
             }
         };            

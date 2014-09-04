@@ -5,15 +5,15 @@ import javax.inject.Provider;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
-import com.netflix.karyon.ws.rs.InjectionSpi;
+import com.netflix.karyon.ws.rs.IoCProviderFactory;
 
 @Singleton
-public class GuiceInjectionSpi implements InjectionSpi {
+public class GuiceIocProviderFactory implements IoCProviderFactory {
 
     private final Injector injector;
 
     @Inject
-    public GuiceInjectionSpi(Injector injector) {
+    public GuiceIocProviderFactory(Injector injector) {
         this.injector = injector;
     }
     
@@ -21,10 +21,4 @@ public class GuiceInjectionSpi implements InjectionSpi {
     public <T> Provider<T> getProvider(Class<T> type) {
         return injector.getProvider(type);
     }
-
-    @Override
-    public <T> Provider<T> getProvider(Class<T> type, InjectionSpi scoped) {
-        return injector.getProvider(type);
-    }
-    
 }

@@ -1,4 +1,4 @@
-package com.netflix.karyon.ws.rs;
+package com.netflix.karyon.ws.rs.router;
 
 /**
  * Logic for configuring a RoutingRequestHandler's builder

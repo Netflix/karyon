@@ -12,6 +12,6 @@ import rx.functions.Func1;
  * @author elandau
  *
  */
-public interface RequestHandler extends Func1<RequestContext, Observable<Object>> {
+public interface RequestHandler extends Func1<RequestContext, Observable<Void>> {
 
 }
