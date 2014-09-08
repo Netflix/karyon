@@ -30,7 +30,7 @@ public class UriTemplateRoute implements Route {
     
     public static class Builder {
         private UriTemplate template;
-        private HttpMethod verb = HttpMethod.GET;
+        private HttpMethod verb = null;
         private RequestHandler handler;
         private Completion completion;
         

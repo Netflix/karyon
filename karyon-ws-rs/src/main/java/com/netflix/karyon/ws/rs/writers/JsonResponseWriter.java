@@ -1,4 +1,4 @@
-package com.netflix.karyon.ws.rs.providers;
+package com.netflix.karyon.ws.rs.writers;
 
 import io.netty.buffer.ByteBuf;
 import io.reactivex.netty.protocol.http.server.HttpServerResponse;
@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 
+import javax.ws.rs.Produces;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 
@@ -15,6 +16,7 @@ import org.codehaus.jackson.map.ObjectMapper;
 import rx.Observable;
 import rx.functions.Func1;
 
+@Produces({MediaType.APPLICATION_JSON})
 public class JsonResponseWriter implements ResponseWriter<Object> {
     private ObjectMapper mapper = new ObjectMapper();
     
@@ -48,7 +50,4 @@ public class JsonResponseWriter implements ResponseWriter<Object> {
             }
         });
     }
-
-
-
 }

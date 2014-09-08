@@ -23,9 +23,10 @@ import rx.functions.Action1;
 import rx.functions.Func1;
 
 import com.netflix.karyon.ws.rs.binders.StringBinderFactory;
-import com.netflix.karyon.ws.rs.providers.ResponseWriterFactory;
 import com.netflix.karyon.ws.rs.router.RoutingRequestHandler.Builder;
 import com.netflix.karyon.ws.rs.rx.RxReflection;
+import com.netflix.karyon.ws.rs.rx.RxUtil;
+import com.netflix.karyon.ws.rs.writers.ResponseWriterFactory;
 
 /**
  * Configure a RoutingRequestHandler from a type
@@ -95,6 +96,7 @@ public class ClassRouterConfigurer implements RouterConfigurer {
                     Observable.just(resource)
                         .flatMap(RxReflection.getAllSubclasses())
                         .flatMap(RxReflection.getDeclaredMethods())
+                        .doOnError(RxUtil.error("Failed to process method"))
                         .subscribe(new Action1<Method>() {
                             @Override
                             public void call(Method method) {

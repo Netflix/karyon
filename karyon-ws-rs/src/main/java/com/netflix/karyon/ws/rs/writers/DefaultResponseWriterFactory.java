@@ -1,4 +1,4 @@
-package com.netflix.karyon.ws.rs.providers;
+package com.netflix.karyon.ws.rs.writers;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;

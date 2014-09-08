@@ -1,4 +1,4 @@
-package com.netflix.karyon.ws.rs.providers;
+package com.netflix.karyon.ws.rs.writers;
 
 import io.netty.buffer.ByteBuf;
 import io.reactivex.netty.protocol.http.server.HttpServerResponse;

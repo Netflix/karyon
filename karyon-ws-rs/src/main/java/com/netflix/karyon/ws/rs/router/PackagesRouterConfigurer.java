@@ -16,10 +16,10 @@ import com.google.common.collect.Sets;
 import com.netflix.karyon.ws.rs.IoCProviderFactory;
 import com.netflix.karyon.ws.rs.binders.DefaultStringBinderFactory;
 import com.netflix.karyon.ws.rs.binders.StringBinderFactory;
-import com.netflix.karyon.ws.rs.providers.DefaultResponseWriterFactory;
-import com.netflix.karyon.ws.rs.providers.ResponseWriterFactory;
 import com.netflix.karyon.ws.rs.rx.RxReflection;
 import com.netflix.karyon.ws.rs.rx.RxUtil;
+import com.netflix.karyon.ws.rs.writers.DefaultResponseWriterFactory;
+import com.netflix.karyon.ws.rs.writers.ResponseWriterFactory;
 
 /**
  * RouterConfigurer for the top level RequestHandler passed to WsRsRequestHandler

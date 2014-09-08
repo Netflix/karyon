@@ -68,20 +68,26 @@ public class RouterTest {
             return server.getServerPort();
         }
         
-        public class TestDsl {
+        class RequestDsl {
             HttpClientRequest<ByteBuf> request;
             final CountDownLatch finishLatch = new CountDownLatch(1);
             
-            public TestDsl(HttpClientRequest<ByteBuf> request) {
+            public RequestDsl(HttpClientRequest<ByteBuf> request) {
                 this.request = request;
             }
             
-            public TestDsl header(String header, String value) {
+            public RequestDsl header(String header, String value) {
                 request.withHeader(header, value);
                 return this;
             }
             
-            public TestDsl accepts(MediaType type) {
+            public RequestDsl content(String content, MediaType type) {
+                request.withContent(content);
+                request.withHeader(HttpHeaders.Names.CONTENT_TYPE, type.toString());
+                return this;
+            }
+            
+            public RequestDsl accepts(MediaType type) {
                 request.withHeader(HttpHeaders.Names.ACCEPT, type.toString());
                 return this;
             }
@@ -110,8 +116,12 @@ public class RouterTest {
             }
         }
         
-        public TestDsl get(String path) throws Exception {
-            return new TestDsl(HttpClientRequest.createGet(path));
+        public RequestDsl get(String path) throws Exception {
+            return new RequestDsl(HttpClientRequest.createGet(path));
+        }
+        
+        public RequestDsl post(String path) throws Exception {
+            return new RequestDsl(HttpClientRequest.createPost(path));
         }
     }
     
@@ -182,6 +192,15 @@ public class RouterTest {
     public void testJsonArray() throws Exception {
         String resp = server.get("/json/users").accepts(MediaType.APPLICATION_JSON_TYPE).execute();
         Assert.assertEquals("[{\"first\":\"John\",\"last\":\"Doe\"},{\"first\":\"Jane\",\"last\":\"Doe\"}]", resp);
+    }
+
+    @Test
+    public void testPost() throws Exception {
+        String resp = server
+                .post("/json/users")
+                .content("{\"first\":\"John\",\"last\":\"Doe\"}", MediaType.APPLICATION_JSON_TYPE)
+                .execute();
+        Assert.assertEquals("John:Doe", resp);
     }
 
 }

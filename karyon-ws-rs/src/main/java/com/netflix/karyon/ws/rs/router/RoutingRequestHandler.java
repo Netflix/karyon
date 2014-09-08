@@ -1,7 +1,5 @@
 package com.netflix.karyon.ws.rs.router;
 
-import io.netty.handler.codec.http.HttpResponseStatus;
-
 import java.util.List;
 import java.util.Map;
 
@@ -42,18 +40,7 @@ public class RoutingRequestHandler implements RequestHandler {
         }
         
         public Builder withNotFoundHandler() {
-            routes.add(new Route() {
-                    @Override
-                    public boolean match(RequestContext context,Map<String, String> groupValues) {
-                        return true;
-                    }
-
-                    @Override
-                    public Observable<Void> call(RequestContext context) {
-                        context.getResponse().setStatus(HttpResponseStatus.NOT_FOUND);
-                        return Observable.empty();
-                    }
-                });
+            routes.add(new NotFoundRoute());
             return this;
         }
         
@@ -85,8 +72,8 @@ public class RoutingRequestHandler implements RequestHandler {
                     return route.match(context, vars);
                 }
             })
-            .doOnNext(RxUtil.info("Found a route:"))
             .take(1)
+            .doOnNext(RxUtil.info("Found a route:"))
             .flatMap(new Func1<Route, Observable<Void>>() {
                 @Override
                 public Observable<Void> call(Route route) {

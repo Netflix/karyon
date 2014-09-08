@@ -10,6 +10,7 @@ import java.util.List;
 
 import javax.inject.Provider;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.CookieParam;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.MatrixParam;
@@ -32,8 +33,8 @@ import com.netflix.karyon.ws.rs.RequestContext;
 import com.netflix.karyon.ws.rs.RequestHandler;
 import com.netflix.karyon.ws.rs.binders.StringBinder;
 import com.netflix.karyon.ws.rs.binders.StringBinderFactory;
-import com.netflix.karyon.ws.rs.providers.ResponseWriter;
-import com.netflix.karyon.ws.rs.providers.ResponseWriterFactory;
+import com.netflix.karyon.ws.rs.writers.ResponseWriter;
+import com.netflix.karyon.ws.rs.writers.ResponseWriterFactory;
 
 /**
  * RequestHandler for a Resource method
@@ -86,7 +87,7 @@ public class MethodRequestHandler implements RequestHandler {
             final ParameterInfo info = new ParameterInfo();
             Resolver resolver = null;
             for (Annotation annot : parameters[i]) {
-                if (annot.annotationType().equals(PathParam.class)) {
+                if (PathParam.class.equals(annot.annotationType())) {
                     Preconditions.checkArgument(resolver == null, "Multiple value binders not allowed");
                     final StringBinder<?> binder = stringBinderFactory.create(type);
                     final PathParam pathParam = (PathParam)annot;
@@ -97,7 +98,7 @@ public class MethodRequestHandler implements RequestHandler {
                         }
                     };
                 }
-                else if (annot.annotationType().equals(QueryParam.class)) {
+                else if (QueryParam.class.equals(annot.annotationType())) {
                     Preconditions.checkArgument(resolver == null, "Multiple value binders not allowed");
                     final QueryParam queryParam = (QueryParam)annot;
                     if (List.class.isAssignableFrom(type)) {
@@ -128,7 +129,7 @@ public class MethodRequestHandler implements RequestHandler {
                         };
                     }
                 }
-                else if (annot.annotationType().equals(HeaderParam.class)) {
+                else if (HeaderParam.class.equals(annot.annotationType())) {
                     Preconditions.checkArgument(resolver == null, "Multiple value binders not allowed");
                     final HeaderParam headerParam = (HeaderParam)annot;
                     if (List.class.isAssignableFrom(type)) {
@@ -159,11 +160,17 @@ public class MethodRequestHandler implements RequestHandler {
                         };
                     }
                 }
-                else if (annot.annotationType().equals(MatrixParam.class)) {
+                else if (MatrixParam.class.equals(annot.annotationType())) {
                     Preconditions.checkArgument(resolver == null, "Multiple value binders not allowed");
                     final MatrixParam matrixParam = (MatrixParam)annot;
+                    // TODO:
                 }
-                else if (annot.annotationType().equals(DefaultValue.class)) {
+                else if (CookieParam.class.equals(annot.annotationType())) {
+                    Preconditions.checkArgument(resolver == null, "Multiple value binders not allowed");
+                    final CookieParam matrixParam = (CookieParam)annot;
+                    // TODO:
+                }
+                else if (DefaultValue.class.equals(annot.annotationType())) {
                     Preconditions.checkArgument(info.defaultValue == null, "Multiple default values not allowed");
                     info.defaultValue = (DefaultValue)annot;
                 }
@@ -208,13 +215,14 @@ public class MethodRequestHandler implements RequestHandler {
                 });
             }
             else {
-                // Placeholder that resolves to null
-                resolvers.add(new Resolver() {
-                    @Override
-                    public Object call(RequestContext context) {
-                        return null;
-                    }
-                });
+                throw new RuntimeException("Attribute without annotations " + method.getParameterTypes()[i]);
+//                // Placeholder that resolves to null
+//                resolvers.add(new Resolver() {
+//                    @Override
+//                    public Object call(RequestContext context) {
+//                        return null;
+//                    }
+//                });
             }
         }
         
@@ -260,7 +268,6 @@ public class MethodRequestHandler implements RequestHandler {
     
     @Override
     public Observable<Void> call(final RequestContext context) {
-        LOG.info("Processing request : " + context.getFragment());
         context.getVars().remove("_");
         
         String accept = context.getRequest().getHeaders().getHeader(HttpHeaders.Names.ACCEPT);
@@ -312,8 +319,5 @@ public class MethodRequestHandler implements RequestHandler {
             .append(", produces:").append(Joiner.on(",").join(produces))
             .append("]")
             .toString();
-
     }
-
-
 }
