@@ -1,17 +1,19 @@
 package com.netflix.karyon;
 
-import javax.annotation.PostConstruct;
-
 import com.google.inject.AbstractModule;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.inject.binder.LinkedBindingBuilder;
 import com.google.inject.name.Named;
 import com.google.inject.name.Names;
+import com.netflix.governator.guice.LifecycleInjectorBuilder;
+import com.netflix.governator.guice.LifecycleInjectorBuilderSuite;
 import com.netflix.governator.lifecycle.LifecycleManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import rx.functions.Action0;
+
+import javax.annotation.PostConstruct;
 
 /**
  * Provide shutdown listener as Governator managed service. Default shutdown action
@@ -22,11 +24,12 @@ import rx.functions.Action0;
  */
 public class ShutdownModule extends AbstractModule {
 
+    public static final int DEFAULT_PORT = 7002;
     private final int port;
 
     @Inject
     public ShutdownModule() {
-        port = 7002;
+        port = DEFAULT_PORT;
     }
 
     protected ShutdownModule(int port) {
@@ -45,6 +48,19 @@ public class ShutdownModule extends AbstractModule {
 
     protected LinkedBindingBuilder<Action0> bindAfterShutdownAction() {
         return bind(Action0.class).annotatedWith(Names.named("afterShutdownAction"));
+    }
+
+    public static LifecycleInjectorBuilderSuite asSuite() {
+        return asSuite(7002);
+    }
+
+    public static LifecycleInjectorBuilderSuite asSuite(final int port) {
+        return new LifecycleInjectorBuilderSuite() {
+            @Override
+            public void configure(LifecycleInjectorBuilder builder) {
+                builder.withAdditionalModules(new ShutdownModule(port));
+            }
+        };
     }
 
     @Singleton

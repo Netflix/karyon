@@ -1,4 +1,4 @@
-package com.netflix.karyon.examples.hellonoss.server.auth;
+package com.netflix.karyon.examples.hellonoss.common.auth;
 
 import com.netflix.karyon.transport.interceptor.InboundInterceptor;
 import io.netty.buffer.ByteBuf;

@@ -14,7 +14,7 @@
  *      limitations under the License.
  */
 
-package com.netflix.karyon.examples.hellonoss.server.health;
+package com.netflix.karyon.examples.hellonoss.common.health;
 
 import com.google.inject.Singleton;
 import com.netflix.karyon.health.HealthCheckHandler;

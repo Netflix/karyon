@@ -16,11 +16,27 @@ import javax.inject.Inject;
  */
 public class ArchaiusSuite implements LifecycleInjectorBuilderSuite {
 
-    private final ArchaiusBootstrap archaiusBootstrap;
+    private final Class<? extends PropertiesLoader> propertiesLoaderClass;
+    private final PropertiesLoader propertiesLoader;
+
+    public ArchaiusSuite(String appName) {
+        this(new DefaultPropertiesLoader(appName));
+    }
+
+    public ArchaiusSuite(PropertiesLoader propertiesLoader) {
+        this.propertiesLoader = propertiesLoader;
+        this.propertiesLoaderClass = null;
+    }
+
+    public ArchaiusSuite(Class<PropertiesLoader> propertiesLoader) {
+        this.propertiesLoaderClass = propertiesLoader;
+        this.propertiesLoader = null;
+    }
 
     @Inject
-    public ArchaiusSuite(ArchaiusBootstrap archaiusBootstrap) {
-        this.archaiusBootstrap = archaiusBootstrap;
+    ArchaiusSuite(ArchaiusBootstrap archaiusBootstrap) {
+        propertiesLoaderClass = archaiusBootstrap.loader();
+        propertiesLoader = null;
     }
 
     @Override
@@ -29,8 +45,11 @@ public class ArchaiusSuite implements LifecycleInjectorBuilderSuite {
 
             @Override
             public void configure(BootstrapBinder bootstrapBinder) {
-                bootstrapBinder.bind(ArchaiusBootstrap.class).toInstance(archaiusBootstrap);
-                bootstrapBinder.bind(PropertiesLoader.class).toProvider(archaiusBootstrap.loader());
+                if (null != propertiesLoaderClass) {
+                    bootstrapBinder.bind(PropertiesLoader.class).to(propertiesLoaderClass).asEagerSingleton();
+                } else {
+                    bootstrapBinder.bind(PropertiesLoader.class).toInstance(propertiesLoader);
+                }
                 bootstrapBinder.bind(PropertiesInitializer.class).asEagerSingleton();
                 ArchaiusConfigurationProvider.Builder builder = ArchaiusConfigurationProvider.builder();
                 builder.withOwnershipPolicy(ConfigurationOwnershipPolicies.ownsAll());
@@ -39,7 +58,12 @@ public class ArchaiusSuite implements LifecycleInjectorBuilderSuite {
         });
     }
 
-    public static class PropertiesInitializer {
+    /**
+     * This is required as we want to invoke {@link PropertiesLoader#load()} automatically.
+     * One way of achieving this is by using {@link @javax.annotation.PostConstruct} but archaius initialization is done
+     * in the bootstrap phase and {@link @javax.annotation.PostConstruct} is not invoked in the bootstrap phase.
+     */
+    private static class PropertiesInitializer {
 
         @Inject
         public PropertiesInitializer(PropertiesLoader loader) {

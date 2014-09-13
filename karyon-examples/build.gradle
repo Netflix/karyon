@@ -46,7 +46,7 @@ task runJerseyHelloNOSS (dependsOn: [classes], type: JavaExec) {
     group = "Examples"
     description = "Run Jersey Hello NOSS server"
 
-    main = "com.netflix.karyon.KaryonServer"
+    main = "com.netflix.karyon.KaryonRunner"
     classpath = sourceSets.main.runtimeClasspath
 
     systemProperty 'java.awt.headless', 'true'
@@ -55,17 +55,28 @@ task runJerseyHelloNOSS (dependsOn: [classes], type: JavaExec) {
     args = ["com.netflix.karyon.examples.hellonoss.server.jersey.JerseyHelloWorldApp"]
 }
 
-task runRxRouterHelloNOSS (dependsOn: [classes], type: JavaExec) {
+task runSimpleRouterHelloNOSS (dependsOn: [classes], type: JavaExec) {
     group = "Examples"
     description = "Run RX router Hello NOSS server"
 
-    main = "com.netflix.karyon.KaryonServer"
+    main = "com.netflix.karyon.KaryonRunner"
     classpath = sourceSets.main.runtimeClasspath
 
     systemProperty 'java.awt.headless', 'true'
     systemProperty 'archaius.deployment.environment', 'dev'
 
-    args = ["com.netflix.karyon.examples.hellonoss.server.rxrouter.RxRouterHelloWorldApp"]
+    args = ["com.netflix.karyon.examples.hellonoss.server.simple.RxRouterHelloWorldApp"]
+}
+
+task runPureRxNettyHelloNOSS (dependsOn: [classes], type: JavaExec) {
+    group = "Examples"
+    description = "Run RX netty based Hello NOSS server"
+
+    main = "com.netflix.karyon.examples.hellonoss.server.rxnetty.MyRunner"
+    classpath = sourceSets.main.runtimeClasspath
+
+    systemProperty 'java.awt.headless', 'true'
+    systemProperty 'archaius.deployment.environment', 'dev'
 }
 
 
@@ -73,7 +84,7 @@ task runTcpPipelineApp (dependsOn: [classes], type: JavaExec) {
     group = "Examples"
     description = "Run TCP pipeline server"
 
-    main = "com.netflix.karyon.KaryonServer"
+    main = "com.netflix.karyon.KaryonRunner"
     classpath = sourceSets.main.runtimeClasspath
 
     systemProperty 'java.awt.headless', 'true'

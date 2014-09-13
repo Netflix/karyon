@@ -1,4 +1,4 @@
-package com.netflix.karyon.examples.hellonoss.server;
+package com.netflix.karyon.examples.hellonoss.common;
 
 import com.netflix.karyon.transport.interceptor.DuplexInterceptor;
 import io.netty.buffer.ByteBuf;
