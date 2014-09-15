@@ -18,9 +18,7 @@ Karyon can be thought of as a nucleus that contains the following main ingredien
 Getting Started
 ===============
 
-Easiest way to get started with karyon is to see the examples provided with karyon under karyon-examples module.
-[This] (https://github.com/Netflix/karyon/tree/master/karyon-examples) is a simple "hello world" application
-built using karyon.
+Easiest way to get started with karyon is to see the examples provided with karyon under [karyon-examples](karyon-examples) module.
 
 Documentation
 ==============
