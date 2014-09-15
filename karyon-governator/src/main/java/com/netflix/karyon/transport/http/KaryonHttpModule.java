@@ -55,7 +55,7 @@ public abstract class KaryonHttpModule<I, O> extends AbstractServerModule<I, O, 
         return interceptorSupportInstance;
     }
 
-    public static class HttpServerConfig extends ServerConfig {
+    public static class HttpServerConfig extends AbstractServerModule.ServerConfig {
 
         private final int threadPoolSize;
 
@@ -74,13 +74,14 @@ public abstract class KaryonHttpModule<I, O> extends AbstractServerModule<I, O, 
         }
 
         public boolean requiresThreadPool() {
-            return 0 < threadPoolSize;
+            return threadPoolSize > 0;
         }
     }
 
-    public static class HttpServerConfigBuilder extends ServerConfigBuilder<HttpServerConfigBuilder, HttpServerConfig> {
+    public static class HttpServerConfigBuilder
+            extends AbstractServerModule.ServerConfigBuilder<HttpServerConfigBuilder, HttpServerConfig> {
 
-        protected int poolSize = Runtime.getRuntime().availableProcessors();
+        protected int poolSize = -1;
 
         public HttpServerConfigBuilder threadPoolSize(int poolSize) {
             this.poolSize = poolSize;
