@@ -25,7 +25,7 @@ public abstract class KaryonHttpModule<I, O> extends AbstractServerModule<I, O, 
     protected KaryonHttpModule(String moduleName, Class<I> iType, Class<O> oType) {
         super(moduleName, iType, oType);
 
-        routerKey = keyFor(HttpRequestRouter.class, iType, oType, nameAnnotation);
+        routerKey = keyFor(RequestHandler.class, iType, oType, nameAnnotation);
         interceptorSupportKey = keyFor(GovernatorHttpInterceptorSupport.class, iType, oType, nameAnnotation);
         httpServerKey = keyFor(HttpServer.class, iType, oType, nameAnnotation);
     }

@@ -18,12 +18,12 @@ import javax.inject.Inject;
  *
  * @author Nitesh Kant
  */
-public class HttpHealthCheckEndpoint implements RequestHandler<ByteBuf, ByteBuf> {
+public class HealthCheckEndpoint implements RequestHandler<ByteBuf, ByteBuf> {
 
     private final HealthCheckHandler healthCheckHandler;
 
     @Inject
-    public HttpHealthCheckEndpoint(HealthCheckHandler healthCheckHandler) {
+    public HealthCheckEndpoint(HealthCheckHandler healthCheckHandler) {
         this.healthCheckHandler = healthCheckHandler;
     }
 

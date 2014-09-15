@@ -6,7 +6,6 @@ import com.netflix.governator.guice.LifecycleInjectorBuilderSuite;
 import com.netflix.governator.guice.annotations.Bootstrap;
 import com.netflix.karyon.transport.KaryonTransport;
 import com.netflix.karyon.transport.http.HttpRequestHandler;
-import com.netflix.karyon.transport.http.HttpRequestRouter;
 import io.netty.buffer.ByteBuf;
 import io.reactivex.netty.RxNetty;
 import io.reactivex.netty.channel.ConnectionHandler;
@@ -60,10 +59,10 @@ public final class Karyon {
     public static KaryonServer forRequestHandler(int port, final RequestHandler<ByteBuf, ByteBuf> handler,
                                                  LifecycleInjectorBuilderSuite... suites) {
         HttpServer<ByteBuf, ByteBuf> httpServer =
-                KaryonTransport.newHttpServer(port, new HttpRequestRouter<ByteBuf, ByteBuf>() {
+                KaryonTransport.newHttpServer(port, new RequestHandler<ByteBuf, ByteBuf>() {
                     @Override
-                    public Observable<Void> route(HttpServerRequest<ByteBuf> request,
-                                                  HttpServerResponse<ByteBuf> response) {
+                    public Observable<Void> handle(HttpServerRequest<ByteBuf> request,
+                                                   HttpServerResponse<ByteBuf> response) {
                         return handler.handle(request, response);
                     }
                 });
