@@ -45,6 +45,6 @@ public class SimpleRouter implements RequestHandler<ByteBuf, ByteBuf> {
 
     @Override
     public Observable<Void> handle(HttpServerRequest<ByteBuf> request, HttpServerResponse<ByteBuf> response) {
-        return delegate.route(request, response);
+        return delegate.handle(request, response);
     }
 }

@@ -43,7 +43,7 @@ public class HttpRxServerProvider<I, O, S extends HttpServer<I, O>> implements P
     public HttpRxServerProvider(String name, Class<I> iType, Class<O> oType) {
         nameAnnotation = Names.named(name);
 
-        routerKey = keyFor(HttpRequestRouter.class, iType, oType, nameAnnotation);
+        routerKey = keyFor(RequestHandler.class, iType, oType, nameAnnotation);
         interceptorSupportKey = keyFor(GovernatorHttpInterceptorSupport.class, iType, oType, nameAnnotation);
         pipelineConfiguratorKey = Key.get(PipelineConfigurator.class, nameAnnotation);
         metricEventsListenerFactoryKey = Key.get(MetricEventsListenerFactory.class, nameAnnotation);

@@ -26,6 +26,10 @@ public class InterceptorExecutor<I, O, C extends KeyEvaluationContext> {
         allOut = support.getOutboundInterceptors();
     }
 
+    /**
+     * @deprecated Use {@link #InterceptorExecutor(AbstractInterceptorSupport, Handler)} instead.
+     */
+    @Deprecated
     public InterceptorExecutor(AbstractInterceptorSupport<I, O, C, ?, ?> support, final RequestRouter<I, O> router) {
         this.router = new Handler<I, O>() {
             @Override
