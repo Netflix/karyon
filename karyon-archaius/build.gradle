@@ -48,7 +48,7 @@ idea {
 
 jar {
     manifest {
-        name = 'karyon-eureka'
+        name = 'karyon-archaius'
         instruction 'Bundle-Vendor', 'Netflix'
         instruction 'Bundle-DocURL', 'https://github.com/Netflix/karyon'
         instruction 'Import-Package', '!org.junit,!junit.framework,!org.mockito.*,*'

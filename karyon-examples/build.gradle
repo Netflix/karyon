@@ -36,6 +36,7 @@ dependencies {
     compile project(':karyon-jersey-blocking')
     compile project(':karyon-eureka')
     compile project(':karyon-archaius')
+    compile project(':karyon-servo')
     compile 'org.codehaus.jettison:jettison:1.2'
     compile 'com.google.inject:guice:3.0'
     compile 'org.slf4j:slf4j-api:1.7.0'
@@ -46,7 +47,7 @@ task runJerseyHelloNOSS (dependsOn: [classes], type: JavaExec) {
     group = "Examples"
     description = "Run Jersey Hello NOSS server"
 
-    main = "com.netflix.karyon.KaryonServer"
+    main = "com.netflix.karyon.KaryonRunner"
     classpath = sourceSets.main.runtimeClasspath
 
     systemProperty 'java.awt.headless', 'true'
@@ -55,17 +56,39 @@ task runJerseyHelloNOSS (dependsOn: [classes], type: JavaExec) {
     args = ["com.netflix.karyon.examples.hellonoss.server.jersey.JerseyHelloWorldApp"]
 }
 
-task runRxRouterHelloNOSS (dependsOn: [classes], type: JavaExec) {
+task runSimpleRouterAnnotationHelloNOSS (dependsOn: [classes], type: JavaExec) {
     group = "Examples"
-    description = "Run RX router Hello NOSS server"
+    description = "Run simple URI router based Hello NOSS server using annotation based bootstrapping."
 
-    main = "com.netflix.karyon.KaryonServer"
+    main = "com.netflix.karyon.KaryonRunner"
     classpath = sourceSets.main.runtimeClasspath
 
     systemProperty 'java.awt.headless', 'true'
     systemProperty 'archaius.deployment.environment', 'dev'
 
-    args = ["com.netflix.karyon.examples.hellonoss.server.rxrouter.RxRouterHelloWorldApp"]
+    args = ["com.netflix.karyon.examples.hellonoss.server.simple.annotation.SimpleRoutingApp"]
+}
+
+task runSimpleRouterGuiceHelloNOSS (dependsOn: [classes], type: JavaExec) {
+    group = "Examples"
+    description = "Run simple URI router based Hello NOSS server using guice modules based bootstrapping."
+
+    main = "com.netflix.karyon.examples.hellonoss.server.simple.module.SimpleRunner"
+    classpath = sourceSets.main.runtimeClasspath
+
+    systemProperty 'java.awt.headless', 'true'
+    systemProperty 'archaius.deployment.environment', 'dev'
+}
+
+task runPureRxNettyHelloNOSS (dependsOn: [classes], type: JavaExec) {
+    group = "Examples"
+    description = "Run RX netty based Hello NOSS server"
+
+    main = "com.netflix.karyon.examples.hellonoss.server.rxnetty.MyApplicationRunner"
+    classpath = sourceSets.main.runtimeClasspath
+
+    systemProperty 'java.awt.headless', 'true'
+    systemProperty 'archaius.deployment.environment', 'dev'
 }
 
 
@@ -73,11 +96,11 @@ task runTcpPipelineApp (dependsOn: [classes], type: JavaExec) {
     group = "Examples"
     description = "Run TCP pipeline server"
 
-    main = "com.netflix.karyon.KaryonServer"
+    main = "com.netflix.karyon.KaryonRunner"
     classpath = sourceSets.main.runtimeClasspath
 
     systemProperty 'java.awt.headless', 'true'
     systemProperty 'archaius.deployment.environment', 'dev'
 
-    args = ["com.netflix.karyon.examples.rx.tcp.TcpPipelineApp"]
+    args = ["com.netflix.karyon.examples.tcp.TcpPipelineApp"]
 }

@@ -9,6 +9,8 @@ import com.netflix.discovery.DiscoveryClient;
 import com.netflix.discovery.EurekaClientConfig;
 import com.netflix.discovery.EurekaNamespace;
 import com.netflix.discovery.providers.DefaultEurekaClientConfigProvider;
+import com.netflix.governator.guice.LifecycleInjectorBuilder;
+import com.netflix.governator.guice.LifecycleInjectorBuilderSuite;
 
 /**
  * @author Nitesh Kant
@@ -40,5 +42,14 @@ public class KaryonEurekaModule extends AbstractModule {
 
     protected LinkedBindingBuilder<String> bindEurekaNamespace() {
         return bind(String.class).annotatedWith(EurekaNamespace.class);
+    }
+
+    public static LifecycleInjectorBuilderSuite asSuite() {
+        return new LifecycleInjectorBuilderSuite() {
+            @Override
+            public void configure(LifecycleInjectorBuilder builder) {
+                builder.withAdditionalModules(new KaryonEurekaModule());
+            }
+        };
     }
 }

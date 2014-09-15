@@ -1,4 +1,4 @@
-package com.netflix.karyon.examples.hellonoss.server;
+package com.netflix.karyon.examples.hellonoss.common;
 
 import com.netflix.karyon.transport.interceptor.DuplexInterceptor;
 import io.netty.buffer.ByteBuf;
@@ -18,7 +18,7 @@ public class LoggingInterceptor implements DuplexInterceptor<HttpServerRequest<B
     private static int count;
     private final int id;
 
-    LoggingInterceptor() {
+    public LoggingInterceptor() {
         id = ++count;
     }
 

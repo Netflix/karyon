@@ -16,9 +16,7 @@
 
 package com.netflix.karyon.examples.hellonoss.server.jersey;
 
-import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.netflix.karyon.health.HealthCheckHandler;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import org.slf4j.Logger;
@@ -36,12 +34,6 @@ import javax.ws.rs.core.Response;
 public class HelloworldResource {
 
     private static final Logger logger = LoggerFactory.getLogger(HelloworldResource.class);
-    private final HealthCheckHandler healthCheckHandler;
-
-    @Inject
-    public HelloworldResource(HealthCheckHandler healthCheckHandler) {
-        this.healthCheckHandler = healthCheckHandler; // This is just to demo injection in jersey.
-    }
 
     @Path("to/{name}")
     @GET
@@ -69,21 +61,4 @@ public class HelloworldResource {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
         }
     }
-
-    @Path("healthcheck")
-    @GET
-    @Produces(MediaType.APPLICATION_JSON)
-    public Response helloFromComponent() {
-
-        JSONObject response = new JSONObject();
-        try {
-            response.put("Status", healthCheckHandler.getStatus());
-            return Response.ok(response.toString()).build();
-        } catch (JSONException e) {
-            logger.error("Error creating json response.", e);
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
-        }
-    }
-
-
 }

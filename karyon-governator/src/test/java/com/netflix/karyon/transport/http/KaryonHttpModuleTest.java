@@ -1,9 +1,5 @@
 package com.netflix.karyon.transport.http;
 
-import java.util.Map;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
-
 import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.TypeLiteral;
@@ -17,6 +13,7 @@ import io.reactivex.netty.RxNetty;
 import io.reactivex.netty.protocol.http.client.HttpClientResponse;
 import io.reactivex.netty.protocol.http.server.HttpServerRequest;
 import io.reactivex.netty.protocol.http.server.HttpServerResponse;
+import io.reactivex.netty.protocol.http.server.RequestHandler;
 import io.reactivex.netty.server.RxServer;
 import org.junit.After;
 import org.junit.Before;
@@ -24,7 +21,11 @@ import org.junit.Test;
 import rx.Observable;
 import rx.functions.Func1;
 
-import static org.junit.Assert.*;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
+
+import static org.junit.Assert.assertEquals;
 
 /**
  * @author Tomasz Bak
@@ -77,9 +78,10 @@ public class KaryonHttpModuleTest {
                 }).single().toBlocking().toFuture().get(1, TimeUnit.SECONDS);
     }
 
-    public static class TestableRequestRouter implements HttpRequestRouter<ByteBuf, ByteBuf> {
+    public static class TestableRequestRouter implements RequestHandler<ByteBuf, ByteBuf> {
+
         @Override
-        public Observable<Void> route(HttpServerRequest<ByteBuf> request, HttpServerResponse<ByteBuf> response) {
+        public Observable<Void> handle(HttpServerRequest<ByteBuf> request, HttpServerResponse<ByteBuf> response) {
             if (request.getPath().contains("/sendOK")) {
                 response.setStatus(HttpResponseStatus.OK);
             } else if (request.getPath().contains("/sendNotFound")) {

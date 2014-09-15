@@ -1,4 +1,4 @@
-package com.netflix.karyon.examples.hellonoss.server.auth;
+package com.netflix.karyon.examples.hellonoss.common.auth;
 
 import io.netty.buffer.ByteBuf;
 import io.reactivex.netty.protocol.http.server.HttpServerRequest;

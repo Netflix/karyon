@@ -4,10 +4,9 @@ import com.google.inject.Key;
 import com.google.inject.binder.LinkedBindingBuilder;
 import com.google.inject.multibindings.MapBinder;
 import com.netflix.karyon.transport.AbstractServerModule;
-import com.netflix.karyon.transport.AbstractServerModule.ServerConfig;
-import com.netflix.karyon.transport.AbstractServerModule.ServerConfigBuilder;
 import com.netflix.karyon.transport.http.KaryonHttpModule.HttpServerConfigBuilder;
 import io.reactivex.netty.protocol.http.server.HttpServer;
+import io.reactivex.netty.protocol.http.server.RequestHandler;
 import io.reactivex.netty.server.RxServer;
 
 import static com.netflix.karyon.utils.TypeUtils.keyFor;
@@ -17,7 +16,7 @@ import static com.netflix.karyon.utils.TypeUtils.keyFor;
  */
 public abstract class KaryonHttpModule<I, O> extends AbstractServerModule<I, O, HttpServerConfigBuilder> {
 
-    protected final Key<HttpRequestRouter<I, O>> routerKey;
+    protected final Key<RequestHandler<I, O>> routerKey;
     protected final Key<HttpServer<I, O>> httpServerKey;
     protected final Key<GovernatorHttpInterceptorSupport<I, O>> interceptorSupportKey;
 
@@ -48,7 +47,7 @@ public abstract class KaryonHttpModule<I, O> extends AbstractServerModule<I, O, 
         return new HttpServerConfigBuilder();
     }
 
-    protected LinkedBindingBuilder<HttpRequestRouter<I, O>> bindRouter() {
+    protected LinkedBindingBuilder<RequestHandler<I, O>> bindRouter() {
         return bind(routerKey);
     }
 
@@ -56,9 +55,14 @@ public abstract class KaryonHttpModule<I, O> extends AbstractServerModule<I, O, 
         return interceptorSupportInstance;
     }
 
-    public static class HttpServerConfig extends ServerConfig {
+    public static class HttpServerConfig extends AbstractServerModule.ServerConfig {
 
         private final int threadPoolSize;
+
+        public HttpServerConfig(int port) {
+            super(port);
+            this.threadPoolSize = -1;
+        }
 
         public HttpServerConfig(int port, int threadPoolSize) {
             super(port);
@@ -68,11 +72,16 @@ public abstract class KaryonHttpModule<I, O> extends AbstractServerModule<I, O, 
         public int getThreadPoolSize() {
             return threadPoolSize;
         }
+
+        public boolean requiresThreadPool() {
+            return threadPoolSize > 0;
+        }
     }
 
-    public static class HttpServerConfigBuilder extends ServerConfigBuilder<HttpServerConfigBuilder, HttpServerConfig> {
+    public static class HttpServerConfigBuilder
+            extends AbstractServerModule.ServerConfigBuilder<HttpServerConfigBuilder, HttpServerConfig> {
 
-        protected int poolSize = Runtime.getRuntime().availableProcessors();
+        protected int poolSize = -1;
 
         public HttpServerConfigBuilder threadPoolSize(int poolSize) {
             this.poolSize = poolSize;

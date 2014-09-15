@@ -6,7 +6,6 @@ import com.google.inject.binder.LinkedBindingBuilder;
 import com.google.inject.name.Named;
 import com.google.inject.name.Names;
 import com.netflix.karyon.transport.AbstractServerModule.ServerConfigBuilder;
-import io.reactivex.netty.metrics.MetricEventsListenerFactory;
 import io.reactivex.netty.pipeline.PipelineConfigurator;
 
 /**
@@ -20,7 +19,6 @@ public abstract class AbstractServerModule<I, O, B extends ServerConfigBuilder> 
     protected final Class<O> oType;
 
     protected final Key<PipelineConfigurator> pipelineConfiguratorKey;
-    protected final Key<MetricEventsListenerFactory> metricEventsListenerFactoryKey;
 
     protected final Key<ServerConfig> serverConfigKey;
     protected final B serverConfigBuilder;
@@ -31,7 +29,6 @@ public abstract class AbstractServerModule<I, O, B extends ServerConfigBuilder> 
         this.oType = oType;
 
         pipelineConfiguratorKey = Key.get(PipelineConfigurator.class, nameAnnotation);
-        metricEventsListenerFactoryKey = Key.get(MetricEventsListenerFactory.class, nameAnnotation);
         serverConfigKey = Key.get(ServerConfig.class, nameAnnotation);
 
         serverConfigBuilder = newServerConfigBuilder();
@@ -43,10 +40,6 @@ public abstract class AbstractServerModule<I, O, B extends ServerConfigBuilder> 
 
     protected LinkedBindingBuilder<PipelineConfigurator> bindPipelineConfigurator() {
         return bind(pipelineConfiguratorKey);
-    }
-
-    protected LinkedBindingBuilder<MetricEventsListenerFactory> bindEventsListenerFactory() {
-        return bind(metricEventsListenerFactoryKey);
     }
 
     protected B server() {

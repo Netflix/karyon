@@ -7,10 +7,10 @@ import io.netty.buffer.ByteBuf;
 import io.netty.handler.codec.http.DefaultHttpRequest;
 import io.netty.handler.codec.http.HttpMethod;
 import io.netty.handler.codec.http.HttpVersion;
+import io.reactivex.netty.protocol.http.UnicastContentSubject;
 import io.reactivex.netty.protocol.http.server.HttpServerRequest;
 import org.junit.Assert;
 import org.junit.Test;
-import rx.subjects.PublishSubject;
 
 /**
  * @author Nitesh Kant
@@ -108,6 +108,6 @@ public class ServletStyleConstraintTest extends InterceptorConstraintTestBase {
 
     protected HttpServerRequest<ByteBuf> newRequest(String uri) {
         return new HttpServerRequest<ByteBuf>(new DefaultHttpRequest(HttpVersion.HTTP_1_0, HttpMethod.GET, uri),
-                                              PublishSubject.<ByteBuf>create());
+                                              UnicastContentSubject.<ByteBuf>createWithoutNoSubscriptionTimeout());
     }
 }

@@ -1,19 +1,27 @@
 karyon-governator
 ======
 
-This module provides bootstrapping for karyon using [Governator](https://github.com/Netflix/governator)
+This module provides bootstrapping for karyon using [Governator](https://github.com/Netflix/governator). Bootstrapping
+is categorized into two broad categories:
 
-##### @KaryonBootstrap
+#### Annotation Based
 
-This annotation is used to provide an application name and does the necessary bindings using [KaryonBootstrapSuite](src/main/java/com/netflix/karyon/KaryonBootstrapSuite.java)
+This model leverages [Governators](https://github.com/Netflix/governator) `@Bootstrap` annotations to provide syntactic 
+ sugar for discovering applicable modules.
+Under this model, one provides all `@Bootstrap` annotations on a class/interface which is referred to as an 
+_Application_ class and is consumed by Karyon to create a [KaryonServer](src/main/java/com/netflix/karyon/KaryonServer.java)
+  
+An example of this model can be found under [karyon examples](../karyon-examples) 
 
-#### AbstractHttpModule
+###### KaryonRunner
 
-[AbstractHttpModule](src/main/java/com/netflix/karyon/transport/http/AbstractHttpModule.java) provides an abstract 
-module for karyon extension to create a karyon based HTTP server.
+[KaryonRunner](src/main/java/com/netflix/karyon/KaryonRunner.java) is a utility class which can be used as the startup
+for all _Application_ classes created in this annotation based model. This class has a main method which expects an
+_Application_ class name to be passed as the program argument. 
 
-#### KaryonServer
+#### Guice modules Based
 
-[AbstractHttpModule](src/main/java/com/netflix/karyon/KaryonServer.java) is the startup class which has a main method that uses a bootstrap class (annotated with above annotations) to start a Karyon server
+The annotation based model above leverages this basic guice module based bootstrapping model which requires the user to
+explicitly provide the guice modules which are required by the application.
 
-See the [hello world example](../karyon-examples/hello-netflix-oss) for a sample.
+An example of this model can be found under[karyon examples](../karyon-examples)

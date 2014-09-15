@@ -2,7 +2,6 @@ package com.netflix.karyon.archaius;
 
 import com.netflix.governator.guice.annotations.Bootstrap;
 
-import javax.inject.Provider;
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -17,5 +16,5 @@ import java.lang.annotation.Target;
 @Bootstrap(ArchaiusSuite.class)
 public @interface ArchaiusBootstrap {
 
-    Class<? extends Provider<PropertiesLoader>> loader() default DefaultPropertiesLoaderProvider.class;
+    Class<? extends PropertiesLoader> loader() default DefaultPropertiesLoader.class;
 }
