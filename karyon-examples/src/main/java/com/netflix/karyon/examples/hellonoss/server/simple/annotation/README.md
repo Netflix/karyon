@@ -1,24 +1,17 @@
-Hello Netflix OSS (Simple Routing)
+Hello Netflix OSS (Simple Routing - Annotations based bootstrapping)
 ======
 
 This helloworld example demonstrates how to use karyon's simple but powerful [SimpleUriRouter](https://github.com/Netflix/karyon/blob/master/karyon-core/src/main/java/com/netflix/karyon/transport/http/SimpleUriRouter.java)
 to provide HTTP endpoints.
 
-This module demonstrates how one can use karyon's annotation based bootstrapping and guice modules based bootstrapping 
-as provided by [karyon-governator](https://github.com/Netflix/karyon/tree/master/karyon-governator)
+This module uses karyon's annotation based bootstrapping as provided by [karyon-governator](https://github.com/Netflix/karyon/tree/master/karyon-governator)
 
 Running the example
 ===================
 
 This example can be run using gradle.
 
-* _Annotation based bootstrapping_:
-
 `../gradlew runSimpleRouterAnnotationHelloNOSS`
-
-* _Guice modules based bootstrapping_:
-
-`../gradlew runSimpleRouterGuiceHelloNOSS`
 
 What to see
 ===========
