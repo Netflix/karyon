@@ -2,7 +2,7 @@ package com.netflix.karyon.examples.hellonoss.server.simple;
 
 import com.netflix.karyon.examples.hellonoss.common.health.HealthCheck;
 import com.netflix.karyon.transport.http.SimpleUriRouter;
-import com.netflix.karyon.transport.http.health.HttpHealthCheckEndpoint;
+import com.netflix.karyon.transport.http.health.HealthCheckEndpoint;
 import io.netty.buffer.ByteBuf;
 import io.reactivex.netty.protocol.http.server.HttpServerRequest;
 import io.reactivex.netty.protocol.http.server.HttpServerResponse;
@@ -23,7 +23,7 @@ public class SimpleRouter implements RequestHandler<ByteBuf, ByteBuf> {
         delegate = new SimpleUriRouter<ByteBuf, ByteBuf>();
 
         delegate.addUri("/healthcheck",
-                        new HttpHealthCheckEndpoint(new HealthCheck()))
+                        new HealthCheckEndpoint(new HealthCheck()))
                 .addUri("/hello",
                         new RequestHandler<ByteBuf, ByteBuf>() {
                             @Override

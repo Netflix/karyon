@@ -1,6 +1,6 @@
 package com.netflix.karyon.examples.hellonoss.server.rxnetty;
 
-import com.netflix.karyon.transport.http.health.HttpHealthCheckEndpoint;
+import com.netflix.karyon.transport.http.health.HealthCheckEndpoint;
 import io.netty.buffer.ByteBuf;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.reactivex.netty.protocol.http.server.HttpServerRequest;
@@ -14,9 +14,9 @@ import rx.Observable;
 public class RxNettyHandler implements RequestHandler<ByteBuf, ByteBuf> {
 
     private final String healthCheckUri;
-    private final HttpHealthCheckEndpoint healthCheckEndpoint;
+    private final HealthCheckEndpoint healthCheckEndpoint;
 
-    public RxNettyHandler(String healthCheckUri, HttpHealthCheckEndpoint healthCheckEndpoint) {
+    public RxNettyHandler(String healthCheckUri, HealthCheckEndpoint healthCheckEndpoint) {
         this.healthCheckUri = healthCheckUri;
         this.healthCheckEndpoint = healthCheckEndpoint;
     }
