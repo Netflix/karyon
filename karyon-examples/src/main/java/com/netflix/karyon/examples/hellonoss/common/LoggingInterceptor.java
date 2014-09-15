@@ -18,7 +18,7 @@ public class LoggingInterceptor implements DuplexInterceptor<HttpServerRequest<B
     private static int count;
     private final int id;
 
-    LoggingInterceptor() {
+    public LoggingInterceptor() {
         id = ++count;
     }
 

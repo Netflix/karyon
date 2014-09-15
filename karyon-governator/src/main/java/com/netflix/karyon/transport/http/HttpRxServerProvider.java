@@ -1,7 +1,5 @@
 package com.netflix.karyon.transport.http;
 
-import javax.annotation.PreDestroy;
-
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Key;
@@ -15,10 +13,13 @@ import io.reactivex.netty.metrics.MetricEventsListenerFactory;
 import io.reactivex.netty.pipeline.PipelineConfigurator;
 import io.reactivex.netty.protocol.http.server.HttpServer;
 import io.reactivex.netty.protocol.http.server.HttpServerBuilder;
+import io.reactivex.netty.protocol.http.server.RequestHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static com.netflix.karyon.utils.TypeUtils.*;
+import javax.annotation.PreDestroy;
+
+import static com.netflix.karyon.utils.TypeUtils.keyFor;
 
 /**
  * @author Tomasz Bak
@@ -30,7 +31,7 @@ public class HttpRxServerProvider<I, O, S extends HttpServer<I, O>> implements P
 
     private final Named nameAnnotation;
 
-    private final Key<HttpRequestRouter<I, O>> routerKey;
+    private final Key<RequestHandler<I, O>> routerKey;
     private final Key<GovernatorHttpInterceptorSupport<I, O>> interceptorSupportKey;
     @SuppressWarnings("rawtypes")
     private final Key<PipelineConfigurator> pipelineConfiguratorKey;
@@ -66,14 +67,17 @@ public class HttpRxServerProvider<I, O, S extends HttpServer<I, O>> implements P
     public void setInjector(Injector injector) {
         HttpServerConfig config = (HttpServerConfig) injector.getInstance(serverConfigKey);
 
-        HttpRequestRouter router = injector.getInstance(routerKey);
+        RequestHandler router = injector.getInstance(routerKey);
 
         GovernatorHttpInterceptorSupport<I, O> interceptorSupport = injector.getInstance(interceptorSupportKey);
         interceptorSupport.finish(injector);
         HttpRequestHandler<I, O> httpRequestHandler = new HttpRequestHandler<I, O>(router, interceptorSupport);
 
-        HttpServerBuilder<I, O> builder = KaryonTransport.newHttpServerBuilder(config.getPort(), httpRequestHandler)
-                .withRequestProcessingThreads(config.getThreadPoolSize());
+        HttpServerBuilder<I, O> builder = KaryonTransport.newHttpServerBuilder(config.getPort(), httpRequestHandler);
+
+        if (config.requiresThreadPool()) {
+            builder.withRequestProcessingThreads(config.getThreadPoolSize());
+        }
 
         if (injector.getExistingBinding(pipelineConfiguratorKey) != null) {
             builder.appendPipelineConfigurator(injector.getInstance(pipelineConfiguratorKey));

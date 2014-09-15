@@ -16,6 +16,15 @@ public class HttpRequestHandler<I, O> implements RequestHandler<I, O> {
 
     private final InterceptorExecutor<HttpServerRequest<I>, HttpServerResponse<O>, HttpKeyEvaluationContext> executor;
 
+    public HttpRequestHandler(RequestHandler<I, O> router) {
+        this(router, new HttpInterceptorSupport<I, O>());
+    }
+
+    public HttpRequestHandler(RequestHandler<I, O> router,
+                              AbstractInterceptorSupport<HttpServerRequest<I>, HttpServerResponse<O>, HttpKeyEvaluationContext, ?, ?> interceptorSupport) {
+        executor = new InterceptorExecutor<HttpServerRequest<I>, HttpServerResponse<O>, HttpKeyEvaluationContext>(interceptorSupport, router);
+    }
+
     public HttpRequestHandler(HttpRequestRouter<I, O> router) {
         this(router, new HttpInterceptorSupport<I, O>());
     }

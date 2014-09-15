@@ -1,16 +1,25 @@
 package com.netflix.karyon;
 
-import com.netflix.governator.guice.LifecycleInjector;
 import com.netflix.governator.guice.LifecycleInjectorBuilderSuite;
 import com.netflix.governator.guice.annotations.Bootstrap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * An application runner which consumes a main class annotated with governator's {@link Bootstrap} annotations and
- * executes that main class using {@link LifecycleInjector#bootstrap(Class, LifecycleInjectorBuilderSuite...)}.
- * For applications using a programmatic module configuration instead of annotation based module discovery, it is
- * better to instead use {@link Karyon}
+ * An application runner which consumes a main class annotated with governator's {@link Bootstrap} annotations.
+ *
+ * This is shorthand for:
+ *
+ <PRE>
+     com.netflix.karyon.forApplication(MyApp.class).startAndWaitTillShutdown()
+ </PRE>
+ *
+ * where the name of the Application class is passed as the argument to the main method.
+ *
+ * This is useful while creating standard packaging scripts where the main class for starting the JVM remains the same
+ * and the actual application class differs from one application to another.
+ *
+ * If you are bootstrapping karyon programmatically, it is better to use {@code Karyon} directly.
  *
  * @author Nitesh Kant
  */
@@ -31,7 +40,7 @@ public class KaryonRunner {
             Karyon.forApplication(Class.forName(mainClassName), (LifecycleInjectorBuilderSuite[]) null)
                   .startAndWaitTillShutdown();
         } catch (@SuppressWarnings("UnusedCatchParameter") ClassNotFoundException e) {
-            System.out.println("Main class: " + mainClassName + "not found.");
+            System.out.println("Main class: " + mainClassName + " not found.");
             System.exit(-1);
         } catch (Exception e) {
             logger.error("Error while starting karyon server.", e);

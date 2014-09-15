@@ -3,7 +3,6 @@ package com.netflix.karyon;
 import com.google.inject.Injector;
 import com.netflix.governator.guice.LifecycleInjector;
 import com.netflix.governator.guice.LifecycleInjectorBuilderSuite;
-import com.netflix.governator.lifecycle.LifecycleManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -12,37 +11,15 @@ import java.util.concurrent.CountDownLatch;
 /**
  * @author Nitesh Kant
  */
-class MainClassBasedServer implements KaryonServer {
+class MainClassBasedServer extends AbstractKaryonServer {
 
     private static final Logger logger = LoggerFactory.getLogger(MainClassBasedServer.class);
 
     private final Class<?> mainClass;
-    protected final LifecycleInjectorBuilderSuite[] suites;
-    private LifecycleManager lifecycleManager;
-    private Injector injector;
 
     protected MainClassBasedServer(Class<?> mainClass, LifecycleInjectorBuilderSuite... suites) {
+        super(suites);
         this.mainClass = mainClass;
-        this.suites = suites;
-    }
-
-    @Override
-    public void start() {
-        injector = LifecycleInjector.bootstrap(mainClass, suites);
-        startLifecycleManager();
-    }
-
-    @Override
-    public void shutdown() {
-        if (lifecycleManager != null) {
-            lifecycleManager.close();
-        }
-    }
-
-    @Override
-    public void startAndWaitTillShutdown() {
-        start();
-        waitTillShutdown();
     }
 
     @Override
@@ -70,12 +47,8 @@ class MainClassBasedServer implements KaryonServer {
         }
     }
 
-    private void startLifecycleManager() {
-        lifecycleManager = injector.getInstance(LifecycleManager.class);
-        try {
-            lifecycleManager.start();
-        } catch (Exception e) {
-            throw new RuntimeException(e); // So that this does not pollute the API.
-        }
+    @Override
+    protected Injector newInjector(LifecycleInjectorBuilderSuite... applicableSuites) {
+        return LifecycleInjector.bootstrap(mainClass, applicableSuites);
     }
 }

@@ -1,9 +1,4 @@
-package com.netflix.karyon.examples.rx.tcp;
-
-import java.nio.charset.Charset;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.TimeUnit;
+package com.netflix.karyon.examples.tcp;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -12,6 +7,11 @@ import io.reactivex.netty.channel.ConnectionHandler;
 import io.reactivex.netty.channel.ObservableConnection;
 import rx.Observable;
 import rx.functions.Func1;
+
+import java.nio.charset.Charset;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author Tomasz Bak

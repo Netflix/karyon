@@ -12,6 +12,7 @@ import com.netflix.karyon.examples.hellonoss.common.auth.AuthenticationServiceIm
 import com.netflix.karyon.examples.hellonoss.common.health.HealthCheck;
 import com.netflix.karyon.examples.hellonoss.server.jersey.JerseyHelloWorldApp.KaryonJerseyModuleImpl;
 import com.netflix.karyon.jersey.blocking.KaryonJerseyModule;
+import com.netflix.karyon.servo.KaryonServoModule;
 
 @ArchaiusBootstrap
 @KaryonBootstrap(name = "hello-netflix-oss", healthcheck = HealthCheck.class)
@@ -19,7 +20,8 @@ import com.netflix.karyon.jersey.blocking.KaryonJerseyModule;
         ShutdownModule.class,
         KaryonWebAdminModule.class,
         // KaryonEurekaModule.class, // Uncomment this to enable Eureka client.
-        KaryonJerseyModuleImpl.class
+        KaryonJerseyModuleImpl.class,
+        KaryonServoModule.class
 })
 public interface JerseyHelloWorldApp {
 

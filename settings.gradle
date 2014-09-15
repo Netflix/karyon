@@ -19,6 +19,7 @@ include 'karyon-core', \
  'karyon-governator', \
  'karyon-eureka', \
  'karyon-archaius', \
+ 'karyon-servo', \
  'karyon-admin', \
  'karyon-admin-web', \
  'karyon-jersey-blocking', \

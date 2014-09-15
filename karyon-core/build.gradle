@@ -25,7 +25,6 @@ tasks.withType(Javadoc).each {
 dependencies {
     dependencies {
         compile "com.netflix.rxnetty:rx-netty-contexts:${rxnetty_version}"
-        compile "com.netflix.rxnetty:rx-netty-servo:${rxnetty_version}"
     }
 }
 

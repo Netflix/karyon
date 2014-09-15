@@ -1,4 +1,4 @@
-package com.netflix.karyon.examples.rx.tcp;
+package com.netflix.karyon.examples.tcp;
 
 import com.google.inject.AbstractModule;
 import com.netflix.adminresources.resources.KaryonWebAdminModule;
@@ -6,10 +6,10 @@ import com.netflix.governator.annotations.Modules;
 import com.netflix.karyon.KaryonBootstrap;
 import com.netflix.karyon.ShutdownModule;
 import com.netflix.karyon.archaius.ArchaiusBootstrap;
-import com.netflix.karyon.examples.rx.tcp.TcpPipelineApp.ApplicationModule;
-import com.netflix.karyon.examples.rx.tcp.TcpPipelineApp.TcpBackendModule;
-import com.netflix.karyon.examples.rx.tcp.TcpPipelineApp.TcpFrontendModule;
-import com.netflix.karyon.examples.rx.tcp.TcpPipelineHandlers.QueueProvider;
+import com.netflix.karyon.examples.tcp.TcpPipelineApp.ApplicationModule;
+import com.netflix.karyon.examples.tcp.TcpPipelineApp.TcpBackendModule;
+import com.netflix.karyon.examples.tcp.TcpPipelineApp.TcpFrontendModule;
+import com.netflix.karyon.examples.tcp.TcpPipelineHandlers.QueueProvider;
 import com.netflix.karyon.transport.tcp.KaryonTcpModule;
 import io.netty.buffer.ByteBuf;
 

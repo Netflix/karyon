@@ -216,6 +216,34 @@ public final class Karyon {
     }
 
     /**
+     * Creates a new {@link KaryonServer} which combines lifecycle of the passed {@link KaryonServer} with
+     * it's own lifecycle. This is useful when a {@link KaryonServer} is already present and the passed
+     * {@link Module}s are to be added to that server.
+     *
+     * @param server An existing karyon server
+     * @param modules Additional modules.
+     *
+     * @return {@link KaryonServer} which is to be used to start the created server.
+     */
+    public static KaryonServer forServer(KaryonServer server, Module... modules) {
+        return forServer(server, toSuite(modules));
+    }
+
+    /**
+     * Creates a new {@link KaryonServer} which combines lifecycle of the passed {@link KaryonServer} with
+     * it's own lifecycle. This is useful when a {@link KaryonServer} is already present and the passed
+     * {@link LifecycleInjectorBuilderSuite}s are to be added to that server.
+     *
+     * @param server An existing karyon server
+     * @param suites Additional suites.
+     *
+     * @return {@link KaryonServer} which is to be used to start the created server.
+     */
+    public static KaryonServer forServer(KaryonServer server, LifecycleInjectorBuilderSuite... suites) {
+        return new KaryonServerBackedServer((AbstractKaryonServer)server, suites);
+    }
+
+    /**
      * Creates a new {@link KaryonServer} which uses the passed class to detect any modules.
      *
      * @param mainClass Any class/interface containing governator's {@link Bootstrap} annotations.

@@ -1,7 +1,6 @@
 package com.netflix.karyon.jersey.blocking;
 
 import com.google.inject.Injector;
-import com.netflix.karyon.transport.http.HttpRequestRouter;
 import com.sun.jersey.api.container.ContainerFactory;
 import com.sun.jersey.api.core.ResourceConfig;
 import com.sun.jersey.guice.spi.container.GuiceComponentProviderFactory;
@@ -9,6 +8,7 @@ import com.sun.jersey.spi.container.WebApplication;
 import io.netty.buffer.ByteBuf;
 import io.reactivex.netty.protocol.http.server.HttpServerRequest;
 import io.reactivex.netty.protocol.http.server.HttpServerResponse;
+import io.reactivex.netty.protocol.http.server.RequestHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import rx.Observable;
@@ -21,7 +21,7 @@ import java.io.IOException;
 /**
  * @author Nitesh Kant
  */
-public class JerseyBasedRouter implements HttpRequestRouter<ByteBuf, ByteBuf> {
+public class JerseyBasedRouter implements RequestHandler<ByteBuf, ByteBuf> {
 
     private static final Logger logger = LoggerFactory.getLogger(JerseyBasedRouter.class);
 
@@ -42,7 +42,7 @@ public class JerseyBasedRouter implements HttpRequestRouter<ByteBuf, ByteBuf> {
     }
 
     @Override
-    public Observable<Void> route(HttpServerRequest<ByteBuf> request, HttpServerResponse<ByteBuf> response) {
+    public Observable<Void> handle(HttpServerRequest<ByteBuf> request, HttpServerResponse<ByteBuf> response) {
         try {
             application.handleRequest(nettyToJerseyBridge.bridgeRequest(request, response.getAllocator()),
                                       nettyToJerseyBridge.bridgeResponse(response));
