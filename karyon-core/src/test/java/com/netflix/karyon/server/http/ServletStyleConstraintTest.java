@@ -20,7 +20,7 @@ public class ServletStyleConstraintTest extends InterceptorConstraintTestBase {
     @Test
     public void testServletPathExactMatch() throws Exception {
         ServletStyleUriConstraintKey<ByteBuf> key = new ServletStyleUriConstraintKey<ByteBuf>("d/a/b/c", "d");
-        HttpKeyEvaluationContext context = new HttpKeyEvaluationContext(new MockChannelHandlerContext("mock"));
+        HttpKeyEvaluationContext context = new HttpKeyEvaluationContext(new MockChannelHandlerContext("mock").channel());
         HttpServerRequest<ByteBuf> request = newRequest("/d/a/b/c/");
         boolean keyApplicable = key.apply(request, context);
         Assert.assertTrue("Exact match servlet style constraint failed.", keyApplicable);
@@ -31,7 +31,7 @@ public class ServletStyleConstraintTest extends InterceptorConstraintTestBase {
     @Test
     public void testServletPathPrefixMatch() throws Exception {
         ServletStyleUriConstraintKey<ByteBuf> key = new ServletStyleUriConstraintKey<ByteBuf>("d/a/*", "d");
-        HttpKeyEvaluationContext context = new HttpKeyEvaluationContext(new MockChannelHandlerContext("mock"));
+        HttpKeyEvaluationContext context = new HttpKeyEvaluationContext(new MockChannelHandlerContext("mock").channel());
         HttpServerRequest<ByteBuf> request = newRequest("/d/a/b/c/");
         boolean keyApplicable = key.apply(request, context);
         Assert.assertTrue("Prefix match servlet style constraint failed.", keyApplicable);
@@ -42,7 +42,7 @@ public class ServletStyleConstraintTest extends InterceptorConstraintTestBase {
     @Test
     public void testServletPathExtensionMatch() throws Exception {
         ServletStyleUriConstraintKey<ByteBuf> key = new ServletStyleUriConstraintKey<ByteBuf>("*.boo", "d");
-        HttpKeyEvaluationContext context = new HttpKeyEvaluationContext(new MockChannelHandlerContext("mock"));
+        HttpKeyEvaluationContext context = new HttpKeyEvaluationContext(new MockChannelHandlerContext("mock").channel());
         HttpServerRequest<ByteBuf> request = newRequest("/d/a/b/c.boo");
         boolean keyApplicable = key.apply(request, context);
         Assert.assertTrue("Extension match servlet style constraint failed.", keyApplicable);

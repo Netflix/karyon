@@ -24,6 +24,6 @@ public class InterceptorConstraintTestBase {
         DefaultHttpRequest nettyRequest = new DefaultHttpRequest(HttpVersion.HTTP_1_0, httpMethod, uri);
         return key.apply(new HttpServerRequest<ByteBuf>(nettyRequest,
                                                         UnicastContentSubject.<ByteBuf>createWithoutNoSubscriptionTimeout()),
-                         new HttpKeyEvaluationContext(new MockChannelHandlerContext("mock")));
+                         new HttpKeyEvaluationContext(new MockChannelHandlerContext("mock").channel()));
     }
 }

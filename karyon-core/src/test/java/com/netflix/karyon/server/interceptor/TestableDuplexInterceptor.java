@@ -43,14 +43,14 @@ public class TestableDuplexInterceptor implements DuplexInterceptor<ByteBuf, Byt
     public Observable<Void> in(ByteBuf request, ByteBuf response) {
         inCalled = true;
         MockChannelHandlerContext mock = new MockChannelHandlerContext("mock");
-        wasLastInCallValid = filterKey.apply(request, new KeyEvaluationContext(mock));
+        wasLastInCallValid = filterKey.apply(request, new KeyEvaluationContext(mock.channel()));
         return Observable.empty();
     }
 
     @Override
     public Observable<Void> out(ByteBuf response) {
         outCalled = true;
-        wasLastOutCallValid = filterKey.apply(response, new KeyEvaluationContext(new MockChannelHandlerContext("")));
+        wasLastOutCallValid = filterKey.apply(response, new KeyEvaluationContext(new MockChannelHandlerContext("").channel()));
         return Observable.empty();
     }
 }
