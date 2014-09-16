@@ -31,7 +31,7 @@ class TestableInboundInterceptor implements InboundInterceptor<ByteBuf, ByteBuf>
     @Override
     public Observable<Void> in(ByteBuf request, ByteBuf response) {
         MockChannelHandlerContext context = new MockChannelHandlerContext("mock");
-        wasLastCallValid = filterKey.apply(request, new KeyEvaluationContext(context));
+        wasLastCallValid = filterKey.apply(request, new KeyEvaluationContext(context.channel()));
         receivedACall = true;
         return Observable.empty();
     }

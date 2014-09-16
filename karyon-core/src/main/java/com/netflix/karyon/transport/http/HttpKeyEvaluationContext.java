@@ -1,6 +1,7 @@
 package com.netflix.karyon.transport.http;
 
 import com.netflix.karyon.transport.interceptor.KeyEvaluationContext;
+import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.http.HttpRequest;
 import io.netty.util.Attribute;
@@ -22,8 +23,8 @@ public class HttpKeyEvaluationContext extends KeyEvaluationContext {
 
     private QueryStringDecoder queryStringDecoder;
 
-    public HttpKeyEvaluationContext(ChannelHandlerContext channelHandlerContext) {
-        super(channelHandlerContext);
+    public HttpKeyEvaluationContext(Channel channel) {
+        super(channel);
     }
 
     /**
@@ -41,7 +42,7 @@ public class HttpKeyEvaluationContext extends KeyEvaluationContext {
         }
 
         if (null == queryStringDecoder) {
-            if (null == channelHandlerContext) {
+            if (null == channel) {
                 queryStringDecoder = new QueryStringDecoder(uri);
             } else {
                 queryStringDecoder = getOrCreateQueryStringDecoder(httpRequest);
@@ -60,7 +61,7 @@ public class HttpKeyEvaluationContext extends KeyEvaluationContext {
             return null;
         }
 
-        Attribute<QueryStringDecoder> queryDecoderAttr = channelHandlerContext.attr(queryDecoderKey);
+        Attribute<QueryStringDecoder> queryDecoderAttr = channel.attr(queryDecoderKey);
 
         QueryStringDecoder _queryStringDecoder = queryDecoderAttr.get();
 

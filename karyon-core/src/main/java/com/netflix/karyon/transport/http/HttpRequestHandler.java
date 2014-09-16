@@ -44,6 +44,6 @@ public class HttpRequestHandler<I, O> implements RequestHandler<I, O> {
 
     @Override
     public Observable<Void> handle(HttpServerRequest<I> request, HttpServerResponse<O> response) {
-        return executor.execute(request, response, new HttpKeyEvaluationContext(response.getChannelHandlerContext()));
+        return executor.execute(request, response, new HttpKeyEvaluationContext(response.getChannel()));
     }
 }

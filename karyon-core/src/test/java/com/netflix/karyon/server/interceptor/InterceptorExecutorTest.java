@@ -79,7 +79,7 @@ public class InterceptorExecutorTest {
         final CountDownLatch completionLatch = new CountDownLatch(1);
 
         executor.execute(Unpooled.buffer(), Unpooled.buffer(),
-                         new KeyEvaluationContext(new MockChannelHandlerContext("mock")))
+                         new KeyEvaluationContext(new MockChannelHandlerContext("mock").channel()))
                 .doOnCompleted(new Action0() {
                     @Override
                     public void call() {

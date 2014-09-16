@@ -29,7 +29,7 @@ public class SimpleUriRouter<I, O> implements RequestHandler<I, O> {
 
     @Override
     public Observable<Void> handle(HttpServerRequest<I> request, HttpServerResponse<O> response) {
-        HttpKeyEvaluationContext context = new HttpKeyEvaluationContext(response.getChannelHandlerContext());
+        HttpKeyEvaluationContext context = new HttpKeyEvaluationContext(response.getChannel());
         for (Route route : routes) {
             if (route.key.apply(request, context)) {
                 return route.getHandler().handle(request, response);

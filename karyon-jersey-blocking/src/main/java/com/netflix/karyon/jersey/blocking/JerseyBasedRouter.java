@@ -4,6 +4,8 @@ import com.google.inject.Injector;
 import com.sun.jersey.api.container.ContainerFactory;
 import com.sun.jersey.api.core.ResourceConfig;
 import com.sun.jersey.guice.spi.container.GuiceComponentProviderFactory;
+import com.sun.jersey.spi.container.ContainerRequest;
+import com.sun.jersey.spi.container.ContainerResponseWriter;
 import com.sun.jersey.spi.container.WebApplication;
 import io.netty.buffer.ByteBuf;
 import io.reactivex.netty.protocol.http.server.HttpServerRequest;
@@ -12,6 +14,9 @@ import io.reactivex.netty.protocol.http.server.RequestHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import rx.Observable;
+import rx.Subscriber;
+import rx.functions.Action0;
+import rx.schedulers.Schedulers;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -42,16 +47,33 @@ public class JerseyBasedRouter implements RequestHandler<ByteBuf, ByteBuf> {
     }
 
     @Override
-    public Observable<Void> handle(HttpServerRequest<ByteBuf> request, HttpServerResponse<ByteBuf> response) {
-        try {
-            application.handleRequest(nettyToJerseyBridge.bridgeRequest(request, response.getAllocator()),
-                                      nettyToJerseyBridge.bridgeResponse(response));
-        } catch (IOException e) {
-            logger.error("Failed to handle request.", e);
-            return Observable.error(e);
-        }
+    public Observable<Void> handle(final HttpServerRequest<ByteBuf> request, final HttpServerResponse<ByteBuf> response) {
 
-        return Observable.empty(); // Since execution is blocking, if this stmt is reached, it means execution is over.
+        /*
+         * Creating the Container request eagerly, subscribes to the request content eagerly. Failure to do so, will
+          * result in expiring/loss of content.
+         */
+        final ContainerRequest containerRequest = nettyToJerseyBridge.bridgeRequest(request, response.getAllocator());
+        final ContainerResponseWriter containerResponse = nettyToJerseyBridge.bridgeResponse(response);
+
+        return Observable.create(new Observable.OnSubscribe<Void>() {
+            @Override
+            public void call(Subscriber<? super Void> subscriber) {
+                try {
+                    application.handleRequest(containerRequest, containerResponse);
+                    subscriber.onCompleted();
+                } catch (IOException e) {
+                    logger.error("Failed to handle request.", e);
+                    subscriber.onError(e);
+                }
+            }
+        }).doOnTerminate(new Action0() {
+            @Override
+            public void call() {
+                response.close(true); /* Since this runs in a different thread, it needs an explicit flush,
+                                         else the LastHttpContent will never be flushed and the client will not finish.*/
+            }
+        }).subscribeOn(Schedulers.io()) /*Since this blocks on subscription*/;
     }
 
     @PostConstruct

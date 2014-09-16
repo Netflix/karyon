@@ -1,5 +1,6 @@
 package com.netflix.karyon.jersey.blocking;
 
+import com.netflix.karyon.transport.util.HttpContentInputStream;
 import com.sun.jersey.core.header.InBoundHeaders;
 import com.sun.jersey.spi.container.ContainerRequest;
 import com.sun.jersey.spi.container.ContainerResponse;
@@ -7,7 +8,6 @@ import com.sun.jersey.spi.container.ContainerResponseWriter;
 import com.sun.jersey.spi.container.WebApplication;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
-import io.netty.buffer.ByteBufInputStream;
 import io.netty.buffer.ByteBufOutputStream;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.reactivex.netty.protocol.http.server.HttpRequestHeaders;
@@ -47,11 +47,9 @@ final class NettyToJerseyBridge {
         try {
             URI baseUri = new URI("/"); // Since the netty server does not have a context path element as such, so base uri is always /
             URI uri = new URI(nettyRequest.getUri());
-            final ByteBuf contentBuffer = allocator.buffer();
-
             return new ContainerRequest(application, nettyRequest.getHttpMethod().name(),
                                         baseUri, uri, new JerseyRequestHeadersAdapter(nettyRequest.getHeaders()),
-                                        new ByteBufInputStream(contentBuffer));
+                                        new HttpContentInputStream(allocator, nettyRequest.getContent()));
         } catch (URISyntaxException e) {
             logger.error(String.format("Invalid request uri: %s", nettyRequest.getUri()), e);
             throw new IllegalArgumentException(e);
@@ -61,7 +59,7 @@ final class NettyToJerseyBridge {
     ContainerResponseWriter bridgeResponse(final HttpServerResponse<ByteBuf> serverResponse) {
         return new ContainerResponseWriter() {
 
-            private final ByteBuf contentBuffer = serverResponse.getChannelHandlerContext().alloc().buffer();
+            private final ByteBuf contentBuffer = serverResponse.getChannel().alloc().buffer();
 
             @Override
             public OutputStream writeStatusAndHeaders(long contentLength, ContainerResponse response) {
