@@ -7,6 +7,7 @@ import com.netflix.governator.guice.annotations.Bootstrap;
 import com.netflix.karyon.transport.KaryonTransport;
 import com.netflix.karyon.transport.http.HttpRequestHandler;
 import io.netty.buffer.ByteBuf;
+import io.netty.handler.codec.http.websocketx.WebSocketFrame;
 import io.reactivex.netty.RxNetty;
 import io.reactivex.netty.channel.ConnectionHandler;
 import io.reactivex.netty.protocol.http.server.HttpServer;
@@ -165,7 +166,7 @@ public final class Karyon {
      * Creates a new {@link KaryonServer} which combines lifecycle of the passed {@link HttpServer} with
      * it's own lifecycle.
      *
-     * @param server TCP server
+     * @param server HTTP server
      * @param modules Additional suites if any.
      *
      * @return {@link KaryonServer} which is to be used to start the created server.
@@ -178,7 +179,7 @@ public final class Karyon {
      * Creates a new {@link KaryonServer} which combines lifecycle of the passed {@link HttpServer} with
      * it's own lifecycle.
      *
-     * @param server TCP server
+     * @param server HTTP server
      * @param suites Additional suites if any.
      *
      * @return {@link KaryonServer} which is to be used to start the created server.
@@ -189,10 +190,37 @@ public final class Karyon {
     }
 
     /**
+     * Creates a new {@link KaryonServer} which combines lifecycle of the passed WebSockets {@link RxServer} with
+     * it's own lifecycle.
+     *
+     * @param server WebSocket server
+     * @param modules Additional suites if any.
+     *
+     * @return {@link KaryonServer} which is to be used to start the created server.
+     */
+    public static KaryonServer forWebSocketServer(RxServer<? extends WebSocketFrame, ? extends WebSocketFrame> server, Module... modules) {
+        return forWebSocketServer(server, toSuite(modules));
+    }
+
+    /**
+     * Creates a new {@link KaryonServer} which combines lifecycle of the passed WebSockets {@link RxServer} with
+     * it's own lifecycle.
+     *
+     * @param server WebSocket server
+     * @param suites Additional suites if any.
+     *
+     * @return {@link KaryonServer} which is to be used to start the created server.
+     */
+    public static KaryonServer forWebSocketServer(RxServer<? extends WebSocketFrame, ? extends WebSocketFrame> server,
+                                             LifecycleInjectorBuilderSuite... suites) {
+        return new RxNettyServerBackedServer(server, suites);
+    }
+
+    /**
      * Creates a new {@link KaryonServer} which combines lifecycle of the passed {@link UdpServer} with
      * it's own lifecycle.
      *
-     * @param server TCP server
+     * @param server UDP server
      * @param modules Additional modules if any.
      *
      * @return {@link KaryonServer} which is to be used to start the created server.
@@ -205,7 +233,7 @@ public final class Karyon {
      * Creates a new {@link KaryonServer} which combines lifecycle of the passed {@link UdpServer} with
      * it's own lifecycle.
      *
-     * @param server TCP server
+     * @param server UDP server
      * @param suites Additional suites if any.
      *
      * @return {@link KaryonServer} which is to be used to start the created server.

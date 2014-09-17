@@ -13,6 +13,7 @@ Simple URI Routing | [Guice module based](src/main/java/com/netflix/karyon/examp
 Jersey             | [Annotation based](src/main/java/com/netflix/karyon/examples/hellonoss/server/jersey)                   | An example of how to use blocking jersey resources inside karyon.
 RxNetty            | [Guice module based](src/main/java/com/netflix/karyon/examples/hellonoss/server/rxnetty)                | An example of how to directly use an RxNetty based `RequestHandler` inside karyon.
 TCP                | [Karyon TCP server](src/main/java/com/netflix/karyon/examples/tcp)                                      | An example of how to create a raw TCP karyon server.
+WebSockets         | [Karyon WebSocket Echo server](src/main/java/com/netflix/karyon/examples/websockets)                    | An example of WebSockets server.
 
 Build
 =====
