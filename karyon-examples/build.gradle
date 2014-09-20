@@ -109,3 +109,15 @@ task runTcpPipelineApp (dependsOn: [classes], type: JavaExec) {
 
     args = ["com.netflix.karyon.examples.tcp.TcpPipelineApp"]
 }
+
+task runWebSocketEcho (dependsOn: [classes], type: JavaExec) {
+    group = "Examples"
+    description = "Run WebSocket echo server"
+
+    main = "com.netflix.karyon.examples.websockets.WebSocketEchoServer"
+    classpath = sourceSets.main.runtimeClasspath
+
+    jvmArgs "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005"
+    systemProperty 'java.awt.headless', 'true'
+    systemProperty 'archaius.deployment.environment', 'dev'
+}
