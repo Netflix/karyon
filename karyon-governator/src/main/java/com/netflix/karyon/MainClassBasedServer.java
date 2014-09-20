@@ -48,6 +48,11 @@ class MainClassBasedServer extends AbstractKaryonServer {
     }
 
     @Override
+    protected void _start() {
+        // No Op.
+    }
+
+    @Override
     protected Injector newInjector(LifecycleInjectorBuilderSuite... applicableSuites) {
         return LifecycleInjector.bootstrap(mainClass, applicableSuites);
     }

@@ -22,8 +22,7 @@ class RxNettyServerBackedServer extends MainClassBasedServer {
     }
 
     @Override
-    public void start() {
-        super.start();
+    protected void _start() {
         rxNettyServer.start();
     }
 
