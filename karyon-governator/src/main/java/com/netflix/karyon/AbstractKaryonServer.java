@@ -20,22 +20,24 @@ abstract class AbstractKaryonServer implements KaryonServer {
     }
 
     @Override
-    public void start() {
+    public final void start() {
         startWithAdditionalSuites();
     }
 
-    public void startWithAdditionalSuites(LifecycleInjectorBuilderSuite... additionalSuites) {
+    public final void startWithAdditionalSuites(LifecycleInjectorBuilderSuite... additionalSuites) {
+        LifecycleInjectorBuilderSuite[] applicableSuites = this.suites;
         if (null != additionalSuites && additionalSuites.length != 0) {
-            LifecycleInjectorBuilderSuite[] toReturn = Arrays.copyOf(suites, suites.length
-                                                                             + additionalSuites.length);
-            System.arraycopy(additionalSuites, 0, toReturn, suites.length, additionalSuites.length);
-            injector = newInjector(toReturn);
-        } else {
-            injector = newInjector();
+            applicableSuites = Arrays.copyOf(suites, suites.length + additionalSuites.length);
+            System.arraycopy(additionalSuites, 0, applicableSuites, suites.length, additionalSuites.length);
         }
 
+        injector = newInjector(applicableSuites);
+
         startLifecycleManager();
+        _start();
     }
+
+    protected abstract void _start();
 
     @Override
     public void shutdown() {
