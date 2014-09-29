@@ -1,6 +1,7 @@
 package com.netflix.karyon.transport.http;
 
 import com.netflix.karyon.transport.interceptor.KeyEvaluationContext;
+import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.http.HttpRequest;
 import io.netty.util.Attribute;
@@ -14,7 +15,7 @@ public class HttpKeyEvaluationContext extends KeyEvaluationContext {
 
     /**
      * In order to optimize for request URI parsing, karyon stores the {@link QueryStringDecoder} instances, if created,
-     * in the {@link io.netty.channel.ChannelHandlerContext} as an {@link io.netty.util.Attribute}. <br/>
+     * in the {@link io.netty.channel.ChannelHandlerContext} as an {@link io.netty.util.Attribute}. <br>
      * This attribute is not always available and hence the users must always check for availability. It is always a
      * good practice to store the decoder back in the context, once created so that other code can use it if required.
      */
@@ -22,8 +23,8 @@ public class HttpKeyEvaluationContext extends KeyEvaluationContext {
 
     private QueryStringDecoder queryStringDecoder;
 
-    public HttpKeyEvaluationContext(ChannelHandlerContext channelHandlerContext) {
-        super(channelHandlerContext);
+    public HttpKeyEvaluationContext(Channel channel) {
+        super(channel);
     }
 
     /**
@@ -41,7 +42,7 @@ public class HttpKeyEvaluationContext extends KeyEvaluationContext {
         }
 
         if (null == queryStringDecoder) {
-            if (null == channelHandlerContext) {
+            if (null == channel) {
                 queryStringDecoder = new QueryStringDecoder(uri);
             } else {
                 queryStringDecoder = getOrCreateQueryStringDecoder(httpRequest);
@@ -60,7 +61,7 @@ public class HttpKeyEvaluationContext extends KeyEvaluationContext {
             return null;
         }
 
-        Attribute<QueryStringDecoder> queryDecoderAttr = channelHandlerContext.attr(queryDecoderKey);
+        Attribute<QueryStringDecoder> queryDecoderAttr = channel.attr(queryDecoderKey);
 
         QueryStringDecoder _queryStringDecoder = queryDecoderAttr.get();
 

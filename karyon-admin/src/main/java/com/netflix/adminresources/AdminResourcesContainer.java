@@ -44,13 +44,13 @@ import java.util.EnumSet;
 /**
  * This class starts an embedded jetty server, listening at port specified by property
  * {@link AdminResourcesContainer#CONTAINER_LISTEN_PORT} and defaulting to
- * {@link AdminResourcesContainer#LISTEN_PORT_DEFAULT}. <br/>
+ * {@link AdminResourcesContainer#LISTEN_PORT_DEFAULT}. <br>
  *
  * The embedded server uses jersey so any jersey resources available in packages
- * specified via properties {@link AdminResourcesContainer#JERSEY_CORE_PACKAGES}will be scanned and initialized. <br/>
+ * specified via properties {@link AdminResourcesContainer#JERSEY_CORE_PACKAGES}will be scanned and initialized. <br>
  *
  * Karyon admin starts in an embedded container to have a "always available" endpoint for any application. This helps
- * in a homogeneous admin view for all applications. <br/>
+ * in a homogeneous admin view for all applications. <br>
  *
  * <h3>Available resources</h3>
  *
@@ -78,13 +78,13 @@ public class AdminResourcesContainer {
     public static final String CONTAINER_LISTEN_PORT = "netflix.platform.admin.resources.port";
     public static final int LISTEN_PORT_DEFAULT = 8077;
     private static final String JERSEY_CORE_PACKAGES = "netflix.platform.admin.resources.core.packages";
-    public static final String JERSEY_CORE_PACKAGES_DEAULT = "com.netflix.adminresources;com.netflix.explorers.resources;com.netflix.explorers.providers";
+    public static final String JERSEY_CORE_PACKAGES_DEFAULT = "com.netflix.adminresources;com.netflix.explorers.resources;com.netflix.explorers.providers";
 
     @Configuration(
             value = JERSEY_CORE_PACKAGES,
             documentation = "Property defining the list of core packages which contains jersey resources for karyon admin. com.netflix.adminresources is always added to this."
     )
-    private String coreJerseyPackages = JERSEY_CORE_PACKAGES_DEAULT;
+    private String coreJerseyPackages = JERSEY_CORE_PACKAGES_DEFAULT;
 
 
     @Configuration(

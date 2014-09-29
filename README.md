@@ -7,19 +7,18 @@ Karyon in the context of molecular biology is essentially "a part of the cell co
 
 At Netflix, Karyon is a framework and library that essentially contains the blueprint of what it means to implement a cloud ready web service.  All the other fine grained web services and applications that form our SOA graph can essentially be thought as being cloned from this basic blueprint.
 
-Karyon can be thought of as the nucleus of a blueprint that contains the following main ingredients.
+Karyon can be thought of as a nucleus that contains the following main ingredients.
 
-* Bootstrapping , Libraries and Lifecycle Management (via NetflixOSS's Governator)
-* Runtime Insights and Diagnostics (via built in Admin Console)
-* Pluggable Web Resources (via JSR-311 and Jersey)
-* Cloud Ready
+* Bootstrapping , dependency and Lifecycle Management (via [Governator](https://github.com/Netflix/governator))
+* Runtime Insights and Diagnostics (via `karyon-admin-web` module)
+* Configuration Management (via [Archaius](https://github.com/Netflix/archaius))
+* Service discovery (via [Eureka](https://github.com/Netflix/eureka))
+* Powerful transport module (via [RxNetty](https://github.com/Netflix/RxNetty))
 
 Getting Started
 ===============
 
-Easiest way to get started with karyon is to see the examples provided with karyon under karyon-examples module.
-[This] (https://github.com/Netflix/karyon/tree/master/karyon-examples/hello-netflix-oss) is a simple "hello world" application
-built using karyon.
+Easiest way to get started with karyon is to see the examples provided with karyon under [karyon-examples](karyon-examples) module.
 
 Documentation
 ==============

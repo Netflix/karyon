@@ -6,7 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Provides constraint implementation for {@link InterceptorKey} similar to java servlet specifications. <p/>
+ * Provides constraint implementation for {@link InterceptorKey} similar to java servlet specifications. <p></p>
  * The following types of constraints are supported:
  * <ul>
  <li>Exact uri mapping: Give the exact string that should match the URI path of the incoming request.
@@ -26,10 +26,10 @@ import org.slf4j.LoggerFactory;
  </ul>
  *
  * In any of the pattersn above the leading slash in the constraint is optional, i.e., "/myresource/foo" is equivalent to
- * "myresource/foo". <p/>
+ * "myresource/foo". <p></p>
  *
  * As compared to servlets/web applications there are no context paths of an application so the URI path has to be
- * absolute. <br/>
+ * absolute. <br>
  *
  * The request URI path is as retrieved using: {@link HttpKeyEvaluationContext#getRequestUriPath(HttpServerRequest)}
  *

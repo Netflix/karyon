@@ -3,6 +3,7 @@ package com.netflix.karyon.transport.http;
 import com.netflix.karyon.transport.interceptor.InterceptorKey;
 import io.netty.handler.codec.http.HttpMethod;
 import io.reactivex.netty.protocol.http.server.HttpServerRequest;
+import io.reactivex.netty.protocol.http.server.RequestHandler;
 
 /**
  * A convenience builder to create {@link HttpRequestHandler} instances.
@@ -12,14 +13,14 @@ import io.reactivex.netty.protocol.http.server.HttpServerRequest;
 public class HttpRequestHandlerBuilder<I, O> {
 
     private final HttpInterceptorSupport<I, O> interceptorSupport;
-    private final HttpRequestRouter<I, O> router;
+    private final RequestHandler<I, O> router;
 
-    public HttpRequestHandlerBuilder(HttpRequestRouter<I, O> router) {
+    public HttpRequestHandlerBuilder(RequestHandler<I, O> router) {
         this(new HttpInterceptorSupport<I, O>(), router);
     }
 
     public HttpRequestHandlerBuilder(HttpInterceptorSupport<I, O> interceptorSupport,
-                                     HttpRequestRouter<I, O> router) {
+                                     RequestHandler<I, O> router) {
         this.interceptorSupport = interceptorSupport;
         this.router = router;
     }
@@ -44,7 +45,7 @@ public class HttpRequestHandlerBuilder<I, O> {
         return interceptorSupport;
     }
 
-    public HttpRequestRouter<I, O> getRouter() {
+    public RequestHandler<I, O> getRouter() {
         return router;
     }
 

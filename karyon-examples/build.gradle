@@ -1,0 +1,123 @@
+/*
+ * Copyright 2013 Netflix, Inc.
+ *
+ *      Licensed under the Apache License, Version 2.0 (the "License");
+ *      you may not use this file except in compliance with the License.
+ *      You may obtain a copy of the License at
+ *
+ *          http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *      Unless required by applicable law or agreed to in writing, software
+ *      distributed under the License is distributed on an "AS IS" BASIS,
+ *      WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *      See the License for the specific language governing permissions and
+ *      limitations under the License.
+ */
+ext.githubProjectName = rootProject.name // Change if github project name is not the same as the root project's name
+
+apply plugin: 'application'
+
+buildscript {
+    repositories { mavenCentral() }
+    apply from: file('../gradle/buildscript.gradle'), to: buildscript
+}
+
+allprojects {
+    repositories { mavenCentral() }
+}
+
+apply from: file('../gradle/convention.gradle')
+apply from: file('../gradle/maven.gradle')
+apply from: file('../gradle/check.gradle')
+apply from: file('../gradle/license.gradle')
+
+dependencies {
+    compile project(':karyon-admin-web')
+    compile project(':karyon-jersey-blocking')
+    compile project(':karyon-eureka')
+    compile project(':karyon-archaius')
+    compile project(':karyon-servo')
+    compile 'org.codehaus.jettison:jettison:1.2'
+    compile 'com.google.inject:guice:3.0'
+    compile 'org.slf4j:slf4j-api:1.7.0'
+    runtime 'org.slf4j:slf4j-simple:1.7.0'
+}
+
+task runJerseyHelloNOSS (dependsOn: [classes], type: JavaExec) {
+    group = "Examples"
+    description = "Run Jersey Hello NOSS server"
+
+    main = "com.netflix.karyon.KaryonRunner"
+    classpath = sourceSets.main.runtimeClasspath
+
+    jvmArgs "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005"
+    systemProperty 'java.awt.headless', 'true'
+    systemProperty 'archaius.deployment.environment', 'dev'
+
+    args = ["com.netflix.karyon.examples.hellonoss.server.jersey.JerseyHelloWorldApp"]
+}
+
+task runSimpleRouterAnnotationHelloNOSS (dependsOn: [classes], type: JavaExec) {
+    group = "Examples"
+    description = "Run simple URI router based Hello NOSS server using annotation based bootstrapping."
+
+    main = "com.netflix.karyon.KaryonRunner"
+    classpath = sourceSets.main.runtimeClasspath
+
+    jvmArgs "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005"
+    systemProperty 'java.awt.headless', 'true'
+    systemProperty 'archaius.deployment.environment', 'dev'
+
+    args = ["com.netflix.karyon.examples.hellonoss.server.simple.annotation.SimpleRoutingApp"]
+}
+
+task runSimpleRouterGuiceHelloNOSS (dependsOn: [classes], type: JavaExec) {
+    group = "Examples"
+    description = "Run simple URI router based Hello NOSS server using guice modules based bootstrapping."
+
+    main = "com.netflix.karyon.examples.hellonoss.server.simple.module.SimpleRunner"
+    classpath = sourceSets.main.runtimeClasspath
+
+    jvmArgs "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005"
+    systemProperty 'java.awt.headless', 'true'
+    systemProperty 'archaius.deployment.environment', 'dev'
+}
+
+task runPureRxNettyHelloNOSS (dependsOn: [classes], type: JavaExec) {
+    group = "Examples"
+    description = "Run RX netty based Hello NOSS server"
+
+    main = "com.netflix.karyon.examples.hellonoss.server.rxnetty.MyApplicationRunner"
+    classpath = sourceSets.main.runtimeClasspath
+
+    jvmArgs "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005"
+    systemProperty 'java.awt.headless', 'true'
+    systemProperty 'archaius.deployment.environment', 'dev'
+}
+
+
+task runTcpPipelineApp (dependsOn: [classes], type: JavaExec) {
+    group = "Examples"
+    description = "Run TCP pipeline server"
+
+    main = "com.netflix.karyon.KaryonRunner"
+    classpath = sourceSets.main.runtimeClasspath
+
+    jvmArgs "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005"
+    systemProperty 'java.awt.headless', 'true'
+    systemProperty 'archaius.deployment.environment', 'dev'
+
+    args = ["com.netflix.karyon.examples.tcp.TcpPipelineApp"]
+}
+
+task runWebSocketEcho (dependsOn: [classes], type: JavaExec) {
+    group = "Examples"
+    description = "Run WebSocket echo server"
+
+    main = "com.netflix.karyon.examples.websockets.WebSocketEchoServer"
+    classpath = sourceSets.main.runtimeClasspath
+
+    jvmArgs "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005"
+    systemProperty 'java.awt.headless', 'true'
+    systemProperty 'archaius.deployment.environment', 'dev'
+}

@@ -3,8 +3,6 @@ package com.netflix.karyon;
 import com.google.inject.AbstractModule;
 import com.google.inject.binder.AnnotatedBindingBuilder;
 import com.google.inject.binder.LinkedBindingBuilder;
-import com.netflix.governator.guice.BootstrapBinder;
-import com.netflix.governator.guice.BootstrapModule;
 import com.netflix.governator.guice.LifecycleInjectorBuilder;
 import com.netflix.governator.guice.LifecycleInjectorBuilderSuite;
 import com.netflix.governator.guice.LifecycleInjectorMode;
@@ -22,22 +20,27 @@ import javax.inject.Inject;
  */
 public class KaryonBootstrapSuite implements LifecycleInjectorBuilderSuite {
 
-    private final KaryonBootstrap karyonBootstrap;
+    private final Class<? extends HealthCheckHandler> healthcheckHandlerClass;
+    private final HealthCheckHandler healthcheckHandler;
+
+    public KaryonBootstrapSuite() {
+        this((HealthCheckHandler)null);
+    }
+
+    public KaryonBootstrapSuite(HealthCheckHandler healthcheckHandler) {
+        this.healthcheckHandler = null == healthcheckHandler ? new AlwaysHealthyHealthCheck() : healthcheckHandler;
+        healthcheckHandlerClass = null;
+    }
 
     @Inject
-    public KaryonBootstrapSuite(KaryonBootstrap karyonBootstrap) {
-        this.karyonBootstrap = karyonBootstrap;
+    KaryonBootstrapSuite(KaryonBootstrap karyonBootstrap) {
+        healthcheckHandlerClass = karyonBootstrap.healthcheck();
+        healthcheckHandler = null;
     }
 
     @Override
     public void configure(LifecycleInjectorBuilder builder) {
         builder.withMode(LifecycleInjectorMode.SIMULATED_CHILD_INJECTORS);
-        builder.withAdditionalBootstrapModules(new BootstrapModule() {
-            @Override
-            public void configure(BootstrapBinder bootstrapBinder) {
-                bootstrapBinder.bind(KaryonBootstrap.class).toInstance(karyonBootstrap);
-            }
-        });
         builder.withAdditionalModules(new AbstractModule() {
             @Override
             protected void configure() {
@@ -47,11 +50,15 @@ public class KaryonBootstrapSuite implements LifecycleInjectorBuilderSuite {
         });
     }
 
-    private void bindHealthCheckInvocationStrategy(AnnotatedBindingBuilder<HealthCheckInvocationStrategy> bindingBuilder) {
+    private static void bindHealthCheckInvocationStrategy(AnnotatedBindingBuilder<HealthCheckInvocationStrategy> bindingBuilder) {
         bindingBuilder.to(SyncHealthCheckInvocationStrategy.class);
     }
 
     protected void bindHealthCheck(LinkedBindingBuilder<HealthCheckHandler> bindingBuilder) {
-        bindingBuilder.to(AlwaysHealthyHealthCheck.class);
+        if (null != healthcheckHandlerClass) {
+            bindingBuilder.to(healthcheckHandlerClass);
+        } else {
+            bindingBuilder.toInstance(healthcheckHandler);
+        }
     }
 }

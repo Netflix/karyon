@@ -1,6 +1,7 @@
 package com.netflix.karyon.transport.interceptor;
 
 import com.netflix.karyon.transport.RequestRouter;
+import io.reactivex.netty.channel.Handler;
 import rx.Observable;
 import rx.Subscriber;
 import rx.subscriptions.SerialSubscription;
@@ -17,10 +18,25 @@ public class InterceptorExecutor<I, O, C extends KeyEvaluationContext> {
 
     private final List<InterceptorHolder<I, C, InboundInterceptor<I, O>>> allIn;
     private final List<InterceptorHolder<I, C, OutboundInterceptor<O>>> allOut;
-    private final RequestRouter<I, O> router;
+    private final Handler<I, O> router;
 
-    public InterceptorExecutor(AbstractInterceptorSupport<I, O, C, ?, ?> support, RequestRouter<I, O> router) {
+    public InterceptorExecutor(AbstractInterceptorSupport<I, O, C, ?, ?> support, Handler<I, O> router) {
         this.router = router;
+        allIn = support.getInboundInterceptors();
+        allOut = support.getOutboundInterceptors();
+    }
+
+    /**
+     * @deprecated Use {@link #InterceptorExecutor(AbstractInterceptorSupport, Handler)} instead.
+     */
+    @Deprecated
+    public InterceptorExecutor(AbstractInterceptorSupport<I, O, C, ?, ?> support, final RequestRouter<I, O> router) {
+        this.router = new Handler<I, O>() {
+            @Override
+            public Observable<Void> handle(I input, O output) {
+                return router.route(input, output);
+            }
+        };
         allIn = support.getInboundInterceptors();
         allOut = support.getOutboundInterceptors();
     }
@@ -42,7 +58,7 @@ public class InterceptorExecutor<I, O, C extends KeyEvaluationContext> {
         if (null != nextIn) {
             startingPoint = nextIn.in(request, response);
         } else if (context.invokeRouter()){
-            startingPoint = router.route(request, response);
+            startingPoint = router.handle(request, response);
         } else {
             return Observable.error(new IllegalStateException("No router defined.")); // No router defined.
         }
@@ -119,7 +135,7 @@ public class InterceptorExecutor<I, O, C extends KeyEvaluationContext> {
                             case NotExecuted:
                                 boolean apply = holder.getKey().apply(request, keyEvaluationContext);
                                 keyEvaluationContext.updateKeyEvaluationResult(holder.getKey(), apply);
-                                return returnNextInterceptor(request, holder);
+                                return nextIn(request);
                         }
                     }
             }
@@ -187,7 +203,7 @@ public class InterceptorExecutor<I, O, C extends KeyEvaluationContext> {
                 Observable<Void> interceptorResult = nextIn.in(request, response);
                 handleResult(interceptorResult);
             } else if (context.invokeRouter()) {
-                handleResult(router.route(request, response));
+                handleResult(router.handle(request, response));
             } else if (null != (nextOut = context.nextOut())) {
                 handleResult(nextOut.out(response));
             } else {

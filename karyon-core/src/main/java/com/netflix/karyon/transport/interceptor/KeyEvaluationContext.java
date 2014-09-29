@@ -1,20 +1,20 @@
 package com.netflix.karyon.transport.interceptor;
 
-import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.Channel;
 
 import java.util.HashMap;
 import java.util.Map;
 
 /**
- * A context to store results of costly operations during evaluation of filter keys, eg: request URI parsing. <p/>
+ * A context to store results of costly operations during evaluation of filter keys, eg: request URI parsing. <p></p>
  * <b>This context is not thread-safe.</b>
  */
 public class KeyEvaluationContext {
 
-    protected final ChannelHandlerContext channelHandlerContext;
+    protected final Channel channel;
 
-    public KeyEvaluationContext(ChannelHandlerContext channelHandlerContext) {
-        this.channelHandlerContext = channelHandlerContext;
+    public KeyEvaluationContext(Channel channel) {
+        this.channel = channel;
     }
 
     enum KeyEvaluationResult { Apply, Skip, NotExecuted }

@@ -1,52 +1,30 @@
 package com.netflix.karyon;
 
-import com.google.inject.Injector;
-import com.google.inject.Key;
-import com.google.inject.TypeLiteral;
-import com.netflix.governator.guice.LifecycleInjector;
-import com.netflix.karyon.transport.http.ServerBootstrap;
-import io.netty.buffer.ByteBuf;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 /**
- * @author Nitesh Kant
+ * A logical abstraction to manage the lifecycle of a karyon based application.
+ * This does not define any contracts of handling and processing requests, those should all be defined by means of
+ * modules.
  */
-public class KaryonServer {
+public interface KaryonServer {
 
-    private static final Logger logger = LoggerFactory.getLogger(KaryonServer.class);
+    /**
+     * Starts the server and hence the modules associated with this server.
+     */
+    void start();
 
-    private final Class<?> mainClass;
+    /**
+     * Shutdown the server and hence the modules associated with this server.
+     */
+    void shutdown();
 
-    public KaryonServer(Class<?> mainClass) {
-        this.mainClass = mainClass;
-    }
+    /**
+     * A utility method to block the caller thread till the server is shutdown (by external invocation).
+     * <b>This method does not start or shutdown the server. It just waits for shutdown.</b>
+     */
+    void waitTillShutdown();
 
-    public void startAndAwait() throws Exception {
-        Injector injector = LifecycleInjector.bootstrap(mainClass);
-        TypeLiteral<ServerBootstrap<ByteBuf, ByteBuf>> bootstrapTypeLiteral = new TypeLiteral<ServerBootstrap<ByteBuf, ByteBuf>>() {};
-        ServerBootstrap<ByteBuf, ByteBuf> serverBootstrap = injector.getInstance(Key.get(bootstrapTypeLiteral));
-        serverBootstrap.startServerAndWait();
-    }
-
-    public static void main(String[] args) {
-        if (args.length == 0) {
-            System.out.println("Usage: " + KaryonServer.class.getCanonicalName() + " <main classs name>");
-            System.exit(-1);
-        }
-
-        String mainClassName = args[0];
-        System.out.println("Using main class: " + mainClassName);
-
-        KaryonServer server;
-        try {
-            server = new KaryonServer(Class.forName(mainClassName));
-            server.startAndAwait();
-        } catch (ClassNotFoundException e) {
-            System.out.println("Main class: " + mainClassName + "not found.");
-            System.exit(-1);
-        } catch (Exception e) {
-            logger.error("Error while starting karyon server.", e);
-        }
-    }
+    /**
+     * A shorthand for calling {@link #start()} and {@link #waitTillShutdown()}
+     */
+    void startAndWaitTillShutdown();
 }

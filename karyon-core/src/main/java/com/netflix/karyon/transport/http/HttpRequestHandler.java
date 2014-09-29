@@ -16,10 +16,27 @@ public class HttpRequestHandler<I, O> implements RequestHandler<I, O> {
 
     private final InterceptorExecutor<HttpServerRequest<I>, HttpServerResponse<O>, HttpKeyEvaluationContext> executor;
 
+    public HttpRequestHandler(RequestHandler<I, O> router) {
+        this(router, new HttpInterceptorSupport<I, O>());
+    }
+
+    public HttpRequestHandler(RequestHandler<I, O> router,
+                              AbstractInterceptorSupport<HttpServerRequest<I>, HttpServerResponse<O>, HttpKeyEvaluationContext, ?, ?> interceptorSupport) {
+        executor = new InterceptorExecutor<HttpServerRequest<I>, HttpServerResponse<O>, HttpKeyEvaluationContext>(interceptorSupport, router);
+    }
+
+    /**
+     * @deprecated Use {@link #HttpRequestHandler(RequestHandler)} instead.
+     */
+    @Deprecated
     public HttpRequestHandler(HttpRequestRouter<I, O> router) {
         this(router, new HttpInterceptorSupport<I, O>());
     }
 
+    /**
+     * @deprecated Use {@link #HttpRequestHandler(RequestHandler, AbstractInterceptorSupport)} instead.
+     */
+    @Deprecated
     public HttpRequestHandler(HttpRequestRouter<I, O> router,
                               AbstractInterceptorSupport<HttpServerRequest<I>, HttpServerResponse<O>, HttpKeyEvaluationContext, ?, ?> interceptorSupport) {
         executor = new InterceptorExecutor<HttpServerRequest<I>, HttpServerResponse<O>, HttpKeyEvaluationContext>(interceptorSupport, router);
@@ -27,6 +44,6 @@ public class HttpRequestHandler<I, O> implements RequestHandler<I, O> {
 
     @Override
     public Observable<Void> handle(HttpServerRequest<I> request, HttpServerResponse<O> response) {
-        return executor.execute(request, response, new HttpKeyEvaluationContext(response.getChannelHandlerContext()));
+        return executor.execute(request, response, new HttpKeyEvaluationContext(response.getChannel()));
     }
 }

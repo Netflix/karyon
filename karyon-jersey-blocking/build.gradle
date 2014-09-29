@@ -31,8 +31,8 @@ dependencies {
     compile project(':karyon-governator')
     compile 'com.google.guava:guava:11.0.2'
     compile 'com.netflix.archaius:archaius-core:0.6.0'
-    compile 'com.sun.jersey:jersey-core:1.18.1'
-    compile 'com.sun.jersey.contribs:jersey-guice:1.18.1'
-    compile 'com.sun.jersey:jersey-servlet:1.18.1'
-    compile 'com.sun.jersey:jersey-server:1.18.1'
+    compile "com.sun.jersey:jersey-core:${jersey_version}"
+    compile "com.sun.jersey.contribs:jersey-guice:${jersey_version}"
+    compile "com.sun.jersey:jersey-servlet:${jersey_version}"
+    compile "com.sun.jersey:jersey-server:${jersey_version}"
 }
