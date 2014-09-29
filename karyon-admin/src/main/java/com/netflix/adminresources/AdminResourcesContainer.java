@@ -119,10 +119,17 @@ public class AdminResourcesContainer {
                 .builder()
                 .usingBasePackages("com.netflix.explorers")
                 .withModules(new AdminResourcesModule(strategy, handlerProvider)).createInjector();
+        injector.getInstance(LifecycleManager.class).start();
+
         try {
-            injector.getInstance(LifecycleManager.class).start();
+
+            AdminPageRegistry baseServerPageRegistry = injector.getInstance(AdminPageRegistry.class);
+            baseServerPageRegistry.registerAdminPagesWithClasspathScan();
+            final String jerseyResourcePkgsForAdminPages = baseServerPageRegistry.buildJerseyResourcePkgListForAdminPages();
+            final String jerseyResourcePkgList = buildJerseyResourcePkgList(jerseyResourcePkgsForAdminPages);
+
             AdminResourcesFilter adminResourcesFilter = injector.getInstance(AdminResourcesFilter.class);
-            adminResourcesFilter.setPackages(coreJerseyPackages);
+            adminResourcesFilter.setPackages(jerseyResourcePkgList);
 
             ServletContextHandler handler = new ServletContextHandler();
             handler.setContextPath("/");
@@ -138,6 +145,15 @@ public class AdminResourcesContainer {
         } catch (Exception e) {
             logger.error("Exception in building AdminResourcesContainer ", e);
         }
+    }
+
+    private String buildJerseyResourcePkgList(String jerseyResourcePkgListForAdminPages) {
+        String pkgPath = coreJerseyPackages;
+        if (jerseyResourcePkgListForAdminPages != null && !jerseyResourcePkgListForAdminPages.isEmpty()) {
+            pkgPath += ";" + jerseyResourcePkgListForAdminPages;
+        }
+
+        return pkgPath;
     }
 
     @PreDestroy
