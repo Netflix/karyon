@@ -37,6 +37,9 @@ dependencies {
     compile project(':karyon-eureka')
     compile project(':karyon-archaius')
     compile project(':karyon-servo')
+
+    compile 'com.sun.jersey:jersey-core:1.17.1'
+
     compile 'org.codehaus.jettison:jettison:1.2'
     compile 'com.google.inject:guice:3.0'
     compile 'org.slf4j:slf4j-api:1.7.0'

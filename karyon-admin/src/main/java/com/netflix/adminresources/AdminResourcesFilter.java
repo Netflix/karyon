@@ -3,10 +3,12 @@ package com.netflix.adminresources;
 import com.google.common.collect.Maps;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
+import com.netflix.explorers.providers.FreemarkerTemplateProvider;
 import com.sun.jersey.api.core.PackagesResourceConfig;
 import com.sun.jersey.api.core.ResourceConfig;
 import com.sun.jersey.guice.spi.container.servlet.GuiceContainer;
 import com.sun.jersey.spi.container.servlet.WebConfig;
+import netflix.admin.AdminFreemarkerTemplateProvider;
 
 import javax.inject.Inject;
 import javax.servlet.ServletException;
@@ -16,6 +18,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.net.URI;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * This class is a minimal simulation of GuiceFilter. Due to the number of
@@ -69,6 +72,15 @@ class AdminResourcesFilter extends GuiceContainer {
     protected ResourceConfig getDefaultResourceConfig(Map<String, Object> props,
                                                       WebConfig webConfig) throws ServletException {
         props.put(PackagesResourceConfig.PROPERTY_PACKAGES, packages);
-        return new PackagesResourceConfig(props);
+        return new PackagesResourceConfig(props) {
+            @Override
+            public Set<Class<?>> getProviderClasses() {
+                Set<Class<?>> providers = super.getProviderClasses();
+                // remove conflicting provider if present
+                providers.remove(FreemarkerTemplateProvider.class);
+                providers.add(AdminFreemarkerTemplateProvider.class);
+                return providers;
+            }
+        };
     }
 }

@@ -33,7 +33,7 @@ dependencies {
         compile 'com.sun.jersey.contribs:jersey-guice:1.11'
         compile 'com.sun.jersey:jersey-servlet:1.11'
         compile 'com.google.inject.extensions:guice-servlet:3.0'
-        compile 'com.netflix.pytheas:pytheas-core:1.11'
+        compile 'com.netflix.pytheas:pytheas-core:1.20'
         runtime 'org.codehaus.jackson:jackson-mapper-asl:1.9.11'
     }
 }

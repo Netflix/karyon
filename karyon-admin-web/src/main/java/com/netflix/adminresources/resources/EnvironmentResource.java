@@ -44,8 +44,8 @@ public class EnvironmentResource {
         Map<String,String> envVarsMap = new HashMap<String,String>(System.getenv());
         
         // mask the specified properties if they're in the envVarsMap
-        Set<String> maskedResources = MaskedResourceHelper.getMaskedResourceSet();
-    	Iterator<String> maskedResourcesIter = maskedResources.iterator();		
+        Set<String> maskedProperties = MaskedResourceHelper.getMaskedPropertiesSet();
+    	Iterator<String> maskedResourcesIter = maskedProperties.iterator();
     	while (maskedResourcesIter.hasNext()) {			
     		String maskedResource = maskedResourcesIter.next();
         	if (envVarsMap.containsKey(maskedResource)) {

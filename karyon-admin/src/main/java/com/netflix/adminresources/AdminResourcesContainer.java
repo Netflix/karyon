@@ -16,6 +16,7 @@
 
 package com.netflix.adminresources;
 
+import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
 import com.google.inject.Provider;
 import com.netflix.adminresources.resources.EmbeddedContentResource;
@@ -78,7 +79,7 @@ public class AdminResourcesContainer {
     public static final String CONTAINER_LISTEN_PORT = "netflix.platform.admin.resources.port";
     public static final int LISTEN_PORT_DEFAULT = 8077;
     private static final String JERSEY_CORE_PACKAGES = "netflix.platform.admin.resources.core.packages";
-    public static final String JERSEY_CORE_PACKAGES_DEFAULT = "com.netflix.adminresources;com.netflix.explorers.resources;com.netflix.explorers.providers";
+    public static final String JERSEY_CORE_PACKAGES_DEFAULT = "com.netflix.adminresources;com.netflix.explorers.resources;com.netflix.explorers.providers;netflix.admin";
 
     @Configuration(
             value = JERSEY_CORE_PACKAGES,
@@ -118,7 +119,14 @@ public class AdminResourcesContainer {
         Injector injector = LifecycleInjector
                 .builder()
                 .usingBasePackages("com.netflix.explorers")
-                .withModules(new AdminResourcesModule(strategy, handlerProvider)).createInjector();
+                .withAdditionalModules(new AbstractModule() {
+                    @Override
+                    protected void configure() {
+                        bind(HealthCheckInvocationStrategy.class).toProvider(strategy);
+                        bind(HealthCheckHandler.class).toProvider(handlerProvider);
+                    }
+                })
+                .createInjector();
         injector.getInstance(LifecycleManager.class).start();
 
         try {
