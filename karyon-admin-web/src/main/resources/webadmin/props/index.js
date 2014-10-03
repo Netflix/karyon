@@ -26,7 +26,7 @@ $(document).ready(function () {
         "bServerSide"    : true,
         "bProcessing"    : true,
         "sPaginationType": "bootstrap",
-        "iDisplayLength" : 10,
+        "iDisplayLength" : 50,
         "bDestroy"       : true,
         "bFilter"        : true,
         "bAutoWidth"     : false,

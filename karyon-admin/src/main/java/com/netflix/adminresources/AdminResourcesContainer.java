@@ -119,11 +119,12 @@ public class AdminResourcesContainer {
         Injector injector = LifecycleInjector
                 .builder()
                 .usingBasePackages("com.netflix.explorers")
-                .withAdditionalModules(new AbstractModule() {
+                .withModules(new AbstractModule() {
                     @Override
                     protected void configure() {
                         bind(HealthCheckInvocationStrategy.class).toProvider(strategy);
                         bind(HealthCheckHandler.class).toProvider(handlerProvider);
+                        bind(AdminResourcesFilter.class).asEagerSingleton();
                     }
                 })
                 .createInjector();
