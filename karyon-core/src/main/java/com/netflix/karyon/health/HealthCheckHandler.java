@@ -16,6 +16,7 @@
 
 package com.netflix.karyon.health;
 
+
 /**
  * This is an extension to the <a href="https://github.com/Netflix/eureka/blob/master/eureka-client/src/main/java/com/netflix/appinfo/HealthCheckCallback.java">callback handler </a>
  * in <a href="https://github.com/Netflix/eureka/">eureka</a> to provide a

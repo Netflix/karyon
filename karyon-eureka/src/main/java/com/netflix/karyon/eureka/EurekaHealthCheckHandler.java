@@ -16,31 +16,30 @@
 
 package com.netflix.karyon.eureka;
 
-import com.netflix.appinfo.InstanceInfo;
-import com.netflix.karyon.health.HealthCheckHandler;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import javax.inject.Inject;
+
+import com.netflix.appinfo.InstanceInfo;
+import com.netflix.karyon.health.HealthCheckInvoker;
+import com.netflix.karyon.health.HealthCheckRegistry;
 
 /**
  * @author Nitesh Kant
  */
 public class EurekaHealthCheckHandler implements com.netflix.appinfo.HealthCheckHandler {
 
-    private final HealthCheckHandler healthCheckHandler;
-    private final EurekaKaryonStatusBridge eurekaKaryonStatusBridge;
+    private final HealthCheckRegistry registry;
+    private HealthCheckInvoker invoker;
+    private EurekaHealthCheckResolver resolver;
 
     @Inject
-    public EurekaHealthCheckHandler(HealthCheckHandler healthCheckHandler,
-                                    EurekaKaryonStatusBridge eurekaKaryonStatusBridge) {
-        this.healthCheckHandler = healthCheckHandler;
-        this.eurekaKaryonStatusBridge = eurekaKaryonStatusBridge;
+    public EurekaHealthCheckHandler(HealthCheckRegistry registry, HealthCheckInvoker invoker, EurekaHealthCheckResolver resolver) {
+        this.registry = registry;
+        this.invoker = invoker;
+        this.resolver = resolver;
     }
 
     @Override
     public InstanceInfo.InstanceStatus getStatus(InstanceInfo.InstanceStatus currentStatus) {
-        int healthStatus = healthCheckHandler.getStatus();
-        return eurekaKaryonStatusBridge.interpretKaryonStatus(healthStatus);
+        return resolver.resolve(invoker.invoke(registry.getHealthChecks()));
     }
 }
