@@ -11,6 +11,7 @@ import com.netflix.discovery.EurekaNamespace;
 import com.netflix.discovery.providers.DefaultEurekaClientConfigProvider;
 import com.netflix.governator.guice.LifecycleInjectorBuilder;
 import com.netflix.governator.guice.LifecycleInjectorBuilderSuite;
+import com.netflix.karyon.health.HealthCheckRegistry;
 
 /**
  * @author Nitesh Kant
@@ -22,6 +23,7 @@ public class KaryonEurekaModule extends AbstractModule {
         bind(com.netflix.appinfo.HealthCheckHandler.class).to(EurekaHealthCheckHandler.class);
         bind(ApplicationInfoManager.class).asEagerSingleton();
         bind(DiscoveryClient.class).asEagerSingleton();
+        bind(HealthCheckRegistry.class).to(DefaultHealthCheckRegistry.class);
 
         configureEureka();
     }

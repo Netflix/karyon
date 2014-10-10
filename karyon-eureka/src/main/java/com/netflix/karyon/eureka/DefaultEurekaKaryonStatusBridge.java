@@ -5,6 +5,7 @@ import com.netflix.appinfo.InstanceInfo;
 /**
  * @author Nitesh Kant
  */
+@Deprecated
 public class DefaultEurekaKaryonStatusBridge implements EurekaKaryonStatusBridge {
 
     @Override
