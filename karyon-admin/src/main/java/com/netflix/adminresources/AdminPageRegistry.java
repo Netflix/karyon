@@ -112,7 +112,13 @@ public class AdminPageRegistry {
 
     private boolean derivedFromAbstractBaseServePageInfo(Class<?> baseServerAdminPageClass) {
         Class<?> superClass = baseServerAdminPageClass.getSuperclass();
-        return superClass.equals(AbstractAdminPageInfo.class);
+        while (superClass != null) {
+            if (superClass.equals(AbstractAdminPageInfo.class)) {
+                return true;
+            }
+            superClass = superClass.getSuperclass();
+        }
+        return false;
     }
 
 }

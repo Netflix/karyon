@@ -47,6 +47,11 @@ public class AdminPageResource {
         Map<String, Object> model = new HashMap<String, Object>();
         model.put("id", id);
         model.put("instance_hostname", getInstanceHostName(id));
+
+        if (adminPageRegistry != null && adminPageRegistry.getPageInfo(view) != null) {
+           return new Viewable(adminPageRegistry.getPageInfo(view).getPageTemplate(), model);
+        }
+
         return new Viewable("/webadmin/" + view + "/index.ftl", model);
     }
 

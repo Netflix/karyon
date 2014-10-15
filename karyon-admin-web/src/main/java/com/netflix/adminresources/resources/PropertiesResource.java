@@ -20,15 +20,14 @@ import com.google.common.annotations.Beta;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.inject.Inject;
-import com.netflix.adminresources.resources.model.Property;
 import com.netflix.adminresources.tableview.DataTableHelper;
-import com.netflix.config.ConcurrentCompositeConfiguration;
-import com.netflix.config.ConfigurationManager;
-import org.codehaus.jettison.json.JSONObject;
+import com.netflix.adminresources.tableview.PropsTableView;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.ws.rs.*;
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
 import javax.ws.rs.core.*;
 
 @Beta
@@ -38,7 +37,7 @@ public class PropertiesResource {
     private static final Logger LOG = LoggerFactory.getLogger(PropertiesResource.class);
 
     @Inject(optional = true)
-    private PropsTableViewResource adminPropsResource;
+    private PropsTableView adminPropsResource;
 
     @GET
     public Response getProperties(@Context UriInfo uriInfo) {
