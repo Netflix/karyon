@@ -146,23 +146,75 @@ public class PropsTableView implements TableViewResource {
 
     private List<Property> applyFilter(List<Property> propsCurrentPage) {
         if (allColumnSearchTerm != null && !allColumnSearchTerm.isEmpty()) {
-            final String searchTermLowerCase = allColumnSearchTerm.toLowerCase();
-
-            List<Property> filteredList = Lists.newArrayList();
-            int index = 0;
-            for (Property property : propsCurrentPage) {
-                String propName = property.getName().toLowerCase();
-                String propValue = property.getValue().toLowerCase();
-
-                if (propName.contains(searchTermLowerCase) || propValue.contains(searchTermLowerCase)) {
-                    filteredList.add(property);
-                    index++;
-                }
-            }
-            numFilteredRecords = index;
-            return filteredList;
+            return applyAllColumnsFilter(propsCurrentPage);
+        } else if (columnSearchTermExists()) {
+            return applyColumnFilters(propsCurrentPage);
         }
         return propsCurrentPage;
+    }
+
+    private List<Property> applyColumnFilters(List<Property> propsCurrentPage) {
+        final String propKeySearchTerm = getPropKeySearchTerm();
+        final String propValueSearchTerm = getPropValueSearchTerm();
+
+        List<Property> filteredList = Lists.newArrayList();
+        int index = 0;
+        for (Property property : propsCurrentPage) {
+            String propName = property.getName().toLowerCase();
+            String propValue = property.getValue().toLowerCase();
+
+            boolean matched = true;
+            if (propKeySearchTerm != null) {
+                matched = propName.contains(propKeySearchTerm);
+            }
+
+            if (propValueSearchTerm != null) {
+                matched = matched && (propValue.contains(propValueSearchTerm));
+            }
+
+            if (matched) {
+                filteredList.add(property);
+                index++;
+            }
+        }
+        numFilteredRecords = index;
+        return filteredList;
+    }
+
+    private List<Property> applyAllColumnsFilter(List<Property> propsCurrentPage) {
+        final String searchTermLowerCase = allColumnSearchTerm.toLowerCase();
+
+        List<Property> filteredList = Lists.newArrayList();
+        int index = 0;
+        for (Property property : propsCurrentPage) {
+            String propName = property.getName().toLowerCase();
+            String propValue = property.getValue().toLowerCase();
+
+            if (propName.contains(searchTermLowerCase) || propValue.contains(searchTermLowerCase)) {
+                filteredList.add(property);
+                index++;
+            }
+        }
+        numFilteredRecords = index;
+        return filteredList;
+    }
+
+    private boolean columnSearchTermExists() {
+        for (Map.Entry<String, Column> columnEntry : columnMap.entrySet()) {
+            final Column col = columnEntry.getValue();
+            if (col.searchTerm != null) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private String getPropKeySearchTerm() {
+        return columnMap.get(KEY).searchTerm;
+    }
+
+    private String getPropValueSearchTerm() {
+        return columnMap.get(VALUE).searchTerm;
     }
 
     private List<Property> applySorting(List<Property> propsFiltered) {
