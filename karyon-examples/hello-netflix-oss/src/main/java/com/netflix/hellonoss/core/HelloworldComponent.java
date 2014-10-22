@@ -18,6 +18,8 @@ package com.netflix.hellonoss.core;
 
 import com.google.inject.Singleton;
 import com.netflix.karyon.spi.Component;
+import com.netflix.config.DynamicBooleanProperty;
+import com.netflix.config.DynamicPropertyFactory;
 
 import javax.annotation.PostConstruct;
 
@@ -30,10 +32,13 @@ public class HelloworldComponent {
 
     private String helloString = "I am a component";
     private boolean isReady;
+    
+    static DynamicBooleanProperty initialState = DynamicPropertyFactory.getInstance().getBooleanProperty("com.netflix.hellonoss.core.HelloComponent.initialState", false);
 
     @PostConstruct
     public void initialize() {
         // TODO: Initialization logic, eg: connection to DB etc.
+    	isReady = initialState.get();
     }
 
     public String getHelloString() {
