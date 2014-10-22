@@ -1,22 +1,4 @@
-// Establish version and status
-ext.githubProjectName = rootProject.name // Change if github project name is not the same as the root project's name
-
-buildscript {
-    repositories { mavenCentral() }
-    apply from: file('../../gradle/buildscript.gradle'), to: buildscript
-}
-
-allprojects {
-    repositories { mavenCentral() }
-}
-
-apply from: file('../../gradle/convention.gradle')
-apply from: file('../../gradle/maven.gradle')
-apply from: file('../../gradle/check.gradle')
-apply from: file('../../gradle/license.gradle')
-
 apply plugin: 'war'
-apply plugin: 'jetty'
 
 war {
     from('resources')  {
@@ -45,6 +27,7 @@ dependencies {
     }
 }
 
+apply plugin: 'jetty'
 jettyRun.doFirst {
     // use the default port of the ws-backend-simulation module
     System.setProperty("archaius.deployment.applicationId","hello-netflix-oss")
