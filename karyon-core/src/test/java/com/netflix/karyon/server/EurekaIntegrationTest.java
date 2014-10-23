@@ -17,10 +17,13 @@
 package com.netflix.karyon.server;
 
 import com.netflix.appinfo.InstanceInfo;
+import com.netflix.config.ConcurrentCompositeConfiguration;
+import com.netflix.config.ConfigurationManager;
 import com.netflix.discovery.DiscoveryManager;
 import com.netflix.karyon.spi.PropertyNames;
 import com.netflix.karyon.util.EurekaResourceMock;
 import com.netflix.karyon.util.KaryonTestSetupUtil;
+
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -86,6 +89,8 @@ public class EurekaIntegrationTest {
     }
 
     private void startServer() throws Exception {
+        ((ConcurrentCompositeConfiguration) ConfigurationManager.getConfigInstance())
+        .setOverrideProperty(KaryonTestSetupUtil.CONTAINER_LISTEN_PORT, KaryonTestSetupUtil.TESTCASE_LISTEN_PORT);
         server = new KaryonServer();
         server.initialize();
         server.start();
@@ -93,5 +98,7 @@ public class EurekaIntegrationTest {
 
     private void shutdownServer() throws Exception {
         server.close();
+        ((ConcurrentCompositeConfiguration) ConfigurationManager.getConfigInstance())
+        .clearProperty(KaryonTestSetupUtil.CONTAINER_LISTEN_PORT);
     }
 }

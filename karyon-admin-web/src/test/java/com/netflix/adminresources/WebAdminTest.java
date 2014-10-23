@@ -37,9 +37,11 @@ import org.slf4j.LoggerFactory;
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Injector;
 import com.netflix.adminresources.resources.MaskedResourceHelper;
+import com.netflix.config.ConcurrentCompositeConfiguration;
 import com.netflix.config.ConfigurationManager;
 import com.netflix.karyon.server.KaryonServer;
 import com.netflix.karyon.spi.PropertyNames;
+import com.netflix.karyon.util.KaryonTestSetupUtil;
 
 /**
  * @author Amit Joshi
@@ -50,16 +52,16 @@ public class WebAdminTest {
     private static KaryonServer server;
 
     private static final Map<String, String> REST_END_POINTS = new ImmutableMap.Builder<String, String>()
-            .put("http://localhost:8077/webadmin/props", MediaType.APPLICATION_JSON)
-            .put("http://localhost:8077/admin/props", MediaType.TEXT_HTML)
-            .put("http://localhost:8077/admin/env", MediaType.TEXT_HTML)
-            .put("http://localhost:8077/webadmin/env", MediaType.APPLICATION_JSON)
-            .put("http://localhost:8077/admin/jars", MediaType.TEXT_HTML)
-            .put("http://localhost:8077/webadmin/jars", MediaType.APPLICATION_JSON)
-            .put("http://localhost:8077/webadmin/jmx?key=root&_=1366497431351", MediaType.APPLICATION_JSON)
-            .put("http://localhost:8077/admin/jmx", MediaType.TEXT_HTML)
-            .put("http://localhost:8077/admin/eureka", MediaType.TEXT_HTML)
-            .put("http://localhost:8077/webadmin/eureka", MediaType.APPLICATION_JSON)
+            .put("http://localhost:" + KaryonTestSetupUtil.TESTCASE_LISTEN_PORT + "/webadmin/props", MediaType.APPLICATION_JSON)
+            .put("http://localhost:" + KaryonTestSetupUtil.TESTCASE_LISTEN_PORT + "/admin/props", MediaType.TEXT_HTML)
+            .put("http://localhost:" + KaryonTestSetupUtil.TESTCASE_LISTEN_PORT + "/admin/env", MediaType.TEXT_HTML)
+            .put("http://localhost:" + KaryonTestSetupUtil.TESTCASE_LISTEN_PORT + "/webadmin/env", MediaType.APPLICATION_JSON)
+            .put("http://localhost:" + KaryonTestSetupUtil.TESTCASE_LISTEN_PORT + "/admin/jars", MediaType.TEXT_HTML)
+            .put("http://localhost:" + KaryonTestSetupUtil.TESTCASE_LISTEN_PORT + "/webadmin/jars", MediaType.APPLICATION_JSON)
+            .put("http://localhost:" + KaryonTestSetupUtil.TESTCASE_LISTEN_PORT + "/webadmin/jmx?key=root&_=1366497431351", MediaType.APPLICATION_JSON)
+            .put("http://localhost:" + KaryonTestSetupUtil.TESTCASE_LISTEN_PORT + "/admin/jmx", MediaType.TEXT_HTML)
+            .put("http://localhost:" + KaryonTestSetupUtil.TESTCASE_LISTEN_PORT + "/admin/eureka", MediaType.TEXT_HTML)
+            .put("http://localhost:" + KaryonTestSetupUtil.TESTCASE_LISTEN_PORT + "/webadmin/eureka", MediaType.APPLICATION_JSON)
             .build();
 
     @BeforeClass
@@ -69,6 +71,8 @@ public class WebAdminTest {
         System.setProperty("AWS_SECRET_KEY", "super-secret-aws-key");
         System.setProperty("AWS_ACCESS_ID", "super-aws-access-id");
         System.setProperty(MaskedResourceHelper.MASKED_PROPERTY_NAMES, "AWS_SECRET_KEY");
+        ((ConcurrentCompositeConfiguration) ConfigurationManager.getConfigInstance())
+            .setOverrideProperty(AdminResourcesContainer.CONTAINER_LISTEN_PORT, KaryonTestSetupUtil.TESTCASE_LISTEN_PORT);
 
         startServer();
     }
@@ -80,6 +84,8 @@ public class WebAdminTest {
         ConfigurationManager.getConfigInstance().clearProperty("AWS_SECRET_KEY");
         ConfigurationManager.getConfigInstance().clearProperty("AWS_ACCESS_ID");
         ConfigurationManager.getConfigInstance().clearProperty(MaskedResourceHelper.MASKED_PROPERTY_NAMES);
+        ((ConcurrentCompositeConfiguration) ConfigurationManager.getConfigInstance())
+        .clearProperty(AdminResourcesContainer.CONTAINER_LISTEN_PORT);
 
         if (server != null) {
             server.close();
@@ -106,7 +112,7 @@ public class WebAdminTest {
     @Test
     public void testMaskedResources() throws Exception {
         HttpClient client = new DefaultHttpClient();
-    	final String endPoint = "http://localhost:8077/webadmin/props";
+    	final String endPoint = "http://localhost:" + KaryonTestSetupUtil.TESTCASE_LISTEN_PORT + "/webadmin/props";
         LOG.info("REST endpoint " + endPoint);
         HttpGet restGet = new HttpGet(endPoint);
         HttpResponse response = client.execute(restGet);
