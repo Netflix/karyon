@@ -1,8 +1,12 @@
 package com.netflix.karyon.server;
 
+import com.netflix.config.ConcurrentCompositeConfiguration;
+import com.netflix.config.ConfigurationManager;
 import com.netflix.karyon.spi.ServiceRegistryClient;
 import com.netflix.karyon.util.KaryonTestSetupUtil;
+
 import junit.framework.Assert;
+
 import org.junit.Test;
 
 /**
@@ -14,6 +18,8 @@ public class CustomServiceRegistryTest {
     public void testCustomServiceRegistry() throws Exception {
         KaryonTestSetupUtil.setUp();
         CustomBootstrap bootstrap = new CustomBootstrap();
+        ((ConcurrentCompositeConfiguration) ConfigurationManager.getConfigInstance())
+        .setOverrideProperty(KaryonTestSetupUtil.CONTAINER_LISTEN_PORT, KaryonTestSetupUtil.TESTCASE_LISTEN_PORT);
         KaryonServer server = new KaryonServer(bootstrap);
         server.initialize();
         server.start();
@@ -21,6 +27,8 @@ public class CustomServiceRegistryTest {
         Assert.assertTrue("Custom service client not called with status up", InMemRegistry.receivedUp);
 
         KaryonTestSetupUtil.tearDown(server);
+        ((ConcurrentCompositeConfiguration) ConfigurationManager.getConfigInstance())
+        .clearProperty(KaryonTestSetupUtil.CONTAINER_LISTEN_PORT);
 
         Assert.assertTrue("Custom service client not called with status down", InMemRegistry.receivedDown);
     }

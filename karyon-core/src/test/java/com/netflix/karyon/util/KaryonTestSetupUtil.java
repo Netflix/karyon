@@ -27,6 +27,10 @@ import com.test.RegistrationSequence;
  * @author Nitesh Kant
  */
 public class KaryonTestSetupUtil {
+	// Avoid using 8077 as some test servers already have Karyon based sidecars listening on port 8077
+	public static final String TESTCASE_LISTEN_PORT = "18077";
+	// Included here so not everyone has to depend on karyon-admin com.netflix.adminresources.AdminResourcesContainer
+	public static final String CONTAINER_LISTEN_PORT = "netflix.platform.admin.resources.port";
 
     public static void setUp() throws Exception {
         System.setProperty(PropertyNames.SERVER_BOOTSTRAP_BASE_PACKAGES_OVERRIDE, "com.test");
@@ -37,11 +41,13 @@ public class KaryonTestSetupUtil {
         ConfigurationManager.getConfigInstance().clearProperty(PropertyNames.SERVER_BOOTSTRAP_BASE_PACKAGES_OVERRIDE);
         ConfigurationManager.getConfigInstance().clearProperty(PropertyNames.DISABLE_APPLICATION_DISCOVERY_PROP_NAME);
         ConfigurationManager.getConfigInstance().clearProperty(PropertyNames.EXPLICIT_APPLICATION_CLASS_PROP_NAME);
+        clearOverrideProperties(CONTAINER_LISTEN_PORT);
         RegistrationSequence.reset();
         server.close();
     }
 
     public static Injector startServer(KaryonServer server) throws Exception {
+    	setOverrideProperty(CONTAINER_LISTEN_PORT, TESTCASE_LISTEN_PORT);
         Injector injector = server.initialize();
         server.start();
         return injector;
@@ -55,4 +61,5 @@ public class KaryonTestSetupUtil {
         ((ConcurrentCompositeConfiguration) ConfigurationManager.getConfigInstance())
                 .setOverrideProperty(name, value);
     }
+
 }

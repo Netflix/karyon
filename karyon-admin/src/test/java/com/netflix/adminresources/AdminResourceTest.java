@@ -22,6 +22,8 @@ import com.netflix.config.ConfigurationManager;
 import com.netflix.karyon.server.KaryonServer;
 import com.netflix.karyon.server.eureka.SyncHealthCheckInvocationStrategy;
 import com.netflix.karyon.spi.PropertyNames;
+import com.netflix.karyon.util.KaryonTestSetupUtil;
+
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
@@ -59,11 +61,15 @@ public class AdminResourceTest {
 
     @Test
     public void testBasic() throws Exception {
+        ((ConcurrentCompositeConfiguration) ConfigurationManager.getConfigInstance())
+            .setOverrideProperty(AdminResourcesContainer.CONTAINER_LISTEN_PORT, KaryonTestSetupUtil.TESTCASE_LISTEN_PORT);
         startServer();
         HttpClient client = new DefaultHttpClient();
         HttpGet healthGet =
-                new HttpGet("http://localhost:" + AdminResourcesContainer.LISTEN_PORT_DEFAULT + "/healthcheck");
+                new HttpGet("http://localhost:" + KaryonTestSetupUtil.TESTCASE_LISTEN_PORT + "/healthcheck");
         HttpResponse response = client.execute(healthGet);
+        ((ConcurrentCompositeConfiguration) ConfigurationManager.getConfigInstance())
+        .clearProperty(AdminResourcesContainer.CONTAINER_LISTEN_PORT);
         Assert.assertEquals("admin resource health check failed.", 200, response.getStatusLine().getStatusCode());
     }
 
@@ -73,10 +79,12 @@ public class AdminResourceTest {
                 .setOverrideProperty(AdminResourcesContainer.CONTAINER_LISTEN_PORT, CUSTOM_LISTEN_PORT);
         startServer();
         HttpClient client = new DefaultHttpClient();
-        HttpGet healthGet = new HttpGet("http://localhost:"+ AdminResourcesContainer.LISTEN_PORT_DEFAULT + "/healthcheck");
+        HttpGet healthGet = new HttpGet("http://localhost:" + KaryonTestSetupUtil.TESTCASE_LISTEN_PORT + "/healthcheck");
         client.execute(healthGet);
+        ((ConcurrentCompositeConfiguration) ConfigurationManager.getConfigInstance())
+        .clearProperty(AdminResourcesContainer.CONTAINER_LISTEN_PORT);
         throw new AssertionError("Admin container did not bind to the custom port " + CUSTOM_LISTEN_PORT +
-                                 ", instead listened to default port: " + AdminResourcesContainer.LISTEN_PORT_DEFAULT);
+                                 ", instead listened to default port: " + KaryonTestSetupUtil.TESTCASE_LISTEN_PORT);
     }
 
     private Injector startServer() throws Exception {
