@@ -17,12 +17,12 @@
 package com.netflix.adminresources;
 
 import com.google.inject.Provider;
-import com.netflix.config.ConcurrentCompositeConfiguration;
 import com.netflix.config.ConfigurationManager;
 import com.netflix.karyon.health.AlwaysHealthyHealthCheck;
 import com.netflix.karyon.health.HealthCheckHandler;
 import com.netflix.karyon.health.HealthCheckInvocationStrategy;
 import com.netflix.karyon.health.SyncHealthCheckInvocationStrategy;
+import org.apache.commons.configuration.AbstractConfiguration;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
@@ -40,8 +40,8 @@ public class AdminResourceTest {
 
     @After
     public void tearDown() throws Exception {
-        ((ConcurrentCompositeConfiguration) ConfigurationManager.getConfigInstance())
-                .clearOverrideProperty(AdminResourcesContainer.CONTAINER_LISTEN_PORT);
+        final AbstractConfiguration configInst = ConfigurationManager.getConfigInstance();
+        configInst.clearProperty(AdminResourcesContainer.CONTAINER_LISTEN_PORT);
         container.shutdown();
     }
 
