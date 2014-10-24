@@ -16,65 +16,37 @@
 
 package com.netflix.adminresources.resources;
 
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeMap;
+import com.google.common.annotations.Beta;
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+import com.google.inject.Inject;
+import com.netflix.adminresources.tableview.DataTableHelper;
+import com.netflix.adminresources.tableview.PropsTableView;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
+import javax.ws.rs.core.*;
 
-import org.apache.commons.configuration.AbstractConfiguration;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.google.common.annotations.Beta;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.netflix.config.ConfigurationManager;
-
-/**
- * @author Nitesh Kant
- */
 @Beta
 @Path("/webadmin/props")
 @Produces(MediaType.APPLICATION_JSON)
 public class PropertiesResource {
     private static final Logger LOG = LoggerFactory.getLogger(PropertiesResource.class);
 
-    /**
-     * List all properties
-     */
+    @Inject(optional = true)
+    private PropsTableView adminPropsResource;
+
     @GET
-    public Response getAllProperties() {
-        Map<String, String> allPropsAsString = new TreeMap<String, String>();
-        AbstractConfiguration config = ConfigurationManager.getConfigInstance();
-        Iterator<String> keys = config.getKeys();
-
-        Set<String> maskedResources = MaskedResourceHelper.getMaskedResourceSet();
-        
-        while (keys.hasNext()) {
-            final String key = keys.next();
-
-            // mask the specified properties
-            final Object value;
-            if (maskedResources.contains(key)) {
-            	value = MaskedResourceHelper.MASKED_PROPERTY_VALUE;
-            } else {
-	            value = config.getProperty(key);
-            }
-            
-            if (null != value) {
-                allPropsAsString.put(key, value.toString());
-            }
+    public Response getProperties(@Context UriInfo uriInfo) {
+        if (adminPropsResource != null) {
+            MultivaluedMap<String, String> queryParams = uriInfo.getQueryParameters();
+            JsonObject output = DataTableHelper.buildOutput(adminPropsResource, queryParams);
+            return Response.ok().entity(new Gson().toJson(output)).build();
+        } else {
+            return Response.status(Response.Status.BAD_REQUEST).build();
         }
-        
-        GsonBuilder gsonBuilder = new GsonBuilder().serializeNulls();
-        Gson gson = gsonBuilder.create();
-        String propsJson = gson.toJson(new PairResponse(allPropsAsString));
-        return Response.ok(propsJson).build();
     }
 }

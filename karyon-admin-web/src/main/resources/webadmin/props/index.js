@@ -1,60 +1,50 @@
-$(document).ready(function() {
+$(document).ready(function () {
     "use strict";
-    
-    $("#status-error").html("");
-    
-    <#assign list_source = "/webadmin/props">
 
-    var oTable = $('#props-table').dataTable( {
+    $("#status-error").html("");
+    var editSrc = "/webadmin/props/{0}";
+
+    var oTable = $('#props-table').dataTable({
         "aoColumns": [
             { "sTitle": "Name", "sWidth" : "30%", "sDefaultContent" : "-" },
             { "sTitle": "Value", "sWidth" : "70%", "sDefaultContent" : "-"}
         ],
-        "sAjaxSource" : "${list_source}",
-        "fnServerData": function ( sSource, aoData, fnCallback ) {
-            $.getJSON(sSource)
-                .success(function(json) {
-                    $("#status-error").html("");
-                    $("#status-lastupdate").html(new Date().format());
-                    if (json.error) {
-                        $("#status-error").html(json.error.message);
-                        $("#status-error").addClass("status-error");
-                    }
-                    else {
-                        $("#status-error").removeClass("status-error");
-                        var items = [];
-                        $.each(json.data, function(index, obj) {
-                            items.push([obj.name, obj.value]);
-                        });
-                         
-                        fnCallback({"aaData":items});
-                    }
-                })
-                .error(function(jqXHR, textStatus, errorThrown) {
-                    $("#status-error").html(textStatus + ": " + errorThrown);
-                    $("#status-error").addClass("status-error");
-                });
+        "sAjaxSource"    : "/webadmin/props",
+        "fnServerData"   : function (sSource, aoData, fnCallback) {
+            $.getJSON(sSource, aoData, function (json) {
+                $("#status-lastupdate").html(new Date().format());
+                if (json.iTotalDisplayRecords) {
+                    $("#status-visible").html(json.iTotalDisplayRecords);
+                }
+                if (json.iTotalRecords) {
+                    $("#status-total").html(json.iTotalRecords);
+                }
+                fnCallback(json);
+            });
         },
-        "bPaginate"       : false,
-        "bLengthChange"   : false,
-        "bDestroy"        : true,
-        "bFilter"         : true,
-        "bAutoWidth"      : false,
-        "fnInfoCallback": function( oSettings, iStart, iEnd, iMax, iTotal, sPre ) {
+        "bLengthChange"  : false,
+        "bServerSide"    : true,
+        "bProcessing"    : true,
+        "sPaginationType": "bootstrap",
+        "iDisplayLength" : 50,
+        "bDestroy"       : true,
+        "bFilter"        : true,
+        "bAutoWidth"     : false,
+        "fnInfoCallback" : function (oSettings, iStart, iEnd, iMax, iTotal, sPre) {
             $("#status-visible").html(iTotal);
             $("#status-total").html(iMax);
             return "";
         }
     });
-    
+
     $(".bse-filter").val("");
     $("#props-table_filter").hide();
-    
-    $(".bse-filter").die("keyup").live("keyup", function() {
+
+    $(".bse-filter").die("keyup").live("keyup", function () {
         $('#props-table').dataTable().fnFilter($(".bse-filter").val(), null, false, true);
     });
-        
-    $(".bse-refresh").die("click").live("click", function() {
+
+    $(".bse-refresh").die("click").live("click", function () {
         $('#props-table').dataTable().fnReloadAjax();
-    });    
+    });
 });

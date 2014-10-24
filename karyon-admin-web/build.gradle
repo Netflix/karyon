@@ -15,8 +15,8 @@
  */
 apply plugin: 'osgi'
 
-sourceCompatibility = JavaVersion.VERSION_1_6
-targetCompatibility = JavaVersion.VERSION_1_6
+sourceCompatibility = JavaVersion.VERSION_1_7
+targetCompatibility = JavaVersion.VERSION_1_7
 
 tasks.withType(Javadoc).each {
     it.classpath = sourceSets.main.compileClasspath
@@ -27,7 +27,6 @@ dependencies {
         compile project(':karyon-admin')
         compile 'com.google.code.gson:gson:2.1'
         runtime 'org.freemarker:freemarker:2.3.15'
-        compile 'com.netflix.pytheas:pytheas-core:1.11'
         runtime 'org.codehaus.jackson:jackson-mapper-asl:1.9.11'
     }
 }

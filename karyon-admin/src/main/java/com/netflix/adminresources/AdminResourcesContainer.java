@@ -16,6 +16,7 @@
 
 package com.netflix.adminresources;
 
+import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
 import com.google.inject.Provider;
 import com.netflix.adminresources.resources.EmbeddedContentResource;
@@ -78,7 +79,7 @@ public class AdminResourcesContainer {
     public static final String CONTAINER_LISTEN_PORT = "netflix.platform.admin.resources.port";
     public static final int LISTEN_PORT_DEFAULT = 8077;
     private static final String JERSEY_CORE_PACKAGES = "netflix.platform.admin.resources.core.packages";
-    public static final String JERSEY_CORE_PACKAGES_DEFAULT = "com.netflix.adminresources;com.netflix.explorers.resources;com.netflix.explorers.providers";
+    public static final String JERSEY_CORE_PACKAGES_DEFAULT = "com.netflix.adminresources;com.netflix.explorers.resources;com.netflix.explorers.providers;netflix.admin";
 
     @Configuration(
             value = JERSEY_CORE_PACKAGES,
@@ -118,11 +119,26 @@ public class AdminResourcesContainer {
         Injector injector = LifecycleInjector
                 .builder()
                 .usingBasePackages("com.netflix.explorers")
-                .withModules(new AdminResourcesModule(strategy, handlerProvider)).createInjector();
+                .withModules(new AbstractModule() {
+                    @Override
+                    protected void configure() {
+                        bind(HealthCheckInvocationStrategy.class).toProvider(strategy);
+                        bind(HealthCheckHandler.class).toProvider(handlerProvider);
+                        bind(AdminResourcesFilter.class).asEagerSingleton();
+                    }
+                })
+                .createInjector();
+        injector.getInstance(LifecycleManager.class).start();
+
         try {
-            injector.getInstance(LifecycleManager.class).start();
+
+            AdminPageRegistry baseServerPageRegistry = injector.getInstance(AdminPageRegistry.class);
+            baseServerPageRegistry.registerAdminPagesWithClasspathScan();
+            final String jerseyResourcePkgsForAdminPages = baseServerPageRegistry.buildJerseyResourcePkgListForAdminPages();
+            final String jerseyResourcePkgList = buildJerseyResourcePkgList(jerseyResourcePkgsForAdminPages);
+
             AdminResourcesFilter adminResourcesFilter = injector.getInstance(AdminResourcesFilter.class);
-            adminResourcesFilter.setPackages(coreJerseyPackages);
+            adminResourcesFilter.setPackages(jerseyResourcePkgList);
 
             ServletContextHandler handler = new ServletContextHandler();
             handler.setContextPath("/");
@@ -138,6 +154,15 @@ public class AdminResourcesContainer {
         } catch (Exception e) {
             logger.error("Exception in building AdminResourcesContainer ", e);
         }
+    }
+
+    private String buildJerseyResourcePkgList(String jerseyResourcePkgListForAdminPages) {
+        String pkgPath = coreJerseyPackages;
+        if (jerseyResourcePkgListForAdminPages != null && !jerseyResourcePkgListForAdminPages.isEmpty()) {
+            pkgPath += ";" + jerseyResourcePkgListForAdminPages;
+        }
+
+        return pkgPath;
     }
 
     @PreDestroy

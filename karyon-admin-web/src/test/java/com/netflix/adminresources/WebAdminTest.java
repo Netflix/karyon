@@ -112,8 +112,8 @@ public class WebAdminTest {
 
     	String responseStr = EntityUtils.toString(response.getEntity());
     	LOG.info("responseStr: " + responseStr);
-    	assertTrue(responseStr.contains("{\"name\":\"AWS_SECRET_KEY\",\"value\":\"" + MaskedResourceHelper.MASKED_PROPERTY_VALUE + "\"}"));
-    	assertTrue(responseStr.contains("{\"name\":\"AWS_ACCESS_ID\",\"value\":\"super-aws-access-id\"}"));
+        assertTrue(responseStr.contains("[\"AWS_SECRET_KEY\",\"" + MaskedResourceHelper.MASKED_PROPERTY_VALUE + "\"]"));
+        assertTrue(responseStr.contains("[\"AWS_ACCESS_ID\",\"super-aws-access-id\"]"));
 
         // need to consume full response before make another rest call with
         // the default SingleClientConnManager used with DefaultHttpClient

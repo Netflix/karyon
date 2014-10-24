@@ -17,8 +17,8 @@
 package com.netflix.adminresources.resources;
 
 import com.netflix.adminresources.AdminResourcesContainer;
-import com.netflix.config.ConcurrentCompositeConfiguration;
 import com.netflix.config.ConfigurationManager;
+import org.apache.commons.configuration.AbstractConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,14 +34,14 @@ public class WebAdminComponent {
 
     @PostConstruct
     public void init() {
-        ConcurrentCompositeConfiguration configInstance =
-                (ConcurrentCompositeConfiguration) ConfigurationManager.getConfigInstance();
-        if (configInstance.containsKey(AdminResourcesContainer.DEFAULT_PAGE_PROP_NAME)) {
+        final AbstractConfiguration configInst = ConfigurationManager.getConfigInstance();
+
+        if (configInst.containsKey(AdminResourcesContainer.DEFAULT_PAGE_PROP_NAME)) {
             logger.info("Admin container default page already set to: " +
-                        configInstance.getString(AdminResourcesContainer.DEFAULT_PAGE_PROP_NAME + ", not overriding."));
+                    configInst.getString(AdminResourcesContainer.DEFAULT_PAGE_PROP_NAME + ", not overriding."));
             return;
         }
-        configInstance.setOverrideProperty(AdminResourcesContainer.DEFAULT_PAGE_PROP_NAME, ADMINRES_WEBADMIN_INDEX_HTML);
+        configInst.setProperty(AdminResourcesContainer.DEFAULT_PAGE_PROP_NAME, ADMINRES_WEBADMIN_INDEX_HTML);
         logger.info("Set the default page for admin container to: " + ADMINRES_WEBADMIN_INDEX_HTML);
     }
 }
