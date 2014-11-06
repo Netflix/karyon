@@ -1,6 +1,7 @@
 package netflix.karyon.server.http;
 
 import io.netty.buffer.ByteBuf;
+import io.netty.channel.Channel;
 import io.netty.handler.codec.http.DefaultHttpRequest;
 import io.netty.handler.codec.http.HttpMethod;
 import io.netty.handler.codec.http.HttpVersion;
@@ -19,7 +20,7 @@ public class ServletStyleConstraintTest extends InterceptorConstraintTestBase {
 
     @Test
     public void testServletPathExactMatch() throws Exception {
-        ServletStyleUriConstraintKey<ByteBuf> key = new ServletStyleUriConstraintKey<ByteBuf>("d/a/b/c", "d");
+        ServletStyleUriConstraintKey<ByteBuf> key = new ServletStyleUriConstraintKey<>("d/a/b/c", "d");
         HttpKeyEvaluationContext context = new HttpKeyEvaluationContext(new MockChannelHandlerContext("mock").channel());
         HttpServerRequest<ByteBuf> request = newRequest("/d/a/b/c/");
         boolean keyApplicable = key.apply(request, context);
@@ -30,7 +31,7 @@ public class ServletStyleConstraintTest extends InterceptorConstraintTestBase {
 
     @Test
     public void testServletPathPrefixMatch() throws Exception {
-        ServletStyleUriConstraintKey<ByteBuf> key = new ServletStyleUriConstraintKey<ByteBuf>("d/a/*", "d");
+        ServletStyleUriConstraintKey<ByteBuf> key = new ServletStyleUriConstraintKey<>("d/a/*", "d");
         HttpKeyEvaluationContext context = new HttpKeyEvaluationContext(new MockChannelHandlerContext("mock").channel());
         HttpServerRequest<ByteBuf> request = newRequest("/d/a/b/c/");
         boolean keyApplicable = key.apply(request, context);
@@ -41,7 +42,7 @@ public class ServletStyleConstraintTest extends InterceptorConstraintTestBase {
 
     @Test
     public void testServletPathExtensionMatch() throws Exception {
-        ServletStyleUriConstraintKey<ByteBuf> key = new ServletStyleUriConstraintKey<ByteBuf>("*.boo", "d");
+        ServletStyleUriConstraintKey<ByteBuf> key = new ServletStyleUriConstraintKey<>("*.boo", "d");
         HttpKeyEvaluationContext context = new HttpKeyEvaluationContext(new MockChannelHandlerContext("mock").channel());
         HttpServerRequest<ByteBuf> request = newRequest("/d/a/b/c.boo");
         boolean keyApplicable = key.apply(request, context);
@@ -52,58 +53,72 @@ public class ServletStyleConstraintTest extends InterceptorConstraintTestBase {
 
     @Test
     public void testExactMatch() throws Exception {
-        ServletStyleUriConstraintKey<ByteBuf> key = new ServletStyleUriConstraintKey<ByteBuf>("a/b/c", "");
+        ServletStyleUriConstraintKey<ByteBuf> key = new ServletStyleUriConstraintKey<>("a/b/c", "");
         boolean keyApplicable = doApplyForGET(key, "/a/b/c");
         Assert.assertTrue("Exact match servlet style constraint failed.", keyApplicable);
     }
 
     @Test
     public void testExactMatchWithTrailingSlashInUri() throws Exception {
-        ServletStyleUriConstraintKey<ByteBuf> key = new ServletStyleUriConstraintKey<ByteBuf>("a/b/c", "");
+        ServletStyleUriConstraintKey<ByteBuf> key = new ServletStyleUriConstraintKey<>("a/b/c", "");
         boolean keyApplicable = doApplyForGET(key, "/a/b/c/");
         Assert.assertTrue("Exact match servlet style constraint failed.", keyApplicable);
     }
 
     @Test
     public void testExactMatchWithTrailingSlashInConstraint() throws Exception {
-        ServletStyleUriConstraintKey<ByteBuf> key = new ServletStyleUriConstraintKey<ByteBuf>("a/b/c/", "");
+        ServletStyleUriConstraintKey<ByteBuf> key = new ServletStyleUriConstraintKey<>("a/b/c/", "");
         boolean keyApplicable = doApplyForGET(key, "/a/b/c");
         Assert.assertTrue("Exact match servlet style constraint failed.", keyApplicable);
     }
 
     @Test
     public void testPrefixMatch() throws Exception {
-        ServletStyleUriConstraintKey<ByteBuf> key = new ServletStyleUriConstraintKey<ByteBuf>("a/b/c*", "");
+        ServletStyleUriConstraintKey<ByteBuf> key = new ServletStyleUriConstraintKey<>("a/b/c*", "");
         boolean keyApplicable = doApplyForGET(key, "/a/b/c/def");
         Assert.assertTrue("Prefix match servlet style constraint failed.", keyApplicable);
     }
 
     @Test
     public void testPrefixMatchWithSlashInConstraint() throws Exception {
-        ServletStyleUriConstraintKey<ByteBuf> key = new ServletStyleUriConstraintKey<ByteBuf>("a/b/c/*", "");
+        ServletStyleUriConstraintKey<ByteBuf> key = new ServletStyleUriConstraintKey<>("a/b/c/*", "");
         boolean keyApplicable = doApplyForGET(key, "/a/b/c/def");
         Assert.assertTrue("Prefix match servlet style constraint failed.", keyApplicable);
     }
 
     @Test
     public void testPrefixMatchWithExactUri() throws Exception {
-        ServletStyleUriConstraintKey<ByteBuf> key = new ServletStyleUriConstraintKey<ByteBuf>("a/b/c/*", "");
+        ServletStyleUriConstraintKey<ByteBuf> key = new ServletStyleUriConstraintKey<>("a/b/c/*", "");
         boolean keyApplicable = doApplyForGET(key, "/a/b/c/");
         Assert.assertTrue("Prefix match servlet style constraint failed.", keyApplicable);
     }
 
     @Test
     public void testPrefixMatchWithNoSlashInUri() throws Exception {
-        ServletStyleUriConstraintKey<ByteBuf> key = new ServletStyleUriConstraintKey<ByteBuf>("a/b/c/*", "");
+        ServletStyleUriConstraintKey<ByteBuf> key = new ServletStyleUriConstraintKey<>("a/b/c/*", "");
         boolean keyApplicable = doApplyForGET(key, "/a/b/c");
         Assert.assertTrue("Prefix match servlet style constraint failed.", keyApplicable);
     }
 
     @Test
     public void testExtensionMatch() throws Exception {
-        ServletStyleUriConstraintKey<ByteBuf> key = new ServletStyleUriConstraintKey<ByteBuf>("*.boo", "");
+        ServletStyleUriConstraintKey<ByteBuf> key = new ServletStyleUriConstraintKey<>("*.boo", "");
         boolean keyApplicable = doApplyForGET(key, "/a/b/c/d.boo");
         Assert.assertTrue("Extension match servlet style constraint failed.", keyApplicable);
+    }
+
+    @Test
+    public void testQueryDecoderCache() throws Exception {
+        ServletStyleUriConstraintKey<ByteBuf> key = new ServletStyleUriConstraintKey<>("d/a/b/c", "d");
+        Channel mockChannel = new MockChannelHandlerContext("mock").channel();
+        HttpKeyEvaluationContext context = new HttpKeyEvaluationContext(mockChannel);
+        HttpServerRequest<ByteBuf> request = newRequest("/d/a/b/c/");
+        boolean keyApplicable = key.apply(request, context);
+        Assert.assertTrue("Exact match servlet style constraint failed.", keyApplicable);
+        HttpKeyEvaluationContext context2 = new HttpKeyEvaluationContext(mockChannel);
+        request = newRequest("/x/y/z");
+        keyApplicable = key.apply(request, context2);
+        Assert.assertFalse("Query decoder cache not cleared..", keyApplicable);
     }
 
     protected HttpServerRequest<ByteBuf> newRequest(String uri) {

@@ -14,7 +14,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     @Override
     public Observable<Boolean> authenticate(HttpServerRequest<ByteBuf> request) {
         if (request.getHeaders().contains(AUTH_HEADER_NAME)) {
-            return Observable.from(Boolean.TRUE);
+            return Observable.just(Boolean.TRUE);
         } else {
             return Observable.error(new IllegalArgumentException("Should pass a header: " + AUTH_HEADER_NAME));
         }

@@ -25,6 +25,7 @@ public class HttpKeyEvaluationContext extends KeyEvaluationContext {
 
     public HttpKeyEvaluationContext(Channel channel) {
         super(channel);
+        channel.attr(queryDecoderKey).remove();
     }
 
     /**
