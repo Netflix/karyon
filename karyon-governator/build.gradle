@@ -15,9 +15,6 @@
  */
 apply plugin: 'osgi'
 
-sourceCompatibility = JavaVersion.VERSION_1_6
-targetCompatibility = JavaVersion.VERSION_1_6
-
 tasks.withType(Javadoc).each {
     it.classpath = sourceSets.main.compileClasspath
 }
