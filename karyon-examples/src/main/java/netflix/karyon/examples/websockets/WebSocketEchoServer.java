@@ -8,6 +8,7 @@ import io.reactivex.netty.channel.ObservableConnection;
 import io.reactivex.netty.server.RxServer;
 import netflix.adminresources.resources.KaryonWebAdminModule;
 import netflix.karyon.Karyon;
+import netflix.karyon.KaryonBootstrapSuite;
 import netflix.karyon.ShutdownModule;
 import netflix.karyon.archaius.ArchaiusSuite;
 import netflix.karyon.servo.KaryonServoModule;
@@ -40,6 +41,7 @@ public final class WebSocketEchoServer {
         ).build();
         Karyon.forWebSocketServer(
                 webSocketServer,
+                new KaryonBootstrapSuite(),
                 new ArchaiusSuite("websocket-echo-server"),
                 // KaryonEurekaModule.asSuite(), /* Uncomment if you need eureka */
                 KaryonWebAdminModule.asSuite(),

@@ -21,7 +21,7 @@ tasks.withType(Javadoc).each {
 
 dependencies {
     dependencies {
-        compile 'com.netflix.governator:governator:1.2.17'
+        compile 'com.netflix.governator:governator:1.2.20'
         compile project(':karyon-core')
     }
 }
