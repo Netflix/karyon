@@ -20,7 +20,7 @@ public interface TcpPipelineHandlers {
 
     @Singleton
     class QueueProvider {
-        private static final BlockingQueue<String> messageQueue = new LinkedBlockingQueue<String>();
+        private static final BlockingQueue<String> messageQueue = new LinkedBlockingQueue<>();
 
         public boolean isEmpty() {
             return messageQueue.isEmpty();
@@ -77,8 +77,8 @@ public interface TcpPipelineHandlers {
             return Observable.interval(1, TimeUnit.SECONDS).flatMap(new Func1<Long, Observable<Void>>() {
                 @Override
                 public Observable<Void> call(Long tick) {
-                    ByteBuf output = connection.getAllocator().buffer();
                     while (!queueProvider.isEmpty()) {
+                        ByteBuf output = connection.getAllocator().buffer();
                         output.writeBytes(queueProvider.poll().getBytes());
                         connection.write(output);
                     }

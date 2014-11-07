@@ -3,6 +3,8 @@ package netflix.karyon;
 import com.google.inject.AbstractModule;
 import com.google.inject.binder.AnnotatedBindingBuilder;
 import com.google.inject.binder.LinkedBindingBuilder;
+import com.netflix.governator.guice.BootstrapBinder;
+import com.netflix.governator.guice.BootstrapModule;
 import com.netflix.governator.guice.LifecycleInjectorBuilder;
 import com.netflix.governator.guice.LifecycleInjectorBuilderSuite;
 import com.netflix.governator.guice.LifecycleInjectorMode;
@@ -22,6 +24,7 @@ public class KaryonBootstrapSuite implements LifecycleInjectorBuilderSuite {
 
     private final Class<? extends HealthCheckHandler> healthcheckHandlerClass;
     private final HealthCheckHandler healthcheckHandler;
+    private final KaryonBootstrap karyonBootstrap;
 
     public KaryonBootstrapSuite() {
         this((HealthCheckHandler)null);
@@ -30,10 +33,12 @@ public class KaryonBootstrapSuite implements LifecycleInjectorBuilderSuite {
     public KaryonBootstrapSuite(HealthCheckHandler healthcheckHandler) {
         this.healthcheckHandler = null == healthcheckHandler ? new AlwaysHealthyHealthCheck() : healthcheckHandler;
         healthcheckHandlerClass = null;
+        karyonBootstrap = null;
     }
 
     @Inject
     KaryonBootstrapSuite(KaryonBootstrap karyonBootstrap) {
+        this.karyonBootstrap = karyonBootstrap;
         healthcheckHandlerClass = karyonBootstrap.healthcheck();
         healthcheckHandler = null;
     }
@@ -41,6 +46,14 @@ public class KaryonBootstrapSuite implements LifecycleInjectorBuilderSuite {
     @Override
     public void configure(LifecycleInjectorBuilder builder) {
         builder.withMode(LifecycleInjectorMode.SIMULATED_CHILD_INJECTORS);
+        if (null != karyonBootstrap) {
+            builder.withAdditionalBootstrapModules(new BootstrapModule() {
+                @Override
+                public void configure(BootstrapBinder bootstrapBinder) {
+                    bootstrapBinder.bind(KaryonBootstrap.class).toInstance(karyonBootstrap);
+                }
+            });
+        }
         builder.withAdditionalModules(new AbstractModule() {
             @Override
             protected void configure() {
