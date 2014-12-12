@@ -5,7 +5,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Provides constraint implementation for {@link netflix.karyon.transport.interceptor.InterceptorKey} similar to java servlet specifications. <p></p>
+ * Provides constraint implementation for {@link netflix.karyon.transport.interceptor.InterceptorKey} similar to java servlet specifications. 
  * The following types of constraints are supported:
  * <ul>
  <li>Exact uri mapping: Give the exact string that should match the URI path of the incoming request.
@@ -25,7 +25,7 @@ import org.slf4j.LoggerFactory;
  </ul>
  *
  * In any of the pattersn above the leading slash in the constraint is optional, i.e., "/myresource/foo" is equivalent to
- * "myresource/foo". <p></p>
+ * "myresource/foo".
  *
  * As compared to servlets/web applications there are no context paths of an application so the URI path has to be
  * absolute. <br>
