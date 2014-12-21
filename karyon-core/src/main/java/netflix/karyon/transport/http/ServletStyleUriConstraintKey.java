@@ -5,7 +5,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Provides constraint implementation for {@link netflix.karyon.transport.interceptor.InterceptorKey} similar to java servlet specifications. 
+ * Provides constraint implementation for {@link netflix.karyon.transport.interceptor.InterceptorKey} similar to java servlet specifications.
  * The following types of constraints are supported:
  * <ul>
  <li>Exact uri mapping: Give the exact string that should match the URI path of the incoming request.
