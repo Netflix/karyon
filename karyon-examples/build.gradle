@@ -48,35 +48,35 @@ task runJerseyHelloNOSS (dependsOn: [classes], type: JavaExec) {
     group = "Examples"
     description = "Run Jersey Hello NOSS server"
 
-    main = "com.netflix.karyon.KaryonRunner"
+    main = "netflix.karyon.KaryonRunner"
     classpath = sourceSets.main.runtimeClasspath
 
     jvmArgs "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005"
     systemProperty 'java.awt.headless', 'true'
     systemProperty 'archaius.deployment.environment', 'dev'
 
-    args = ["com.netflix.karyon.examples.hellonoss.server.jersey.JerseyHelloWorldApp"]
+    args = ["netflix.karyon.examples.hellonoss.server.jersey.JerseyHelloWorldApp"]
 }
 
 task runSimpleRouterAnnotationHelloNOSS (dependsOn: [classes], type: JavaExec) {
     group = "Examples"
     description = "Run simple URI router based Hello NOSS server using annotation based bootstrapping."
 
-    main = "com.netflix.karyon.KaryonRunner"
+    main = "netflix.karyon.KaryonRunner"
     classpath = sourceSets.main.runtimeClasspath
 
     jvmArgs "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005"
     systemProperty 'java.awt.headless', 'true'
     systemProperty 'archaius.deployment.environment', 'dev'
 
-    args = ["com.netflix.karyon.examples.hellonoss.server.simple.annotation.SimpleRoutingApp"]
+    args = ["netflix.karyon.examples.hellonoss.server.simple.annotation.SimpleRoutingApp"]
 }
 
 task runSimpleRouterGuiceHelloNOSS (dependsOn: [classes], type: JavaExec) {
     group = "Examples"
     description = "Run simple URI router based Hello NOSS server using guice modules based bootstrapping."
 
-    main = "com.netflix.karyon.examples.hellonoss.server.simple.module.SimpleRunner"
+    main = "netflix.karyon.examples.hellonoss.server.simple.module.SimpleRunner"
     classpath = sourceSets.main.runtimeClasspath
 
     jvmArgs "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005"
@@ -88,7 +88,7 @@ task runPureRxNettyHelloNOSS (dependsOn: [classes], type: JavaExec) {
     group = "Examples"
     description = "Run RX netty based Hello NOSS server"
 
-    main = "com.netflix.karyon.examples.hellonoss.server.rxnetty.MyApplicationRunner"
+    main = "netflix.karyon.examples.hellonoss.server.rxnetty.MyApplicationRunner"
     classpath = sourceSets.main.runtimeClasspath
 
     jvmArgs "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005"
@@ -101,21 +101,21 @@ task runTcpPipelineApp (dependsOn: [classes], type: JavaExec) {
     group = "Examples"
     description = "Run TCP pipeline server"
 
-    main = "com.netflix.karyon.KaryonRunner"
+    main = "netflix.karyon.KaryonRunner"
     classpath = sourceSets.main.runtimeClasspath
 
     jvmArgs "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005"
     systemProperty 'java.awt.headless', 'true'
     systemProperty 'archaius.deployment.environment', 'dev'
 
-    args = ["com.netflix.karyon.examples.tcp.TcpPipelineApp"]
+    args = ["netflix.karyon.examples.tcp.TcpPipelineApp"]
 }
 
 task runWebSocketEcho (dependsOn: [classes], type: JavaExec) {
     group = "Examples"
     description = "Run WebSocket echo server"
 
-    main = "com.netflix.karyon.examples.websockets.WebSocketEchoServer"
+    main = "netflix.karyon.examples.websockets.WebSocketEchoServer"
     classpath = sourceSets.main.runtimeClasspath
 
     jvmArgs "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005"

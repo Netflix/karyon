@@ -15,16 +15,13 @@
  */
 apply plugin: 'osgi'
 
-sourceCompatibility = JavaVersion.VERSION_1_6
-targetCompatibility = JavaVersion.VERSION_1_6
-
 tasks.withType(Javadoc).each {
     it.classpath = sourceSets.main.compileClasspath
 }
 
 dependencies {
     dependencies {
-        compile 'com.netflix.governator:governator:1.2.17'
+        compile 'com.netflix.governator:governator:1.2.20'
         compile project(':karyon-core')
     }
 }

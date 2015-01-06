@@ -24,7 +24,10 @@ apply from: file('gradle/release.gradle')
 apply plugin: 'idea'
 
 subprojects {
-    group = "com.netflix.karyon"
+    sourceCompatibility = JavaVersion.VERSION_1_7
+    targetCompatibility = JavaVersion.VERSION_1_7
+
+    group = "com.netflix.karyon2"
 
     apply plugin: 'java'
     apply plugin: 'eclipse'
