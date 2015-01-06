@@ -3,7 +3,7 @@ $(document).ready(function() {
 
     $("#status-error").html("");
 
-    <#assign source = "/webadmin/eureka">
+    var source = "${ajax_base}/eureka";
 
     var oTable = $('#discovery-table').dataTable( {
         "aoColumns": [
@@ -13,7 +13,7 @@ $(document).ready(function() {
             {"sTitle" : "IP Address", "mDataProp" : "ipAddress"},
             {"sTitle" : "Hostname", "mDataProp" : "hostName"}
         ],
-        "sAjaxSource": "${source}",
+        "sAjaxSource": source,
         "fnServerData": function ( sSource, aoData, fnCallback ) {
             $.getJSON(sSource)
                 .success(function(json) {

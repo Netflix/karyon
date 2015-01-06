@@ -16,18 +16,19 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@Path("/admin")
+@Path("/baseserver")
 @Produces(MediaType.TEXT_HTML)
 public class AdminPageResource {
     private static final Logger LOG = LoggerFactory.getLogger(AdminPageResource.class);
+    public static final String V1_PLATFORM_BASE = "/v1/platform/base";
 
     @Inject
     private AdminPageRegistry adminPageRegistry;
 
-
     @GET()
     public Viewable showIndex() {
         Map<String, Object> model = new HashMap<String, Object>();
+        model.put("ajax_base", V1_PLATFORM_BASE);
 
         if (adminPageRegistry != null) {
             final Collection<AdminPageInfo> adminPages = adminPageRegistry.getAllPages();
@@ -47,6 +48,7 @@ public class AdminPageResource {
         Map<String, Object> model = new HashMap<String, Object>();
         model.put("id", id);
         model.put("instance_hostname", getInstanceHostName(id));
+        model.put("ajax_base", V1_PLATFORM_BASE);
 
         if (adminPageRegistry != null && adminPageRegistry.getPageInfo(view) != null) {
            return new Viewable(adminPageRegistry.getPageInfo(view).getPageTemplate(), model);
@@ -85,6 +87,7 @@ public class AdminPageResource {
         Map<String, Object> model = new HashMap<String, Object>();
         model.put("id", id);
         model.put("key", key);
+        model.put("ajax_base", V1_PLATFORM_BASE);
         //model.put("instance_hostname", "");
         return new Viewable("/webadmin/jmx/view.ftl", model);
     }

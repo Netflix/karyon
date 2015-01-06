@@ -30,7 +30,7 @@ import javax.annotation.PostConstruct;
 public class WebAdminComponent {
 
     private static final Logger logger = LoggerFactory.getLogger(WebAdminComponent.class);
-    public static final String ADMINRES_WEBADMIN_INDEX_HTML = "/admin";
+    public static final String ADMINRES_WEBADMIN_INDEX_HTML = "/baseserver";
 
     @PostConstruct
     public void init() {

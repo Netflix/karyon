@@ -55,7 +55,7 @@ import org.slf4j.LoggerFactory;
  *
  */
 @Produces({ MediaType.APPLICATION_JSON, MediaType.TEXT_HTML })
-@Path("/webadmin/jmx")
+@Path("/v1/platform/base/jmx")
 public class JMXResource {
     private static final Logger LOG = LoggerFactory.getLogger(JMXResource.class);
     private static final String CURRENT_VALUE = "CurrentValue";

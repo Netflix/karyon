@@ -31,7 +31,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.*;
 
 @Beta
-@Path("/webadmin/props")
+@Path("/v1/platform/base/props")
 @Produces(MediaType.APPLICATION_JSON)
 public class PropertiesResource {
     private static final Logger LOG = LoggerFactory.getLogger(PropertiesResource.class);

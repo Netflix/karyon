@@ -13,6 +13,7 @@ $(document).ready(function() {
         center: { paneSelector : ".middle-center-wrapper" }
     });
 
+    var ajaxCallBase = '${ajax_base}';
     var init = $.getHashParams();
     var state = {};
 
@@ -24,7 +25,7 @@ $(document).ready(function() {
 
     $("#machine-readable").click(function(e) {
         e.preventDefault();
-        window.open("/webadmin/" + $.getHashParams()["view"]);
+        window.open(ajaxCallBase + "/" + $.getHashParams()["view"]);
     });
 
 
@@ -55,7 +56,7 @@ $(document).ready(function() {
         state.inst = inst;
         var $view = $(".middle-center");
         if (view) {
-            var url = "/admin/{0}".format(state.view);
+            var url = "/baseserver/{0}".format(state.view);
             $(".nav li").removeClass("active");
             $("#submenu-{0}".format(state.view)).parent().addClass("active");
 

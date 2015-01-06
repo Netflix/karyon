@@ -2,7 +2,8 @@ $(document).ready(function() {
     "use strict";
     
     var counter = 0;
-    
+    var ajaxSrc = "${ajax_base}/jmx";
+
     var aoColumns;
     var multikey = ("${key}".indexOf("*") != -1);
     if (multikey) {
@@ -30,7 +31,7 @@ $(document).ready(function() {
         "bStateSave"    : true,
         "bAjaxRefresh"  : true,
         "sDom"          : "H<'row'<'span3'l><f>r>t<'row'<'span6'i><p>>",
-        "sAjaxSource"   : "/webadmin/jmx/{0}?jsonp=?".format("${key}"),
+        "sAjaxSource"   : ajaxSrc + "/{0}?jsonp=?".format("${key}"),
         "fnPostProcessServerData" : function(json, callback) {
             var aaData = [];
             if (json.attributes) {
@@ -65,7 +66,7 @@ $(document).ready(function() {
                 bOperationsInitialized = true;
                 $.each(json.operations, function(indx, obj) {
                     var html;
-                    html = "<form id='jmxform{0}' action='/webadmin/jmx/${key}/{1}?jsonp=?' method='post' class='form-inline'>".format(indx, obj.name);
+                    html = "<form id='jmxform{0}' action='{2}/${key}/{1}?jsonp=?' method='post' class='form-inline'>".format(indx, obj.name, ajaxSrc);
                     html += "<input type='submit' class='btn' value='{0}'/>".format(obj.name); 
                     html += "<input type='hidden' class='span2' name='op' value='{0}'/> ( ".format(obj.name); 
                     $.each(obj.params, function(indxParam, param) {

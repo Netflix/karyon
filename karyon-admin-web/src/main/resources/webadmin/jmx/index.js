@@ -1,6 +1,9 @@
 $(document).ready(function() {
     "use strict";
-    
+
+    var ajaxSrc = "${ajax_base}/jmx";
+    var mbeanViewSrc = "/baseserver/jmx/mbean";
+
     $('#jmxview').layout({
         center: {
             resizable:              false
@@ -16,12 +19,12 @@ $(document).ready(function() {
     var oTree = $("#jmxbeantree").dynatree( {
         onActivate: function(node) {
             if (node.data.noLink == false) {
-                $("#jmxbeanview").load("/admin/jmx/mbean?" + $.param({id: "${id}", "key": node.data.key}));
+                $("#jmxbeanview").load(mbeanViewSrc + "?" + $.param({id: "${id}", "key": node.data.key}));
             }
         },
         selectMode: 1,
         initAjax: {
-            url:      "/webadmin/jmx",
+            url:      ajaxSrc,
             cache:    false,
             dataType: "json",
             data:     { key: "root" }

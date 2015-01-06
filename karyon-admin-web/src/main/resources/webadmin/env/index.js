@@ -3,14 +3,14 @@ $(document).ready(function() {
 
     $("#status-error").html("");
 
-    <#assign source = "/webadmin/env">
+    var source = "${ajax_base}/env";
 
     var oTable = $('#env-table').dataTable( {
         "aoColumns": [
             { "sTitle" : "Name", 'sWidth' : '50%'  },
             { "sTitle" : "Value", 'sWidth' : '50%' }
         ],
-        "sAjaxSource": "${source}",
+        "sAjaxSource": source,
         "fnServerData": function ( sSource, aoData, fnCallback ) {
             $.getJSON(sSource)
                 .success(function(json) {

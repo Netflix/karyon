@@ -34,7 +34,7 @@ import com.google.gson.GsonBuilder;
 /**
  * @author Nitesh Kant
  */
-@Path("/webadmin/env")
+@Path("/v1/platform/base/env")
 @Beta
 @Produces(MediaType.APPLICATION_JSON)
 public class EnvironmentResource {
