@@ -16,7 +16,7 @@ import java.lang.annotation.Target;
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
-@Bootstrap(KaryonBootstrapSuite.class)
+@Bootstrap(bootstrap = KaryonBootstrapModule.class)
 public @interface KaryonBootstrap {
 
     String name();

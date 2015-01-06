@@ -1,8 +1,8 @@
 package netflix.adminresources.resources;
 
-import com.netflix.governator.guice.LifecycleInjectorBuilder;
-import com.netflix.governator.guice.LifecycleInjectorBuilderSuite;
+import com.netflix.governator.guice.BootstrapModule;
 import netflix.adminresources.KaryonAdminModule;
+import netflix.karyon.Karyon;
 
 public class KaryonWebAdminModule extends KaryonAdminModule {
 
@@ -12,12 +12,7 @@ public class KaryonWebAdminModule extends KaryonAdminModule {
         bind(WebAdminComponent.class).asEagerSingleton();
     }
 
-    public static LifecycleInjectorBuilderSuite asSuite() {
-        return new LifecycleInjectorBuilderSuite() {
-            @Override
-            public void configure(LifecycleInjectorBuilder builder) {
-                builder.withAdditionalModules(new KaryonWebAdminModule());
-            }
-        };
+    public static BootstrapModule asBootstrapModule() {
+        return Karyon.toBootstrapModule(KaryonWebAdminModule.class);
     }
 }

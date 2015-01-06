@@ -2,9 +2,9 @@ package netflix.karyon.examples.hellonoss.server.rxnetty;
 
 import netflix.adminresources.resources.KaryonWebAdminModule;
 import netflix.karyon.Karyon;
-import netflix.karyon.KaryonBootstrapSuite;
+import netflix.karyon.KaryonBootstrapModule;
 import netflix.karyon.ShutdownModule;
-import netflix.karyon.archaius.ArchaiusSuite;
+import netflix.karyon.archaius.ArchaiusBootstrapModule;
 import netflix.karyon.examples.hellonoss.common.health.HealthCheck;
 import netflix.karyon.servo.KaryonServoModule;
 import netflix.karyon.transport.http.health.HealthCheckEndpoint;
@@ -19,12 +19,12 @@ public class MyApplicationRunner {
         Karyon.forRequestHandler(8888,
                                  new RxNettyHandler("/healthcheck",
                                                     new HealthCheckEndpoint(healthCheckHandler)),
-                                 new KaryonBootstrapSuite(healthCheckHandler),
-                                 new ArchaiusSuite("hello-netflix-oss"),
-                                 // KaryonEurekaModule.asSuite(), /* Uncomment if you need eureka */
-                                 KaryonWebAdminModule.asSuite(),
-                                 ShutdownModule.asSuite(),
-                                 KaryonServoModule.asSuite())
+                                 new KaryonBootstrapModule(healthCheckHandler),
+                                 new ArchaiusBootstrapModule("hello-netflix-oss"),
+                                 // KaryonEurekaModule.asBootstrapModule(), /* Uncomment if you need eureka */
+                                 KaryonWebAdminModule.asBootstrapModule(),
+                                 ShutdownModule.asBootstrapModule(),
+                                 KaryonServoModule.asBootstrapModule())
               .startAndWaitTillShutdown();
     }
 }

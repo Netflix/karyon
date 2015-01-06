@@ -2,9 +2,9 @@ package netflix.karyon.examples.hellonoss.server.simple.module;
 
 import netflix.adminresources.resources.KaryonWebAdminModule;
 import netflix.karyon.Karyon;
-import netflix.karyon.KaryonBootstrapSuite;
+import netflix.karyon.KaryonBootstrapModule;
 import netflix.karyon.ShutdownModule;
-import netflix.karyon.archaius.ArchaiusSuite;
+import netflix.karyon.archaius.ArchaiusBootstrapModule;
 import netflix.karyon.servo.KaryonServoModule;
 
 /**
@@ -17,12 +17,12 @@ public class SimpleRunner {
         Karyon.forRequestHandler(8888,
                                  // new SimpleRouter(), /* Use this instead of RouterWithInterceptors below if interceptors are not required */
                                  new RouterWithInterceptors(),
-                                 new KaryonBootstrapSuite(),
-                                 new ArchaiusSuite("hello-netflix-oss"),
-                                 // KaryonEurekaModule.asSuite(), /* Uncomment if you need eureka */
-                                 KaryonWebAdminModule.asSuite(),
-                                 ShutdownModule.asSuite(),
-                                 KaryonServoModule.asSuite())
+                                 new KaryonBootstrapModule(),
+                                 new ArchaiusBootstrapModule("hello-netflix-oss"),
+                                 // KaryonEurekaModule.asBootstrapModule(), /* Uncomment if you need eureka */
+                                 KaryonWebAdminModule.asBootstrapModule(),
+                                 ShutdownModule.asBootstrapModule(),
+                                 KaryonServoModule.asBootstrapModule())
               .startAndWaitTillShutdown();
     }
 }

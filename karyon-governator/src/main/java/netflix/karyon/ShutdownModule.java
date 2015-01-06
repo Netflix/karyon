@@ -6,8 +6,7 @@ import com.google.inject.Singleton;
 import com.google.inject.binder.LinkedBindingBuilder;
 import com.google.inject.name.Named;
 import com.google.inject.name.Names;
-import com.netflix.governator.guice.LifecycleInjectorBuilder;
-import com.netflix.governator.guice.LifecycleInjectorBuilderSuite;
+import com.netflix.governator.guice.BootstrapModule;
 import com.netflix.governator.lifecycle.LifecycleManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,17 +49,12 @@ public class ShutdownModule extends AbstractModule {
         return bind(Action0.class).annotatedWith(Names.named("afterShutdownAction"));
     }
 
-    public static LifecycleInjectorBuilderSuite asSuite() {
-        return asSuite(7002);
+    public static BootstrapModule asBootstrapModule() {
+        return asBootstrapModule(7002);
     }
 
-    public static LifecycleInjectorBuilderSuite asSuite(final int port) {
-        return new LifecycleInjectorBuilderSuite() {
-            @Override
-            public void configure(LifecycleInjectorBuilder builder) {
-                builder.withAdditionalModules(new ShutdownModule(port));
-            }
-        };
+    public static BootstrapModule asBootstrapModule(final int port) {
+        return Karyon.toBootstrapModule(new ShutdownModule(port));
     }
 
     @Singleton

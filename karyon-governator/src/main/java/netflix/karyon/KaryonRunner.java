@@ -1,6 +1,6 @@
 package netflix.karyon;
 
-import com.netflix.governator.guice.LifecycleInjectorBuilderSuite;
+import com.netflix.governator.guice.BootstrapModule;
 import com.netflix.governator.guice.annotations.Bootstrap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,7 +37,7 @@ public class KaryonRunner {
         System.out.println("Using main class: " + mainClassName);
 
         try {
-            Karyon.forApplication(Class.forName(mainClassName), (LifecycleInjectorBuilderSuite[]) null)
+            Karyon.forApplication(Class.forName(mainClassName), (BootstrapModule[]) null)
                   .startAndWaitTillShutdown();
         } catch (@SuppressWarnings("UnusedCatchParameter") ClassNotFoundException e) {
             System.out.println("Main class: " + mainClassName + " not found.");

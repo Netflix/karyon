@@ -72,7 +72,7 @@ public class AdminExplorerManager implements ExplorerManager {
 
     @Override
     public Collection<Explorer> getExplorers() {
-        return Collections.EMPTY_LIST;
+        return Collections.emptyList();
     }
 
     @Override

@@ -3,11 +3,7 @@ package netflix.karyon;
 import com.google.inject.AbstractModule;
 import com.google.inject.binder.AnnotatedBindingBuilder;
 import com.google.inject.binder.LinkedBindingBuilder;
-import com.netflix.governator.guice.BootstrapBinder;
-import com.netflix.governator.guice.BootstrapModule;
-import com.netflix.governator.guice.LifecycleInjectorBuilder;
-import com.netflix.governator.guice.LifecycleInjectorBuilderSuite;
-import com.netflix.governator.guice.LifecycleInjectorMode;
+import com.netflix.governator.guice.*;
 import netflix.karyon.health.AlwaysHealthyHealthCheck;
 import netflix.karyon.health.HealthCheckHandler;
 import netflix.karyon.health.HealthCheckInvocationStrategy;
@@ -20,41 +16,42 @@ import javax.inject.Inject;
  *
  * @author Nitesh Kant
  */
-public class KaryonBootstrapSuite implements LifecycleInjectorBuilderSuite {
+public class KaryonBootstrapModule implements BootstrapModule {
 
     private final Class<? extends HealthCheckHandler> healthcheckHandlerClass;
     private final HealthCheckHandler healthcheckHandler;
     private final KaryonBootstrap karyonBootstrap;
 
-    public KaryonBootstrapSuite() {
+    public KaryonBootstrapModule() {
         this((HealthCheckHandler)null);
     }
 
-    public KaryonBootstrapSuite(HealthCheckHandler healthcheckHandler) {
+    public KaryonBootstrapModule(HealthCheckHandler healthcheckHandler) {
         this.healthcheckHandler = null == healthcheckHandler ? new AlwaysHealthyHealthCheck() : healthcheckHandler;
-        healthcheckHandlerClass = null;
-        karyonBootstrap = null;
+        this.healthcheckHandlerClass = null;
+        this.karyonBootstrap = null;
+    }
+
+    public KaryonBootstrapModule(Class<? extends HealthCheckHandler> healthcheckHandlerClass) {
+        this.healthcheckHandler = null;
+        this.healthcheckHandlerClass = healthcheckHandlerClass;
+        this.karyonBootstrap = null;
     }
 
     @Inject
-    KaryonBootstrapSuite(KaryonBootstrap karyonBootstrap) {
+    KaryonBootstrapModule(KaryonBootstrap karyonBootstrap) {
         this.karyonBootstrap = karyonBootstrap;
-        healthcheckHandlerClass = karyonBootstrap.healthcheck();
-        healthcheckHandler = null;
+        this.healthcheckHandlerClass = karyonBootstrap.healthcheck();
+        this.healthcheckHandler = null;
     }
 
     @Override
-    public void configure(LifecycleInjectorBuilder builder) {
-        builder.withMode(LifecycleInjectorMode.SIMULATED_CHILD_INJECTORS);
+    public void configure(BootstrapBinder bootstrapBinder) {
+        bootstrapBinder.inMode(LifecycleInjectorMode.SIMULATED_CHILD_INJECTORS);
         if (null != karyonBootstrap) {
-            builder.withAdditionalBootstrapModules(new BootstrapModule() {
-                @Override
-                public void configure(BootstrapBinder bootstrapBinder) {
-                    bootstrapBinder.bind(KaryonBootstrap.class).toInstance(karyonBootstrap);
-                }
-            });
+            bootstrapBinder.bind(KaryonBootstrap.class).toInstance(karyonBootstrap);
         }
-        builder.withAdditionalModules(new AbstractModule() {
+        bootstrapBinder.include(new AbstractModule() {
             @Override
             protected void configure() {
                 bindHealthCheck(bind(HealthCheckHandler.class));

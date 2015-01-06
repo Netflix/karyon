@@ -127,6 +127,7 @@ public class AdminResourcesContainer {
                         bind(AdminResourcesFilter.class).asEagerSingleton();
                     }
                 })
+                .build()
                 .createInjector();
         injector.getInstance(LifecycleManager.class).start();
 
