@@ -1,6 +1,6 @@
 package netflix.karyon;
 
-import com.netflix.governator.guice.LifecycleInjectorBuilderSuite;
+import com.netflix.governator.guice.BootstrapModule;
 
 /**
  * An implementation of {@link KaryonServer} which wraps an existing {@link KaryonServer}.
@@ -10,16 +10,16 @@ import com.netflix.governator.guice.LifecycleInjectorBuilderSuite;
 class KaryonServerBackedServer implements KaryonServer {
 
     private final AbstractKaryonServer delegate;
-    private final LifecycleInjectorBuilderSuite[] suites;
+    private final BootstrapModule[] bootstrapModules;
 
-    KaryonServerBackedServer(AbstractKaryonServer delegate, LifecycleInjectorBuilderSuite... suites) {
+    KaryonServerBackedServer(AbstractKaryonServer delegate, BootstrapModule... bootstrapModules) {
         this.delegate = delegate;
-        this.suites = suites;
+        this.bootstrapModules = bootstrapModules;
     }
 
     @Override
     public void start() {
-        delegate.startWithAdditionalSuites(suites);
+        delegate.startWithAdditionalBootstrapModules(bootstrapModules);
     }
 
     @Override

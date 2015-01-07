@@ -22,7 +22,7 @@ tasks.withType(Javadoc).each {
 dependencies {
     dependencies {
         compile project(':karyon-governator')
-        compile 'com.netflix.eureka:eureka-client:1.1.135'
+        compile 'com.netflix.eureka:eureka-client:1.1.146'
     }
 }
 

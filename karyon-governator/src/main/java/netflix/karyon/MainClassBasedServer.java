@@ -1,8 +1,8 @@
 package netflix.karyon;
 
 import com.google.inject.Injector;
+import com.netflix.governator.guice.BootstrapModule;
 import com.netflix.governator.guice.LifecycleInjector;
-import com.netflix.governator.guice.LifecycleInjectorBuilderSuite;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,8 +17,8 @@ class MainClassBasedServer extends AbstractKaryonServer {
 
     private final Class<?> mainClass;
 
-    protected MainClassBasedServer(Class<?> mainClass, LifecycleInjectorBuilderSuite... suites) {
-        super(suites);
+    protected MainClassBasedServer(Class<?> mainClass, BootstrapModule... bootstrapModules) {
+        super(bootstrapModules);
         this.mainClass = mainClass;
     }
 
@@ -53,7 +53,7 @@ class MainClassBasedServer extends AbstractKaryonServer {
     }
 
     @Override
-    protected Injector newInjector(LifecycleInjectorBuilderSuite... applicableSuites) {
-        return LifecycleInjector.bootstrap(mainClass, applicableSuites);
+    protected Injector newInjector(BootstrapModule... applicableBootstrapModules) {
+        return LifecycleInjector.bootstrap(mainClass, applicableBootstrapModules);
     }
 }
