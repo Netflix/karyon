@@ -33,7 +33,7 @@ import java.util.Set;
 /**
  * @author Nitesh Kant
  */
-@Path("/v1/platform/base/env")
+@Path("/env")
 @Beta
 @Produces(MediaType.APPLICATION_JSON)
 public class EnvironmentResource {

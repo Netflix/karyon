@@ -2,7 +2,6 @@ package netflix.adminresources;
 
 import com.google.common.collect.Maps;
 import com.google.inject.Injector;
-import com.google.inject.Singleton;
 import com.netflix.explorers.providers.FreemarkerTemplateProvider;
 import com.sun.jersey.api.core.PackagesResourceConfig;
 import com.sun.jersey.api.core.ResourceConfig;
@@ -25,7 +24,7 @@ import java.util.Set;
  * statics used in GuiceFilter, there cannot be more than one in an application.
  * The AdminResources app needs minimal features and this class provides those.
  */
-@Singleton
+//@Singleton
 class AdminResourcesFilter extends GuiceContainer {
     private final Map<String, HttpServlet> servlets = Maps.newConcurrentMap();
     private volatile String packages;
@@ -47,7 +46,7 @@ class AdminResourcesFilter extends GuiceContainer {
     /**
      * Add a non-Jersey servlet mapping
      *
-     * @param path path prefix for the servlet
+     * @param path    path prefix for the servlet
      * @param servlet the servlet
      */
     void mapServlet(String path, HttpServlet servlet) {

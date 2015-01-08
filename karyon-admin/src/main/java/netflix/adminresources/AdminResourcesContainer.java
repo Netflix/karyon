@@ -24,13 +24,17 @@ import com.netflix.config.DynamicStringProperty;
 import com.netflix.governator.annotations.Configuration;
 import com.netflix.governator.guice.LifecycleInjector;
 import com.netflix.governator.lifecycle.LifecycleManager;
-import netflix.adminresources.resources.EmbeddedContentResource;
-import netflix.adminresources.resources.HealthcheckResource;
+import netflix.admin.AdminConfigImpl;
+import netflix.admin.AdminContainerConfig;
+import netflix.admin.HealthCheckServlet;
 import netflix.karyon.health.HealthCheckHandler;
 import netflix.karyon.health.HealthCheckInvocationStrategy;
 import org.eclipse.jetty.server.DispatcherType;
+import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.server.handler.HandlerCollection;
 import org.eclipse.jetty.server.session.SessionHandler;
+import org.eclipse.jetty.servlet.DefaultServlet;
 import org.eclipse.jetty.servlet.FilterHolder;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
@@ -46,29 +50,27 @@ import java.util.EnumSet;
  * This class starts an embedded jetty server, listening at port specified by property
  * {@link AdminResourcesContainer#CONTAINER_LISTEN_PORT} and defaulting to
  * {@link AdminResourcesContainer#LISTEN_PORT_DEFAULT}. <br>
- *
+ * <p/>
  * The embedded server uses jersey so any jersey resources available in packages
  * specified via properties {@link AdminResourcesContainer#JERSEY_CORE_PACKAGES}will be scanned and initialized. <br>
- *
+ * <p/>
  * Karyon admin starts in an embedded container to have a "always available" endpoint for any application. This helps
  * in a homogeneous admin view for all applications. <br>
- *
+ * <p/>
  * <h3>Available resources</h3>
- *
+ * <p/>
  * The following resources are available by default:
- *
+ * <p/>
  * <ul>
- <li>Healthcheck: A healthcheck is available at path {@link HealthcheckResource#PATH}. This utilizes the configured
- {@link HealthCheckHandler} for karyon.</li>
- <li>Admin resource: Any url starting with "/adminres" is served via {@link EmbeddedContentResource}</li>
- </ul>
+ * <li>Healthcheck: A healthcheck is available at path {@link netflix.admin.HealthCheckServlet#PATH}. This utilizes the configured
+ * {@link HealthCheckHandler} for karyon.</li>
+ * </ul>
  *
  * @author pkamath
  * @author Nitesh Kant
  * @author Jordan Zimmerman
  */
 public class AdminResourcesContainer {
-
     private static final Logger logger = LoggerFactory.getLogger(AdminResourcesContainer.class);
 
     public static final String DEFAULT_PAGE_PROP_NAME = "com.netflix.karyon.admin.default.page";
@@ -79,7 +81,8 @@ public class AdminResourcesContainer {
     public static final String CONTAINER_LISTEN_PORT = "netflix.platform.admin.resources.port";
     public static final int LISTEN_PORT_DEFAULT = 8077;
     private static final String JERSEY_CORE_PACKAGES = "netflix.platform.admin.resources.core.packages";
-    public static final String JERSEY_CORE_PACKAGES_DEFAULT = "netflix.adminresources;com.netflix.explorers.resources;com.netflix.explorers.providers;netflix.admin";
+    public static final String JERSEY_CORE_PACKAGES_DEFAULT = "netflix.adminresources;com.netflix.explorers.resources;com.netflix.explorers.providers";
+    public static final String JERSEY_PACKAGES_ADMIN_TEMPLATES = "netflix.admin;netflix.adminresources.pages;com.netflix.explorers.resources";
 
     @Configuration(
             value = JERSEY_CORE_PACKAGES,
@@ -124,39 +127,56 @@ public class AdminResourcesContainer {
                     protected void configure() {
                         bind(HealthCheckInvocationStrategy.class).toProvider(strategy);
                         bind(HealthCheckHandler.class).toProvider(handlerProvider);
-                        bind(AdminResourcesFilter.class).asEagerSingleton();
+                        bind(AdminContainerConfig.class).to(AdminConfigImpl.class);
+                        bind(AdminResourcesFilter.class);
                     }
                 })
                 .createInjector();
         injector.getInstance(LifecycleManager.class).start();
 
         try {
+            final AdminPageRegistry adminPageRegistry = buildAdminPageRegistry(injector);
+            final AdminContainerConfig adminContainerConfig = injector.getInstance(AdminContainerConfig.class);
+            final HealthCheckServlet healthCheckServlet = injector.getInstance(HealthCheckServlet.class);
 
-            AdminPageRegistry baseServerPageRegistry = injector.getInstance(AdminPageRegistry.class);
-            baseServerPageRegistry.registerAdminPagesWithClasspathScan();
-            final String jerseyResourcePkgsForAdminPages = baseServerPageRegistry.buildJerseyResourcePkgListForAdminPages();
-            final String jerseyResourcePkgList = buildJerseyResourcePkgList(jerseyResourcePkgsForAdminPages);
+            // root redirection, health-check servlet
+            ServletContextHandler rootHandler = new ServletContextHandler();
+            rootHandler.setContextPath("/");
+            rootHandler.addFilter(RedirectFilter.class, "/", EnumSet.allOf(DispatcherType.class));
+            rootHandler.addServlet(new ServletHolder(healthCheckServlet), adminContainerConfig.healthCheckPath());
+            rootHandler.addServlet(new ServletHolder(new DefaultServlet()), "/*");
 
-            AdminResourcesFilter adminResourcesFilter = injector.getInstance(AdminResourcesFilter.class);
-            adminResourcesFilter.setPackages(jerseyResourcePkgList);
+            // admin page template resources
+            AdminResourcesFilter arfTemplatesResources = injector.getInstance(AdminResourcesFilter.class);
+            arfTemplatesResources.setPackages(JERSEY_PACKAGES_ADMIN_TEMPLATES);
 
-            ServletContextHandler handler = new ServletContextHandler();
-            handler.setContextPath("/");
+            ServletContextHandler adminTemplatesResHandler = new ServletContextHandler();
+            adminTemplatesResHandler.setContextPath(adminContainerConfig.templateResourceContext());
+            adminTemplatesResHandler.setSessionHandler(new SessionHandler());
+            adminTemplatesResHandler.addFilter(LoggingFilter.class, "/*", EnumSet.allOf(DispatcherType.class));
+            adminTemplatesResHandler.addFilter(new FilterHolder(arfTemplatesResources), "/*", EnumSet.allOf(DispatcherType.class));
+            adminTemplatesResHandler.addServlet(new ServletHolder(new DefaultServlet()), "/*");
 
-            handler.setSessionHandler(new SessionHandler());
-            handler.addFilter(LoggingFilter.class, "/*", EnumSet.allOf(DispatcherType.class));
-            handler.addFilter(RedirectFilter.class, "/*", EnumSet.allOf(DispatcherType.class));
-            handler.addFilter(new FilterHolder(adminResourcesFilter), "/*", EnumSet.allOf(DispatcherType.class));
-            handler.addServlet(new ServletHolder(adminResourcesFilter), "/*");
+            // admin page data resources
+            final String jerseyPkgListForAjaxResources = appendCoreJerseyPackages(adminPageRegistry.buildJerseyResourcePkgListForAdminPages());
+            AdminResourcesFilter arfDataResources = injector.getInstance(AdminResourcesFilter.class);
+            arfDataResources.setPackages(jerseyPkgListForAjaxResources);
 
-            server.setHandler(handler);
+            ServletContextHandler adminDataResHandler = new ServletContextHandler();
+            adminDataResHandler.setContextPath(adminContainerConfig.ajaxDataResourceContext());
+            adminDataResHandler.addFilter(new FilterHolder(arfDataResources), "/*", EnumSet.allOf(DispatcherType.class));
+            adminDataResHandler.addServlet(new ServletHolder(new DefaultServlet()), "/*");
+
+            HandlerCollection handlers = new HandlerCollection();
+            handlers.setHandlers(new Handler[]{adminTemplatesResHandler, adminDataResHandler, rootHandler});
+            server.setHandler(handlers);
             server.start();
         } catch (Exception e) {
             logger.error("Exception in building AdminResourcesContainer ", e);
         }
     }
 
-    private String buildJerseyResourcePkgList(String jerseyResourcePkgListForAdminPages) {
+    private String appendCoreJerseyPackages(String jerseyResourcePkgListForAdminPages) {
         String pkgPath = coreJerseyPackages;
         if (jerseyResourcePkgListForAdminPages != null && !jerseyResourcePkgListForAdminPages.isEmpty()) {
             pkgPath += ";" + jerseyResourcePkgListForAdminPages;
@@ -164,6 +184,13 @@ public class AdminResourcesContainer {
 
         return pkgPath;
     }
+
+    private AdminPageRegistry buildAdminPageRegistry(Injector injector) {
+        AdminPageRegistry baseServerPageRegistry = injector.getInstance(AdminPageRegistry.class);
+        baseServerPageRegistry.registerAdminPagesWithClasspathScan();
+        return baseServerPageRegistry;
+    }
+
 
     @PreDestroy
     public void shutdown() {

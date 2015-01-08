@@ -1,5 +1,6 @@
 $(document).ready(function() {
     "use strict";
+    var templateBaseUrl = '${template_base}';
 
     $("div.outer-center").layout({
         defaults: {
@@ -56,7 +57,7 @@ $(document).ready(function() {
         state.inst = inst;
         var $view = $(".middle-center");
         if (view) {
-            var url = "/baseserver/{0}".format(state.view);
+            var url = templateBaseUrl + "/{0}".format(state.view);
             $(".nav li").removeClass("active");
             $("#submenu-{0}".format(state.view)).parent().addClass("active");
 

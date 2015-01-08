@@ -1,9 +1,10 @@
-package netflix.adminresources.resources;
+package netflix.adminresources.pages;
 
 import com.google.inject.Inject;
 import com.netflix.appinfo.InstanceInfo;
 import com.netflix.discovery.DiscoveryManager;
 import com.sun.jersey.api.view.Viewable;
+import netflix.admin.AdminContainerConfig;
 import netflix.adminresources.AdminPageInfo;
 import netflix.adminresources.AdminPageRegistry;
 import org.slf4j.Logger;
@@ -23,19 +24,24 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@Path("/baseserver")
+@Path("/")
 @Produces(MediaType.TEXT_HTML)
 public class AdminPageResource {
     private static final Logger LOG = LoggerFactory.getLogger(AdminPageResource.class);
-    public static final String V1_PLATFORM_BASE = "/v1/platform/base";
+    private final AdminContainerConfig adminContainerConfig;
+    private AdminPageRegistry adminPageRegistry;
 
     @Inject
-    private AdminPageRegistry adminPageRegistry;
+    public AdminPageResource(AdminPageRegistry adminPageRegistry, AdminContainerConfig adminContainerConfig) {
+        this.adminContainerConfig = adminContainerConfig;
+        this.adminPageRegistry = adminPageRegistry;
+    }
 
     @GET()
     public Viewable showIndex() {
         Map<String, Object> model = new HashMap<String, Object>();
-        model.put("ajax_base", V1_PLATFORM_BASE);
+        model.put("ajax_base", adminContainerConfig.ajaxDataResourceContext());
+        model.put("template_base", adminContainerConfig.templateResourceContext());
 
         if (adminPageRegistry != null) {
             final Collection<AdminPageInfo> adminPages = adminPageRegistry.getAllPages();
@@ -55,7 +61,8 @@ public class AdminPageResource {
         Map<String, Object> model = new HashMap<String, Object>();
         model.put("id", id);
         model.put("instance_hostname", getInstanceHostName(id));
-        model.put("ajax_base", V1_PLATFORM_BASE);
+        model.put("ajax_base", adminContainerConfig.ajaxDataResourceContext());
+        model.put("template_base", adminContainerConfig.templateResourceContext());
 
         if (adminPageRegistry != null && adminPageRegistry.getPageInfo(view) != null) {
            return new Viewable(adminPageRegistry.getPageInfo(view).getPageTemplate(), model);
@@ -94,7 +101,8 @@ public class AdminPageResource {
         Map<String, Object> model = new HashMap<String, Object>();
         model.put("id", id);
         model.put("key", key);
-        model.put("ajax_base", V1_PLATFORM_BASE);
+        model.put("ajax_base", adminContainerConfig.ajaxDataResourceContext());
+
         //model.put("instance_hostname", "");
         return new Viewable("/webadmin/jmx/view.ftl", model);
     }

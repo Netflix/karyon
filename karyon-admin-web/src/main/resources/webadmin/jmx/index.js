@@ -2,7 +2,7 @@ $(document).ready(function() {
     "use strict";
 
     var ajaxSrc = "${ajax_base}/jmx";
-    var mbeanViewSrc = "/baseserver/jmx/mbean";
+    var mbeanViewSrc = '${template_base}/jmx/mbean';
 
     $('#jmxview').layout({
         center: {

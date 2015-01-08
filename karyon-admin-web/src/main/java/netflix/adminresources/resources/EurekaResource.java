@@ -40,7 +40,7 @@ import java.util.List;
  * @author Nitesh Kant
  */
 @Beta
-@Path("/v1/platform/base/eureka")
+@Path("/eureka")
 @Produces(MediaType.APPLICATION_JSON)
 public class EurekaResource {
 
