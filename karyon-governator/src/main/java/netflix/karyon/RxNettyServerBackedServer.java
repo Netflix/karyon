@@ -1,6 +1,6 @@
 package netflix.karyon;
 
-import com.netflix.governator.guice.LifecycleInjectorBuilderSuite;
+import com.netflix.governator.guice.BootstrapModule;
 import io.reactivex.netty.server.AbstractServer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,8 +16,8 @@ class RxNettyServerBackedServer extends MainClassBasedServer {
 
     @SuppressWarnings("rawtypes") private final AbstractServer rxNettyServer;
 
-    RxNettyServerBackedServer(AbstractServer rxNettyServer, LifecycleInjectorBuilderSuite... suites) {
-        super(RxNettyServerBackedServer.class, suites);
+    RxNettyServerBackedServer(AbstractServer rxNettyServer, BootstrapModule... bootstrapModules) {
+        super(RxNettyServerBackedServer.class, bootstrapModules);
         this.rxNettyServer = rxNettyServer;
     }
 

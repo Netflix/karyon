@@ -1,7 +1,7 @@
 package netflix.karyon;
 
 import com.google.inject.Injector;
-import com.netflix.governator.guice.LifecycleInjectorBuilderSuite;
+import com.netflix.governator.guice.BootstrapModule;
 import com.netflix.governator.lifecycle.LifecycleManager;
 
 import java.util.Arrays;
@@ -11,27 +11,27 @@ import java.util.Arrays;
  */
 abstract class AbstractKaryonServer implements KaryonServer {
 
-    protected final LifecycleInjectorBuilderSuite[] suites;
+    protected final BootstrapModule[] bootstrapModules;
     protected LifecycleManager lifecycleManager;
     protected Injector injector;
 
-    public AbstractKaryonServer(LifecycleInjectorBuilderSuite... suites) {
-        this.suites = suites;
+    public AbstractKaryonServer(BootstrapModule... bootstrapModules) {
+        this.bootstrapModules = bootstrapModules;
     }
 
     @Override
     public final void start() {
-        startWithAdditionalSuites();
+        startWithAdditionalBootstrapModules();
     }
 
-    public final void startWithAdditionalSuites(LifecycleInjectorBuilderSuite... additionalSuites) {
-        LifecycleInjectorBuilderSuite[] applicableSuites = this.suites;
-        if (null != additionalSuites && additionalSuites.length != 0) {
-            applicableSuites = Arrays.copyOf(suites, suites.length + additionalSuites.length);
-            System.arraycopy(additionalSuites, 0, applicableSuites, suites.length, additionalSuites.length);
+    public final void startWithAdditionalBootstrapModules(BootstrapModule... additionalBootstrapModules) {
+        BootstrapModule[] applicableBootstrapModules = this.bootstrapModules;
+        if (null != additionalBootstrapModules && additionalBootstrapModules.length != 0) {
+            applicableBootstrapModules = Arrays.copyOf(bootstrapModules, bootstrapModules.length + additionalBootstrapModules.length);
+            System.arraycopy(additionalBootstrapModules, 0, applicableBootstrapModules, bootstrapModules.length, additionalBootstrapModules.length);
         }
 
-        injector = newInjector(applicableSuites);
+        injector = newInjector(applicableBootstrapModules);
 
         startLifecycleManager();
         _start();
@@ -52,7 +52,7 @@ abstract class AbstractKaryonServer implements KaryonServer {
         waitTillShutdown();
     }
 
-    protected abstract Injector newInjector(LifecycleInjectorBuilderSuite... applicableSuites);
+    protected abstract Injector newInjector(BootstrapModule... applicableBootstrapModules);
 
     protected void startLifecycleManager() {
         lifecycleManager = injector.getInstance(LifecycleManager.class);

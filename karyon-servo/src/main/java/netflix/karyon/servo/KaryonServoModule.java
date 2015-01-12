@@ -1,27 +1,24 @@
 package netflix.karyon.servo;
 
 import com.google.inject.AbstractModule;
-import com.netflix.governator.guice.LifecycleInjectorBuilder;
-import com.netflix.governator.guice.LifecycleInjectorBuilderSuite;
+import com.netflix.governator.guice.BootstrapModule;
 import io.reactivex.netty.RxNetty;
 import io.reactivex.netty.servo.ServoEventsListenerFactory;
+import netflix.karyon.Karyon;
 
 /**
+ * Register global RxNetty's Metric Listeners Factory to use Servo.
+ *
  * @author Nitesh Kant
  */
-public class KaryonServoModule extends AbstractModule{
+public class KaryonServoModule extends AbstractModule {
 
     @Override
     protected void configure() {
         RxNetty.useMetricListenersFactory(new ServoEventsListenerFactory());
     }
 
-    public static LifecycleInjectorBuilderSuite asSuite() {
-        return new LifecycleInjectorBuilderSuite() {
-            @Override
-            public void configure(LifecycleInjectorBuilder builder) {
-                builder.withAdditionalModules(new KaryonServoModule());
-            }
-        };
+    public static BootstrapModule asBootstrapModule() {
+        return Karyon.toBootstrapModule(KaryonServoModule.class);
     }
 }

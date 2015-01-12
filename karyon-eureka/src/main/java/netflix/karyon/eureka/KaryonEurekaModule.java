@@ -9,10 +9,13 @@ import com.netflix.discovery.DiscoveryClient;
 import com.netflix.discovery.EurekaClientConfig;
 import com.netflix.discovery.EurekaNamespace;
 import com.netflix.discovery.providers.DefaultEurekaClientConfigProvider;
-import com.netflix.governator.guice.LifecycleInjectorBuilder;
-import com.netflix.governator.guice.LifecycleInjectorBuilderSuite;
+import com.netflix.governator.guice.BootstrapModule;
+import netflix.karyon.Karyon;
 
 /**
+ * Initialize Eureka, by binding the &quot;eureka.&quot; namespace and adding providers for EurekaClientConfig
+ * and EurekaInstanceConfig.
+ *
  * @author Nitesh Kant
  */
 public class KaryonEurekaModule extends AbstractModule {
@@ -44,12 +47,8 @@ public class KaryonEurekaModule extends AbstractModule {
         return bind(String.class).annotatedWith(EurekaNamespace.class);
     }
 
-    public static LifecycleInjectorBuilderSuite asSuite() {
-        return new LifecycleInjectorBuilderSuite() {
-            @Override
-            public void configure(LifecycleInjectorBuilder builder) {
-                builder.withAdditionalModules(new KaryonEurekaModule());
-            }
-        };
+    public static BootstrapModule asBootstrapModule() {
+        return Karyon.toBootstrapModule(KaryonEurekaModule.class);
     }
+
 }

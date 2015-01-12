@@ -22,7 +22,7 @@ tasks.withType(Javadoc).each {
 dependencies {
     dependencies {
         compile project(':karyon-governator')
-        compile "com.netflix.rxnetty:rx-netty-servo:${rxnetty_version}"
+        compile "io.reactivex:rxnetty-servo:${rxnetty_version}"
     }
 }
 

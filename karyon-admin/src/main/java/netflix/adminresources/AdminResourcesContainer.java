@@ -131,6 +131,7 @@ public class AdminResourcesContainer {
                         bind(AdminResourcesFilter.class);
                     }
                 })
+                .build()
                 .createInjector();
         injector.getInstance(LifecycleManager.class).start();
 
