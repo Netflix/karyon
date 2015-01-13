@@ -23,6 +23,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class AdminPageRegistry {
     private static final Logger LOG = LoggerFactory.getLogger(AdminPageRegistry.class);
     public final static String PROP_ID_ADMIN_PAGES_SCAN = "netflix.platform.admin.pages.packages";
+    public static final String DEFAULT_SCAN_PKG = "netflix";
 
     private Map<String, AdminPageInfo> baseServerPageInfoMap = new ConcurrentHashMap<String, AdminPageInfo>();
 
@@ -99,7 +100,7 @@ public class AdminPageRegistry {
     }
 
     private List<String> getAdminPagesPackagesToScan() {
-        final String adminPagesPkgPath = ConfigurationManager.getConfigInstance().getString(PROP_ID_ADMIN_PAGES_SCAN, "com.netflix");
+        final String adminPagesPkgPath = ConfigurationManager.getConfigInstance().getString(PROP_ID_ADMIN_PAGES_SCAN, DEFAULT_SCAN_PKG);
         String[] pkgPaths = adminPagesPkgPath.split(";");
         return Lists.newArrayList(pkgPaths);
     }

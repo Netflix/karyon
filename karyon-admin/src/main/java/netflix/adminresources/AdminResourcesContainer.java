@@ -19,6 +19,7 @@ package netflix.adminresources;
 import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
 import com.google.inject.Provider;
+import com.netflix.config.ConfigurationManager;
 import com.netflix.config.DynamicPropertyFactory;
 import com.netflix.config.DynamicStringProperty;
 import com.netflix.governator.annotations.Configuration;
@@ -28,6 +29,7 @@ import netflix.adminresources.resources.EmbeddedContentResource;
 import netflix.adminresources.resources.HealthcheckResource;
 import netflix.karyon.health.HealthCheckHandler;
 import netflix.karyon.health.HealthCheckInvocationStrategy;
+import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.DispatcherType;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.session.SessionHandler;
@@ -46,22 +48,22 @@ import java.util.EnumSet;
  * This class starts an embedded jetty server, listening at port specified by property
  * {@link AdminResourcesContainer#CONTAINER_LISTEN_PORT} and defaulting to
  * {@link AdminResourcesContainer#LISTEN_PORT_DEFAULT}. <br>
- *
+ * <p/>
  * The embedded server uses jersey so any jersey resources available in packages
  * specified via properties {@link AdminResourcesContainer#JERSEY_CORE_PACKAGES}will be scanned and initialized. <br>
- *
+ * <p/>
  * Karyon admin starts in an embedded container to have a "always available" endpoint for any application. This helps
  * in a homogeneous admin view for all applications. <br>
- *
+ * <p/>
  * <h3>Available resources</h3>
- *
+ * <p/>
  * The following resources are available by default:
- *
+ * <p/>
  * <ul>
- <li>Healthcheck: A healthcheck is available at path {@link HealthcheckResource#PATH}. This utilizes the configured
- {@link HealthCheckHandler} for karyon.</li>
- <li>Admin resource: Any url starting with "/adminres" is served via {@link EmbeddedContentResource}</li>
- </ul>
+ * <li>Healthcheck: A healthcheck is available at path {@link HealthcheckResource#PATH}. This utilizes the configured
+ * {@link HealthCheckHandler} for karyon.</li>
+ * <li>Admin resource: Any url starting with "/adminres" is served via {@link EmbeddedContentResource}</li>
+ * </ul>
  *
  * @author pkamath
  * @author Nitesh Kant
@@ -81,22 +83,9 @@ public class AdminResourcesContainer {
     private static final String JERSEY_CORE_PACKAGES = "netflix.platform.admin.resources.core.packages";
     public static final String JERSEY_CORE_PACKAGES_DEFAULT = "netflix.adminresources;com.netflix.explorers.resources;com.netflix.explorers.providers;netflix.admin";
 
-    @Configuration(
-            value = JERSEY_CORE_PACKAGES,
-            documentation = "Property defining the list of core packages which contains jersey resources for karyon admin. netflix.adminresources is always added to this."
-    )
-    private String coreJerseyPackages = JERSEY_CORE_PACKAGES_DEFAULT;
-
-
-    @Configuration(
-            value = CONTAINER_LISTEN_PORT,
-            documentation = "Property defining the listen port for admin resources.",
-            ignoreTypeMismatch = true
-    )
-    private int listenPort = LISTEN_PORT_DEFAULT;
-
+    private String coreJerseyPackages = ConfigurationManager.getConfigInstance().getString(JERSEY_CORE_PACKAGES, JERSEY_CORE_PACKAGES_DEFAULT);
+    private int listenPort = ConfigurationManager.getConfigInstance().getInt(CONTAINER_LISTEN_PORT, LISTEN_PORT_DEFAULT);
     private Server server;
-
 
     private final Provider<HealthCheckInvocationStrategy> strategy;
     private final Provider<HealthCheckHandler> handlerProvider;
@@ -152,9 +141,17 @@ public class AdminResourcesContainer {
 
             server.setHandler(handler);
             server.start();
+
+            final Connector connector = server.getConnectors()[0];
+            listenPort = connector.getLocalPort();
+
         } catch (Exception e) {
             logger.error("Exception in building AdminResourcesContainer ", e);
         }
+    }
+
+    public int getListenPort() {
+        return listenPort;
     }
 
     private String buildJerseyResourcePkgList(String jerseyResourcePkgListForAdminPages) {
