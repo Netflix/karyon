@@ -29,6 +29,7 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.junit.After;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 
 /**
@@ -45,17 +46,22 @@ public class AdminResourceTest {
         container.shutdown();
     }
 
+    @Before
+    public void init() {
+        System.setProperty(AdminResourcesContainer.CONTAINER_LISTEN_PORT, "0");
+    }
+
     @Test
     public void testBasic() throws Exception {
-        startServer();
+        final int port = startServerAndGetListeningPort();
         HttpClient client = new DefaultHttpClient();
         HttpGet healthGet =
-                new HttpGet("http://localhost:" + AdminResourcesContainer.LISTEN_PORT_DEFAULT + "/healthcheck");
+                new HttpGet(String.format("http://localhost:%d/healthcheck", port));
         HttpResponse response = client.execute(healthGet);
         Assert.assertEquals("admin resource health check failed.", 200, response.getStatusLine().getStatusCode());
     }
 
-    private void startServer() throws Exception {
+    private int startServerAndGetListeningPort() throws Exception {
         container = new AdminResourcesContainer(new Provider<HealthCheckInvocationStrategy>() {
             @Override
             public HealthCheckInvocationStrategy get() {
@@ -68,5 +74,7 @@ public class AdminResourceTest {
             }
         });
         container.init();
+
+        return container.getListenPort();
     }
 }

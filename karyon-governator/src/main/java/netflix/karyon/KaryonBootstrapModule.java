@@ -48,9 +48,6 @@ public class KaryonBootstrapModule implements BootstrapModule {
     @Override
     public void configure(BootstrapBinder bootstrapBinder) {
         bootstrapBinder.inMode(LifecycleInjectorMode.SIMULATED_CHILD_INJECTORS);
-        if (null != karyonBootstrap) {
-            bootstrapBinder.bind(KaryonBootstrap.class).toInstance(karyonBootstrap);
-        }
         bootstrapBinder.include(new AbstractModule() {
             @Override
             protected void configure() {

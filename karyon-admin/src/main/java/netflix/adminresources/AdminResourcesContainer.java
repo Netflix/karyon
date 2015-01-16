@@ -19,9 +19,9 @@ package netflix.adminresources;
 import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
 import com.google.inject.Provider;
+import com.netflix.config.ConfigurationManager;
 import com.netflix.config.DynamicPropertyFactory;
 import com.netflix.config.DynamicStringProperty;
-import com.netflix.governator.annotations.Configuration;
 import com.netflix.governator.guice.LifecycleInjector;
 import com.netflix.governator.lifecycle.LifecycleManager;
 import netflix.admin.AdminConfigImpl;
@@ -29,6 +29,7 @@ import netflix.admin.AdminContainerConfig;
 import netflix.admin.HealthCheckServlet;
 import netflix.karyon.health.HealthCheckHandler;
 import netflix.karyon.health.HealthCheckInvocationStrategy;
+import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.DispatcherType;
 import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.Server;
@@ -62,13 +63,10 @@ import java.util.EnumSet;
  * The following resources are available by default:
  * <p/>
  * <ul>
- * <li>Healthcheck: A healthcheck is available at path {@link netflix.admin.HealthCheckServlet#PATH}. This utilizes the configured
+ * <li>Healthcheck: A healthcheck is available at path {@link netflix.admin.HealthCheckServlet}. This utilizes the configured
  * {@link HealthCheckHandler} for karyon.</li>
  * </ul>
  *
- * @author pkamath
- * @author Nitesh Kant
- * @author Jordan Zimmerman
  */
 public class AdminResourcesContainer {
     private static final Logger logger = LoggerFactory.getLogger(AdminResourcesContainer.class);
@@ -84,22 +82,9 @@ public class AdminResourcesContainer {
     public static final String JERSEY_CORE_PACKAGES_DEFAULT = "netflix.adminresources;com.netflix.explorers.resources;com.netflix.explorers.providers";
     public static final String JERSEY_PACKAGES_ADMIN_TEMPLATES = "netflix.admin;netflix.adminresources.pages;com.netflix.explorers.resources";
 
-    @Configuration(
-            value = JERSEY_CORE_PACKAGES,
-            documentation = "Property defining the list of core packages which contains jersey resources for karyon admin. netflix.adminresources is always added to this."
-    )
-    private String coreJerseyPackages = JERSEY_CORE_PACKAGES_DEFAULT;
-
-
-    @Configuration(
-            value = CONTAINER_LISTEN_PORT,
-            documentation = "Property defining the listen port for admin resources.",
-            ignoreTypeMismatch = true
-    )
-    private int listenPort = LISTEN_PORT_DEFAULT;
-
+    private String coreJerseyPackages = ConfigurationManager.getConfigInstance().getString(JERSEY_CORE_PACKAGES, JERSEY_CORE_PACKAGES_DEFAULT);
+    private int listenPort = ConfigurationManager.getConfigInstance().getInt(CONTAINER_LISTEN_PORT, LISTEN_PORT_DEFAULT);
     private Server server;
-
 
     private final Provider<HealthCheckInvocationStrategy> strategy;
     private final Provider<HealthCheckHandler> handlerProvider;
@@ -172,9 +157,17 @@ public class AdminResourcesContainer {
             handlers.setHandlers(new Handler[]{adminTemplatesResHandler, adminDataResHandler, rootHandler});
             server.setHandler(handlers);
             server.start();
+
+            final Connector connector = server.getConnectors()[0];
+            listenPort = connector.getLocalPort();
+
         } catch (Exception e) {
             logger.error("Exception in building AdminResourcesContainer ", e);
         }
+    }
+
+    public int getListenPort() {
+        return listenPort;
     }
 
     private String appendCoreJerseyPackages(String jerseyResourcePkgListForAdminPages) {
