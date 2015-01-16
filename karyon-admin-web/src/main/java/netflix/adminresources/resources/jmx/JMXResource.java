@@ -58,7 +58,7 @@ import java.util.TreeMap;
  *
  */
 @Produces({ MediaType.APPLICATION_JSON, MediaType.TEXT_HTML })
-@Path("/webadmin/jmx")
+@Path("/jmx")
 public class JMXResource {
     private static final Logger LOG = LoggerFactory.getLogger(JMXResource.class);
     private static final String CURRENT_VALUE = "CurrentValue";

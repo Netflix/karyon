@@ -16,7 +16,9 @@
 
 package netflix.adminresources;
 
+import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import netflix.admin.AdminContainerConfig;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
@@ -39,6 +41,13 @@ import java.io.IOException;
 @Singleton
 public class RedirectFilter implements Filter {
 
+    private AdminContainerConfig adminContainerConfig;
+
+    @Inject
+    public RedirectFilter(AdminContainerConfig adminContainerConfig) {
+        this.adminContainerConfig = adminContainerConfig;
+    }
+
     @Override
     public void destroy() {
     }
@@ -48,8 +57,7 @@ public class RedirectFilter implements Filter {
                          FilterChain chain) throws IOException, ServletException {
         HttpServletRequest httpRequest = (HttpServletRequest) request;
         if (httpRequest.getRequestURI().equals("/")) {
-            String defaultLocation = AdminResourcesContainer.DEFAULT_PAGE.get();
-            ((HttpServletResponse) response).sendRedirect(defaultLocation);
+            ((HttpServletResponse) response).sendRedirect(adminContainerConfig.templateResourceContext());
             return;
         }
         chain.doFilter(httpRequest, response);

@@ -62,12 +62,15 @@ public class AdminResourceTest {
     }
 
     private int startServerAndGetListeningPort() throws Exception {
-        container = new AdminResourcesContainer(new Provider<HealthCheckInvocationStrategy>() {
+        container = new AdminResourcesContainer();
+        container.setStrategy(new Provider<HealthCheckInvocationStrategy>() {
             @Override
             public HealthCheckInvocationStrategy get() {
                 return new SyncHealthCheckInvocationStrategy(AlwaysHealthyHealthCheck.INSTANCE);
             }
-        }, new Provider<HealthCheckHandler>() {
+        });
+
+        container.setHandlerProvider(new Provider<HealthCheckHandler>() {
             @Override
             public HealthCheckHandler get() {
                 return AlwaysHealthyHealthCheck.INSTANCE;
@@ -75,6 +78,6 @@ public class AdminResourceTest {
         });
         container.init();
 
-        return container.getListenPort();
+        return container.getServerPort();
     }
 }

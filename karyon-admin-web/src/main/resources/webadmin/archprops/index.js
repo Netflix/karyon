@@ -2,14 +2,14 @@ $(document).ready(function () {
     "use strict";
 
     $("#status-error").html("");
-    var editSrc = "/webadmin/props/{0}";
+    var source = "${ajax_base}/archprops";
 
-    var oTable = $('#props-table').dataTable({
+    $('#props-table').dataTable({
         "aoColumns": [
             { "sTitle": "Name", "sWidth" : "30%", "sDefaultContent" : "-" },
             { "sTitle": "Value", "sWidth" : "70%", "sDefaultContent" : "-"}
         ],
-        "sAjaxSource"    : "/webadmin/props",
+        "sAjaxSource"    : source,
         "fnServerData"   : function (sSource, aoData, fnCallback) {
             $.getJSON(sSource, aoData, function (json) {
                 $("#status-lastupdate").html(new Date().format());

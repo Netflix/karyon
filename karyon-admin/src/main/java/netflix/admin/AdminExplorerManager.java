@@ -17,10 +17,11 @@ import java.util.*;
 @Singleton
 public class AdminExplorerManager implements ExplorerManager {
     private static final Logger LOG = LoggerFactory.getLogger(AdminExplorerManager.class);
+    public static final String ADMIN_EXPLORER_NAME = "baseserver";
 
     public static class AdminResourceExplorer extends AbstractExplorerModule {
         public AdminResourceExplorer() {
-            super("admin");
+            super(ADMIN_EXPLORER_NAME);
         }
     }
 
@@ -64,7 +65,7 @@ public class AdminExplorerManager implements ExplorerManager {
 
     @Override
     public Explorer getExplorer(String name) {
-        if (name.equals("admin")) {
+        if (name.equals(ADMIN_EXPLORER_NAME)) {
             return adminExplorer;
         }
         throw new IllegalArgumentException("AdminExplorerManager called with explorerName = " + name);

@@ -9,7 +9,6 @@ public class KaryonWebAdminModule extends KaryonAdminModule {
     @Override
     protected void configure() {
         super.configure();
-        bind(WebAdminComponent.class).asEagerSingleton();
     }
 
     public static BootstrapModule asBootstrapModule() {

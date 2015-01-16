@@ -71,8 +71,24 @@
 }
 </style>
 
+<#import "/layout/bootstrap/form.ftl" as form/>
 <#import "/layout/bootstrap/bootstrap.ftl" as bs/>
 
+<button class="btn btn-success" id="property-create"><i class="icon-plus icon-white"> </i> Add Property</button>
 <table cellpadding="0" cellspacing="0" border="0" class="table table-striped table-condensed table-bordered fixed break-wrap" id="props-table" style="width:100%"></table>
+
+
+<!-- Dialog template for adding a new property -->
+<@form.modalform action="/webadmin/props" id="property-new-template" title="New property" class="span10">
+    <@form.modalbody>
+        <@form.text     label="Property Name"  name="name" />
+        <@form.textarea label="Property Value" name="value"/>
+    </@form.modalbody>
+
+    <@form.modalfooter>
+        <@form.submit "Create"/>
+        <@form.cancel "Cancel"/>
+    </@form.modalfooter>
+</@form.modalform>
 
 

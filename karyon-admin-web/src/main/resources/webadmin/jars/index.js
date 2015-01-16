@@ -2,8 +2,8 @@ $(document).ready(function() {
     "use strict";
     
     $("#status-error").html("");
-    
-<#assign source = "/webadmin/jars">
+
+    var source = "${ajax_base}/jars";
 
     var oTable = $('#jars-table').dataTable( {
         "aoColumns": [
@@ -11,7 +11,7 @@ $(document).ready(function() {
             { "sTitle": "Owner"     , "mDataProp" : "libraryOwner",          "sDefaultContent": "", "sWidth" : "10%" },
             { "sTitle": "Version"     , "mDataProp" : "implementationVersion", "sDefaultContent": "", "sWidth" : "10%" }
         ],
-        "sAjaxSource": "${source}",
+        "sAjaxSource": source,
         "fnServerData": function ( sSource, aoData, fnCallback ) {
             $.getJSON(sSource)
                 .success(function(json) {

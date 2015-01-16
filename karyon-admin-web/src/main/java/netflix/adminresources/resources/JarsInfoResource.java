@@ -42,7 +42,7 @@ import java.util.regex.Pattern;
  * @author Nitesh Kant
  */
 @Beta
-@Path("/webadmin/jars")
+@Path("/jars")
 @Produces(MediaType.APPLICATION_JSON)
 public class JarsInfoResource {
 
