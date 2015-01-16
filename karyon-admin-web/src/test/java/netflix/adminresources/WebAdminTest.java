@@ -67,8 +67,8 @@ public class WebAdminTest {
     private static void buildUpRestEndpointsToTest() {
         final String localhostUrlBase = String.format("http://localhost:%d/", adminServerPort);
         REST_END_POINTS = new ImmutableMap.Builder<String, String>()
-                .put(localhostUrlBase + "webadmin/props", MediaType.APPLICATION_JSON)
-                .put(localhostUrlBase + "admin/props", MediaType.TEXT_HTML)
+                .put(localhostUrlBase + "webadmin/archprops", MediaType.APPLICATION_JSON)
+                .put(localhostUrlBase + "admin/archprops", MediaType.TEXT_HTML)
                 .put(localhostUrlBase + "admin/env", MediaType.TEXT_HTML)
                 .put(localhostUrlBase + "webadmin/env", MediaType.APPLICATION_JSON)
                 .put(localhostUrlBase + "admin/jars", MediaType.TEXT_HTML)
@@ -111,7 +111,7 @@ public class WebAdminTest {
     @Test
     public void testMaskedResources() throws Exception {
         HttpClient client = new DefaultHttpClient();
-        final String endPoint = String.format("http://localhost:%d/webadmin/props", adminServerPort);
+        final String endPoint = String.format("http://localhost:%d/webadmin/archprops", adminServerPort);
         LOG.info("REST endpoint " + endPoint);
         HttpGet restGet = new HttpGet(endPoint);
         HttpResponse response = client.execute(restGet);
@@ -129,18 +129,22 @@ public class WebAdminTest {
     }
 
     private static int startServerAndGetListeningPort() throws Exception {
-        container = new AdminResourcesContainer(new Provider<HealthCheckInvocationStrategy>() {
+        container = new AdminResourcesContainer();
+        container.setStrategy(new Provider<HealthCheckInvocationStrategy>() {
             @Override
             public HealthCheckInvocationStrategy get() {
                 return new SyncHealthCheckInvocationStrategy(AlwaysHealthyHealthCheck.INSTANCE);
             }
-        }, new Provider<HealthCheckHandler>() {
+        });
+
+        container.setHandlerProvider(new Provider<HealthCheckHandler>() {
             @Override
             public HealthCheckHandler get() {
                 return AlwaysHealthyHealthCheck.INSTANCE;
             }
         });
+
         container.init();
-        return container.getListenPort();
+        return container.getServerPort();
     }
 }

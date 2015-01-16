@@ -2,7 +2,7 @@ $(document).ready(function () {
     "use strict";
 
     $("#status-error").html("");
-    var source = "${ajax_base}/archaius-props";
+    var source = "${ajax_base}/archprops";
 
     $('#props-table').dataTable({
         "aoColumns": [

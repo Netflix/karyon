@@ -1,6 +1,7 @@
 package netflix.adminresources.pages;
 
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import com.netflix.appinfo.InstanceInfo;
 import com.netflix.discovery.DiscoveryManager;
 import com.sun.jersey.api.view.Viewable;
@@ -26,6 +27,7 @@ import java.util.Map;
 
 @Path("/")
 @Produces(MediaType.TEXT_HTML)
+@Singleton
 public class AdminPageResource {
     private static final Logger LOG = LoggerFactory.getLogger(AdminPageResource.class);
     private final AdminContainerConfig adminContainerConfig;
