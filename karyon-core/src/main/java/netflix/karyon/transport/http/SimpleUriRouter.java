@@ -42,7 +42,7 @@ public class SimpleUriRouter<I, O> implements RequestHandler<I, O> {
     }
 
     /**
-     * Add a new URI -> Handler route to this router.
+     * Add a new URI -&lt; Handler route to this router.
      * @param uri URI to match.
      * @param handler Request handler.
      * @return The updated router.
@@ -53,7 +53,7 @@ public class SimpleUriRouter<I, O> implements RequestHandler<I, O> {
     }
 
     /**
-     * Add a new URI regex -> Handler route to this router.
+     * Add a new URI regex -&lt; Handler route to this router.
      * @param uriRegEx URI regex to match
      * @param handler Request handler.
      * @return The updated router.
