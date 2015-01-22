@@ -17,6 +17,17 @@ ext.githubProjectName = rootProject.name // Change if github project name is not
 
 apply plugin: 'application'
 
+configurations.all {
+    resolutionStrategy {
+        eachDependency { DependencyResolveDetails details ->
+            // examples depend on an older version of governator
+            if (details.requested.group == 'com.netflix.governator') {
+                details.useVersion'1.2.20'
+            }
+        }
+    }
+}
+
 buildscript {
     repositories { mavenCentral() }
     apply from: file('../gradle/buildscript.gradle'), to: buildscript
