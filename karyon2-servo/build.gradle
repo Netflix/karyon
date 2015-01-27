@@ -16,13 +16,13 @@
 apply plugin: 'osgi'
 
 dependencies {
-    compile project(':karyon-governator')
-    compile 'com.netflix.archaius:archaius-core:0.6.3'
+    compile project(':karyon2-governator')
+    compile "io.reactivex:rxnetty-servo:${rxnetty_version}"
 }
 
 jar {
     manifest {
-        name = 'karyon-archaius'
+        name = 'karyon2-servo'
         instruction 'Bundle-Vendor', 'Netflix'
         instruction 'Bundle-DocURL', 'https://github.com/Netflix/karyon'
         instruction 'Import-Package', '!org.junit,!junit.framework,!org.mockito.*,*'

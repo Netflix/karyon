@@ -16,12 +16,13 @@
 apply plugin: 'osgi'
 
 dependencies {
-    compile "io.reactivex:rxnetty-contexts:${rxnetty_version}"
+    compile project(':karyon2-governator')
+    compile 'com.netflix.eureka:eureka-client:1.1.146'
 }
 
 jar {
     manifest {
-        name = 'karyon-core'
+        name = 'karyon2-eureka'
         instruction 'Bundle-Vendor', 'Netflix'
         instruction 'Bundle-DocURL', 'https://github.com/Netflix/karyon'
         instruction 'Import-Package', '!org.junit,!junit.framework,!org.mockito.*,*'

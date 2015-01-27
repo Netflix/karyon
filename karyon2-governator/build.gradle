@@ -16,13 +16,13 @@
 apply plugin: 'osgi'
 
 dependencies {
-    compile project(':karyon-governator')
-    compile 'com.netflix.eureka:eureka-client:1.1.146'
+    compile "com.netflix.governator:governator:${governator_version}"
+    compile project(':karyon2-core')
 }
 
 jar {
     manifest {
-        name = 'karyon-eureka'
+        name = 'karyon2-governator'
         instruction 'Bundle-Vendor', 'Netflix'
         instruction 'Bundle-DocURL', 'https://github.com/Netflix/karyon'
         instruction 'Import-Package', '!org.junit,!junit.framework,!org.mockito.*,*'
