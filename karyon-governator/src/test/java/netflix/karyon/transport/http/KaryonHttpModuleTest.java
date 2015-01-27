@@ -75,7 +75,7 @@ public class KaryonHttpModuleTest {
                     public Observable<HttpResponseStatus> call(HttpClientResponse<ByteBuf> httpClientResponse) {
                         return Observable.just(httpClientResponse.getStatus());
                     }
-                }).single().toBlocking().toFuture().get(1, TimeUnit.SECONDS);
+                }).single().toBlocking().toFuture().get(60, TimeUnit.SECONDS);
     }
 
     public static class TestableRequestRouter implements RequestHandler<ByteBuf, ByteBuf> {
