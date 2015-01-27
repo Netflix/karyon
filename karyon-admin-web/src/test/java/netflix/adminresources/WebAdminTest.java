@@ -75,8 +75,6 @@ public class WebAdminTest {
                 .put(localhostUrlBase + "webadmin/jars", MediaType.APPLICATION_JSON)
                 .put(localhostUrlBase + "webadmin/jmx?key=root&_=1366497431351", MediaType.APPLICATION_JSON)
                 .put(localhostUrlBase + "admin/jmx", MediaType.TEXT_HTML)
-                .put(localhostUrlBase + "admin/eureka", MediaType.TEXT_HTML)
-                .put(localhostUrlBase + "webadmin/eureka", MediaType.APPLICATION_JSON)
                 .build();
     }
 
