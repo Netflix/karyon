@@ -13,23 +13,8 @@
  *      See the License for the specific language governing permissions and
  *      limitations under the License.
  */
-ext.githubProjectName = rootProject.name // Change if github project name is not the same as the root project's name
 
 apply plugin: 'application'
-
-buildscript {
-    repositories { mavenCentral() }
-    apply from: file('../gradle/buildscript.gradle'), to: buildscript
-}
-
-allprojects {
-    repositories { mavenCentral() }
-}
-
-apply from: file('../gradle/convention.gradle')
-apply from: file('../gradle/maven.gradle')
-apply from: file('../gradle/check.gradle')
-apply from: file('../gradle/license.gradle')
 
 dependencies {
     compile project(':karyon-admin-web')
@@ -44,7 +29,7 @@ dependencies {
     runtime 'org.slf4j:slf4j-simple:1.7.0'
 }
 
-task runJerseyHelloNOSS (dependsOn: [classes], type: JavaExec) {
+task runJerseyHelloNOSS(dependsOn: [classes], type: JavaExec) {
     group = "Examples"
     description = "Run Jersey Hello NOSS server"
 
@@ -58,7 +43,7 @@ task runJerseyHelloNOSS (dependsOn: [classes], type: JavaExec) {
     args = ["netflix.karyon.examples.hellonoss.server.jersey.JerseyHelloWorldApp"]
 }
 
-task runSimpleRouterAnnotationHelloNOSS (dependsOn: [classes], type: JavaExec) {
+task runSimpleRouterAnnotationHelloNOSS(dependsOn: [classes], type: JavaExec) {
     group = "Examples"
     description = "Run simple URI router based Hello NOSS server using annotation based bootstrapping."
 
@@ -72,7 +57,7 @@ task runSimpleRouterAnnotationHelloNOSS (dependsOn: [classes], type: JavaExec) {
     args = ["netflix.karyon.examples.hellonoss.server.simple.annotation.SimpleRoutingApp"]
 }
 
-task runSimpleRouterGuiceHelloNOSS (dependsOn: [classes], type: JavaExec) {
+task runSimpleRouterGuiceHelloNOSS(dependsOn: [classes], type: JavaExec) {
     group = "Examples"
     description = "Run simple URI router based Hello NOSS server using guice modules based bootstrapping."
 
@@ -84,7 +69,7 @@ task runSimpleRouterGuiceHelloNOSS (dependsOn: [classes], type: JavaExec) {
     systemProperty 'archaius.deployment.environment', 'dev'
 }
 
-task runPureRxNettyHelloNOSS (dependsOn: [classes], type: JavaExec) {
+task runPureRxNettyHelloNOSS(dependsOn: [classes], type: JavaExec) {
     group = "Examples"
     description = "Run RX netty based Hello NOSS server"
 
@@ -97,7 +82,7 @@ task runPureRxNettyHelloNOSS (dependsOn: [classes], type: JavaExec) {
 }
 
 
-task runTcpPipelineApp (dependsOn: [classes], type: JavaExec) {
+task runTcpPipelineApp(dependsOn: [classes], type: JavaExec) {
     group = "Examples"
     description = "Run TCP pipeline server"
 
@@ -111,7 +96,7 @@ task runTcpPipelineApp (dependsOn: [classes], type: JavaExec) {
     args = ["netflix.karyon.examples.tcp.TcpPipelineApp"]
 }
 
-task runWebSocketEcho (dependsOn: [classes], type: JavaExec) {
+task runWebSocketEcho(dependsOn: [classes], type: JavaExec) {
     group = "Examples"
     description = "Run WebSocket echo server"
 

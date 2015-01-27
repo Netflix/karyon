@@ -15,33 +15,9 @@
  */
 apply plugin: 'osgi'
 
-tasks.withType(Javadoc).each {
-    it.classpath = sourceSets.main.compileClasspath
-}
-
 dependencies {
-    dependencies {
-        compile project(':karyon-governator')
-        compile "io.reactivex:rxnetty-servo:${rxnetty_version}"
-    }
-}
-
-eclipse {
-    classpath {
-        // include 'provided' dependencies on the classpath
-        plusConfigurations += configurations.provided
-
-        downloadSources = true
-        downloadJavadoc = true
-    }
-}
-
-idea {
-    module {
-        // include 'provided' dependencies on the classpath
-        scopes.PROVIDED.plus += configurations.provided
-        scopes.PROVIDED.plus += configurations.provided
-    }
+    compile project(':karyon-governator')
+    compile "io.reactivex:rxnetty-servo:${rxnetty_version}"
 }
 
 jar {

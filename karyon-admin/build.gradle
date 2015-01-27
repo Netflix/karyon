@@ -14,11 +14,6 @@
  * limitations under the License.
  */
 apply plugin: 'osgi'
-apply plugin: 'project-report'
-
-tasks.withType(Javadoc).each {
-    it.classpath = sourceSets.main.compileClasspath
-}
 
 dependencies {
     dependencies {
@@ -32,29 +27,11 @@ dependencies {
         compile "com.sun.jersey:jersey-servlet:${jersey_version}"
         compile "com.sun.jersey:jersey-server:${jersey_version}"
         compile 'com.google.inject.extensions:guice-servlet:3.0'
-        compile "com.netflix.pytheas:pytheas-core:${pytheas_version}"
+        compile 'com.netflix.pytheas:pytheas-core:1.22'
         compile "com.sun.jersey:jersey-core:${jersey_version}"
         runtime 'org.codehaus.jackson:jackson-mapper-asl:1.9.11'
 
         testCompile "org.apache.httpcomponents:httpclient:${apache_httpclient_version}"
-    }
-}
-
-eclipse {
-    classpath {
-        // include 'provided' dependencies on the classpath
-        plusConfigurations += configurations.provided
-
-        downloadSources = true
-        downloadJavadoc = true
-    }
-}
-
-idea {
-    module {
-        // include 'provided' dependencies on the classpath
-        scopes.PROVIDED.plus += configurations.provided
-        scopes.PROVIDED.plus += configurations.provided
     }
 }
 
