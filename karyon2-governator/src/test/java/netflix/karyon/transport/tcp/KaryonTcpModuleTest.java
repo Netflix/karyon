@@ -69,7 +69,7 @@ public class KaryonTcpModuleTest {
                             }
                         });
                     }
-                }).single().toBlocking().toFuture().get(1, TimeUnit.SECONDS);
+                }).single().toBlocking().toFuture().get(60, TimeUnit.SECONDS);
 
         assertEquals("Invalid message received from server", SERVER_MESSAGE, message);
     }
