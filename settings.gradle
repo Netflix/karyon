@@ -15,13 +15,13 @@
  */
 
 rootProject.name='karyon'
-include 'karyon-core', \
- 'karyon-governator', \
- 'karyon-eureka', \
- 'karyon-archaius', \
- 'karyon-servo', \
- 'karyon-admin', \
- 'karyon-admin-web', \
- 'karyon-admin-plugins:karyon-admin-eureka-plugin', \
- 'karyon-jersey-blocking', \
- 'karyon-examples'
+include 'karyon2-core', \
+ 'karyon2-governator', \
+ 'karyon2-eureka', \
+ 'karyon2-archaius', \
+ 'karyon2-servo', \
+ 'karyon2-admin', \
+ 'karyon2-admin-web', \
+ 'karyon2-admin-plugins:karyon2-admin-eureka-plugin', \
+ 'karyon2-jersey-blocking', \
+ 'karyon2-examples'

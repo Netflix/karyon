@@ -17,11 +17,11 @@
 apply plugin: 'application'
 
 dependencies {
-    compile project(':karyon-admin-web')
-    compile project(':karyon-jersey-blocking')
-    compile project(':karyon-eureka')
-    compile project(':karyon-archaius')
-    compile project(':karyon-servo')
+    compile project(':karyon2-admin-web')
+    compile project(':karyon2-jersey-blocking')
+    compile project(':karyon2-eureka')
+    compile project(':karyon2-archaius')
+    compile project(':karyon2-servo')
 
     compile 'org.codehaus.jettison:jettison:1.2'
     compile 'com.google.inject:guice:3.0'

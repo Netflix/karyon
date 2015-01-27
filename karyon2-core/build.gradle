@@ -16,16 +16,12 @@
 apply plugin: 'osgi'
 
 dependencies {
-    compile project(':karyon-admin')
-    compile "org.apache.httpcomponents:httpclient:${apache_httpclient_version}"
-    compile 'com.google.code.gson:gson:2.1'
-    runtime 'org.freemarker:freemarker:2.3.15'
-    runtime 'org.codehaus.jackson:jackson-mapper-asl:1.9.11'
+    compile "io.reactivex:rxnetty-contexts:${rxnetty_version}"
 }
 
 jar {
     manifest {
-        name = 'karyon-admin-web'
+        name = 'karyon2-core'
         instruction 'Bundle-Vendor', 'Netflix'
         instruction 'Bundle-DocURL', 'https://github.com/Netflix/karyon'
         instruction 'Import-Package', '!org.junit,!junit.framework,!org.mockito.*,*'

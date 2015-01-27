@@ -19,7 +19,7 @@ subprojects {
     apply plugin: 'nebula.provided-base'
     apply plugin: "jacoco"
 
-    group = "com.netflix.karyon2"
+    group = "com.netflix.karyon"
 
     repositories {
         jcenter()

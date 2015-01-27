@@ -17,7 +17,7 @@
 apply plugin: 'osgi'
 
 dependencies {
-    compile project(':karyon-governator')
+    compile project(':karyon2-governator')
     compile 'com.google.guava:guava:14.0.1'
     compile 'com.netflix.archaius:archaius-core:0.6.3'
     compile "com.sun.jersey:jersey-core:${jersey_version}"
@@ -28,7 +28,7 @@ dependencies {
 
 jar {
     manifest {
-        name = 'karyon-jersey-blocking'
+        name = 'karyon2-jersey-blocking'
         instruction 'Bundle-Vendor', 'Netflix'
         instruction 'Bundle-DocURL', 'https://github.com/Netflix/karyon'
         instruction 'Import-Package', '!org.junit,!junit.framework,!org.mockito.*,*'
