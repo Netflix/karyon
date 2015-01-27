@@ -21,11 +21,8 @@ tasks.withType(Javadoc).each {
 
 dependencies {
     dependencies {
-        compile project(':karyon-admin')
-        compile "org.apache.httpcomponents:httpclient:${apache_httpclient_version}"
-        compile 'com.google.code.gson:gson:2.1'
-        runtime 'org.freemarker:freemarker:2.3.15'
-        runtime 'org.codehaus.jackson:jackson-mapper-asl:1.9.11'
+        compile project(':karyon-admin-web')
+        compile "com.netflix.eureka:eureka-client:${eureka_version}"
     }
 }
 
@@ -49,7 +46,7 @@ idea {
 
 jar {
     manifest {
-        name = 'karyon-admin-web'
+        name = 'karyon-admin-eureka-plugin'
         instruction 'Bundle-Vendor', 'Netflix'
         instruction 'Bundle-DocURL', 'https://github.com/Netflix/karyon'
         instruction 'Import-Package', '!org.junit,!junit.framework,!org.mockito.*,*'

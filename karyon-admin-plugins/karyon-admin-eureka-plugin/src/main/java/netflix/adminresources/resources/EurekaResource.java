@@ -44,7 +44,7 @@ import java.util.List;
 @Produces(MediaType.APPLICATION_JSON)
 public class EurekaResource {
 
-    private static final Logger logger = LoggerFactory.getLogger(JarsInfoResource.class);
+    private static final Logger logger = LoggerFactory.getLogger(EurekaResource.class);
 
 
     @GET

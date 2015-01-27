@@ -22,5 +22,6 @@ include 'karyon-core', \
  'karyon-servo', \
  'karyon-admin', \
  'karyon-admin-web', \
+ 'karyon-admin-plugins:karyon-admin-eureka-plugin', \
  'karyon-jersey-blocking', \
  'karyon-examples'
