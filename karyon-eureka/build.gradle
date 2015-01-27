@@ -15,33 +15,9 @@
  */
 apply plugin: 'osgi'
 
-tasks.withType(Javadoc).each {
-    it.classpath = sourceSets.main.compileClasspath
-}
-
 dependencies {
-    dependencies {
-        compile project(':karyon-governator')
-        compile 'com.netflix.eureka:eureka-client:1.1.146'
-    }
-}
-
-eclipse {
-    classpath {
-        // include 'provided' dependencies on the classpath
-        plusConfigurations += configurations.provided
-
-        downloadSources = true
-        downloadJavadoc = true
-    }
-}
-
-idea {
-    module {
-        // include 'provided' dependencies on the classpath
-        scopes.PROVIDED.plus += configurations.provided
-        scopes.PROVIDED.plus += configurations.provided
-    }
+    compile project(':karyon-governator')
+    compile 'com.netflix.eureka:eureka-client:1.1.146'
 }
 
 jar {

@@ -14,46 +14,21 @@
  * limitations under the License.
  */
 apply plugin: 'osgi'
-apply plugin: 'project-report'
-
-tasks.withType(Javadoc).each {
-    it.classpath = sourceSets.main.compileClasspath
-}
 
 dependencies {
-    dependencies {
-        compile project(':karyon-core')
-        compile project(':karyon-governator')
-        compile 'javax.ws.rs:jsr311-api:1.1.1'
-        compile 'javax.servlet:servlet-api:2.5'
-        compile 'org.eclipse.jetty:jetty-server:7.6.7.v20120910'
-        compile 'org.eclipse.jetty:jetty-servlet:7.6.7.v20120910'
-        compile 'com.sun.jersey.contribs:jersey-guice:1.17.1'
-        compile "com.sun.jersey:jersey-servlet:${jersey_version}"
-        compile "com.sun.jersey:jersey-server:${jersey_version}"
-        compile 'com.google.inject.extensions:guice-servlet:3.0'
-        compile 'com.netflix.pytheas:pytheas-core:1.22'
-        compile "com.sun.jersey:jersey-core:${jersey_version}"
-        runtime 'org.codehaus.jackson:jackson-mapper-asl:1.9.11'
-    }
-}
-
-eclipse {
-    classpath {
-        // include 'provided' dependencies on the classpath
-        plusConfigurations += configurations.provided
-
-        downloadSources = true
-        downloadJavadoc = true
-    }
-}
-
-idea {
-    module {
-        // include 'provided' dependencies on the classpath
-        scopes.PROVIDED.plus += configurations.provided
-        scopes.PROVIDED.plus += configurations.provided
-    }
+    compile project(':karyon-core')
+    compile project(':karyon-governator')
+    compile 'javax.ws.rs:jsr311-api:1.1.1'
+    compile 'javax.servlet:servlet-api:2.5'
+    compile 'org.eclipse.jetty:jetty-server:7.6.7.v20120910'
+    compile 'org.eclipse.jetty:jetty-servlet:7.6.7.v20120910'
+    compile 'com.sun.jersey.contribs:jersey-guice:1.17.1'
+    compile "com.sun.jersey:jersey-servlet:${jersey_version}"
+    compile "com.sun.jersey:jersey-server:${jersey_version}"
+    compile 'com.google.inject.extensions:guice-servlet:3.0'
+    compile 'com.netflix.pytheas:pytheas-core:1.22'
+    compile "com.sun.jersey:jersey-core:${jersey_version}"
+    runtime 'org.codehaus.jackson:jackson-mapper-asl:1.9.11'
 }
 
 jar {

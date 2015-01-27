@@ -15,30 +15,8 @@
  */
 apply plugin: 'osgi'
 
-tasks.withType(Javadoc).each {
-    it.classpath = sourceSets.main.compileClasspath
-}
-
 dependencies {
     compile "io.reactivex:rxnetty-contexts:${rxnetty_version}"
-}
-
-eclipse {
-    classpath {
-        // include 'provided' dependencies on the classpath
-        plusConfigurations += configurations.provided
-
-        downloadSources = true
-        downloadJavadoc = true
-    }
-}
-
-idea {
-    module {
-        // include 'provided' dependencies on the classpath
-        scopes.PROVIDED.plus += configurations.provided
-        scopes.PROVIDED.plus += configurations.provided
-    }
 }
 
 jar {

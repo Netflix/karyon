@@ -13,19 +13,8 @@
  *      See the License for the specific language governing permissions and
  *      limitations under the License.
  */
-buildscript {
-    repositories { mavenCentral() }
-    apply from: file('../gradle/buildscript.gradle'), to: buildscript
-}
 
-allprojects {
-    repositories { mavenCentral() }
-}
-
-apply from: file('../gradle/convention.gradle')
-apply from: file('../gradle/maven.gradle')
-apply from: file('../gradle/check.gradle')
-apply from: file('../gradle/license.gradle')
+apply plugin: 'osgi'
 
 dependencies {
     compile project(':karyon-governator')
@@ -35,4 +24,13 @@ dependencies {
     compile "com.sun.jersey.contribs:jersey-guice:${jersey_version}"
     compile "com.sun.jersey:jersey-servlet:${jersey_version}"
     compile "com.sun.jersey:jersey-server:${jersey_version}"
+}
+
+jar {
+    manifest {
+        name = 'karyon-jersey-blocking'
+        instruction 'Bundle-Vendor', 'Netflix'
+        instruction 'Bundle-DocURL', 'https://github.com/Netflix/karyon'
+        instruction 'Import-Package', '!org.junit,!junit.framework,!org.mockito.*,*'
+    }
 }

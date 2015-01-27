@@ -15,38 +15,14 @@
  */
 apply plugin: 'osgi'
 
-tasks.withType(Javadoc).each {
-    it.classpath = sourceSets.main.compileClasspath
-}
-
 dependencies {
-    dependencies {
-        compile "com.netflix.governator:governator:${governator_version}"
-        compile project(':karyon-core')
-    }
-}
-
-eclipse {
-    classpath {
-        // include 'provided' dependencies on the classpath
-        plusConfigurations += configurations.provided
-
-        downloadSources = true
-        downloadJavadoc = true
-    }
-}
-
-idea {
-    module {
-        // include 'provided' dependencies on the classpath
-        scopes.PROVIDED.plus += configurations.provided
-        scopes.PROVIDED.plus += configurations.provided
-    }
+    compile "com.netflix.governator:governator:${governator_version}"
+    compile project(':karyon-core')
 }
 
 jar {
     manifest {
-        name = 'karyon-eureka'
+        name = 'karyon-governator'
         instruction 'Bundle-Vendor', 'Netflix'
         instruction 'Bundle-DocURL', 'https://github.com/Netflix/karyon'
         instruction 'Import-Package', '!org.junit,!junit.framework,!org.mockito.*,*'
