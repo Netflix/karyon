@@ -36,10 +36,12 @@
       <ul class="nav nav-pills left">
           <#if adminPages??>
               <#list adminPages as adminPage>
-                  <#if adminPage.name??>
-                    <li><a href="#" id="submenu-${adminPage.pageId}"><span>${adminPage.name}</span></a></li>
-                  <#else>
-                    <li><a href="#" id="submenu-${adminPage.pageId}"><span>${adminPage.pageId}</span></a></li>
+                  <#if adminPage.isVisible()>
+                      <#if adminPage.name??>
+                        <li><a href="#" id="submenu-${adminPage.pageId}"><span>${adminPage.name}</span></a></li>
+                      <#else>
+                        <li><a href="#" id="submenu-${adminPage.pageId}"><span>${adminPage.pageId}</span></a></li>
+                      </#if>
                   </#if>
               </#list>
           </#if>

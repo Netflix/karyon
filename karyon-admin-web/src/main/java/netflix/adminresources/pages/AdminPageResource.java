@@ -67,7 +67,11 @@ public class AdminPageResource {
         model.put("template_base", adminContainerConfig.templateResourceContext());
 
         if (adminPageRegistry != null && adminPageRegistry.getPageInfo(view) != null) {
-           return new Viewable(adminPageRegistry.getPageInfo(view).getPageTemplate(), model);
+            final Map<String, Object> pageDataModel = adminPageRegistry.getPageInfo(view).getDataModel();
+            if (pageDataModel != null) {
+                model.putAll(pageDataModel);
+            }
+            return new Viewable(adminPageRegistry.getPageInfo(view).getPageTemplate(), model);
         }
 
         return new Viewable("/webadmin/" + view + "/index.ftl", model);

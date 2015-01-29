@@ -2,6 +2,9 @@ package netflix.adminresources;
 
 import com.netflix.config.ConfigurationManager;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public abstract class AbstractAdminPageInfo implements AdminPageInfo {
     public static final String ADMIN_PAGE_DISABLE_PROP_PREFIX = "netflix.platform.admin.pages.";
     public static final String DISABLED = ".disabled";
@@ -38,6 +41,16 @@ public abstract class AbstractAdminPageInfo implements AdminPageInfo {
         final String disablePagePropId = ADMIN_PAGE_DISABLE_PROP_PREFIX + pageId + DISABLED;
         boolean isDisabled = ConfigurationManager.getConfigInstance().getBoolean(disablePagePropId, false);
         return !isDisabled;
+    }
+
+    @Override
+    public Map<String, Object> getDataModel() {
+        return new HashMap<>();
+    }
+
+    @Override
+    public boolean isVisible() {
+        return true;
     }
 }
 

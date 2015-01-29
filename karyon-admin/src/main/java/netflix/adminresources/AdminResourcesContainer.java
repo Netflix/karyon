@@ -18,16 +18,12 @@ package netflix.adminresources;
 
 import com.google.inject.*;
 import com.netflix.config.ConfigurationManager;
-import com.netflix.config.DynamicPropertyFactory;
-import com.netflix.config.DynamicStringProperty;
 import com.netflix.governator.guice.LifecycleInjector;
 import com.netflix.governator.guice.LifecycleInjectorMode;
 import com.netflix.governator.lifecycle.LifecycleManager;
 import netflix.admin.AdminConfigImpl;
 import netflix.admin.AdminContainerConfig;
 import netflix.admin.HealthCheckServlet;
-import netflix.karyon.health.HealthCheckHandler;
-import netflix.karyon.health.HealthCheckInvocationStrategy;
 import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.DispatcherType;
 import org.eclipse.jetty.server.Handler;
@@ -44,6 +40,7 @@ import org.slf4j.LoggerFactory;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import java.util.EnumSet;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -62,17 +59,13 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * The following resources are available by default:
  * <p/>
  * <ul>
- * <li>Healthcheck: A healthcheck is available at path {@link netflix.admin.HealthCheckServlet}. This utilizes the configured
- * {@link HealthCheckHandler} for karyon.</li>
+ * <li>Healthcheck: A healthcheck is available with {@link netflix.admin.HealthCheckServlet}.
  * </ul>
  */
 public class AdminResourcesContainer {
     private static final Logger logger = LoggerFactory.getLogger(AdminResourcesContainer.class);
 
     public static final String DEFAULT_PAGE_PROP_NAME = "com.netflix.karyon.admin.default.page";
-
-    public static final DynamicStringProperty DEFAULT_PAGE =
-            DynamicPropertyFactory.getInstance().getStringProperty(DEFAULT_PAGE_PROP_NAME, "/healthcheck");
 
     public static final String CONTAINER_LISTEN_PORT = "netflix.platform.admin.resources.port";
     public static final int LISTEN_PORT_DEFAULT = 8077;
@@ -83,12 +76,6 @@ public class AdminResourcesContainer {
     private String coreJerseyPackages = ConfigurationManager.getConfigInstance().getString(JERSEY_CORE_PACKAGES, JERSEY_CORE_PACKAGES_DEFAULT);
     private int listenPort = ConfigurationManager.getConfigInstance().getInt(CONTAINER_LISTEN_PORT, LISTEN_PORT_DEFAULT);
     private Server server;
-
-    @Inject(optional = true)
-    private Provider<HealthCheckInvocationStrategy> strategy;
-
-    @Inject(optional = true)
-    private Provider<HealthCheckHandler> handlerProvider;
 
     @Inject(optional = true)
     private Injector appInjector;
@@ -130,7 +117,7 @@ public class AdminResourcesContainer {
                 // root redirection, health-check servlet
                 ServletContextHandler rootHandler = new ServletContextHandler();
                 rootHandler.setContextPath("/");
-                rootHandler.addFilter(new FilterHolder(adminResourceInjector.getInstance(RedirectFilter.class)), "/", EnumSet.allOf(DispatcherType.class));
+                rootHandler.addFilter(new FilterHolder(adminResourceInjector.getInstance(RedirectFilter.class)), "/*", EnumSet.allOf(DispatcherType.class));
                 rootHandler.addServlet(new ServletHolder(healthCheckServlet), adminContainerConfig.healthCheckPath());
                 rootHandler.addServlet(new ServletHolder(new DefaultServlet()), "/*");
 
@@ -172,26 +159,10 @@ public class AdminResourcesContainer {
         return listenPort;
     }
 
-    public void setStrategy(Provider<HealthCheckInvocationStrategy> strategy) {
-        this.strategy = strategy;
-    }
-
-    public void setHandlerProvider(Provider<HealthCheckHandler> handlerProvider) {
-        this.handlerProvider = handlerProvider;
-    }
-
     private Module getAdditionalBindings() {
         return new AbstractModule() {
             @Override
             protected void configure() {
-                if (appInjector == null) {
-                    if (strategy != null) {
-                        bind(HealthCheckInvocationStrategy.class).toProvider(strategy);
-                    }
-                    if (handlerProvider != null) {
-                        bind(HealthCheckHandler.class).toProvider(handlerProvider);
-                    }
-                }
                 bind(AdminContainerConfig.class).to(AdminConfigImpl.class);
                 bind(AdminResourcesFilter.class);
             }
