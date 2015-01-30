@@ -93,7 +93,10 @@ public class AdminPageRegistry {
             if (i > 0) {
                 stringBuilder.append(";");
             }
-            stringBuilder.append(adminPage.getJerseyResourcePackageList());
+            String pkgList = adminPage.getJerseyResourcePackageList();
+            if (pkgList != null) {
+                stringBuilder.append(pkgList);
+            }
             i++;
         }
         return stringBuilder.toString();

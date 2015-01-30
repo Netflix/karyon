@@ -17,13 +17,8 @@
 package netflix.adminresources;
 
 import com.google.common.collect.ImmutableMap;
-import com.google.inject.Provider;
 import com.netflix.config.ConfigurationManager;
 import netflix.adminresources.resources.MaskedResourceHelper;
-import netflix.karyon.health.AlwaysHealthyHealthCheck;
-import netflix.karyon.health.HealthCheckHandler;
-import netflix.karyon.health.HealthCheckInvocationStrategy;
-import netflix.karyon.health.SyncHealthCheckInvocationStrategy;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
@@ -128,20 +123,6 @@ public class WebAdminTest {
 
     private static int startServerAndGetListeningPort() throws Exception {
         container = new AdminResourcesContainer();
-        container.setStrategy(new Provider<HealthCheckInvocationStrategy>() {
-            @Override
-            public HealthCheckInvocationStrategy get() {
-                return new SyncHealthCheckInvocationStrategy(AlwaysHealthyHealthCheck.INSTANCE);
-            }
-        });
-
-        container.setHandlerProvider(new Provider<HealthCheckHandler>() {
-            @Override
-            public HealthCheckHandler get() {
-                return AlwaysHealthyHealthCheck.INSTANCE;
-            }
-        });
-
         container.init();
         return container.getServerPort();
     }

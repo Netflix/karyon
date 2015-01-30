@@ -18,34 +18,22 @@ package netflix.adminresources;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import netflix.admin.AdminContainerConfig;
+import netflix.admin.RedirectRules;
 
-import javax.servlet.Filter;
-import javax.servlet.FilterChain;
-import javax.servlet.FilterConfig;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
+import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-
-/**
- * A {@link javax.servlet.Filter} implementation to redirect root requests to a default location as specified by
- * the dynamic property {@link AdminResourcesContainer#DEFAULT_PAGE}
- *
- * @author pkamath
- * @author Nitesh Kant
- */
+import java.util.Map;
 
 @Singleton
 public class RedirectFilter implements Filter {
 
-    private AdminContainerConfig adminContainerConfig;
+    private RedirectRules redirectRules;
 
     @Inject
-    public RedirectFilter(AdminContainerConfig adminContainerConfig) {
-        this.adminContainerConfig = adminContainerConfig;
+    public RedirectFilter(RedirectRules redirectRules) {
+        this.redirectRules = redirectRules;
     }
 
     @Override
@@ -56,9 +44,13 @@ public class RedirectFilter implements Filter {
     public void doFilter(ServletRequest request, ServletResponse response,
                          FilterChain chain) throws IOException, ServletException {
         HttpServletRequest httpRequest = (HttpServletRequest) request;
-        if (httpRequest.getRequestURI().equals("/")) {
-            ((HttpServletResponse) response).sendRedirect(adminContainerConfig.templateResourceContext());
-            return;
+        final String requestURI = httpRequest.getRequestURI();
+        final Map<String, String> mappings = redirectRules.getMappings();
+        for (Map.Entry<String, String> mapping : mappings.entrySet()) {
+            if (requestURI.equals(mapping.getKey())) {
+                ((HttpServletResponse) response).sendRedirect(mapping.getValue());
+                return;
+            }
         }
         chain.doFilter(httpRequest, response);
     }
