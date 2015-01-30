@@ -18,6 +18,7 @@ apply plugin: 'application'
 
 dependencies {
     compile project(':karyon2-admin-web')
+    compile project(':karyon2-admin-plugins:karyon2-admin-healthcheck-plugin')
     compile project(':karyon2-jersey-blocking')
     compile project(':karyon2-eureka')
     compile project(':karyon2-archaius')

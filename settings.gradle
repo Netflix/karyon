@@ -23,5 +23,6 @@ include 'karyon2-core', \
  'karyon2-admin', \
  'karyon2-admin-web', \
  'karyon2-admin-plugins:karyon2-admin-eureka-plugin', \
+ 'karyon2-admin-plugins:karyon2-admin-healthcheck-plugin', \
  'karyon2-jersey-blocking', \
  'karyon2-examples'

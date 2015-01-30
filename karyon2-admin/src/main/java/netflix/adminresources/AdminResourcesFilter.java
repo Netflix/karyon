@@ -24,7 +24,6 @@ import java.util.Set;
  * statics used in GuiceFilter, there cannot be more than one in an application.
  * The AdminResources app needs minimal features and this class provides those.
  */
-//@Singleton
 class AdminResourcesFilter extends GuiceContainer {
     private final Map<String, HttpServlet> servlets = Maps.newConcurrentMap();
     private volatile String packages;

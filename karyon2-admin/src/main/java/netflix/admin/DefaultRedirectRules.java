@@ -19,7 +19,7 @@ public class DefaultRedirectRules implements RedirectRules {
     @Override
     public Map<String, String> getMappings() {
         Map<String, String> urlRedirects = new HashMap<>();
-        urlRedirects.put("/", adminContainerConfig.healthCheckPath());
+        urlRedirects.put("/", adminContainerConfig.templateResourceContext());
         return urlRedirects;
     }
 }
