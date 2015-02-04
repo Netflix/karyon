@@ -41,6 +41,10 @@ public class ShutdownListener {
         this(shutdownPort, new DefaultCommandHandler(shutdownAction));
     }
 
+    public int getShutdownPort() {
+        return shutdownCmdServer.getServerPort();
+    }
+
     public void start() {
         shutdownCmdServer.start();
     }
