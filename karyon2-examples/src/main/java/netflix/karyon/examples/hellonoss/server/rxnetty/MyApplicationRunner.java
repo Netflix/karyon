@@ -7,20 +7,26 @@ import netflix.karyon.KaryonBootstrapModule;
 import netflix.karyon.ShutdownModule;
 import netflix.karyon.archaius.ArchaiusBootstrapModule;
 import netflix.karyon.examples.hellonoss.common.health.HealthCheck;
-import netflix.karyon.health.HealthCheckInvocationStrategy;
-import netflix.karyon.health.SyncHealthCheckInvocationStrategy;
+import netflix.karyon.health.HealthCheckHandler;
 import netflix.karyon.servo.KaryonServoModule;
 import netflix.karyon.transport.http.health.HealthCheckEndpoint;
+
+import javax.ws.rs.core.Response;
 
 /**
  * @author Nitesh Kant
  */
 public class MyApplicationRunner {
 
-    public static class HealthCheckStrategyModule extends AbstractModule {
+    public static class HealthCheckHandlerModule extends AbstractModule {
         @Override
         protected void configure() {
-            bind(HealthCheckInvocationStrategy.class).to(SyncHealthCheckInvocationStrategy.class);
+            bind(HealthCheckHandler.class).toInstance(new HealthCheckHandler() {
+                @Override
+                public int getStatus() {
+                    return Response.Status.OK.getStatusCode();
+                }
+            });
         }
     }
 
@@ -35,7 +41,7 @@ public class MyApplicationRunner {
                 Karyon.toBootstrapModule(KaryonWebAdminModule.class),
                 ShutdownModule.asBootstrapModule(),
                 KaryonServoModule.asBootstrapModule(),
-                Karyon.toBootstrapModule(HealthCheckStrategyModule.class)
+                Karyon.toBootstrapModule(HealthCheckHandlerModule.class)
         )
                 .startAndWaitTillShutdown();
     }

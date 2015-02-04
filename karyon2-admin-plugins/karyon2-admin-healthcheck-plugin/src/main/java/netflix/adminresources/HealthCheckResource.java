@@ -1,9 +1,8 @@
 package netflix.adminresources;
 
-
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import netflix.karyon.health.HealthCheckInvocationStrategy;
+import netflix.karyon.health.HealthCheckHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -12,27 +11,26 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.util.concurrent.TimeoutException;
 
 @Path("/healthcheck")
 @Produces(MediaType.TEXT_HTML)
 @Singleton
 public class HealthCheckResource {
     private static final Logger logger = LoggerFactory.getLogger(HealthCheckResource.class);
-    private HealthCheckInvocationStrategy invocationStrategy;
+    private HealthCheckHandler healthCheckHandler;
 
     @Inject
-    public HealthCheckResource(HealthCheckInvocationStrategy invocationStrategy) {
-        this.invocationStrategy = invocationStrategy;
+    public HealthCheckResource(HealthCheckHandler healthCheckHandler) {
+        this.healthCheckHandler = healthCheckHandler;
     }
 
     @GET
     public Response getHealthCheck() {
         try {
-            final int status = invocationStrategy.invokeCheck();
+            final int status = healthCheckHandler.getStatus();
             return Response.ok().status(status).build();
-        } catch (TimeoutException e) {
-            logger.error("TimeoutException in invocationStrategy -- ", e);
+        } catch (Exception e) {
+            logger.error("Exception in HealthCheckResource -- ", e);
         }
         return Response.status(Response.Status.BAD_REQUEST.getStatusCode()).build();
     }

@@ -6,8 +6,6 @@ import com.google.inject.Injector;
 import com.netflix.config.ConfigurationManager;
 import netflix.admin.AdminConfigImpl;
 import netflix.karyon.health.HealthCheckHandler;
-import netflix.karyon.health.HealthCheckInvocationStrategy;
-import netflix.karyon.health.SyncHealthCheckInvocationStrategy;
 import org.apache.commons.configuration.AbstractConfiguration;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
@@ -66,7 +64,6 @@ public class HealthCheckResourceTest {
     }
 
 
-
     private AdminResourcesContainer buildAdminResourcesContainer(final HealthCheckHandler healthCheckHandler) throws Exception {
         AdminResourcesContainer container = new AdminResourcesContainer();
         final Field injectorField = AdminResourcesContainer.class.getDeclaredField("appInjector");
@@ -74,7 +71,6 @@ public class HealthCheckResourceTest {
             @Override
             protected void configure() {
                 bind(HealthCheckHandler.class).toInstance(healthCheckHandler);
-                bind(HealthCheckInvocationStrategy.class).to(SyncHealthCheckInvocationStrategy.class);
             }
         });
         injectorField.setAccessible(true);
