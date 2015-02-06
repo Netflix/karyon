@@ -44,7 +44,7 @@ public final class WebSocketEchoServer {
                 new KaryonBootstrapModule(),
                 new ArchaiusBootstrapModule("websocket-echo-server"),
                 // KaryonEurekaModule.asBootstrapModule(), /* Uncomment if you need eureka */
-                KaryonWebAdminModule.asBootstrapModule(),
+                Karyon.toBootstrapModule(KaryonWebAdminModule.class),
                 ShutdownModule.asBootstrapModule(),
                 KaryonServoModule.asBootstrapModule())
                 .startAndWaitTillShutdown();

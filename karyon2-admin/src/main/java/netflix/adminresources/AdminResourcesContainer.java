@@ -23,7 +23,6 @@ import com.netflix.governator.guice.LifecycleInjectorMode;
 import com.netflix.governator.lifecycle.LifecycleManager;
 import netflix.admin.AdminConfigImpl;
 import netflix.admin.AdminContainerConfig;
-import netflix.admin.HealthCheckServlet;
 import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.DispatcherType;
 import org.eclipse.jetty.server.Handler;
@@ -40,7 +39,6 @@ import org.slf4j.LoggerFactory;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import java.util.EnumSet;
-import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -112,13 +110,11 @@ public class AdminResourcesContainer {
 
                 final AdminPageRegistry adminPageRegistry = buildAdminPageRegistry(adminResourceInjector);
                 final AdminContainerConfig adminContainerConfig = adminResourceInjector.getInstance(AdminContainerConfig.class);
-                final HealthCheckServlet healthCheckServlet = adminResourceInjector.getInstance(HealthCheckServlet.class);
 
-                // root redirection, health-check servlet
+                // root path handling, redirect filter
                 ServletContextHandler rootHandler = new ServletContextHandler();
                 rootHandler.setContextPath("/");
                 rootHandler.addFilter(new FilterHolder(adminResourceInjector.getInstance(RedirectFilter.class)), "/*", EnumSet.allOf(DispatcherType.class));
-                rootHandler.addServlet(new ServletHolder(healthCheckServlet), adminContainerConfig.healthCheckPath());
                 rootHandler.addServlet(new ServletHolder(new DefaultServlet()), "/*");
 
                 // admin page template resources

@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 Netflix, Inc.
+ * Copyright 2014 Netflix, Inc.
  *
  *      Licensed under the Apache License, Version 2.0 (the "License");
  *      you may not use this file except in compliance with the License.
@@ -29,8 +29,14 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -44,6 +50,14 @@ import static org.junit.Assert.assertEquals;
  * @author Nitesh Kant
  */
 public class AdminResourceTest {
+    @Path("/ping")
+    @Produces(MediaType.TEXT_HTML)
+    public static class PingResource {
+        @GET
+        public Response ping() {
+            return Response.ok().entity("pong").build();
+        }
+    }
 
     private AdminResourcesContainer container;
 
@@ -56,19 +70,25 @@ public class AdminResourceTest {
         }
     }
 
-    @Before
-    public void init() {
-        System.setProperty(AdminResourcesContainer.CONTAINER_LISTEN_PORT, "0");
+    @BeforeClass
+    public static void init() {
+        setConfig(AdminResourcesContainer.CONTAINER_LISTEN_PORT, "0");
+        setConfig(AdminConfigImpl.NETFLIX_ADMIN_RESOURCE_CONTEXT, "/jr");
+        setConfig(AdminConfigImpl.NETFLIX_ADMIN_TEMPLATE_CONTEXT, "/main");
+    }
+
+    private static void setConfig(String name, String value) {
+        ConfigurationManager.getConfigInstance().setProperty(name, value);
     }
 
     @Test
-    public void testDefaultHealthCheck() throws Exception {
+    public void checkPing() throws Exception {
         final int port = startServerAndGetListeningPort();
         HttpClient client = new DefaultHttpClient();
         HttpGet healthGet =
-                new HttpGet(String.format("http://localhost:%d/" + AdminConfigImpl.HEALTH_CHECK_PATH_DEFAULT, port));
+                new HttpGet(String.format("http://localhost:%d/jr/ping", port));
         HttpResponse response = client.execute(healthGet);
-        assertEquals("admin resource health check failed.", 200, response.getStatusLine().getStatusCode());
+        assertEquals("admin resource ping resource failed.", 200, response.getStatusLine().getStatusCode());
     }
 
     @Test
@@ -77,35 +97,34 @@ public class AdminResourceTest {
         HttpClient client = new DefaultHttpClient();
         HttpGet rootGet = new HttpGet(String.format("http://localhost:%d/", port));
         HttpResponse response = client.execute(rootGet);
-        assertEquals("admin resource root resource unavailable.", 200, response.getStatusLine().getStatusCode());
-        final BufferedReader br = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
-        assertEquals("root resource redirects to health check", br.readLine(), "OK");
+        assertEquals("admin resource root resource does not redirect to template root context.", 404, response.getStatusLine().getStatusCode());
     }
 
     @Test
     public void checkCustomRedirectRule() throws Exception {
-        final AdminResourcesContainer badRedirectContainer = adminResourcesContainerWithCustomRedirect();
-        badRedirectContainer.init();
-        final int serverPort = badRedirectContainer.getServerPort();
+        final AdminResourcesContainer customRedirectContainer = adminResourcesContainerWithCustomRedirect();
+        customRedirectContainer.init();
+        final int serverPort = customRedirectContainer.getServerPort();
         HttpClient client = new DefaultHttpClient();
 
         HttpGet rootGet = new HttpGet(String.format("http://localhost:%d/", serverPort));
         HttpResponse response = client.execute(rootGet);
-        assertEquals("admin resource did not execute bad redirect routing", 404, response.getStatusLine().getStatusCode());
+        assertEquals("admin resource did not execute custom redirect routing", 404, response.getStatusLine().getStatusCode());
         consumeResponse(response);
 
-        HttpGet healthGet = new HttpGet(String.format("http://localhost:%d/health", serverPort));
+        HttpGet healthGet = new HttpGet(String.format("http://localhost:%d/check-me", serverPort));
         response = client.execute(healthGet);
-        assertEquals("admin resource did not pick a custom health check path", 200, response.getStatusLine().getStatusCode());
+        assertEquals("admin resource did not pick a custom redirect routing", 200, response.getStatusLine().getStatusCode());
+        final BufferedReader br = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
+        assertEquals("ping resource did not return pong", br.readLine(), "pong");
 
-        badRedirectContainer.shutdown();
+        customRedirectContainer.shutdown();
     }
 
 
     private int startServerAndGetListeningPort() throws Exception {
         container = new AdminResourcesContainer();
         container.init();
-
         return container.getServerPort();
     }
 
@@ -120,7 +139,7 @@ public class AdminResourceTest {
                     public Map<String, String> getMappings() {
                         Map<String, String> routes = new HashMap<>();
                         routes.put("/", "/bad-route");
-                        routes.put("/health", AdminConfigImpl.HEALTH_CHECK_PATH_DEFAULT);
+                        routes.put("/check-me", "/jr/ping");
                         return routes;
                     }
                 });
@@ -134,6 +153,6 @@ public class AdminResourceTest {
 
     private void consumeResponse(HttpResponse response) throws IOException {
         final BufferedReader br = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
-        while (br.readLine() != null);
+        while (br.readLine() != null) ;
     }
 }

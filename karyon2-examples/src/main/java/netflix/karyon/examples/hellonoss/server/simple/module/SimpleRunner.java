@@ -15,14 +15,14 @@ public class SimpleRunner {
     public static void main(String[] args) {
 
         Karyon.forRequestHandler(8888,
-                                 // new SimpleRouter(), /* Use this instead of RouterWithInterceptors below if interceptors are not required */
-                                 new RouterWithInterceptors(),
-                                 new KaryonBootstrapModule(),
-                                 new ArchaiusBootstrapModule("hello-netflix-oss"),
-                                 // KaryonEurekaModule.asBootstrapModule(), /* Uncomment if you need eureka */
-                                 KaryonWebAdminModule.asBootstrapModule(),
-                                 ShutdownModule.asBootstrapModule(),
-                                 KaryonServoModule.asBootstrapModule())
-              .startAndWaitTillShutdown();
+                // new SimpleRouter(), /* Use this instead of RouterWithInterceptors below if interceptors are not required */
+                new RouterWithInterceptors(),
+                new KaryonBootstrapModule(),
+                new ArchaiusBootstrapModule("hello-netflix-oss"),
+                // KaryonEurekaModule.asBootstrapModule(), /* Uncomment if you need eureka */
+                Karyon.toBootstrapModule(KaryonWebAdminModule.class),
+                ShutdownModule.asBootstrapModule(),
+                KaryonServoModule.asBootstrapModule())
+                .startAndWaitTillShutdown();
     }
 }
