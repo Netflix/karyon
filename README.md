@@ -18,7 +18,7 @@ Karyon can be thought of as a nucleus that contains the following main ingredien
 Getting Started
 ===============
 
-Easiest way to get started with karyon is to see the examples provided with karyon under [karyon-examples](karyon-examples) module.
+Easiest way to get started with karyon is to see the examples provided with karyon under [karyon-examples](karyon2-examples) module.
 
 Documentation
 ==============
