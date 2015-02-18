@@ -5,39 +5,39 @@ A simple helloworld example demonstrating various ways in which to write a karyo
 
 All the flavors demonstrate the following karyon components:
 
-* _[karyon-core](../../karyon-core)_ HTTP request router API 
+* _[karyon2-core](https://github.com/Netflix/karyon/tree/master/karyon2-core)_ HTTP request router API 
 * _eureka_: Uncomment addition of `KaryonEurekaModule` in the respective startup class you are using 
- and update [eureka-client.properties](src/main/resources/eureka-client.properties), available in this example, with proper eureka endpoints in your environment.
-* _[karyon-admin-web](../../karyon-admin-web)_: Starts an embedded jetty server having an admin console available at http://localhost:8077/
-* _[karyon-governator](../../karyon-governator)_: Uses karyon's governator module for bootstrapping.
-* _[karyon-servo](../../karyon-servo)_: Uses karyon's servo module for metrics.
+ and update [eureka-client.properties](https://github.com/Netflix/karyon/blob/master/karyon2-examples/src/main/resources/eureka-client.properties), available in this example, with proper eureka endpoints in your environment.
+* _[karyon2-admin-web](https://github.com/Netflix/karyon/tree/master/karyon2-admin-web)_: Starts an embedded jetty server having an admin console available at http://localhost:8077/
+* _[karyon2-governator](https://github.com/Netflix/karyon/tree/master/karyon2-governator)_: Uses karyon's governator module for bootstrapping.
+* _[karyon2-servo](https://github.com/Netflix/karyon/tree/master/karyon2-servo)_: Uses karyon's servo module for metrics.
 * _karyon health check_: Provides a "always healthy" handler where the implementer can add any logic to signify health of
-the application. The handler class is: [HealthCheck](src/main/java/com/netflix/hellonoss/common/health/HealthCheck.java)
+the application. The handler class is: [HealthCheck](common/health/HealthCheck.java)
 
 See specific example's README file to see details of any additional module used by that example.
 
-* [Jersey](src/main/java/com/netflix/hellonoss/server/jersey)
-* [Simple Routing](src/main/java/com/netflix/hellonoss/server/simple)
-* [RxNetty](src/main/java/com/netflix/hellonoss/server/rxnetty)
+* [Jersey](server/jersey)
+* [Simple Routing](server/simple)
+* [RxNetty](server/rxnetty)
 
 Running the example
 ===================
 
 The examples can be run using gradle. The following are the respective targets:
 
-* [Jersey](src/main/java/com/netflix/hellonoss/server/jersey): 
+* [Jersey](server/jersey):
 
 ```
 $ ../gradlew runJerseyHelloNOSS
 ```
 
-* [Simple Routing](src/main/java/com/netflix/hellonoss/server/simple)
+* [Simple Routing](server/simple)
 
 ```
 $ ../gradlew runSimpleRouterHelloNOSS
 ```
 
-* [RxNetty](src/main/java/com/netflix/hellonoss/server/rxnetty)
+* [RxNetty](server/rxnetty)
 
 ```
 $ ../gradlew runPureRxNettyHelloNOSS

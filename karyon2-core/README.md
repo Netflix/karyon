@@ -9,14 +9,14 @@ One of the __best practices__ for an application inside netflix is to advertise 
 This health status is used by [Eureka](https://github.com/Netflix/eureka) and hence [Ribbon](https://github.com/Netflix/ribbon)
  to identify unavailable instances.
  
- This module provides the __contract__ for this healthcheck as [HealthCheckHandler](karyon-core/src/main/java/com/netflix/karyon/health/HealthCheckHandler.java)
+ This module provides the __contract__ for this healthcheck as [HealthCheckHandler](karyon2-core/src/main/java/netflix/karyon/health/HealthCheckHandler.java)
 
 Karyon's bootstrapping module `karyon-governator` integrates this healthcheck with eureka.
 
 #### Transport
 
 Karyon uses [RxNetty](https://github.com/Netflix/RxNetty) as its transport layer. 
-A karyon based server can be created using the factory class [KaryonTransport](src/main/java/com/netflix/karyon/transport/KaryonTransport.java)
+A karyon based server can be created using the factory class [KaryonTransport](src/main/java/netflix/karyon/transport/KaryonTransport.java)
 
 ```
 
@@ -93,7 +93,7 @@ applicable or not.
 
 ```
 
-After the binding of interceptor is created, the interceptors can be executed using an [InterceptorExecutor](src/main/java/com/netflix/karyon/transport/interceptor/InterceptorExecutor.java)
+After the binding of interceptor is created, the interceptors can be executed using an [InterceptorExecutor](src/main/java/netflix/karyon/transport/interceptor/InterceptorExecutor.java)
 
 This of course is not that useful without attaching to a server, which the out of box provided karyon servers provide.
 
