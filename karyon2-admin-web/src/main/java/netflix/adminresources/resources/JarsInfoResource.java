@@ -16,14 +16,9 @@
 
 package netflix.adminresources.resources;
 
-import com.google.common.annotations.Beta;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -36,6 +31,12 @@ import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import com.google.common.annotations.Beta;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author pkamath
@@ -50,21 +51,42 @@ public class JarsInfoResource {
 
     private static final String JAR_PATTERN = "^jar:file:(.+)!/META-INF/MANIFEST.MF$";
 
+    private final List<JarManifest> jarManifests;
+    private final ArrayList<JarInfo> jarInfos;
+
+    public JarsInfoResource() {
+        jarManifests = loadJarManifests();
+        jarInfos = new ArrayList<>();
+        for (JarManifest jm : jarManifests) {
+            jarInfos.add(jm.toJarInfo());
+        }
+    }
+
     @GET
     public Response getAllJarsInfo() {
-        List<JarInfo> jarInfo = getJarInfo();
         GsonBuilder gsonBuilder = new GsonBuilder().serializeNulls();
         Gson gson = gsonBuilder.create();
-        String propsJson = gson.toJson(new KaryonAdminResponse(jarInfo));
+        String propsJson = gson.toJson(new KaryonAdminResponse(jarInfos));
         return Response.ok(propsJson).build();
     }
 
-    private List<JarInfo> getJarInfo() {
-        List<JarInfo> toReturn = new ArrayList<JarInfo>();
+    @GET
+    @Path("/{id}")
+    public Response getJarManifest(@PathParam("id") int jarId) {
+        GsonBuilder gsonBuilder = new GsonBuilder().serializeNulls();
+        Gson gson = gsonBuilder.create();
+        String propsJson = gson.toJson(new KaryonAdminResponse(jarManifests.get(jarId)));
+        return Response.ok(propsJson).build();
+    }
+
+    private static List<JarManifest> loadJarManifests() {
+        List<JarManifest> jarManifests = new ArrayList<>();
+
         Pattern pattern = Pattern.compile(JAR_PATTERN);
         try {
             ClassLoader cl = Thread.currentThread().getContextClassLoader();
             Enumeration<URL> urls = cl.getResources("META-INF/MANIFEST.MF");
+            int id = 0;
             while (urls.hasMoreElements()) {
                 URL manifestURL = urls.nextElement();
                 InputStream is = manifestURL.openStream();
@@ -73,37 +95,64 @@ public class JarsInfoResource {
                 if (matcher.matches()) {
                     key = matcher.group(1);
                 }
-                Attributes mainAttributes = new Manifest(is).getMainAttributes();
-                toReturn.add(new JarInfo(key, mainAttributes));
+                jarManifests.add(new JarManifest(id, key, new Manifest(is)));
                 is.close();
+                id++;
             }
         } catch (Exception e) {
             logger.error("Failed to load environment jar information.", e);
         }
-        return toReturn;
+
+        return jarManifests;
+    }
+
+    private static class JarManifest {
+        private final int id;
+        private final String jarName;
+        private final Manifest manifest;
+
+        private JarManifest(int id, String jarName, Manifest manifest) {
+            this.id = id;
+            this.jarName = jarName;
+            this.manifest = manifest;
+        }
+
+        public String getJarName() {
+            return jarName;
+        }
+
+        public Manifest getManifest() {
+            return manifest;
+        }
+
+        public JarInfo toJarInfo() {
+            return new JarInfo(id, jarName, manifest.getMainAttributes());
+        }
     }
 
     private static class JarInfo {
 
         public static final String MANIFEST_VERSION = "Manifest-Version";
         public static final String CREATED_BY = "Created-By";
-        public static final String UNAVAILABLE = "Unavailable";
-        @SuppressWarnings("unused")
-        private String jar;
-        @SuppressWarnings("unused")
-        private String createdBy = UNAVAILABLE;
-        @SuppressWarnings("unused")
-        private String manifestVersion = UNAVAILABLE;
+        public static final String BUILD_DATE = "Build-Date";
+        public static final String BUILD_NUMBER = "Build-Number";
+        public static final String BUILT_BY = "Built-By";
+        public static final String UNAVAILABLE = "-";
 
-        public JarInfo(String key, Attributes mainAttributes) {
-            jar = key;
-            if (null != mainAttributes.getValue(MANIFEST_VERSION)) {
-                manifestVersion = String.valueOf(mainAttributes.getValue(MANIFEST_VERSION));
-            }
+        private final int id;
+        private final String jar;
+        private final String createdBy;
+        private final String buildDate;
+        private final String buildNumber;
+        private final String builtBy;
 
-            if (null != mainAttributes.getValue(CREATED_BY)) {
-                createdBy = String.valueOf(mainAttributes.getValue(CREATED_BY));
-            }
+        private JarInfo(int id, String jar, Attributes mainAttributes) {
+            this.id = id;
+            this.jar = jar;
+            createdBy = valueOf(mainAttributes, CREATED_BY);
+            buildDate = valueOf(mainAttributes, BUILD_DATE);
+            buildNumber = valueOf(mainAttributes, BUILD_NUMBER);
+            builtBy = valueOf(mainAttributes, BUILT_BY);
         }
 
         public String getJar() {
@@ -114,8 +163,21 @@ public class JarsInfoResource {
             return createdBy;
         }
 
-        public String getManifestVersion() {
-            return manifestVersion;
+        public String getBuildDate() {
+            return buildDate;
+        }
+
+        public String getBuildNumber() {
+            return buildNumber;
+        }
+
+        public String getBuiltBy() {
+            return builtBy;
+        }
+
+        private static String valueOf(Attributes mainAttributes, String tag) {
+            String value = mainAttributes.getValue(tag);
+            return value == null ? UNAVAILABLE : value;
         }
     }
 }

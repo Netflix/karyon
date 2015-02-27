@@ -7,9 +7,11 @@ $(document).ready(function() {
 
     var oTable = $('#jars-table').dataTable( {
         "aoColumns": [
-            { "sTitle": "Jar"         , "mDataProp" : "name",                  "sDefaultContent": "", "sWidth" : "30%" },
-            { "sTitle": "Owner"     , "mDataProp" : "libraryOwner",          "sDefaultContent": "", "sWidth" : "10%" },
-            { "sTitle": "Version"     , "mDataProp" : "implementationVersion", "sDefaultContent": "", "sWidth" : "10%" }
+            { "sTitle": "Jar"          , "mDataProp" : "name",                  "sDefaultContent": "", "sWidth" : "30%" },
+            { "sTitle": "Created By"   , "mDataProp" : "createdBy",             "sDefaultContent": "", "sWidth" : "10%" },
+            { "sTitle": "Build date"   , "mDataProp" : "buildDate",             "sDefaultContent": "", "sWidth" : "6%" },
+            { "sTitle": "Build number" , "mDataProp" : "buildNumber",           "sDefaultContent": "", "sWidth" : "5%" },
+            { "sTitle": "Built by"     , "mDataProp" : "builtBy",               "sDefaultContent": "", "sWidth" : "5%" }
         ],
         "sAjaxSource": source,
         "fnServerData": function ( sSource, aoData, fnCallback ) {
@@ -26,9 +28,12 @@ $(document).ready(function() {
                         var items = [];
                         $.each(json.data, function(i, obj) {
                             items.push({
+                                'id' : obj.id,
                                 'name' : obj.jar,
-                                'libraryOwner' : obj.createdBy,
-                                'implementationVersion' : obj.manifestVersion
+                                'createdBy' : obj.createdBy,
+                                'buildDate' : obj.buildDate,
+                                'buildNumber' : obj.buildNumber,
+                                'builtBy' : obj.builtBy
                             });
                         });
 
@@ -50,7 +55,7 @@ $(document).ready(function() {
             return "";
         }
     });
-    
+
     $(".bse-filter").val("");
     $("#jars-table_filter").hide();
     
