@@ -91,6 +91,7 @@ public class JerseyBlockingTest {
       Thread.sleep( rnd.nextInt( 100 ) );
     }
     
+    service.shutdown();
     service.awaitTermination( 10, TimeUnit.SECONDS );
     
     assertEquals( "Errors: ", 0, errors.intValue() );
