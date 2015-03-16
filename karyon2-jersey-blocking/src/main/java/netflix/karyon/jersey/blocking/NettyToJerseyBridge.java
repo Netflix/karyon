@@ -49,7 +49,8 @@ final class NettyToJerseyBridge {
             URI uri = new URI(nettyRequest.getUri());
             return new ContainerRequest(application, nettyRequest.getHttpMethod().name(),
                                         baseUri, uri, new JerseyRequestHeadersAdapter(nettyRequest.getHeaders()),
-                                        new HttpContentInputStream(allocator, nettyRequest.getContent()));
+                                        new ObservableInputStreamAdapter(allocator, nettyRequest.getContent()) );
+                                        //new HttpContentInputStream(allocator, nettyRequest.getContent()));
         } catch (URISyntaxException e) {
             logger.error(String.format("Invalid request uri: %s", nettyRequest.getUri()), e);
             throw new IllegalArgumentException(e);
