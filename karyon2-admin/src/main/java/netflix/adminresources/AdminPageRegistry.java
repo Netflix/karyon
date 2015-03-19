@@ -24,6 +24,8 @@ public class AdminPageRegistry {
     private static final Logger LOG = LoggerFactory.getLogger(AdminPageRegistry.class);
     public final static String PROP_ID_ADMIN_PAGES_SCAN = "netflix.platform.admin.pages.packages";
     public static final String DEFAULT_SCAN_PKG = "netflix";
+    public final static String PROP_ID_ADMIN_PAGE_ANNOTATION = "netflix.platform.admin.pages.annotation";
+    public static final String DEFAULT_ADMIN_PAGE_ANNOTATION = "netflix.adminresources.AdminPage";
 
     private Map<String, AdminPageInfo> baseServerPageInfoMap = new ConcurrentHashMap<String, AdminPageInfo>();
 
@@ -68,9 +70,7 @@ public class AdminPageRegistry {
     }
 
     public void registerAdminPagesWithClasspathScan() {
-        List<Class<? extends Annotation>> annotationList = new ArrayList<Class<? extends Annotation>>(1);
-        annotationList.add(AdminPage.class);
-
+        List<Class<? extends Annotation>> annotationList = getAdminPageAnnotations();
         ClasspathScanner cs = new ClasspathScanner(getAdminPagesPackagesToScan(), annotationList);
         for (Class<?> baseServerAdminPageClass : cs.getClasses()) {
             if (derivedFromAbstractBaseServePageInfo(baseServerAdminPageClass) ||
@@ -130,5 +130,21 @@ public class AdminPageRegistry {
         return false;
     }
 
+    public List<Class<? extends Annotation>> getAdminPageAnnotations() {
+        final String adminPageAnnotationClasses = ConfigurationManager.getConfigInstance().getString(PROP_ID_ADMIN_PAGE_ANNOTATION, DEFAULT_ADMIN_PAGE_ANNOTATION);
+        String[] clsNameList = adminPageAnnotationClasses.split(";");
+        List<Class<? extends Annotation>> clsList = new ArrayList<>(clsNameList.length);
+        for (String clsName : clsNameList) {
+            try {
+                final Class<?> aClass = Class.forName(clsName);
+                if (aClass.isAnnotation()) {
+                    clsList.add(aClass.asSubclass(Annotation.class));
+                }
+            } catch (ClassNotFoundException e) {
+                LOG.warn("Invalid AdminPage Annotation class - " + clsName);
+            }
+        }
+        return clsList;
+    }
 }
 
