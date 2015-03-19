@@ -1,5 +1,6 @@
 package netflix.admin;
 
+import com.netflix.config.ConfigurationManager;
 import netflix.adminresources.AbstractAdminPageInfo;
 import netflix.adminresources.AdminPage;
 import netflix.adminresources.AdminPageInfo;
@@ -7,8 +8,10 @@ import netflix.adminresources.AdminPageRegistry;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.lang.annotation.Annotation;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static org.hamcrest.CoreMatchers.is;
@@ -17,6 +20,14 @@ import static org.junit.Assert.*;
 
 public class AdminPageRegistryTest {
     static final AdminPageRegistry adminPageRegistry = new AdminPageRegistry();
+
+    @java.lang.annotation.Target({java.lang.annotation.ElementType.TYPE})
+    @java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.RUNTIME)
+    public static @interface MockAnnotation1 {}
+
+    @java.lang.annotation.Target({java.lang.annotation.ElementType.TYPE})
+    @java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.RUNTIME)
+    public static @interface MockAnnotation2 {}
 
     @AdminPage
     public static class MockPlugin1 extends AbstractAdminPageInfo {
@@ -134,6 +145,36 @@ public class AdminPageRegistryTest {
         assertThat("Data model is null", dataModel, notNullValue());
         assertThat("Data model does not contain 1 entry", dataModel.size(), is(1));
         assertThat("Data model does not contain foo", dataModel.containsKey("foo"), is(true));
+    }
+
+    @Test
+    public void defaultAdminPageAnnotations() {
+        final List<Class<? extends Annotation>> adminPageAnnotations = adminPageRegistry.getAdminPageAnnotations();
+        assertThat("AdminPage Annotations are not null by default", adminPageAnnotations, notNullValue());
+        assertThat("AdminPage Annotations size is 1 by default", adminPageAnnotations.size(), is(1));
+        final String defaultAnnotationClassName = adminPageAnnotations.get(0).getName();
+        assertThat("DefaultAnnotationClassName is AdminPage", defaultAnnotationClassName, is("netflix.adminresources.AdminPage"));
+    }
+
+    @Test
+    public void badAdminPageAnnotation() {
+        ConfigurationManager.getConfigInstance().setProperty(AdminPageRegistry.PROP_ID_ADMIN_PAGE_ANNOTATION, "netflix.InvalidAnnotation1;netflix.InvalidAnnotation2");
+        final List<Class<? extends Annotation>> adminPageAnnotations = adminPageRegistry.getAdminPageAnnotations();
+        assertThat("AdminPage Annotations are not null", adminPageAnnotations, notNullValue());
+        assertThat("AdminPage Annotations size is 0", adminPageAnnotations.size(), is(0));
+    }
+
+    @Test
+    public void configureAdminPageAnnotation() {
+        ConfigurationManager.getConfigInstance().setProperty(AdminPageRegistry.PROP_ID_ADMIN_PAGE_ANNOTATION,
+                "netflix.admin.AdminPageRegistryTest$MockAnnotation1;netflix.admin.AdminPageRegistryTest$MockAnnotation2");
+        final List<Class<? extends Annotation>> adminPageAnnotations = adminPageRegistry.getAdminPageAnnotations();
+        assertThat("AdminPage Annotations are not empty", adminPageAnnotations, notNullValue());
+        assertThat("AdminPage Annotations size is 2", adminPageAnnotations.size(), is(2));
+        final String firstAnnotation = adminPageAnnotations.get(0).getName();
+        final String secondAnnotation = adminPageAnnotations.get(1).getName();
+        assertThat("AdminPage annotation is netflix.Annotation1", firstAnnotation, is("netflix.admin.AdminPageRegistryTest$MockAnnotation1"));
+        assertThat("AdminPage annotation is netflix.Annotation2", secondAnnotation, is("netflix.admin.AdminPageRegistryTest$MockAnnotation2"));
     }
 
 }
