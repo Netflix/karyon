@@ -67,7 +67,10 @@ public class InterceptorExecutor<I, O, C extends KeyEvaluationContext> {
             @Override
             public Subscriber<? super Void> call(Subscriber<? super Void> child) {
                 SerialSubscription subscription = new SerialSubscription();
-                return new ChainSubscriber(subscription, context, request, response, child);
+                ChainSubscriber chainSubscriber = new ChainSubscriber(subscription, context, request, response, child);
+                subscription.set(chainSubscriber);
+                child.add(subscription);
+                return chainSubscriber;
             }
         });
     }
