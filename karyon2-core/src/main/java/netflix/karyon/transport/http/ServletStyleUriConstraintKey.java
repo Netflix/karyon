@@ -25,7 +25,7 @@ import org.slf4j.LoggerFactory;
  </ul>
  *
  * In any of the pattersn above the leading slash in the constraint is optional, i.e., "/myresource/foo" is equivalent to
- * "myresource/foo". <p></p>
+ * "myresource/foo".
  *
  * As compared to servlets/web applications there are no context paths of an application so the URI path has to be
  * absolute. <br>
