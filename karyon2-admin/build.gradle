@@ -25,7 +25,9 @@ dependencies {
         compile  "com.sun.jersey:jersey-servlet:${jersey_version}"
         compile  "com.sun.jersey:jersey-server:${jersey_version}"
         compile  'com.google.inject.extensions:guice-servlet:3.0'
-        compile  "com.netflix.pytheas:pytheas-core:${pytheas_version}"
+        compile  ("com.netflix.pytheas:pytheas-core:${pytheas_version}") {
+          exclude group: 'javax.servlet' 
+        }
         compile  "com.sun.jersey:jersey-core:${jersey_version}"
         runtime  'com.fasterxml.jackson.core:jackson-databind:2.5.+'
 
