@@ -32,7 +32,7 @@ public interface JerseyBlockingModule {
     protected void configureServer() {
       
       //we need intercepter, otherwise RxJava will leak scheduler threads
-      interceptorSupport().forUri("/*").intercept(AccessInterceptor.class);
+      //interceptorSupport().forUri("/*").intercept(AccessInterceptor.class);
       server().port( 7001 ).threadPoolSize( 200 );
     }
   }

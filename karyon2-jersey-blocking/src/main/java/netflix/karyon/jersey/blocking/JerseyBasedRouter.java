@@ -7,13 +7,17 @@ import com.sun.jersey.guice.spi.container.GuiceComponentProviderFactory;
 import com.sun.jersey.spi.container.ContainerRequest;
 import com.sun.jersey.spi.container.ContainerResponseWriter;
 import com.sun.jersey.spi.container.WebApplication;
+
 import io.netty.buffer.ByteBuf;
 import io.reactivex.netty.protocol.http.server.HttpServerRequest;
 import io.reactivex.netty.protocol.http.server.HttpServerResponse;
 import io.reactivex.netty.protocol.http.server.RequestHandler;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import rx.Observable;
+import rx.Scheduler;
 import rx.Subscriber;
 import rx.functions.Action0;
 import rx.schedulers.Schedulers;
@@ -21,6 +25,7 @@ import rx.schedulers.Schedulers;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.inject.Inject;
+
 import java.io.IOException;
 
 /**
@@ -65,6 +70,9 @@ public class JerseyBasedRouter implements RequestHandler<ByteBuf, ByteBuf> {
                 } catch (IOException e) {
                     logger.error("Failed to handle request.", e);
                     subscriber.onError(e);
+                }
+                finally {
+                  subscriber.unsubscribe();
                 }
             }
         }).doOnTerminate(new Action0() {

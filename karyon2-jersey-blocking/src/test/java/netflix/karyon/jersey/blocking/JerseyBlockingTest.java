@@ -92,7 +92,7 @@ public class JerseyBlockingTest {
     }
     
     service.shutdown();
-    service.awaitTermination( 10, TimeUnit.SECONDS );
+    service.awaitTermination( 100, TimeUnit.SECONDS );
     
     assertEquals( "Errors: ", 0, errors.intValue() );
   }
