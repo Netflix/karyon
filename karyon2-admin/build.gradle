@@ -15,9 +15,6 @@
  */
 apply plugin: 'osgi'
 
-version= "2.2.1-ALPHA7"
-group="com.thomsonreuters"
-
 dependencies {
     dependencies {
         compile  'javax.ws.rs:jsr311-api:1.1.1'
