@@ -38,7 +38,10 @@ import org.slf4j.LoggerFactory;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.EnumSet;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -56,14 +59,11 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * <p/>
  * The following resources are available by default:
  * <p/>
- * <ul>
- * <li>Healthcheck: A healthcheck is available with {@link netflix.admin.HealthCheckServlet}.
  * </ul>
  */
+@Singleton
 public class AdminResourcesContainer {
     private static final Logger logger = LoggerFactory.getLogger(AdminResourcesContainer.class);
-
-    public static final String DEFAULT_PAGE_PROP_NAME = "com.netflix.karyon.admin.default.page";
 
     public static final String CONTAINER_LISTEN_PORT = "netflix.platform.admin.resources.port";
     public static final int LISTEN_PORT_DEFAULT = 8077;
@@ -79,6 +79,7 @@ public class AdminResourcesContainer {
     private Injector appInjector;
 
     private AtomicBoolean alreadyInited = new AtomicBoolean(false);
+    private AdminPageRegistry adminPageRegistry;
 
     /**
      * Starts the container and hence the embedded jetty server.
@@ -93,22 +94,24 @@ public class AdminResourcesContainer {
 
                 server = new Server(listenPort);
 
+                adminPageRegistry = new AdminPageRegistry();
+                adminPageRegistry.registerAdminPagesWithClasspathScan();
+
                 Injector adminResourceInjector;
                 if (appInjector != null) {
-                    adminResourceInjector = appInjector.createChildInjector(getAdditionalBindings());
+                    adminResourceInjector = appInjector.createChildInjector(buildAdminPluginsGuiceModules());
                 } else {
                     adminResourceInjector = LifecycleInjector
                             .builder()
                             .inStage(Stage.DEVELOPMENT)
                             .withMode(LifecycleInjectorMode.SIMULATED_CHILD_INJECTORS)
                             .usingBasePackages("com.netflix.explorers")
-                            .withModules(getAdditionalBindings())
+                            .withModules(buildAdminPluginsGuiceModules())
                             .build()
                             .createInjector();
                     adminResourceInjector.getInstance(LifecycleManager.class).start();
                 }
 
-                final AdminPageRegistry adminPageRegistry = buildAdminPageRegistry(adminResourceInjector);
                 final AdminContainerConfig adminContainerConfig = adminResourceInjector.getInstance(AdminContainerConfig.class);
 
                 // root path handling, redirect filter
@@ -155,6 +158,14 @@ public class AdminResourcesContainer {
         return listenPort;
     }
 
+    public void setServerPort(int port) {
+        listenPort = port;
+    }
+
+    public AdminPageRegistry getAdminPageRegistry() {
+        return adminPageRegistry;
+    }
+
     private Module getAdditionalBindings() {
         return new AbstractModule() {
             @Override
@@ -174,11 +185,21 @@ public class AdminResourcesContainer {
         return pkgPath;
     }
 
-    private AdminPageRegistry buildAdminPageRegistry(Injector injector) {
-        AdminPageRegistry baseServerPageRegistry = injector.getInstance(AdminPageRegistry.class);
-        baseServerPageRegistry.registerAdminPagesWithClasspathScan();
-        return baseServerPageRegistry;
+    private List<Module> buildAdminPluginsGuiceModules() {
+        List<Module> guiceModules = new ArrayList<>();
+        if (adminPageRegistry != null) {
+            final Collection<AdminPageInfo> allPages = adminPageRegistry.getAllPages();
+            for (AdminPageInfo adminPlugin : allPages) {
+                final List<Module> guiceModuleList = adminPlugin.getGuiceModules();
+                if (guiceModuleList != null && !guiceModuleList.isEmpty()) {
+                    guiceModules.addAll(adminPlugin.getGuiceModules());
+                }
+            }
+        }
+        guiceModules.add(getAdditionalBindings());
+        return guiceModules;
     }
+
 
     @PreDestroy
     public void shutdown() {

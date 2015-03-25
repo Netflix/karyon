@@ -19,7 +19,6 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 
-@Singleton
 public class AdminPageRegistry {
     private static final Logger LOG = LoggerFactory.getLogger(AdminPageRegistry.class);
     public final static String PROP_ID_ADMIN_PAGES_SCAN = "netflix.platform.admin.pages.packages";
@@ -27,7 +26,12 @@ public class AdminPageRegistry {
     public final static String PROP_ID_ADMIN_PAGE_ANNOTATION = "netflix.platform.admin.pages.annotation";
     public static final String DEFAULT_ADMIN_PAGE_ANNOTATION = "netflix.adminresources.AdminPage";
 
-    private Map<String, AdminPageInfo> baseServerPageInfoMap = new ConcurrentHashMap<String, AdminPageInfo>();
+    private Map<String, AdminPageInfo> baseServerPageInfoMap;
+
+
+    public AdminPageRegistry() {
+        this.baseServerPageInfoMap = new ConcurrentHashMap<>();
+    }
 
     public void add(AdminPageInfo baseServerPageInfo) {
         Preconditions.checkNotNull(baseServerPageInfo);
@@ -59,15 +63,6 @@ public class AdminPageRegistry {
         return enabledPages;
     }
 
-    private List<AdminPageInfo> getEnabledPages(List<AdminPageInfo> pages) {
-        List<AdminPageInfo> enabledPages = Lists.newArrayList();
-        for (AdminPageInfo page : pages) {
-            if (page.isEnabled()) {
-                enabledPages.add(page);
-            }
-        }
-        return enabledPages;
-    }
 
     public void registerAdminPagesWithClasspathScan() {
         List<Class<? extends Annotation>> annotationList = getAdminPageAnnotations();
@@ -145,6 +140,16 @@ public class AdminPageRegistry {
             }
         }
         return clsList;
+    }
+
+    private List<AdminPageInfo> getEnabledPages(List<AdminPageInfo> pages) {
+        List<AdminPageInfo> enabledPages = Lists.newArrayList();
+        for (AdminPageInfo page : pages) {
+            if (page.isEnabled()) {
+                enabledPages.add(page);
+            }
+        }
+        return enabledPages;
     }
 }
 

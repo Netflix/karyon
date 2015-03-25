@@ -1,8 +1,11 @@
 package netflix.adminresources;
 
+import com.google.inject.Module;
 import com.netflix.config.ConfigurationManager;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public abstract class AbstractAdminPageInfo implements AdminPageInfo {
@@ -41,6 +44,11 @@ public abstract class AbstractAdminPageInfo implements AdminPageInfo {
         final String disablePagePropId = ADMIN_PAGE_DISABLE_PROP_PREFIX + pageId + DISABLED;
         boolean isDisabled = ConfigurationManager.getConfigInstance().getBoolean(disablePagePropId, false);
         return !isDisabled;
+    }
+
+    @Override
+    public List<Module> getGuiceModules() {
+        return new ArrayList<>(0);
     }
 
     @Override
