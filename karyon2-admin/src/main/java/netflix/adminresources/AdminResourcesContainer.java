@@ -21,10 +21,12 @@ import com.netflix.config.ConfigurationManager;
 import com.netflix.governator.guice.LifecycleInjector;
 import com.netflix.governator.guice.LifecycleInjectorMode;
 import com.netflix.governator.lifecycle.LifecycleManager;
+
 import netflix.admin.AdminConfigImpl;
 import netflix.admin.AdminContainerConfig;
+
 import org.eclipse.jetty.server.Connector;
-import org.eclipse.jetty.server.DispatcherType;
+//import org.eclipse.jetty.server.DispatcherType;
 import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.handler.HandlerCollection;
@@ -38,6 +40,8 @@ import org.slf4j.LoggerFactory;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
+import javax.servlet.DispatcherType;
+
 import java.util.EnumSet;
 import java.util.concurrent.atomic.AtomicBoolean;
 
