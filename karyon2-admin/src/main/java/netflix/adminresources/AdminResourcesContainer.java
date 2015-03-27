@@ -71,8 +71,10 @@ public class AdminResourcesContainer {
     @Inject(optional = true)
     private AdminContainerConfig adminContainerConfig;
 
-    private AtomicBoolean alreadyInited = new AtomicBoolean(false);
+    @Inject(optional = true)
     private AdminPageRegistry adminPageRegistry;
+
+    private AtomicBoolean alreadyInited = new AtomicBoolean(false);
     private int serverPort; // actual server listen port (apart from what's in Config)
 
     /**
@@ -85,8 +87,8 @@ public class AdminResourcesContainer {
         try {
             if (alreadyInited.compareAndSet(false, true)) {
                 initAdminContainerConfigIfNeeded();
+                initAdminRegistryIfNeeded();
 
-                adminPageRegistry = new AdminPageRegistry();
                 if (adminContainerConfig.shouldScanClassPathForPluginDiscovery()) {
                     adminPageRegistry.registerAdminPagesWithClasspathScan();
                 }
@@ -151,6 +153,12 @@ public class AdminResourcesContainer {
     private void initAdminContainerConfigIfNeeded() {
         if (adminContainerConfig == null) {
             adminContainerConfig = new AdminConfigImpl();
+        }
+    }
+
+    private void initAdminRegistryIfNeeded() {
+        if (adminPageRegistry == null) {
+            adminPageRegistry = new AdminPageRegistry();
         }
     }
 
