@@ -18,6 +18,7 @@ import com.sun.jersey.api.view.Viewable;
 import netflix.admin.AdminContainerConfig;
 import netflix.adminresources.AdminPageInfo;
 import netflix.adminresources.AdminPageRegistry;
+import netflix.adminresources.AdminResourcesContainer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,9 +31,9 @@ public class AdminPageResource {
     private final AdminPageRegistry adminPageRegistry;
 
     @Inject
-    public AdminPageResource(AdminPageRegistry adminPageRegistry, AdminContainerConfig adminContainerConfig) {
+    public AdminPageResource(AdminContainerConfig adminContainerConfig, AdminResourcesContainer adminResourcesContainer) {
         this.adminContainerConfig = adminContainerConfig;
-        this.adminPageRegistry = adminPageRegistry;
+        this.adminPageRegistry = adminResourcesContainer.getAdminPageRegistry();
     }
 
     @GET()

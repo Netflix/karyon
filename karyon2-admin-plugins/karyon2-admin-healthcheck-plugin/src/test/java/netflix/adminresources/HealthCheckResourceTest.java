@@ -26,7 +26,7 @@ public class HealthCheckResourceTest {
     @After
     public void tearDown() throws Exception {
         final AbstractConfiguration configInst = ConfigurationManager.getConfigInstance();
-        configInst.clearProperty(AdminResourcesContainer.CONTAINER_LISTEN_PORT);
+        configInst.clearProperty(AdminConfigImpl.CONTAINER_LISTEN_PORT);
         if (container != null) {
             container.shutdown();
         }
@@ -34,7 +34,7 @@ public class HealthCheckResourceTest {
 
     @Before
     public void init() {
-        System.setProperty(AdminResourcesContainer.CONTAINER_LISTEN_PORT, "0");
+        System.setProperty(AdminConfigImpl.CONTAINER_LISTEN_PORT, "0");
         System.setProperty(AdminConfigImpl.NETFLIX_ADMIN_RESOURCE_CONTEXT, "/jr");
     }
 

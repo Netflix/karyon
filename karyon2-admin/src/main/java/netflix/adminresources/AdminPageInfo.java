@@ -1,5 +1,8 @@
 package netflix.adminresources;
 
+import com.google.inject.Module;
+
+import java.util.List;
 import java.util.Map;
 
 public interface AdminPageInfo {
@@ -17,6 +20,9 @@ public interface AdminPageInfo {
 
     // additional jersey resource package list if needed
     String getJerseyResourcePackageList();
+
+    // Guice modules that need to be added to the injector
+    List<Module> getGuiceModules();
 
     // controls if the module should be visible/enabled in admin console
     boolean isEnabled();

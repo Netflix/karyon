@@ -8,15 +8,33 @@ import javax.inject.Singleton;
 public class AdminConfigImpl implements AdminContainerConfig {
     public static final String NETFLIX_ADMIN_TEMPLATE_CONTEXT = "netflix.admin.template.context";
     public static final String TEMPLATE_CONTEXT_DEFAULT = "/admin";
+
     public static final String NETFLIX_ADMIN_RESOURCE_CONTEXT = "netflix.admin.resource.context";
     public static final String RESOURCE_CONTEXT_DEFAULT = "/webadmin";
+
+    private static final String JERSEY_CORE_RESOURCES = "netflix.platform.admin.resources.core.packages";
+    public static final String JERSEY_CORE_RESOURCES_DEFAULT = "netflix.adminresources;com.netflix.explorers.resources;com.netflix.explorers.providers";
+
+    private static final String JERSEY_VIEWABLE_RESOURCES = "netflix.platform.admin.resources.viewable.packages";
+    public static final String JERSEY_VIEWABLE_RESOURCES_DEFAULT = "netflix.admin;netflix.adminresources.pages;com.netflix.explorers.resources";
+
+    public static final String CONTAINER_LISTEN_PORT = "netflix.platform.admin.resources.port";
+    public static final int LISTEN_PORT_DEFAULT = 8077;
+
     private final String templateResContext;
     private final String resourceContext;
+    private final String coreJerseyResources;
+    private final String viewableResources;
+    private final int listenPort;
 
     public AdminConfigImpl() {
         templateResContext = ConfigurationManager.getConfigInstance().getString(NETFLIX_ADMIN_TEMPLATE_CONTEXT, TEMPLATE_CONTEXT_DEFAULT);
         resourceContext = ConfigurationManager.getConfigInstance().getString(NETFLIX_ADMIN_RESOURCE_CONTEXT, RESOURCE_CONTEXT_DEFAULT);
+        coreJerseyResources = ConfigurationManager.getConfigInstance().getString(JERSEY_CORE_RESOURCES, JERSEY_CORE_RESOURCES_DEFAULT);
+        viewableResources = ConfigurationManager.getConfigInstance().getString(JERSEY_VIEWABLE_RESOURCES, JERSEY_VIEWABLE_RESOURCES_DEFAULT);
+        listenPort = ConfigurationManager.getConfigInstance().getInt(CONTAINER_LISTEN_PORT, LISTEN_PORT_DEFAULT);
     }
+
 
     @Override
     public String templateResourceContext() {
@@ -26,5 +44,25 @@ public class AdminConfigImpl implements AdminContainerConfig {
     @Override
     public String ajaxDataResourceContext() {
         return resourceContext;
+    }
+
+    @Override
+    public String jerseyResourcePkgList() {
+        return coreJerseyResources;
+    }
+
+    @Override
+    public String jerseyViewableResourcePkgList() {
+        return viewableResources;
+    }
+
+    @Override
+    public boolean shouldScanClassPathForPluginDiscovery() {
+        return true;
+    }
+
+    @Override
+    public int listenPort() {
+        return listenPort;
     }
 }

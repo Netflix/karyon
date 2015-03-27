@@ -1,5 +1,6 @@
 package netflix.admin;
 
+import com.google.inject.Module;
 import com.netflix.config.ConfigurationManager;
 import netflix.adminresources.AbstractAdminPageInfo;
 import netflix.adminresources.AdminPage;
@@ -9,10 +10,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.lang.annotation.Annotation;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
@@ -23,11 +21,13 @@ public class AdminPageRegistryTest {
 
     @java.lang.annotation.Target({java.lang.annotation.ElementType.TYPE})
     @java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.RUNTIME)
-    public static @interface MockAnnotation1 {}
+    public static @interface MockAnnotation1 {
+    }
 
     @java.lang.annotation.Target({java.lang.annotation.ElementType.TYPE})
     @java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.RUNTIME)
-    public static @interface MockAnnotation2 {}
+    public static @interface MockAnnotation2 {
+    }
 
     @AdminPage
     public static class MockPlugin1 extends AbstractAdminPageInfo {
@@ -99,6 +99,11 @@ public class AdminPageRegistryTest {
         }
 
         @Override
+        public List<Module> getGuiceModules() {
+            return new ArrayList<>(0);
+        }
+
+        @Override
         public boolean isEnabled() {
             return true;
         }
@@ -122,6 +127,21 @@ public class AdminPageRegistryTest {
         for (AdminPageInfo pageInfo : allPages) {
             assertTrue(pageInfo.getName().startsWith("plugin"));
         }
+    }
+
+    @Test
+    public void addAndRemoveAdminPluginDynamically() {
+        Collection<AdminPageInfo> allPlugins = adminPageRegistry.getAllPages();
+        assertThat("Admin plugins are not null by default", allPlugins, notNullValue());
+        assertThat("Admin plugins size is 3", allPlugins.size(), is(3));
+
+        final AbstractAdminPageInfo dynamicPlugin1 = new AbstractAdminPageInfo("dynamicPluginId1", "dynamicPluginName1") {
+        };
+        adminPageRegistry.add(dynamicPlugin1);
+        assertThat("Admin plugins added dynamically", adminPageRegistry.getAllPages().size(), is(4));
+
+        adminPageRegistry.remove(dynamicPlugin1);
+        assertThat("Admin plugins removed dynamically", adminPageRegistry.getAllPages().size(), is(3));
     }
 
     @Test
@@ -155,6 +175,7 @@ public class AdminPageRegistryTest {
         final String defaultAnnotationClassName = adminPageAnnotations.get(0).getName();
         assertThat("DefaultAnnotationClassName is AdminPage", defaultAnnotationClassName, is("netflix.adminresources.AdminPage"));
     }
+
 
     @Test
     public void badAdminPageAnnotation() {

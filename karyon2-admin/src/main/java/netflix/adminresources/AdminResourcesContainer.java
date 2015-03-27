@@ -17,7 +17,6 @@
 package netflix.adminresources;
 
 import com.google.inject.*;
-import com.netflix.config.ConfigurationManager;
 import com.netflix.governator.guice.LifecycleInjector;
 import com.netflix.governator.guice.LifecycleInjectorMode;
 import com.netflix.governator.lifecycle.LifecycleManager;
@@ -38,16 +37,19 @@ import org.slf4j.LoggerFactory;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.EnumSet;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * This class starts an embedded jetty server, listening at port specified by property
- * {@link AdminResourcesContainer#CONTAINER_LISTEN_PORT} and defaulting to
- * {@link AdminResourcesContainer#LISTEN_PORT_DEFAULT}. <br>
+ * {@link netflix.admin.AdminContainerConfig#listenPort()} and defaulting to
+ * {@link netflix.admin.AdminContainerConfig}. <br>
  * <p/>
  * The embedded server uses jersey so any jersey resources available in packages
- * specified via properties {@link AdminResourcesContainer#JERSEY_CORE_PACKAGES}will be scanned and initialized. <br>
+ * specified via properties {@link netflix.admin.AdminContainerConfig#jerseyResourcePkgList()}will be scanned and initialized. <br>
  * <p/>
  * Karyon admin starts in an embedded container to have a "always available" endpoint for any application. This helps
  * in a homogeneous admin view for all applications. <br>
@@ -56,29 +58,24 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * <p/>
  * The following resources are available by default:
  * <p/>
- * <ul>
- * <li>Healthcheck: A healthcheck is available with {@link netflix.admin.HealthCheckServlet}.
  * </ul>
  */
+@Singleton
 public class AdminResourcesContainer {
     private static final Logger logger = LoggerFactory.getLogger(AdminResourcesContainer.class);
-
-    public static final String DEFAULT_PAGE_PROP_NAME = "com.netflix.karyon.admin.default.page";
-
-    public static final String CONTAINER_LISTEN_PORT = "netflix.platform.admin.resources.port";
-    public static final int LISTEN_PORT_DEFAULT = 8077;
-    private static final String JERSEY_CORE_PACKAGES = "netflix.platform.admin.resources.core.packages";
-    public static final String JERSEY_CORE_PACKAGES_DEFAULT = "netflix.adminresources;com.netflix.explorers.resources;com.netflix.explorers.providers";
-    public static final String JERSEY_PACKAGES_ADMIN_TEMPLATES = "netflix.admin;netflix.adminresources.pages;com.netflix.explorers.resources";
-
-    private String coreJerseyPackages = ConfigurationManager.getConfigInstance().getString(JERSEY_CORE_PACKAGES, JERSEY_CORE_PACKAGES_DEFAULT);
-    private int listenPort = ConfigurationManager.getConfigInstance().getInt(CONTAINER_LISTEN_PORT, LISTEN_PORT_DEFAULT);
     private Server server;
 
     @Inject(optional = true)
     private Injector appInjector;
 
+    @Inject(optional = true)
+    private AdminContainerConfig adminContainerConfig;
+
+    @Inject(optional = true)
+    private AdminPageRegistry adminPageRegistry;
+
     private AtomicBoolean alreadyInited = new AtomicBoolean(false);
+    private int serverPort; // actual server listen port (apart from what's in Config)
 
     /**
      * Starts the container and hence the embedded jetty server.
@@ -88,30 +85,32 @@ public class AdminResourcesContainer {
     @PostConstruct
     public void init() throws Exception {
         try {
-
             if (alreadyInited.compareAndSet(false, true)) {
+                initAdminContainerConfigIfNeeded();
+                initAdminRegistryIfNeeded();
 
-                server = new Server(listenPort);
+                if (adminContainerConfig.shouldScanClassPathForPluginDiscovery()) {
+                    adminPageRegistry.registerAdminPagesWithClasspathScan();
+                }
 
                 Injector adminResourceInjector;
                 if (appInjector != null) {
-                    adminResourceInjector = appInjector.createChildInjector(getAdditionalBindings());
+                    adminResourceInjector = appInjector.createChildInjector(buildAdminPluginsGuiceModules());
                 } else {
                     adminResourceInjector = LifecycleInjector
                             .builder()
                             .inStage(Stage.DEVELOPMENT)
                             .withMode(LifecycleInjectorMode.SIMULATED_CHILD_INJECTORS)
                             .usingBasePackages("com.netflix.explorers")
-                            .withModules(getAdditionalBindings())
+                            .withModules(buildAdminPluginsGuiceModules())
                             .build()
                             .createInjector();
                     adminResourceInjector.getInstance(LifecycleManager.class).start();
                 }
 
-                final AdminPageRegistry adminPageRegistry = buildAdminPageRegistry(adminResourceInjector);
-                final AdminContainerConfig adminContainerConfig = adminResourceInjector.getInstance(AdminContainerConfig.class);
+                server = new Server(adminContainerConfig.listenPort());
 
-                // root path handling, redirect filter
+                // redirect filter based on configurable RedirectRules
                 ServletContextHandler rootHandler = new ServletContextHandler();
                 rootHandler.setContextPath("/");
                 rootHandler.addFilter(new FilterHolder(adminResourceInjector.getInstance(RedirectFilter.class)), "/*", EnumSet.allOf(DispatcherType.class));
@@ -119,7 +118,7 @@ public class AdminResourcesContainer {
 
                 // admin page template resources
                 AdminResourcesFilter arfTemplatesResources = adminResourceInjector.getInstance(AdminResourcesFilter.class);
-                arfTemplatesResources.setPackages(JERSEY_PACKAGES_ADMIN_TEMPLATES);
+                arfTemplatesResources.setPackages(adminContainerConfig.jerseyViewableResourcePkgList());
 
                 ServletContextHandler adminTemplatesResHandler = new ServletContextHandler();
                 adminTemplatesResHandler.setContextPath(adminContainerConfig.templateResourceContext());
@@ -144,29 +143,44 @@ public class AdminResourcesContainer {
                 server.start();
 
                 final Connector connector = server.getConnectors()[0];
-                listenPort = connector.getLocalPort();
+                serverPort = connector.getLocalPort();
             }
         } catch (Exception e) {
             logger.error("Exception in building AdminResourcesContainer ", e);
         }
     }
 
+    private void initAdminContainerConfigIfNeeded() {
+        if (adminContainerConfig == null) {
+            adminContainerConfig = new AdminConfigImpl();
+        }
+    }
+
+    private void initAdminRegistryIfNeeded() {
+        if (adminPageRegistry == null) {
+            adminPageRegistry = new AdminPageRegistry();
+        }
+    }
+
     public int getServerPort() {
-        return listenPort;
+        return serverPort;
+    }
+
+    public AdminPageRegistry getAdminPageRegistry() {
+        return adminPageRegistry;
     }
 
     private Module getAdditionalBindings() {
         return new AbstractModule() {
             @Override
             protected void configure() {
-                bind(AdminContainerConfig.class).to(AdminConfigImpl.class);
                 bind(AdminResourcesFilter.class);
             }
         };
     }
 
     private String appendCoreJerseyPackages(String jerseyResourcePkgListForAdminPages) {
-        String pkgPath = coreJerseyPackages;
+        String pkgPath = adminContainerConfig.jerseyResourcePkgList();
         if (jerseyResourcePkgListForAdminPages != null && !jerseyResourcePkgListForAdminPages.isEmpty()) {
             pkgPath += ";" + jerseyResourcePkgListForAdminPages;
         }
@@ -174,10 +188,19 @@ public class AdminResourcesContainer {
         return pkgPath;
     }
 
-    private AdminPageRegistry buildAdminPageRegistry(Injector injector) {
-        AdminPageRegistry baseServerPageRegistry = injector.getInstance(AdminPageRegistry.class);
-        baseServerPageRegistry.registerAdminPagesWithClasspathScan();
-        return baseServerPageRegistry;
+    private List<Module> buildAdminPluginsGuiceModules() {
+        List<Module> guiceModules = new ArrayList<>();
+        if (adminPageRegistry != null) {
+            final Collection<AdminPageInfo> allPages = adminPageRegistry.getAllPages();
+            for (AdminPageInfo adminPlugin : allPages) {
+                final List<Module> guiceModuleList = adminPlugin.getGuiceModules();
+                if (guiceModuleList != null && !guiceModuleList.isEmpty()) {
+                    guiceModules.addAll(adminPlugin.getGuiceModules());
+                }
+            }
+        }
+        guiceModules.add(getAdditionalBindings());
+        return guiceModules;
     }
 
     @PreDestroy
