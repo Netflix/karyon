@@ -18,6 +18,7 @@ package netflix.adminresources;
 
 import com.google.common.collect.ImmutableMap;
 import com.netflix.config.ConfigurationManager;
+import netflix.admin.AdminConfigImpl;
 import netflix.adminresources.resources.MaskedResourceHelper;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
@@ -53,7 +54,7 @@ public class WebAdminTest {
         System.setProperty("AWS_SECRET_KEY", "super-secret-aws-key");
         System.setProperty("AWS_ACCESS_ID", "super-aws-access-id");
         System.setProperty(MaskedResourceHelper.MASKED_PROPERTY_NAMES, "AWS_SECRET_KEY");
-        System.setProperty(AdminResourcesContainer.CONTAINER_LISTEN_PORT, "0");
+        System.setProperty(AdminConfigImpl.CONTAINER_LISTEN_PORT, "0");
 
         adminServerPort = startServerAndGetListeningPort();
         buildUpRestEndpointsToTest();

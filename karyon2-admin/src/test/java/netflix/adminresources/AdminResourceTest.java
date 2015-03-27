@@ -64,7 +64,7 @@ public class AdminResourceTest {
     @After
     public void tearDown() throws Exception {
         final AbstractConfiguration configInst = ConfigurationManager.getConfigInstance();
-        configInst.clearProperty(AdminResourcesContainer.CONTAINER_LISTEN_PORT);
+        configInst.clearProperty(AdminConfigImpl.CONTAINER_LISTEN_PORT);
         if (container != null) {
             container.shutdown();
         }
@@ -72,7 +72,7 @@ public class AdminResourceTest {
 
     @BeforeClass
     public static void init() {
-        setConfig(AdminResourcesContainer.CONTAINER_LISTEN_PORT, "0");
+        setConfig(AdminConfigImpl.CONTAINER_LISTEN_PORT, "0");
         setConfig(AdminConfigImpl.NETFLIX_ADMIN_RESOURCE_CONTEXT, "/jr");
         setConfig(AdminConfigImpl.NETFLIX_ADMIN_TEMPLATE_CONTEXT, "/main");
     }
