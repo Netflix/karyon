@@ -166,7 +166,6 @@ public class AdminResourcesContainer {
         return new AbstractModule() {
             @Override
             protected void configure() {
-                bind(AdminContainerConfig.class).to(AdminConfigImpl.class);
                 bind(AdminResourcesFilter.class);
             }
         };
