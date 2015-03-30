@@ -6,7 +6,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * A context to store results of costly operations during evaluation of filter keys, eg: request URI parsing. <p></p>
+ * A context to store results of costly operations during evaluation of filter keys, eg: request URI parsing.
  * <b>This context is not thread-safe.</b>
  */
 public class KeyEvaluationContext {

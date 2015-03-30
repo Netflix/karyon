@@ -9,7 +9,7 @@ import java.util.regex.Pattern;
 
 /**
  * Provides constraint implementation for {@link netflix.karyon.transport.interceptor.InterceptorKey} for matching URI paths as regular expressions as
- * supported by {@link java.util.regex.Pattern}. <p></p>
+ * supported by {@link java.util.regex.Pattern}.
  * The request URI path is as retrieved using: {@link HttpKeyEvaluationContext#getRequestUriPath(HttpServerRequest)}
  *
  * @author Nitesh Kant

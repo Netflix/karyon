@@ -74,6 +74,22 @@ public class InterceptorExecutorTest {
         Assert.assertTrue("Tail interceptor did not get invoked.", router.isReceivedACall());
     }
 
+    @Test
+    public void testUnsubscribe() throws Exception {
+
+        TestableRequestRouter<ByteBuf, ByteBuf> router = new TestableRequestRouter<ByteBuf, ByteBuf>();
+
+        InterceptorSupport<ByteBuf, ByteBuf, KeyEvaluationContext> support = new InterceptorSupport<ByteBuf, ByteBuf, KeyEvaluationContext>();
+
+        InterceptorExecutor<ByteBuf, ByteBuf, KeyEvaluationContext> executor =
+                new InterceptorExecutor<ByteBuf, ByteBuf, KeyEvaluationContext>(support, router);
+
+        executeAndAwait(executor);
+
+        Assert.assertTrue("Router did not get invoked.", router.isReceivedACall());
+        Assert.assertTrue("Router did not get unsubscribed.", router.isUnsubscribed());
+    }
+
     protected void executeAndAwait(InterceptorExecutor<ByteBuf, ByteBuf, KeyEvaluationContext> executor)
             throws InterruptedException {
         final CountDownLatch completionLatch = new CountDownLatch(1);
