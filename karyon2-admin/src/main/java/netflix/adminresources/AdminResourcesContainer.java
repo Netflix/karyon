@@ -63,6 +63,13 @@ import java.util.concurrent.atomic.AtomicBoolean;
 @Singleton
 public class AdminResourcesContainer {
     private static final Logger logger = LoggerFactory.getLogger(AdminResourcesContainer.class);
+
+    /**
+     * @deprecated here for backwards compatibility. Use {@link AdminConfigImpl#CONTAINER_LISTEN_PORT}.
+     */
+    @Deprecated
+    public static final String CONTAINER_LISTEN_PORT = AdminConfigImpl.CONTAINER_LISTEN_PORT;
+
     private Server server;
 
     @Inject(optional = true)
