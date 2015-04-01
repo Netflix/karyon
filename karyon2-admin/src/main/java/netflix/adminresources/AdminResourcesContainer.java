@@ -131,6 +131,7 @@ public class AdminResourcesContainer {
                 adminTemplatesResHandler.setContextPath(adminContainerConfig.templateResourceContext());
                 adminTemplatesResHandler.setSessionHandler(new SessionHandler());
                 adminTemplatesResHandler.addFilter(LoggingFilter.class, "/*", EnumSet.allOf(DispatcherType.class));
+                adminTemplatesResHandler.addFilter(new FilterHolder(adminResourceInjector.getInstance(RedirectFilter.class)), "/*", EnumSet.allOf(DispatcherType.class));
                 adminTemplatesResHandler.addFilter(new FilterHolder(arfTemplatesResources), "/*", EnumSet.allOf(DispatcherType.class));
                 adminTemplatesResHandler.addServlet(new ServletHolder(new DefaultServlet()), "/*");
 
@@ -141,6 +142,7 @@ public class AdminResourcesContainer {
 
                 ServletContextHandler adminDataResHandler = new ServletContextHandler();
                 adminDataResHandler.setContextPath(adminContainerConfig.ajaxDataResourceContext());
+                adminDataResHandler.addFilter(new FilterHolder(adminResourceInjector.getInstance(RedirectFilter.class)), "/*", EnumSet.allOf(DispatcherType.class));
                 adminDataResHandler.addFilter(new FilterHolder(arfDataResources), "/*", EnumSet.allOf(DispatcherType.class));
                 adminDataResHandler.addServlet(new ServletHolder(new DefaultServlet()), "/*");
 
