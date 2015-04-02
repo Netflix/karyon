@@ -17,19 +17,17 @@ apply plugin: 'osgi'
 
 dependencies {
     dependencies {
-        compile  'javax.ws.rs:jsr311-api:1.1.1'
-        provided 'javax.servlet:javax.servlet-api:3.0.1'
-        compile  'org.eclipse.jetty:jetty-server:8.1.+'
-        compile  'org.eclipse.jetty:jetty-servlet:8.1.+'
-        compile  "com.sun.jersey.contribs:jersey-guice:${jersey_version}"
-        compile  "com.sun.jersey:jersey-servlet:${jersey_version}"
-        compile  "com.sun.jersey:jersey-server:${jersey_version}"
-        compile  'com.google.inject.extensions:guice-servlet:3.0'
-        compile  ("com.netflix.pytheas:pytheas-core:${pytheas_version}") {
-          exclude group: 'javax.servlet' 
-        }
-        compile  "com.sun.jersey:jersey-core:${jersey_version}"
-        runtime  'com.fasterxml.jackson.core:jackson-databind:2.5.+'
+        compile 'javax.ws.rs:jsr311-api:1.1.1'
+        compile 'javax.servlet:servlet-api:2.5'
+        compile 'org.eclipse.jetty:jetty-server:7.6.7.v20120910'
+        compile 'org.eclipse.jetty:jetty-servlet:7.6.7.v20120910'
+        compile 'com.sun.jersey.contribs:jersey-guice:1.17.1'
+        compile "com.sun.jersey:jersey-servlet:${jersey_version}"
+        compile "com.sun.jersey:jersey-server:${jersey_version}"
+        compile 'com.google.inject.extensions:guice-servlet:3.0'
+        compile "com.netflix.pytheas:pytheas-core:${pytheas_version}"
+        compile "com.sun.jersey:jersey-core:${jersey_version}"
+        runtime 'org.codehaus.jackson:jackson-mapper-asl:1.9.11'
 
         testCompile "org.apache.httpcomponents:httpclient:${apache_httpclient_version}"
     }
