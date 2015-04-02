@@ -9,6 +9,9 @@ import rx.Observer;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * @author Nitesh Kant
@@ -17,9 +20,12 @@ public class HttpContentInputStream extends InputStream {
 
     private static final Logger logger = LoggerFactory.getLogger(HttpContentInputStream.class);
 
+    private final Lock lock = new ReentrantLock();
+    private volatile boolean isClosed = false;
+
     private volatile boolean isCompleted = false;
     private volatile Throwable completedWithError = null;
-    private final Object contentAvailabilityMonitor = new Object();
+    private final Condition contentAvailabilityMonitor = lock.newCondition();
     private final ByteBuf contentBuffer;
 
     public HttpContentInputStream(final ByteBufAllocator allocator, final Observable<ByteBuf> content) {
@@ -27,20 +33,46 @@ public class HttpContentInputStream extends InputStream {
         content.subscribe(new Observer<ByteBuf>() {
             @Override
             public void onCompleted() {
-                isCompleted = true;
+                lock.lock();
+                try {
+                    isCompleted = true;
+                  
+                    logger.debug( "Processing complete" );
+                    contentAvailabilityMonitor.signalAll();
+                }
+                finally {
+                    lock.unlock();
+                }
             }
 
             @Override
             public void onError(Throwable e) {
-                completedWithError = e;
-                isCompleted = true;
+                lock.lock();
+                try {
+                    completedWithError = e;
+                    isCompleted = true;
+                  
+                    logger.error("Observer, got error: " + e.getMessage());
+                    contentAvailabilityMonitor.signalAll();
+                }
+                finally {
+                    lock.unlock();
+                }
             }
 
             @Override
             public void onNext(ByteBuf byteBuf) {
-                contentBuffer.writeBytes(byteBuf);
-                synchronized (contentAvailabilityMonitor) { // This is never
-                    contentAvailabilityMonitor.notify();
+                lock.lock();
+                try {
+                    contentBuffer.writeBytes( byteBuf );
+                  
+                    contentAvailabilityMonitor.signalAll();
+                }
+                catch( Exception e ) {
+                  logger.error("Error on server", e);
+                }
+                finally {
+                    lock.unlock();
                 }
             }
         });
@@ -63,31 +95,66 @@ public class HttpContentInputStream extends InputStream {
 
     @Override
     public int read() throws IOException {
-        return blockingRead(new ReadFunc() {
-            @Override
-            public int read() {
-                return contentBuffer.readByte() & 0xff;
+        lock.lock();
+        
+        try {
+            if( !await() ) {
+              return -1;
             }
-        });
+          
+            return contentBuffer.readByte() & 0xff;
+        }
+        finally {
+            lock.unlock();
+        }
     }
 
     @Override
     public int read(final byte[] b, final int off, final int len) throws IOException {
-        return blockingRead(new ReadFunc() {
-            @Override
-            public int read() throws IOException {
-                int available = available();
-                if (available == 0) {
-                    return -1;
-                }
+        if( b == null ) {
+          throw new NullPointerException( "Null buffer" );
+        }
+      
+        if( len < 0 || off < 0 || len > b.length - off ) {
+          throw new IndexOutOfBoundsException( "Invalid index" ); 
+        }
+      
+        if( len == 0 ) {
+          return 0;
+        }
+      
+        lock.lock();
 
-                int availableLength = Math.min(available, len);
-                contentBuffer.readBytes(b, off, availableLength);
-                return availableLength;
-            }
-        });
+        try {
+          if( !await() ) {
+            return -1;
+          }
+
+          int size = Math.min( len, contentBuffer.readableBytes() );
+        
+          contentBuffer.readBytes( b, off, size );
+        
+          return size;
+        }
+        finally {
+          lock.unlock();
+        }
     }
 
+    @Override
+    public void close() throws IOException {
+        //we need a sync block here, as the double close sometimes is reality and we want to decrement ref. counter only once
+        synchronized ( this ) {
+            if ( isClosed ) {
+                return;
+            }
+          
+            isClosed = true;
+        }
+      
+        contentBuffer.release();
+    }
+    
     @Override
     public void reset() throws IOException {
         contentBuffer.resetReaderIndex();
@@ -95,6 +162,11 @@ public class HttpContentInputStream extends InputStream {
 
     @Override
     public long skip(long n) throws IOException {
+        //per InputStream contract, if n is negative, 0 bytes are skipped
+        if( n <= 0 ) {
+            return 0;
+        }
+      
         if (n > Integer.MAX_VALUE) {
             return skipBytes(Integer.MAX_VALUE);
         } else {
@@ -107,39 +179,30 @@ public class HttpContentInputStream extends InputStream {
         contentBuffer.skipBytes(nBytes);
         return nBytes;
     }
+    
+    private boolean await() throws IOException {
+      //await in here
+      while( !isCompleted && !contentBuffer.isReadable() ) {
+          try {
+              contentAvailabilityMonitor.await();
+          } 
+          catch (InterruptedException e) {
+              // Restore interrupt status and bailout
+              Thread.currentThread().interrupt();
+            
+              logger.error("Interrupted: " + e.getMessage());
+              throw new IOException( e );
+          }
+      }
 
-    private int blockingRead(ReadFunc readFunc) throws IOException {
-        if (null != completedWithError) {
-            // If observable finished with error, read is aborted irrespective of whether there is some more data in
-            // the buffer or not.
-            throw new IOException("Content Observable finished with error.", completedWithError);
-        }
+      if( completedWithError != null ) {
+          throw new IOException( completedWithError );
+      }
 
-        if (isCompleted) {
-            if (!contentBuffer.isReadable()) {
-                return -1;
-            } else {
-                return readFunc.read();
-            }
-        } else if (!contentBuffer.isReadable()) {
-            synchronized (contentAvailabilityMonitor) {
-                try {
-                    contentAvailabilityMonitor.wait();
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt(); // Reset the interrupted flag for the upstream to handle.
-                    logger.error("Interrupted while waiting for content.", e);
-                    throw new IOException("Interrupted while waiting for content.", e);
-                }
-            }
-
-            /*Do not call within the sync method.*/ return read(); // Since we have been notified, we check again to see if content is available.
-        } else {
-            return readFunc.read();
-        }
-    }
-
-    private static interface ReadFunc {
-
-        int read() throws IOException;
-    }
+      if( isCompleted && !contentBuffer.isReadable() ) {
+          return false;
+      }
+      
+      return true;
+  }
 }
