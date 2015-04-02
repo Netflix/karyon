@@ -6,17 +6,16 @@ import com.sun.jersey.spi.container.ContainerResponse;
 import com.sun.jersey.spi.container.ContainerResponseWriter;
 import com.sun.jersey.spi.container.WebApplication;
 import io.netty.buffer.ByteBuf;
-import io.netty.buffer.ByteBufAllocator;
 import io.netty.buffer.ByteBufOutputStream;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.reactivex.netty.protocol.http.server.HttpRequestHeaders;
 import io.reactivex.netty.protocol.http.server.HttpResponseHeaders;
 import io.reactivex.netty.protocol.http.server.HttpServerRequest;
 import io.reactivex.netty.protocol.http.server.HttpServerResponse;
-import netflix.karyon.transport.util.HttpContentInputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -43,14 +42,13 @@ final class NettyToJerseyBridge {
         this.application = application;
     }
 
-    ContainerRequest bridgeRequest(final HttpServerRequest<ByteBuf> nettyRequest, ByteBufAllocator allocator) {
+    ContainerRequest bridgeRequest(final HttpServerRequest<ByteBuf> nettyRequest, InputStream requestData ) {
         try {
             URI baseUri = new URI("/"); // Since the netty server does not have a context path element as such, so base uri is always /
             URI uri = new URI(nettyRequest.getUri());
             return new ContainerRequest(application, nettyRequest.getHttpMethod().name(),
                                         baseUri, uri, new JerseyRequestHeadersAdapter(nettyRequest.getHeaders()),
-                                        new ObservableInputStreamAdapter(allocator, nettyRequest.getContent()) );
-                                        //new HttpContentInputStream(allocator, nettyRequest.getContent()));
+                                        requestData );
         } catch (URISyntaxException e) {
             logger.error(String.format("Invalid request uri: %s", nettyRequest.getUri()), e);
             throw new IllegalArgumentException(e);
