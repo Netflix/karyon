@@ -1,13 +1,10 @@
 package netflix.karyon.jersey.blocking;
 
 import static org.junit.Assert.assertEquals;
-import io.netty.buffer.ByteBuf;
-import io.netty.util.ResourceLeak;
 import io.netty.util.ResourceLeakDetector;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.PrintStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Random;
