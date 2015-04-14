@@ -20,6 +20,16 @@ import netflix.karyon.Karyon;
  */
 public class KaryonEurekaModule extends AbstractModule {
 
+    private final String eurekaNamespace;
+
+    public KaryonEurekaModule() {
+        this("eureka.");
+    }
+
+    public KaryonEurekaModule(String eurekaNamespace) {
+        this.eurekaNamespace = eurekaNamespace;
+    }
+
     @Override
     protected void configure() {
         bind(com.netflix.appinfo.HealthCheckHandler.class).to(EurekaHealthCheckHandler.class);
@@ -30,7 +40,7 @@ public class KaryonEurekaModule extends AbstractModule {
     }
 
     protected void configureEureka() {
-        bindEurekaNamespace().toInstance("eureka.");
+        bindEurekaNamespace().toInstance(eurekaNamespace);
         bindEurekaInstanceConfig().toProvider(CloudInstanceConfigProvider.class);
         bindEurekaClientConfig().toProvider(DefaultEurekaClientConfigProvider.class);
     }
