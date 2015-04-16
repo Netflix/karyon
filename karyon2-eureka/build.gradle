@@ -17,7 +17,7 @@ apply plugin: 'osgi'
 
 dependencies {
     compile project(':karyon2-governator')
-    compile 'com.netflix.eureka:eureka-client:1.1.146'
+    compile "com.netflix.eureka:eureka-client:${eureka_version}"
 }
 
 jar {
