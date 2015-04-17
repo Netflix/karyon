@@ -22,10 +22,9 @@ import com.netflix.governator.guice.LifecycleInjectorMode;
 import com.netflix.governator.lifecycle.LifecycleManager;
 import netflix.admin.AdminConfigImpl;
 import netflix.admin.AdminContainerConfig;
-import org.eclipse.jetty.server.Connector;
-import org.eclipse.jetty.server.DispatcherType;
 import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.server.handler.HandlerCollection;
 import org.eclipse.jetty.server.session.SessionHandler;
 import org.eclipse.jetty.servlet.DefaultServlet;
@@ -37,6 +36,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
+import javax.servlet.DispatcherType;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.EnumSet;
@@ -151,7 +151,7 @@ public class AdminResourcesContainer {
                 server.setHandler(handlers);
                 server.start();
 
-                final Connector connector = server.getConnectors()[0];
+                final ServerConnector connector = (ServerConnector) server.getConnectors()[0];
                 serverPort = connector.getLocalPort();
             }
         } catch (Exception e) {
