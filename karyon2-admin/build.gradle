@@ -19,8 +19,7 @@ dependencies {
     dependencies {
         compile 'javax.ws.rs:jsr311-api:1.1.1'
         compile 'javax.servlet:servlet-api:2.5'
-        compile 'org.eclipse.jetty:jetty-server:9.3.0.M1'
-        compile 'org.eclipse.jetty:jetty-servlet:9.3.0.M1'
+        compile 'org.mortbay.jetty:jetty:6.1.26'
         compile 'com.sun.jersey.contribs:jersey-guice:${jersey_version}'
         compile "com.sun.jersey:jersey-servlet:${jersey_version}"
         compile "com.sun.jersey:jersey-server:${jersey_version}"

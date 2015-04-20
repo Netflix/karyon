@@ -22,24 +22,19 @@ import com.netflix.governator.guice.LifecycleInjectorMode;
 import com.netflix.governator.lifecycle.LifecycleManager;
 import netflix.admin.AdminConfigImpl;
 import netflix.admin.AdminContainerConfig;
-import org.eclipse.jetty.server.Handler;
-import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.server.ServerConnector;
-import org.eclipse.jetty.server.handler.HandlerCollection;
-import org.eclipse.jetty.server.session.SessionHandler;
-import org.eclipse.jetty.servlet.DefaultServlet;
-import org.eclipse.jetty.servlet.FilterHolder;
-import org.eclipse.jetty.servlet.ServletContextHandler;
-import org.eclipse.jetty.servlet.ServletHolder;
+import org.mortbay.jetty.Connector;
+import org.mortbay.jetty.Handler;
+import org.mortbay.jetty.Server;
+import org.mortbay.jetty.handler.HandlerCollection;
+import org.mortbay.jetty.servlet.*;
+import org.mortbay.thread.QueuedThreadPool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
-import javax.servlet.DispatcherType;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.EnumSet;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -118,21 +113,21 @@ public class AdminResourcesContainer {
                 server = new Server(adminContainerConfig.listenPort());
 
                 // redirect filter based on configurable RedirectRules
-                ServletContextHandler rootHandler = new ServletContextHandler();
+                final Context rootHandler = new Context();
                 rootHandler.setContextPath("/");
-                rootHandler.addFilter(new FilterHolder(adminResourceInjector.getInstance(RedirectFilter.class)), "/*", EnumSet.allOf(DispatcherType.class));
+                rootHandler.addFilter(new FilterHolder(adminResourceInjector.getInstance(RedirectFilter.class)), "/*", Handler.DEFAULT);
                 rootHandler.addServlet(new ServletHolder(new DefaultServlet()), "/*");
 
                 // admin page template resources
                 AdminResourcesFilter arfTemplatesResources = adminResourceInjector.getInstance(AdminResourcesFilter.class);
                 arfTemplatesResources.setPackages(adminContainerConfig.jerseyViewableResourcePkgList());
 
-                ServletContextHandler adminTemplatesResHandler = new ServletContextHandler();
+                final Context adminTemplatesResHandler = new Context();
                 adminTemplatesResHandler.setContextPath(adminContainerConfig.templateResourceContext());
                 adminTemplatesResHandler.setSessionHandler(new SessionHandler());
-                adminTemplatesResHandler.addFilter(LoggingFilter.class, "/*", EnumSet.allOf(DispatcherType.class));
-                adminTemplatesResHandler.addFilter(new FilterHolder(adminResourceInjector.getInstance(RedirectFilter.class)), "/*", EnumSet.allOf(DispatcherType.class));
-                adminTemplatesResHandler.addFilter(new FilterHolder(arfTemplatesResources), "/*", EnumSet.allOf(DispatcherType.class));
+                adminTemplatesResHandler.addFilter(LoggingFilter.class, "/*", Handler.DEFAULT);
+                adminTemplatesResHandler.addFilter(new FilterHolder(adminResourceInjector.getInstance(RedirectFilter.class)), "/*", Handler.DEFAULT);
+                adminTemplatesResHandler.addFilter(new FilterHolder(arfTemplatesResources), "/*", Handler.DEFAULT);
                 adminTemplatesResHandler.addServlet(new ServletHolder(new DefaultServlet()), "/*");
 
                 // admin page data resources
@@ -140,18 +135,23 @@ public class AdminResourcesContainer {
                 AdminResourcesFilter arfDataResources = adminResourceInjector.getInstance(AdminResourcesFilter.class);
                 arfDataResources.setPackages(jerseyPkgListForAjaxResources);
 
-                ServletContextHandler adminDataResHandler = new ServletContextHandler();
+                final Context adminDataResHandler = new Context();
                 adminDataResHandler.setContextPath(adminContainerConfig.ajaxDataResourceContext());
-                adminDataResHandler.addFilter(new FilterHolder(adminResourceInjector.getInstance(RedirectFilter.class)), "/*", EnumSet.allOf(DispatcherType.class));
-                adminDataResHandler.addFilter(new FilterHolder(arfDataResources), "/*", EnumSet.allOf(DispatcherType.class));
+                adminDataResHandler.addFilter(new FilterHolder(adminResourceInjector.getInstance(RedirectFilter.class)), "/*", Handler.DEFAULT);
+                adminDataResHandler.addFilter(new FilterHolder(arfDataResources), "/*", Handler.DEFAULT);
                 adminDataResHandler.addServlet(new ServletHolder(new DefaultServlet()), "/*");
+
+                QueuedThreadPool threadPool = new QueuedThreadPool();
+                threadPool.setDaemon(true);
+                server.setThreadPool(threadPool);
 
                 HandlerCollection handlers = new HandlerCollection();
                 handlers.setHandlers(new Handler[]{adminTemplatesResHandler, adminDataResHandler, rootHandler});
                 server.setHandler(handlers);
+
                 server.start();
 
-                final ServerConnector connector = (ServerConnector) server.getConnectors()[0];
+                final Connector connector = server.getConnectors()[0];
                 serverPort = connector.getLocalPort();
             }
         } catch (Exception e) {
