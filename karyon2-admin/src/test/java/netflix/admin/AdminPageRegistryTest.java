@@ -183,6 +183,7 @@ public class AdminPageRegistryTest {
         final List<Class<? extends Annotation>> adminPageAnnotations = adminPageRegistry.getAdminPageAnnotations();
         assertThat("AdminPage Annotations are not null", adminPageAnnotations, notNullValue());
         assertThat("AdminPage Annotations size is 0", adminPageAnnotations.size(), is(0));
+        ConfigurationManager.getConfigInstance().setProperty(AdminPageRegistry.PROP_ID_ADMIN_PAGE_ANNOTATION, AdminPageRegistry.DEFAULT_ADMIN_PAGE_ANNOTATION);
     }
 
     @Test
@@ -196,6 +197,7 @@ public class AdminPageRegistryTest {
         final String secondAnnotation = adminPageAnnotations.get(1).getName();
         assertThat("AdminPage annotation is netflix.Annotation1", firstAnnotation, is("netflix.admin.AdminPageRegistryTest$MockAnnotation1"));
         assertThat("AdminPage annotation is netflix.Annotation2", secondAnnotation, is("netflix.admin.AdminPageRegistryTest$MockAnnotation2"));
+        ConfigurationManager.getConfigInstance().setProperty(AdminPageRegistry.PROP_ID_ADMIN_PAGE_ANNOTATION, AdminPageRegistry.DEFAULT_ADMIN_PAGE_ANNOTATION);
     }
 
 }
