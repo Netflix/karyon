@@ -1,6 +1,7 @@
 package netflix.admin;
 
 import com.google.common.base.Supplier;
+import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.netflix.explorers.AbstractExplorerModule;
 import com.netflix.explorers.Explorer;
@@ -11,7 +12,11 @@ import org.apache.commons.configuration.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.*;
+import javax.annotation.PostConstruct;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Properties;
+import java.util.Set;
 
 
 @Singleton
@@ -28,15 +33,19 @@ public class AdminExplorerManager implements ExplorerManager {
     private PropertiesGlobalModelContext propertiesGlobalModelContext;
     private AdminResourceExplorer adminExplorer;
 
-    public AdminExplorerManager() {
-        final Properties properties = AdminUtils.loadAdminConsoleProps();
+    @Inject(optional = true)
+    private GlobalModelContextOverride globalModelContextOverride;
+
+    @PostConstruct
+    @Override
+    public void initialize() {
+        Properties properties = AdminUtils.loadAdminConsoleProps();
+        if (globalModelContextOverride != null) {
+            properties = globalModelContextOverride.overrideProperties(properties);
+        }
         propertiesGlobalModelContext = new PropertiesGlobalModelContext(properties);
         adminExplorer = new AdminResourceExplorer();
         adminExplorer.initialize();
-    }
-
-    @Override
-    public void initialize() {
     }
 
     @Override

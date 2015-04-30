@@ -1,5 +1,6 @@
 package netflix.adminresources.pages;
 
+import javax.annotation.PostConstruct;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -27,13 +28,20 @@ import org.slf4j.LoggerFactory;
 @Singleton
 public class AdminPageResource {
     private static final Logger LOG = LoggerFactory.getLogger(AdminPageResource.class);
-    private final AdminContainerConfig adminContainerConfig;
-    private final AdminPageRegistry adminPageRegistry;
 
-    @Inject
-    public AdminPageResource(AdminContainerConfig adminContainerConfig, AdminResourcesContainer adminResourcesContainer) {
-        this.adminContainerConfig = adminContainerConfig;
-        this.adminPageRegistry = adminResourcesContainer.getAdminPageRegistry();
+    @Inject(optional=true)
+    private AdminContainerConfig adminContainerConfig;
+
+    @Inject(optional=true)
+    private AdminResourcesContainer adminResourcesContainer;
+
+    private AdminPageRegistry adminPageRegistry;
+
+    @PostConstruct
+    public void init() {
+        if (adminResourcesContainer != null) {
+            adminPageRegistry = adminResourcesContainer.getAdminPageRegistry();
+        }
     }
 
     @GET()
