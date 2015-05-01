@@ -62,12 +62,24 @@ public class JarsInfoResource {
         }
     }
 
+    public static class JarsInfoResponse {
+        private List<JarInfo> jars;
+
+        public JarsInfoResponse(List<JarInfo> jarInfos) {
+            this.jars = jarInfos;
+        }
+
+        public List<JarInfo> getJars() {
+            return jars;
+        }
+    }
+
     @GET
     public Response getAllJarsInfo() {
         GsonBuilder gsonBuilder = new GsonBuilder().serializeNulls();
         Gson gson = gsonBuilder.create();
-        String propsJson = gson.toJson(new KaryonAdminResponse(jarInfos));
-        return Response.ok(propsJson).build();
+        String jarsJson = gson.toJson(new JarsInfoResponse(jarInfos));
+        return Response.ok(jarsJson).build();
     }
 
     @GET
@@ -131,48 +143,60 @@ public class JarsInfoResource {
     }
 
     private static class JarInfo {
-
-        public static final String MANIFEST_VERSION = "Manifest-Version";
-        public static final String CREATED_BY = "Created-By";
+        public static final String LIBRARY_OWNER = "Library-Owner";
         public static final String BUILD_DATE = "Build-Date";
-        public static final String BUILD_NUMBER = "Build-Number";
-        public static final String BUILT_BY = "Built-By";
+        public static final String STATUS = "Status";
+        public static final String IMPLEMENTATION_VERSION = "Implementation-Version";
+        public static final String IMPLEMENTATION_TITLE = "Implementation-Title";
+        public static final String SPECIFICATION_VERSION = "Specification-Version";
         public static final String UNAVAILABLE = "-";
 
         private final int id;
-        private final String jar;
-        private final String createdBy;
+        private final String name;
+        private final String libraryOwner;
         private final String buildDate;
-        private final String buildNumber;
-        private final String builtBy;
+        private final String status;
+        private final String implementationVersion;
+        private final String implementationTitle;
+        private final String specificationVersion;
 
         private JarInfo(int id, String jar, Attributes mainAttributes) {
             this.id = id;
-            this.jar = jar;
-            createdBy = valueOf(mainAttributes, CREATED_BY);
+            this.name = jar;
+            libraryOwner = valueOf(mainAttributes, LIBRARY_OWNER);
             buildDate = valueOf(mainAttributes, BUILD_DATE);
-            buildNumber = valueOf(mainAttributes, BUILD_NUMBER);
-            builtBy = valueOf(mainAttributes, BUILT_BY);
+            status = valueOf(mainAttributes, STATUS);
+            implementationTitle = valueOf(mainAttributes, IMPLEMENTATION_TITLE);
+            implementationVersion = valueOf(mainAttributes, IMPLEMENTATION_VERSION);
+            specificationVersion = valueOf(mainAttributes, SPECIFICATION_VERSION);
         }
 
-        public String getJar() {
-            return jar;
+        public String getStatus() {
+            return status;
         }
 
-        public String getCreatedBy() {
-            return createdBy;
+        public String getLibraryOwner() {
+            return libraryOwner;
         }
 
         public String getBuildDate() {
             return buildDate;
         }
 
-        public String getBuildNumber() {
-            return buildNumber;
+        public String getName() {
+            return name;
         }
 
-        public String getBuiltBy() {
-            return builtBy;
+        public String getImplementationVersion() {
+            return implementationVersion;
+        }
+
+        public String getImplementationTitle() {
+            return implementationTitle;
+        }
+
+        public String getSpecificationVersion() {
+            return specificationVersion;
         }
 
         private static String valueOf(Attributes mainAttributes, String tag) {
