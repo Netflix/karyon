@@ -37,8 +37,19 @@ import java.util.Set;
 @Beta
 @Produces(MediaType.APPLICATION_JSON)
 public class EnvironmentResource {
+
+    public static class EnvResponse {
+        private Map<String, String> env;
+        public EnvResponse(Map<String, String> env) {
+            this.env = env;
+        }
+        public Map<String, String> getEnv() {
+            return env;
+        }
+    }
+
     @GET
-    public Response getAllProperties() {  
+    public Response getEnvironmentVars() {
     	// make a writable copy of the immutable System.getenv() map
         Map<String,String> envVarsMap = new HashMap<String,String>(System.getenv());
         
@@ -54,8 +65,8 @@ public class EnvironmentResource {
 
         GsonBuilder gsonBuilder = new GsonBuilder().serializeNulls();
         Gson gson = gsonBuilder.create();                
-        String propsJson = gson.toJson(new PairResponse(envVarsMap));        
+        String envJson = gson.toJson(new EnvResponse(envVarsMap));
         
-        return Response.ok(propsJson).build();
+        return Response.ok(envJson).build();
     }
 }

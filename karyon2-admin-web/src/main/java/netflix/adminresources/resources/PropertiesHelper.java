@@ -6,10 +6,7 @@ import org.apache.commons.configuration.AbstractConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 public class PropertiesHelper {
     private static final Logger LOG = LoggerFactory.getLogger(PropertiesHelper.class);
@@ -44,6 +41,14 @@ public class PropertiesHelper {
 
         }
         return properties;
+    }
+
+    public static Map<String, String> buildPropertiesMap(List<Property> properties) {
+        Map<String, String> propsMap = new HashMap<>();
+        for (Property prop : properties) {
+            propsMap.put(prop.getName(), prop.getValue());
+        }
+        return propsMap;
     }
 }
 

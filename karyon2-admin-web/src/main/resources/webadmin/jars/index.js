@@ -27,15 +27,6 @@ $(document).ready(function () {
                             var items = [];
                             $.each(json.jars, function (i, obj) {
                                 items.push(obj);
-                                /*
-                                 items.push({
-                                 'id' : obj.id,
-                                 'name' : obj.jar,
-                                 'createdBy' : obj.createdBy,
-                                 'buildDate' : obj.buildDate,
-                                 'buildNumber' : obj.buildNumber,
-                                 'builtBy' : obj.builtBy
-                                 });*/
                             });
 
                             fnCallback({"aaData": json.jars});
