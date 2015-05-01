@@ -64,7 +64,16 @@ public class HttpContentInputStream extends InputStream {
             public void onNext(ByteBuf byteBuf) {
                 lock.lock();
                 try {
-                    contentBuffer.writeBytes( byteBuf );
+                  
+                    //This is not only to stop writing 0 bytes as it might seems
+                    //In case of no payload request, like GET
+                    //We are getting onNext( 0 bytes ), onComplete during the stress conditions
+                    //AFTER we say subscriber.onCompleted() and tiered down and close
+                    //request stream, this doesn't contradict logic, in fact 0 bytes is just the same as nothing to write
+                    //but that save us annoying log record every time this happens
+                    if( byteBuf.readableBytes() > 0 ) {
+                      contentBuffer.writeBytes( byteBuf );
+                    }
                   
                     contentAvailabilityMonitor.signalAll();
                 }
