@@ -101,6 +101,14 @@ public class AdminResourceTest {
     }
 
     @Test
+    public void testServiceDisabledFlag() throws Exception {
+        setConfig(AdminConfigImpl.SERVER_ENABLE_PROP_NAME, "false");
+        final int port = startServerAndGetListeningPort();
+        assertEquals("admin resource did not get disabled with a config flag", 0, port);
+        setConfig(AdminConfigImpl.SERVER_ENABLE_PROP_NAME, "true");
+    }
+
+    @Test
     public void checkCustomRedirectRule() throws Exception {
         final AdminResourcesContainer customRedirectContainer = adminResourcesContainerWithCustomRedirect();
         customRedirectContainer.init();

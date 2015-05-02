@@ -91,6 +91,10 @@ public class AdminResourcesContainer {
                 initAdminContainerConfigIfNeeded();
                 initAdminRegistryIfNeeded();
 
+                if (! adminContainerConfig.shouldEnable()) {
+                    return;
+                }
+
                 if (adminContainerConfig.shouldScanClassPathForPluginDiscovery()) {
                     adminPageRegistry.registerAdminPagesWithClasspathScan();
                 }
