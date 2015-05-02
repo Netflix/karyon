@@ -23,11 +23,13 @@ $(document).ready(function() {
                     else {
                         $("#status-error").removeClass("status-error");
                         var items = [];
-                        $.each(json.data, function(i, pair) {
-                            items.push([pair.name, pair.value]);
-                        });
-
-                        fnCallback({"aaData":items});
+                        var envObj = json.env;
+                        for (var key in envObj) {
+                            if (envObj.hasOwnProperty(key)) {
+                                items.push([key, json.env[key]]);
+                            }
+                        }
+                        fnCallback({"aaData": items});
                     }
                 })
                 .error(function(jqXHR, textStatus, errorThrown) {
