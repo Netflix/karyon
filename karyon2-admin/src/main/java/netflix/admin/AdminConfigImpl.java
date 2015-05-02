@@ -21,13 +21,19 @@ public class AdminConfigImpl implements AdminContainerConfig {
     public static final String CONTAINER_LISTEN_PORT = "netflix.platform.admin.resources.port";
     public static final int LISTEN_PORT_DEFAULT = 8077;
 
+    public static final String SERVER_ENABLE_PROP_NAME = "netflix.platform.admin.resources.enable";
+    public static final boolean SERVER_ENABLE_DEFAULT = true;
+
+
     private final String templateResContext;
     private final String resourceContext;
     private final String coreJerseyResources;
     private final String viewableResources;
     private final int listenPort;
+    private final boolean isEnabled;
 
     public AdminConfigImpl() {
+        isEnabled = ConfigurationManager.getConfigInstance().getBoolean(SERVER_ENABLE_PROP_NAME, SERVER_ENABLE_DEFAULT);
         templateResContext = ConfigurationManager.getConfigInstance().getString(NETFLIX_ADMIN_TEMPLATE_CONTEXT, TEMPLATE_CONTEXT_DEFAULT);
         resourceContext = ConfigurationManager.getConfigInstance().getString(NETFLIX_ADMIN_RESOURCE_CONTEXT, RESOURCE_CONTEXT_DEFAULT);
         coreJerseyResources = ConfigurationManager.getConfigInstance().getString(JERSEY_CORE_RESOURCES, JERSEY_CORE_RESOURCES_DEFAULT);
@@ -35,6 +41,10 @@ public class AdminConfigImpl implements AdminContainerConfig {
         listenPort = ConfigurationManager.getConfigInstance().getInt(CONTAINER_LISTEN_PORT, LISTEN_PORT_DEFAULT);
     }
 
+    @Override
+    public boolean shouldEnable() {
+        return isEnabled;
+    }
 
     @Override
     public String templateResourceContext() {
