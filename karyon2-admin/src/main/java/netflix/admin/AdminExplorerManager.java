@@ -33,7 +33,7 @@ public class AdminExplorerManager implements ExplorerManager {
     private PropertiesGlobalModelContext propertiesGlobalModelContext;
     private AdminResourceExplorer adminExplorer;
 
-    @Inject(optional = true)
+    @Inject
     private GlobalModelContextOverride globalModelContextOverride;
 
     @PostConstruct

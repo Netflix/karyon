@@ -45,6 +45,8 @@ public class RedirectFilter implements Filter {
                          FilterChain chain) throws IOException, ServletException {
         HttpServletRequest httpRequest = (HttpServletRequest) request;
         final String requestURI = httpRequest.getRequestURI();
+
+        // redirect based on a simple table lookup
         final Map<String, String> mappings = redirectRules.getMappings();
         for (Map.Entry<String, String> mapping : mappings.entrySet()) {
             if (requestURI.equals(mapping.getKey())) {
@@ -52,6 +54,14 @@ public class RedirectFilter implements Filter {
                 return;
             }
         }
+
+        // redirect based on a custom logic for request
+        final String redirectTo = redirectRules.getRedirect(httpRequest);
+        if (redirectTo != null && !redirectTo.isEmpty() && !redirectTo.equals(requestURI)) {
+            ((HttpServletResponse) response).sendRedirect(redirectTo);
+            return;
+        }
+
         chain.doFilter(httpRequest, response);
     }
 

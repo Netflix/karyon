@@ -32,6 +32,7 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
@@ -46,9 +47,6 @@ import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 
-/**
- * @author Nitesh Kant
- */
 public class AdminResourceTest {
     @Path("/ping")
     @Produces(MediaType.TEXT_HTML)
@@ -81,6 +79,14 @@ public class AdminResourceTest {
         ConfigurationManager.getConfigInstance().setProperty(name, value);
     }
 
+    private static void enableAdminConsole() {
+        ConfigurationManager.getConfigInstance().setProperty(AdminConfigImpl.SERVER_ENABLE_PROP_NAME, true);
+    }
+
+    private static void disableAdminConsole() {
+        ConfigurationManager.getConfigInstance().setProperty(AdminConfigImpl.SERVER_ENABLE_PROP_NAME, false);
+    }
+
     @Test
     public void checkPing() throws Exception {
         final int port = startServerAndGetListeningPort();
@@ -102,10 +108,10 @@ public class AdminResourceTest {
 
     @Test
     public void testServiceDisabledFlag() throws Exception {
-        setConfig(AdminConfigImpl.SERVER_ENABLE_PROP_NAME, "false");
+        disableAdminConsole();
         final int port = startServerAndGetListeningPort();
         assertEquals("admin resource did not get disabled with a config flag", 0, port);
-        setConfig(AdminConfigImpl.SERVER_ENABLE_PROP_NAME, "true");
+        enableAdminConsole();
     }
 
     @Test
@@ -123,7 +129,14 @@ public class AdminResourceTest {
         HttpGet healthGet = new HttpGet(String.format("http://localhost:%d/check-me", serverPort));
         response = client.execute(healthGet);
         assertEquals("admin resource did not pick a custom redirect routing", 200, response.getStatusLine().getStatusCode());
-        final BufferedReader br = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
+        BufferedReader br = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
+        assertEquals("ping resource did not return pong", br.readLine(), "pong");
+
+
+        healthGet = new HttpGet(String.format("http://localhost:%d/proxy-ping/or-not?when=some-day", serverPort));
+        response = client.execute(healthGet);
+        assertEquals("admin resource did not pick a custom redirect routing", 200, response.getStatusLine().getStatusCode());
+        br = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
         assertEquals("ping resource did not return pong", br.readLine(), "pong");
 
         customRedirectContainer.shutdown();
@@ -149,6 +162,15 @@ public class AdminResourceTest {
                         routes.put("/", "/bad-route");
                         routes.put("/check-me", "/jr/ping");
                         return routes;
+                    }
+
+                    @Override
+                    public String getRedirect(HttpServletRequest httpServletRequest) {
+                        final String requestURI = httpServletRequest.getRequestURI();
+                        if (requestURI.startsWith("/proxy-ping")) {
+                            return "/jr/ping";
+                        }
+                        return null;
                     }
                 });
 
