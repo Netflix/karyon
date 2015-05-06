@@ -18,7 +18,6 @@ package netflix.adminresources;
 
 import com.google.inject.*;
 import com.netflix.governator.guice.LifecycleInjector;
-import com.netflix.governator.guice.LifecycleInjectorMode;
 import com.netflix.governator.lifecycle.LifecycleManager;
 import netflix.admin.AdminConfigImpl;
 import netflix.admin.AdminContainerConfig;
@@ -100,13 +99,12 @@ public class AdminResourcesContainer {
                 }
 
                 Injector adminResourceInjector;
-                if (appInjector != null) {
+                if (shouldShareResourcesWithParentInjector()) {
                     adminResourceInjector = appInjector.createChildInjector(buildAdminPluginsGuiceModules());
                 } else {
                     adminResourceInjector = LifecycleInjector
                             .builder()
                             .inStage(Stage.DEVELOPMENT)
-                            .withMode(LifecycleInjectorMode.SIMULATED_CHILD_INJECTORS)
                             .usingBasePackages("com.netflix.explorers")
                             .withModules(buildAdminPluginsGuiceModules())
                             .build()
@@ -188,6 +186,10 @@ public class AdminResourcesContainer {
             @Override
             protected void configure() {
                 bind(AdminResourcesFilter.class);
+                if (! shouldShareResourcesWithParentInjector()) {
+                    bind(AdminPageRegistry.class).toInstance(adminPageRegistry);
+                    bind(AdminContainerConfig.class).toInstance(adminContainerConfig);
+                }
             }
         };
     }
@@ -214,6 +216,10 @@ public class AdminResourcesContainer {
         }
         guiceModules.add(getAdditionalBindings());
         return guiceModules;
+    }
+
+    private boolean shouldShareResourcesWithParentInjector() {
+        return appInjector != null && ! adminContainerConfig.shouldIsolateResources();
     }
 
     @PreDestroy

@@ -24,6 +24,9 @@ public class AdminConfigImpl implements AdminContainerConfig {
     public static final String SERVER_ENABLE_PROP_NAME = "netflix.platform.admin.resources.enable";
     public static final boolean SERVER_ENABLE_DEFAULT = true;
 
+    public static final String NETFLIX_ADMIN_RESOURCES_ISOLATE = "netflix.admin.resources.isolate";
+    public static final boolean ISOLATE_RESOURCES_DEFAULT = false;
+
 
     private final String templateResContext;
     private final String resourceContext;
@@ -31,6 +34,7 @@ public class AdminConfigImpl implements AdminContainerConfig {
     private final String viewableResources;
     private final int listenPort;
     private final boolean isEnabled;
+    private final boolean isResourcesIsolated;
 
     public AdminConfigImpl() {
         isEnabled = ConfigurationManager.getConfigInstance().getBoolean(SERVER_ENABLE_PROP_NAME, SERVER_ENABLE_DEFAULT);
@@ -39,6 +43,12 @@ public class AdminConfigImpl implements AdminContainerConfig {
         coreJerseyResources = ConfigurationManager.getConfigInstance().getString(JERSEY_CORE_RESOURCES, JERSEY_CORE_RESOURCES_DEFAULT);
         viewableResources = ConfigurationManager.getConfigInstance().getString(JERSEY_VIEWABLE_RESOURCES, JERSEY_VIEWABLE_RESOURCES_DEFAULT);
         listenPort = ConfigurationManager.getConfigInstance().getInt(CONTAINER_LISTEN_PORT, LISTEN_PORT_DEFAULT);
+        isResourcesIsolated = ConfigurationManager.getConfigInstance().getBoolean(NETFLIX_ADMIN_RESOURCES_ISOLATE, ISOLATE_RESOURCES_DEFAULT);
+    }
+
+    @Override
+    public boolean shouldIsolateResources() {
+        return isResourcesIsolated;
     }
 
     @Override
