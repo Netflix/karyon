@@ -19,6 +19,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 
+@Singleton
 public class AdminPageRegistry {
     private static final Logger LOG = LoggerFactory.getLogger(AdminPageRegistry.class);
     public final static String PROP_ID_ADMIN_PAGES_SCAN = "netflix.platform.admin.pages.packages";

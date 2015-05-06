@@ -1,27 +1,21 @@
 package netflix.adminresources.pages;
 
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
+import com.sun.jersey.api.view.Viewable;
+import netflix.admin.AdminConfigImpl;
+import netflix.admin.AdminContainerConfig;
+import netflix.adminresources.AdminPageInfo;
+import netflix.adminresources.AdminPageRegistry;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import javax.annotation.PostConstruct;
-import javax.ws.rs.DefaultValue;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
+import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
-
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
-import com.sun.jersey.api.view.Viewable;
-import netflix.admin.AdminContainerConfig;
-import netflix.adminresources.AdminPageInfo;
-import netflix.adminresources.AdminPageRegistry;
-import netflix.adminresources.AdminResourcesContainer;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 @Path("/")
 @Produces(MediaType.TEXT_HTML)
@@ -29,18 +23,19 @@ import org.slf4j.LoggerFactory;
 public class AdminPageResource {
     private static final Logger LOG = LoggerFactory.getLogger(AdminPageResource.class);
 
-    @Inject(optional=true)
+    @Inject(optional = true)
     private AdminContainerConfig adminContainerConfig;
 
-    @Inject(optional=true)
-    private AdminResourcesContainer adminResourcesContainer;
-
+    @Inject(optional = true)
     private AdminPageRegistry adminPageRegistry;
 
     @PostConstruct
     public void init() {
-        if (adminResourcesContainer != null) {
-            adminPageRegistry = adminResourcesContainer.getAdminPageRegistry();
+        if (adminPageRegistry == null) {
+            adminPageRegistry = new AdminPageRegistry();
+        }
+        if (adminContainerConfig == null) {
+            adminContainerConfig = new AdminConfigImpl();
         }
     }
 
