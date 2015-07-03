@@ -1,4 +1,4 @@
-package com.netflix.karyon.example;
+package com.netflix.karyon.example.jetty;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
