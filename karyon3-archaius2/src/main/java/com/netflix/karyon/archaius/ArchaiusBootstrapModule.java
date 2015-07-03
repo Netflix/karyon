@@ -27,12 +27,12 @@ import com.netflix.governator.auto.annotations.OverrideModule;
 
 @Bootstrap
 @OverrideModule(ArchaiusModule.class)
-@ConditionalOnModule("com.netflix.archaius.guice.ArchaiusModule")
+@ConditionalOnModule(ArchaiusModule.class)
 public class ArchaiusBootstrapModule extends DefaultModule {
     @Provides
     @Singleton
     @ApplicationLayer
-    String getConfigName(@Named("configName") String configName) {
+    String getConfigName(@Named("karyon.configName") String configName) {
         return configName;
     }
     

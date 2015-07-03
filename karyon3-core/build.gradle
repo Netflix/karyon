@@ -17,13 +17,13 @@
 apply plugin: 'java'
 
 dependencies {
-    compile 'com.netflix.governator:governator:1.7.6-rc.2'
-    compile 'com.netflix.governator:governator-servlet:1.7.6-rc.2'
-    compile 'com.netflix.governator:governator-jetty:1.7.6-rc.2'
+    compile "com.netflix.governator:governator:${governator_version}"
+    compile "com.netflix.governator:governator-servlet:${governator_version}"
+    compile "com.netflix.governator:governator-jetty:${governator_version}"
     
-    compile 'com.google.inject:guice:4.0'
-    compile 'com.google.inject.extensions:guice-multibindings:4.0'
-    compile 'com.google.inject.extensions:guice-grapher:4.0'
+    compile "com.google.inject:guice:${guice_version}"
+    compile "com.google.inject.extensions:guice-multibindings:${guice_version}"
+    compile "com.google.inject.extensions:guice-grapher:${guice_version}"
     
 }
 
