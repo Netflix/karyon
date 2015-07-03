@@ -11,8 +11,8 @@ import com.netflix.governator.guice.jetty.JettyConfig;
 import com.netflix.governator.guice.jetty.JettyModule;
 
 @OverrideModule(JettyModule.class)
-@ConditionalOnModule("com.netflix.governator.guice.jetty.JettyModule")
-public class JettyProfileModule extends DefaultModule {
+@ConditionalOnModule(JettyModule.class)
+public class JettyOverrideModule extends DefaultModule {
     @Provides
     @Singleton
     private JettyConfig getDefaultConfig(ConfigProxyFactory factory) {
