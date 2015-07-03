@@ -1,4 +1,4 @@
-package com.netflix.karyon.example;
+package com.netflix.karyon.jetty;
 
 import com.netflix.archaius.annotations.Configuration;
 import com.netflix.archaius.annotations.DefaultValue;
