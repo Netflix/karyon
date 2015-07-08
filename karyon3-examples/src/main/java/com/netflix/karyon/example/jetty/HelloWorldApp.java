@@ -3,33 +3,38 @@ package com.netflix.karyon.example.jetty;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 
-import com.netflix.archaius.guice.ArchaiusModule;
 import com.netflix.governator.DefaultLifecycleListener;
+import com.netflix.governator.auto.ModuleListProviders;
 import com.netflix.governator.guice.jetty.JettyModule;
 import com.netflix.karyon.Karyon;
+import com.netflix.karyon.archaius.ArchaiusKaryonConfiguration;
 import com.sun.jersey.guice.JerseyServletModule;
 import com.sun.jersey.guice.spi.container.servlet.GuiceContainer;
 
-@Path("/")
+@Path("/hello")
 public class HelloWorldApp extends DefaultLifecycleListener {
     public static void main(String[] args) throws InterruptedException {
-        new Karyon()
-            .addModules(
-                 new JettyModule(),
-                 new JerseyServletModule() {
-                    @Override
-                    protected void configureServlets() {
-                        serve("/*").with(GuiceContainer.class);
-                        bind(GuiceContainer.class).asEagerSingleton();
-                        
-                        bind(HelloWorldApp.class).asEagerSingleton();
-                    }  
-                }
-            )
-            .withConfigName("helloworld")
-            .addBootstrapModule(new ArchaiusModule())
-            .createInjector()
-            .awaitTermination();
+        Karyon.createInjector(
+            ArchaiusKaryonConfiguration.builder()
+                .withConfigName("helloworld")
+                .addModuleListProvider(ModuleListProviders.forPackagesConditional("com.netflix.karyon"))
+                .build(),
+            new JettyModule(),
+//            new EurekaModule(),
+            new JerseyServletModule() {
+               @Override
+               protected void configureServlets() {
+                   serve("/*").with(GuiceContainer.class);
+                   
+//                   bind(EurekaEndpoint.class).asEagerSingleton();
+                   bind(GuiceContainer.class).asEagerSingleton();
+                   bind(ArchaiusEndpoint.class).asEagerSingleton();
+                   
+                   bind(HelloWorldApp.class).asEagerSingleton();
+               }
+           }
+           )
+           .awaitTermination();
     }
     
     @GET
