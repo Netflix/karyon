@@ -10,7 +10,8 @@ import java.util.Set;
 
 import com.google.inject.Module;
 import com.google.inject.Stage;
-import com.netflix.governator.ModuleListProvider;
+import com.netflix.governator.GovernatorConfiguration;
+import com.netflix.governator.auto.ModuleListProvider;
 import com.netflix.governator.auto.annotations.ConditionalOnProfile;
 
 /**
@@ -19,7 +20,7 @@ import com.netflix.governator.auto.annotations.ConditionalOnProfile;
  * @author elandau
  *
  */
-public class DefaultKaryonConfiguration implements KaryonConfiguration {
+public class DefaultKaryonConfiguration implements GovernatorConfiguration {
     /**
      * Polymorphic builder.
      * 
@@ -99,14 +100,20 @@ public class DefaultKaryonConfiguration implements KaryonConfiguration {
             return This();
         }
         
-        @SuppressWarnings("unchecked")
-        protected T This() {
-            return (T) this;
-        }
+        protected abstract T This();
         
-        public KaryonConfiguration build() {
+        public GovernatorConfiguration build() {
             return new DefaultKaryonConfiguration(this);
         }
+    }
+    
+    public static Builder builder() {
+        return new Builder() {
+            @Override
+            protected Builder This() {
+                return this;
+            }
+        };
     }
     
     private final Stage                       stage;
