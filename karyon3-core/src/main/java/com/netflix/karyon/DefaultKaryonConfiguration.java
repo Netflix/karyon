@@ -13,49 +13,26 @@ import com.google.inject.Stage;
 import com.netflix.governator.ModuleListProvider;
 import com.netflix.governator.auto.annotations.ConditionalOnProfile;
 
+/**
+ * Default implementation of KaryonConfiguration with mostly empty lists.
+ * 
+ * @author elandau
+ *
+ */
 public class DefaultKaryonConfiguration implements KaryonConfiguration {
+    /**
+     * Polymorphic builder.
+     * 
+     * @author elandau
+     *
+     * @param <T>
+     */
     public static abstract class Builder<T extends Builder<T>> {
         protected Stage                       stage = Stage.DEVELOPMENT;
-        protected String                      configName = "application";
         protected List<Module>                bootstrapModules = new ArrayList<>();
-        protected List<Module>                modules = new ArrayList<>();
         protected Set<String>                 profiles = new LinkedHashSet<>();
         protected List<ModuleListProvider>    moduleProviders = new ArrayList<>();
 
-        /**
-         * Module to add to the final injector
-         * @param module
-         * @return
-         */
-        public T addModule(Module module) {
-            this.modules.add(module);
-            return This();
-        }
-        
-        /**
-         * Modules to add to the final injector
-         * @param modules
-         * @return
-         */
-        public T addModules(Module... modules) {
-            this.modules.addAll(Arrays.asList(modules));
-            return This();
-        }
-
-        /**
-         * Configuration name to use for property loading.  Default configuration
-         * name is 'application'.  This value is injectable as
-         *  
-         *      @Named("karyon.configName") String configName
-         * 
-         * @param value
-         * @return
-         */
-        public T withConfigName(String value) {
-            this.configName = value;
-            return This();
-        }
-        
         /**
          * Add a module finder such as a ServiceLoaderModuleFinder or ClassPathScannerModuleFinder
          * @param finder
@@ -122,6 +99,7 @@ public class DefaultKaryonConfiguration implements KaryonConfiguration {
             return This();
         }
         
+        @SuppressWarnings("unchecked")
         protected T This() {
             return (T) this;
         }
@@ -133,34 +111,26 @@ public class DefaultKaryonConfiguration implements KaryonConfiguration {
     
     private final Stage                       stage;
     private final List<Module>                bootstrapModules;
-    private final List<Module>                modules;
     private final Set<String>                 profiles;
     private final List<ModuleListProvider>    moduleProviders;
 
     public DefaultKaryonConfiguration() {
-        this.stage = Stage.DEVELOPMENT;
+        this.stage            = Stage.DEVELOPMENT;
         this.bootstrapModules = new ArrayList<>();
-        this.modules = new ArrayList<>();
-        this.profiles = new HashSet<>();
-        this.moduleProviders = new ArrayList<>();
+        this.profiles         = new HashSet<>();
+        this.moduleProviders  = new ArrayList<>();
     }
     
     protected DefaultKaryonConfiguration(Builder<?> builder) {
-        this.stage = builder.stage;
+        this.stage            = builder.stage;
         this.bootstrapModules = new ArrayList<>(builder.bootstrapModules);
-        this.modules = new ArrayList<>(builder.modules);
-        this.profiles = new LinkedHashSet<>(builder.profiles);
-        this.moduleProviders = new ArrayList<>(builder.moduleProviders);
+        this.profiles         = new LinkedHashSet<>(builder.profiles);
+        this.moduleProviders  = new ArrayList<>(builder.moduleProviders);
     }
     
     @Override
     public List<Module> getBootstrapModules() {
         return bootstrapModules;
-    }
-
-    @Override
-    public List<Module> getModules() {
-        return modules;
     }
 
     @Override

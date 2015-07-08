@@ -5,8 +5,8 @@ import javax.ws.rs.Path;
 
 import com.netflix.governator.DefaultLifecycleListener;
 import com.netflix.governator.guice.jetty.JettyModule;
-import com.netflix.karyon.ArchaiusKaryonConfiguration;
 import com.netflix.karyon.Karyon;
+import com.netflix.karyon.archaius.ArchaiusKaryonConfiguration;
 import com.sun.jersey.guice.JerseyServletModule;
 import com.sun.jersey.guice.spi.container.servlet.GuiceContainer;
 

@@ -23,11 +23,6 @@ dependencies {
     compile "com.google.inject:guice:${guice_version}"
     compile "com.google.inject.extensions:guice-multibindings:${guice_version}"
     compile "com.google.inject.extensions:guice-grapher:${guice_version}"
-
-    compile 'com.netflix.archaius:archaius2-core:2.0.0-rc.21'
-    compile 'com.netflix.archaius:archaius2-guice:2.0.0-rc.21'
-    compile 'com.netflix.archaius:archaius2-persisted2:2.0.0-rc.21'
-    compile 'com.netflix.archaius:archaius2-archaius1-bridge:2.0.0-rc.21'
 }
 
 eclipse {

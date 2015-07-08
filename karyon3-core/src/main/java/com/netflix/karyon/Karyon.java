@@ -57,7 +57,8 @@ import com.netflix.governator.auto.annotations.OverrideModule;
 @Path("/")
 public class HelloWorldApp extends DefaultLifecycleListener {
     public static void main(String[] args) throws InterruptedException {
-        Karyon.createInjector(new ArchaiusKaryonConfiguration(),
+        Karyon.createInjector(
+             new ArchaiusKaryonConfiguration(),
              new JettyModule(),
              new JerseyServletModule() {
                 @Override
@@ -111,8 +112,10 @@ public class Karyon {
     private Karyon(KaryonConfiguration config, List<Module> modules) {
         
         this.stage            = config.getStage();
+        
+        // Create copies of the config
         this.bootstrapModules = new ArrayList<>(config.getBootstrapModules());
-        this.modules          = new ArrayList<>(config.getModules());
+        this.modules          = new ArrayList<>(modules);
         this.profiles         = new LinkedHashSet<>(config.getProfiles());
         this.moduleProviders  = new ArrayList<>(config.getModuleListProviders());
         

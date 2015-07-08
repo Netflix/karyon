@@ -1,4 +1,4 @@
-package com.netflix.karyon;
+package com.netflix.karyon.archaius;
 
 import java.util.List;
 
@@ -6,11 +6,12 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Module;
 import com.google.inject.name.Names;
 import com.netflix.archaius.guice.ArchaiusModule;
+import com.netflix.karyon.DefaultKaryonConfiguration;
 
 public class ArchaiusKaryonConfiguration extends DefaultKaryonConfiguration {
     private static final String DEFAULT_CONFIG_NAME = "application";
     
-    public static class Builder<T extends Builder> extends DefaultKaryonConfiguration.Builder{
+    public static class Builder<T extends Builder<T>> extends DefaultKaryonConfiguration.Builder<T> {
         private String                      configName = "application";
 
         /**
@@ -27,6 +28,7 @@ public class ArchaiusKaryonConfiguration extends DefaultKaryonConfiguration {
             return This();
         }
         
+        @SuppressWarnings("unchecked")
         public T This() {
             return (T) this;
         }
@@ -36,6 +38,7 @@ public class ArchaiusKaryonConfiguration extends DefaultKaryonConfiguration {
         };
     }
     
+    @SuppressWarnings("rawtypes")
     public static Builder builder() {
         return new Builder();
     }
@@ -48,7 +51,7 @@ public class ArchaiusKaryonConfiguration extends DefaultKaryonConfiguration {
         configName = DEFAULT_CONFIG_NAME;
     }
     
-    private ArchaiusKaryonConfiguration(Builder builder) {
+    private ArchaiusKaryonConfiguration(@SuppressWarnings("rawtypes") Builder builder) {
         super(builder);
         this.configName = builder.configName;
     }

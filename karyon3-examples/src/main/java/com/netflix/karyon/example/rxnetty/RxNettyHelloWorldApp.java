@@ -3,8 +3,8 @@ package com.netflix.karyon.example.rxnetty;
 import javax.inject.Singleton;
 
 import com.netflix.governator.DefaultLifecycleListener;
-import com.netflix.karyon.ArchaiusKaryonConfiguration;
 import com.netflix.karyon.Karyon;
+import com.netflix.karyon.archaius.ArchaiusKaryonConfiguration;
 import com.netflix.karyon.rxnetty.RxNettyModule;
 
 @Singleton
