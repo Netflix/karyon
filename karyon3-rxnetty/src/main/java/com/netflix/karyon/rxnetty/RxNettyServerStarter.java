@@ -22,9 +22,9 @@ public class RxNettyServerStarter {
     RxNettyServerStarter(Injector injector) {
         List<Binding<HttpServer>> bindings = injector.findBindingsByType(TypeLiteral.get(HttpServer.class));
         for (Binding<HttpServer> binding : bindings) {
-            LOG.info("Starting HttpServer {}", binding.getKey().getAnnotation());
+            LOG.info("Starting HttpServer '{}'", binding.getKey().getAnnotation() != null ? binding.getKey().getAnnotation() : "default");
             HttpServer server = binding.getProvider().get();
-            LOG.info("Started HttpServer {} on port {}", binding.getKey().getAnnotation(), server.getServerPort());
+            LOG.info("Started HttpServer '{}' on port {}", binding.getKey().getAnnotation() != null ? binding.getKey().getAnnotation() : "default", server.getServerPort());
         }
     }
 }

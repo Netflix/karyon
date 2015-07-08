@@ -5,7 +5,9 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -21,7 +23,6 @@ import com.google.inject.Module;
 import com.google.inject.Provides;
 import com.google.inject.Stage;
 import com.google.inject.TypeLiteral;
-import com.google.inject.name.Names;
 import com.google.inject.spi.Element;
 import com.google.inject.spi.Elements;
 import com.google.inject.util.Modules;
@@ -40,39 +41,34 @@ import com.netflix.governator.auto.ModuleProvider;
 import com.netflix.governator.auto.PropertySource;
 import com.netflix.governator.auto.annotations.Bootstrap;
 import com.netflix.governator.auto.annotations.Conditional;
-import com.netflix.governator.auto.annotations.ConditionalOnProfile;
 import com.netflix.governator.auto.annotations.OverrideModule;
 
 /**
  * Karyon is the core bootstrapper for a Guice based application with auto module loading
- * capabilities based on profiles and other conditionals.
+ * capabilities based on profiles and module conditionals.
  * 
  * Karyon takes the approach that the application entry point should only be responsible
- * for creating the Guice injector and wait for the application to shut down through any
+ * for creating the Guice injector and wait for the application to shut down through various
  * shutdown mechanism.  All application services are specified using Guice modules, with
- * any require services simply being bound asEagerSingleton.  
+ * any application services simply being bound asEagerSingleton.  
  * 
 <pre>
 @{code
 @Path("/")
 public class HelloWorldApp extends DefaultLifecycleListener {
     public static void main(String[] args) throws InterruptedException {
-        new Karyon()
-            .addModules(
-                 new JettyModule(),
-                 new JerseyServletModule() {
-                    @Override
-                    protected void configureServlets() {
-                        serve("/*").with(GuiceContainer.class);
-                        bind(GuiceContainer.class).asEagerSingleton();
-                        
-                        bind(HelloWorldApp.class).asEagerSingleton();
-                    }  
-                }
+        Karyon.createInjector(new ArchaiusKaryonConfiguration(),
+             new JettyModule(),
+             new JerseyServletModule() {
+                @Override
+                protected void configureServlets() {
+                    serve("/*").with(GuiceContainer.class);
+                    bind(GuiceContainer.class).asEagerSingleton();
+                    
+                    bind(HelloWorldApp.class).asEagerSingleton();
+                }  
+            }
             )
-            .withConfigName("helloworld")
-            .addBootstrapModule(new ArchaiusModule())
-            .createInjector()
             .awaitTermination();
     }
     
@@ -94,124 +90,44 @@ public class HelloWorldApp extends DefaultLifecycleListener {
 public class Karyon {
     private static final Logger LOG = LoggerFactory.getLogger(Karyon.class);
     
-    private Stage                       stage = Stage.DEVELOPMENT;
-    private String                      configName = "application";
-    private List<Module>                bootstrapModules = new ArrayList<>();
-    private List<Module>                modules = new ArrayList<>();
-    private Set<String>                 profiles = new HashSet<>();
-    private List<ModuleListProvider>    moduleProviders = new ArrayList<>();
-
-    /**
-     * Module to add to the final injector
-     * @param module
-     * @return
-     */
-    public Karyon addModule(Module module) {
-        this.modules.add(module);
-        return this;
+    public static LifecycleInjector createInjector(KaryonConfiguration config) {
+        return new Karyon(config, Collections.<Module>emptyList()).create();
     }
     
-    /**
-     * Modules to add to the final injector
-     * @param modules
-     * @return
-     */
-    public Karyon addModules(Module... modules) {
-        this.modules.addAll(Arrays.asList(modules));
-        return this;
-    }
-
-    /**
-     * Configuration name to use for property loading.  Default configuration
-     * name is 'application'.  This value is injectable as
-     *  
-     *      @Named("karyon.configName") String configName
-     * 
-     * @param value
-     * @return
-     */
-    public Karyon withConfigName(String value) {
-        this.configName = value;
-        return this;
+    public static LifecycleInjector createInjector(KaryonConfiguration config, Module ... modules) {
+        return new Karyon(config, Arrays.asList(modules)).create();
     }
     
-    /**
-     * Add a module finder such as a ServiceLoaderModuleFinder or ClassPathScannerModuleFinder
-     * @param finder
-     * @return
-     */
-    public Karyon addModuleListProvider(ModuleListProvider finder) {
-        this.moduleProviders.add(finder);
-        return this;
+    public static LifecycleInjector createInjector(KaryonConfiguration config, List<Module> modules) {
+        return new Karyon(config, modules).create();
     }
     
-    /**
-     * Bootstrap overrides for the bootstrap injector used to load and inject into 
-     * the conditions.  Bootstrap does not restrict the bindings to allow any type
-     * to be externally provided and injected into conditions.  Several simple
-     * bindings are provided by default and may be overridden,
-     * 1.  Config
-     * 2.  Profiles
-     * 3.  BoundKeys (TODO)
-     * 
-     * @param bootstrapModule
-     */
-    public Karyon addBootstrapModule(Module bootstrapModule) {
-        this.bootstrapModules.add(bootstrapModule);
-        return this;
-    }
+    private final Stage                       stage;
+    private final List<Module>                bootstrapModules;
+    private final List<Module>                modules;
+    private final Set<String>                 profiles;
+    private final List<ModuleListProvider>    moduleProviders;
     
-    public Karyon addBootstrapModules(Module ... bootstrapModule) {
-        this.bootstrapModules.addAll(Arrays.asList(bootstrapModule));
-        return this;
-    }
-
-    public Karyon addBootstrapModules(List<Module> bootstrapModule) {
-        this.bootstrapModules.addAll(bootstrapModule);
-        return this;
-    }
-
-    /**
-     * Add a runtime profile.  @see {@link ConditionalOnProfile}
-     * 
-     * @param profile
-     */
-    public Karyon addProfile(String profile) {
-        this.profiles.add(profile);
-        return this;
-    }
-
-    /**
-     * Add a runtime profiles.  @see {@link ConditionalOnProfile}
-     * 
-     * @param profile
-     */
-    public Karyon addProfiles(String... profiles) {
-        this.profiles.addAll(Arrays.asList(profiles));
-        return this;
-    }
-    
-    /**
-     * Add a runtime profiles.  @see {@link ConditionalOnProfile}
-     * 
-     * @param profile
-     */
-    public Karyon addProfiles(Collection<String> profiles) {
-        this.profiles.addAll(profiles);
-        return this;
-    }
-
-    public LifecycleInjector createInjector() {
-        LOG.info("Using profiles : " + profiles);
+    private Karyon(KaryonConfiguration config, List<Module> modules) {
         
-        bootstrapModules.add(createInternalBootstrapModule());
+        this.stage            = config.getStage();
+        this.bootstrapModules = new ArrayList<>(config.getBootstrapModules());
+        this.modules          = new ArrayList<>(config.getModules());
+        this.profiles         = new LinkedHashSet<>(config.getProfiles());
+        this.moduleProviders  = new ArrayList<>(config.getModuleListProviders());
+        
+        this.modules.addAll(modules);
         
         // If no loader has been specified use the default which is to load
         // all Module classes via the ServiceLoader
         if (moduleProviders.isEmpty()) {
             moduleProviders.add(new ServiceLoaderModuleListProvider());
         }
-        addModuleListProvider(ModuleListProviders.forPackagesConditional("com.netflix.karyon"));
+        moduleProviders.add(ModuleListProviders.forPackagesConditional("com.netflix.karyon"));
+    }
+    
+    private LifecycleInjector create() {
+        LOG.info("Using profiles : " + profiles);
         
         // Generate a single list of all discovered modules
         // TODO: Duplicates?
@@ -434,14 +350,5 @@ public class Karyon {
                 .override(overrideModules)
                 .with(Modules.combine(extModules)))
             ;
-    }
-    
-    private Module createInternalBootstrapModule() {
-        return new AbstractModule() {
-            @Override
-            protected void configure() {
-                this.bindConstant().annotatedWith(Names.named("karyon.configName")).to(configName);
-            }
-        };
     }
 }
