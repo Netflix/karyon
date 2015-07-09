@@ -14,6 +14,5 @@ public class DefaultKaryonConfigurationTest {
         assertThat(config.getBootstrapModules().size(), equalTo(0));
         assertThat(config.getProfiles().size(), equalTo(0));
         assertThat(config.getStage(), equalTo(Stage.DEVELOPMENT));
-        assertThat(config.getModuleListProviders().size(), equalTo(0));
     }
 }
