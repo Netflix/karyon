@@ -12,23 +12,22 @@ import com.netflix.archaius.Decoder;
 import com.netflix.archaius.PropertyFactory;
 import com.netflix.archaius.config.CompositeConfig;
 import com.netflix.archaius.config.SettableConfig;
+import com.netflix.archaius.guice.ArchaiusConfiguration;
 import com.netflix.archaius.guice.ArchaiusModule;
 import com.netflix.archaius.inject.ApplicationLayer;
 import com.netflix.archaius.inject.LibrariesLayer;
 import com.netflix.archaius.inject.RuntimeLayer;
-import com.netflix.governator.DefaultModule;
 import com.netflix.governator.auto.AbstractPropertySource;
 import com.netflix.governator.auto.ModuleProvider;
 import com.netflix.governator.auto.ModuleProviders;
 import com.netflix.governator.auto.PropertySource;
-import com.netflix.governator.auto.annotations.Bootstrap;
-import com.netflix.governator.auto.annotations.ConditionalOnModule;
-import com.netflix.governator.auto.annotations.OverrideModule;
 
-@Bootstrap
-@OverrideModule(ArchaiusModule.class)
-@ConditionalOnModule(ArchaiusModule.class)
-public class ArchaiusBootstrapModule extends DefaultModule {
+public class ArchaiusBootstrapModule extends AbstractModule {
+    @Override
+    protected void configure() {
+        install(new ArchaiusModule());
+    }
+    
     @Provides
     @Singleton
     @ApplicationLayer
@@ -41,22 +40,21 @@ public class ArchaiusBootstrapModule extends DefaultModule {
     @Singleton
     ModuleProvider getModule(
             final Config config, 
-            final CascadeStrategy cascadeStrategy, 
             final @RuntimeLayer SettableConfig runtime, 
             final @LibrariesLayer CompositeConfig libraries, 
             final PropertyFactory propertyFactory,
             final ConfigProxyFactory proxyFactory,
-            final Decoder decoder) {
+            final ArchaiusConfiguration archaiusConfig) {
         return ModuleProviders.from(new AbstractModule() {
             @Override
             protected void configure() {
                 bind(Config.class).toInstance(config);
-                bind(CascadeStrategy.class).toInstance(cascadeStrategy);
+                bind(CascadeStrategy.class).toInstance(archaiusConfig.getCascadeStrategy());
                 bind(SettableConfig.class).annotatedWith(RuntimeLayer.class).toInstance(runtime);
                 bind(CompositeConfig.class).annotatedWith(LibrariesLayer.class).toInstance(libraries);
                 bind(PropertyFactory.class).toInstance(propertyFactory);
                 bind(ConfigProxyFactory.class).toInstance(proxyFactory);
-                bind(Decoder.class).toInstance(decoder);
+                bind(Decoder.class).toInstance(archaiusConfig.getDecoder());
             }
         });
     }
@@ -86,5 +84,4 @@ public class ArchaiusBootstrapModule extends DefaultModule {
     public String toString() {
       return getClass().getName();
     }
-
 }

@@ -4,7 +4,6 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 
 import com.netflix.governator.DefaultLifecycleListener;
-import com.netflix.governator.auto.ModuleListProviders;
 import com.netflix.governator.guice.jetty.JettyModule;
 import com.netflix.karyon.Karyon;
 import com.netflix.karyon.archaius.ArchaiusKaryonConfiguration;
@@ -17,20 +16,22 @@ public class HelloWorldApp extends DefaultLifecycleListener {
         Karyon.createInjector(
             ArchaiusKaryonConfiguration.builder()
                 .withConfigName("helloworld")
-                .addModuleListProvider(ModuleListProviders.forPackagesConditional("com.netflix.karyon"))
                 .build(),
             new JettyModule(),
-//            new EurekaModule(),
             new JerseyServletModule() {
                @Override
                protected void configureServlets() {
                    serve("/*").with(GuiceContainer.class);
                    
-//                   bind(EurekaEndpoint.class).asEagerSingleton();
                    bind(GuiceContainer.class).asEagerSingleton();
                    bind(ArchaiusEndpoint.class).asEagerSingleton();
                    
                    bind(HelloWorldApp.class).asEagerSingleton();
+               }
+               
+               @Override
+               public String toString() {
+                   return "JerseyServletModule";
                }
            }
            )
