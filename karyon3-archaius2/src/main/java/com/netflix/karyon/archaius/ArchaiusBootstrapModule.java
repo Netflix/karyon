@@ -48,6 +48,7 @@ public class ArchaiusBootstrapModule extends AbstractModule {
         return ModuleProviders.from(new AbstractModule() {
             @Override
             protected void configure() {
+                bind(ArchaiusConfiguration.class).toInstance(archaiusConfig);
                 bind(Config.class).toInstance(config);
                 bind(CascadeStrategy.class).toInstance(archaiusConfig.getCascadeStrategy());
                 bind(SettableConfig.class).annotatedWith(RuntimeLayer.class).toInstance(runtime);
