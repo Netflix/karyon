@@ -2,6 +2,7 @@ package com.netflix.karyon;
 
 import com.netflix.governator.DefaultGovernatorConfiguration;
 import com.netflix.governator.GovernatorConfiguration;
+import com.netflix.governator.auto.ModuleListProviders;
 
 /**
  * Default implementation of KaryonConfiguration.
@@ -33,9 +34,14 @@ public class DefaultKaryonConfiguration extends DefaultGovernatorConfiguration {
     }
     
     public DefaultKaryonConfiguration() {
+        super(builder()
+            .addModuleListProvider(ModuleListProviders.forPackagesConditional("com.netflix.karyon"))
+            );
     }
     
     protected DefaultKaryonConfiguration(Builder<?> builder) {
-        super(builder);
+        super(builder
+            .addModuleListProvider(ModuleListProviders.forPackagesConditional("com.netflix.karyon"))
+            );
     }
 }

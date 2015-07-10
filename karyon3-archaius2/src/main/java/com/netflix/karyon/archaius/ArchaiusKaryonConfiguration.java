@@ -5,7 +5,6 @@ import java.util.List;
 import com.google.inject.AbstractModule;
 import com.google.inject.Module;
 import com.google.inject.name.Names;
-import com.netflix.archaius.guice.ArchaiusModule;
 import com.netflix.karyon.DefaultKaryonConfiguration;
 
 public class ArchaiusKaryonConfiguration extends DefaultKaryonConfiguration {
@@ -58,7 +57,7 @@ public class ArchaiusKaryonConfiguration extends DefaultKaryonConfiguration {
     
     public List<Module> getBootstrapModules() {
         List<Module> modules = super.getBootstrapModules();
-        modules.add(new ArchaiusModule()); 
+        modules.add(new ArchaiusBootstrapModule()); 
         modules.add(new AbstractModule() {
             @Override
             protected void configure() {
