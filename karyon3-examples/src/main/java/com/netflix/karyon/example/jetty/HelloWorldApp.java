@@ -3,6 +3,7 @@ package com.netflix.karyon.example.jetty;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 
+import com.netflix.archaius.guice.ArchaiusModule;
 import com.netflix.governator.DefaultLifecycleListener;
 import com.netflix.governator.guice.jetty.JettyModule;
 import com.netflix.karyon.Karyon;
@@ -18,6 +19,7 @@ public class HelloWorldApp extends DefaultLifecycleListener {
                 .withConfigName("helloworld")
                 .build(),
             new JettyModule(),
+            new ArchaiusModule(),
             new JerseyServletModule() {
                @Override
                protected void configureServlets() {

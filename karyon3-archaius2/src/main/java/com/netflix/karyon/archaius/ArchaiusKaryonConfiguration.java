@@ -5,7 +5,6 @@ import java.util.List;
 import com.google.inject.AbstractModule;
 import com.google.inject.Module;
 import com.google.inject.name.Names;
-import com.netflix.archaius.guice.ArchaiusModule;
 import com.netflix.karyon.DefaultKaryonConfiguration;
 
 public class ArchaiusKaryonConfiguration extends DefaultKaryonConfiguration {
