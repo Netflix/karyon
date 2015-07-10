@@ -11,7 +11,7 @@ plugins {
     id 'nebula.netflixoss' version '2.2.9'
 }
 
-ext.githubProjectName = "karyon"
+ext.githubProjectName = "com.netflix.karyon"
 
 subprojects {
     apply plugin: 'nebula.netflixoss'
