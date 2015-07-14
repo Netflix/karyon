@@ -24,13 +24,15 @@ public class DefaultKaryonConfiguration extends DefaultGovernatorConfiguration {
         }
     }
     
-    public static Builder builder() {
-        return new Builder() {
-            @Override
-            protected Builder This() {
-                return this;
-            }
-        };
+    private static class BuilderWrapper extends Builder<BuilderWrapper> {
+        @Override
+        protected BuilderWrapper This() {
+            return this;
+        }
+    }
+
+    public static Builder<?> builder() {
+        return new BuilderWrapper();
     }
     
     public DefaultKaryonConfiguration() {
