@@ -18,6 +18,7 @@ apply plugin: 'java'
 
 dependencies {
     compile     project(':karyon3-core')
+    compile     project(':karyon3-admin')
     
     compile "com.netflix.archaius:archaius2-core:${archaius_version}"
     compile "com.netflix.archaius:archaius2-guice:${archaius_version}"

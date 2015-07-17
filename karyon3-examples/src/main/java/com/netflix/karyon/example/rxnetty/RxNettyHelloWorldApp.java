@@ -6,6 +6,7 @@ import com.netflix.archaius.guice.ArchaiusModule;
 import com.netflix.governator.DefaultLifecycleListener;
 import com.netflix.karyon.Karyon;
 import com.netflix.karyon.archaius.ArchaiusKaryonConfiguration;
+import com.netflix.karyon.rxnetty.RxNettyAdminServerModule;
 import com.netflix.karyon.rxnetty.RxNettyModule;
 import com.netflix.karyon.rxnetty.ShutdownServerModule;
 
@@ -17,6 +18,7 @@ public class RxNettyHelloWorldApp extends DefaultLifecycleListener {
                 .withConfigName("rxnetty-helloworld")
                 .build(),
             new ArchaiusModule(),
+            new RxNettyAdminServerModule(),
             new RxNettyModule(),               // Needed to start the RxNetty servers
             new ShutdownServerModule(),
             new HelloWorldEndpointModule()

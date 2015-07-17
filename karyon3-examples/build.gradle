@@ -25,6 +25,7 @@ dependencies {
     compile     project(':karyon3-rxnetty')
     compile     project(':karyon3-archaius2')
     compile     project(':karyon3-jetty')
+    compile     project(':karyon3-admin-rxnetty')
     
     compile     'com.netflix.eureka:eureka-client:latest.release'
     compile     'com.sun.jersey.contribs:jersey-guice:1.18.1'

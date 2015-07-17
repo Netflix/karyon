@@ -8,6 +8,9 @@ import com.netflix.governator.DefaultLifecycleListener;
 import com.netflix.governator.guice.jetty.JettyModule;
 import com.netflix.karyon.Karyon;
 import com.netflix.karyon.archaius.ArchaiusKaryonConfiguration;
+import com.netflix.karyon.rxnetty.RxNettyAdminServerModule;
+import com.netflix.karyon.rxnetty.RxNettyModule;
+import com.netflix.karyon.rxnetty.ShutdownServerModule;
 import com.sun.jersey.guice.JerseyServletModule;
 import com.sun.jersey.guice.spi.container.servlet.GuiceContainer;
 
@@ -19,7 +22,10 @@ public class HelloWorldApp extends DefaultLifecycleListener {
                 .withConfigName("helloworld")
                 .build(),
             new JettyModule(),
+            new RxNettyModule(),
+            new RxNettyAdminServerModule(),
             new ArchaiusModule(),
+            new ShutdownServerModule(),
             new JerseyServletModule() {
                @Override
                protected void configureServlets() {

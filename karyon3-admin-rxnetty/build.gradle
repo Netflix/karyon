@@ -16,17 +16,17 @@
 
 apply plugin: 'java'
 
-dependencies {
-    compile project(':karyon3-admin')
-    compile "com.netflix.governator:governator-core:${governator_version}"
-    compile "com.netflix.governator:governator-servlet:${governator_version}"
-    
-    compile "com.google.inject:guice:${guice_version}"
-    compile "com.google.inject.extensions:guice-multibindings:${guice_version}"
-    compile "com.google.inject.extensions:guice-grapher:${guice_version}"
+repositories {
+    maven { url 'https://oss.jfrog.org/libs-snapshot' }
+}
 
-    testCompile "org.hamcrest:hamcrest-core:${hamcrest_version}"
-    testCompile "org.hamcrest:hamcrest-library:${hamcrest_version}"
+dependencies {
+    compile     project(':karyon3-core')
+    compile     project(':karyon3-rxnetty')
+    compile     project(':karyon3-admin')
+
+    compile 	'com.fasterxml.jackson.core:jackson-core:2.5.4'
+    testCompile 'org.slf4j:slf4j-log4j12:1.6.1'
 }
 
 eclipse {
