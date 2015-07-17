@@ -41,13 +41,15 @@ Thumbs.db
 .gradle
 .m2
 
-# Build output directies
+# Build output directoies
 /target
 **/target
 /build
 **/build
 /bin
 **/bin
+/test-output
+**/test-output
 
 # IntelliJ specific files/directories
 out
