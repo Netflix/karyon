@@ -10,15 +10,14 @@ import javax.inject.Singleton;
 
 import com.netflix.archaius.Config;
 import com.netflix.archaius.config.CompositeConfig;
-import com.netflix.karyon.admin.rest.Controller;
 
 // props
 @Singleton
-public class ArchaiusPropController implements Controller {
+public class ArchaiusPropResource {
     private final CompositeConfig config;
 
     @Inject
-    public ArchaiusPropController(Config config) {
+    public ArchaiusPropResource(Config config) {
         this.config = (CompositeConfig)config;
     }
 

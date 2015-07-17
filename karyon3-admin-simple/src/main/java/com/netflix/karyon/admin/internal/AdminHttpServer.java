@@ -9,18 +9,24 @@ import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import com.netflix.karyon.admin.AdminServer;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
 
 @Singleton
 public class AdminHttpServer {
+    private static final Logger LOG = LoggerFactory.getLogger(AdminHttpServer.class);
+    
     private final ExecutorService service;
     private final HttpServer server;
     private final AdminServerConfig config;
     
     @Inject
-    public AdminHttpServer(@SimpleAdmin AdminServerConfig config, @SimpleAdmin HttpHandler handler) throws IOException {
+    public AdminHttpServer(@AdminServer AdminServerConfig config, @AdminServer HttpHandler handler) throws IOException {
         this.config = config;
         this.service = Executors.newFixedThreadPool(
                 config.threads(), 
@@ -35,6 +41,8 @@ public class AdminHttpServer {
         server.createContext("/", handler);
         
         server.start();
+        
+        LOG.info("Started admin server on port {}", config.port());
     }
     
     @PreDestroy 

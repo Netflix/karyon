@@ -8,7 +8,7 @@ import com.netflix.karyon.admin.AdminModule;
 public final class RxNettyAdminModule extends AbstractAdminModule {
     @Override
     protected void configure() {
-        this.bindAdminController("rxnetty").to(RxNettyAdminController.class);
+        this.bindAdminResource("rxnetty").to(RxNettyAdminResource.class);
     }
     
     @Override

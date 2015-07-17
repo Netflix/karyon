@@ -2,11 +2,11 @@ package com.netflix.karyon.admin.rest;
 
 import java.util.List;
 
-public class IndexedStringConverter {
+public class IndexedStringResolver {
     private final int index;
-    private final StringConverter converter;
+    private final StringResolver converter;
     
-    public IndexedStringConverter(int index, StringConverter converter) {
+    public IndexedStringResolver(int index, StringResolver converter) {
         this.index = index;
         this.converter = converter;
     }

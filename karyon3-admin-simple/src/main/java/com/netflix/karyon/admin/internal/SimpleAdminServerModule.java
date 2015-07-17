@@ -7,6 +7,7 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 import com.netflix.archaius.ConfigProxyFactory;
 import com.netflix.karyon.admin.AdminModule;
+import com.netflix.karyon.admin.AdminServer;
 import com.sun.net.httpserver.HttpHandler;
 
 public class SimpleAdminServerModule extends AbstractModule {
@@ -14,7 +15,7 @@ public class SimpleAdminServerModule extends AbstractModule {
     protected void configure() {
         install(new AdminModule());
         
-        bind(HttpHandler.class).annotatedWith(SimpleAdmin.class).to(AdminHttpHandler.class);
+        bind(HttpHandler.class).annotatedWith(AdminServer.class).to(AdminHttpHandler.class);
         bind(AdminHttpServer.class).asEagerSingleton();
     }
     
@@ -22,14 +23,14 @@ public class SimpleAdminServerModule extends AbstractModule {
     // 'karyon.rxnetty.admin'. 
     @Provides
     @Singleton
-    @SimpleAdmin
+    @AdminServer
     protected AdminServerConfig getAdminServerConfig(ConfigProxyFactory factory) {
         return factory.newProxy(AdminServerConfig.class);
     }
     
     @Provides
     @Singleton
-    @SimpleAdmin
+    @AdminServer
     protected ObjectMapper getMapper() {
         return new ObjectMapper();
     }

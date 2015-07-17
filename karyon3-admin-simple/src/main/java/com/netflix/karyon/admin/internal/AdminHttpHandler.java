@@ -15,8 +15,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.netflix.karyon.admin.Admin;
-import com.netflix.karyon.admin.rest.ControllerRegistry;
+import com.netflix.karyon.admin.AdminServer;
+import com.netflix.karyon.admin.rest.ResourceContainer;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 
@@ -24,20 +24,20 @@ import com.sun.net.httpserver.HttpHandler;
 public class AdminHttpHandler implements HttpHandler {
     private static final Logger LOG = LoggerFactory.getLogger(AdminHttpHandler.class);
     
-    private final Provider<ControllerRegistry> controllers;
+    private final Provider<ResourceContainer> controllers;
     private final ObjectMapper mapper;
 
     @Inject
     public AdminHttpHandler(
-            @SimpleAdmin ObjectMapper mapper,
-            @Admin Provider<ControllerRegistry> controllers) {
+            @AdminServer ObjectMapper mapper,
+            @AdminServer Provider<ResourceContainer> controllers) {
         this.controllers = controllers;
         this.mapper = mapper;
     }
     
     @Override
     public void handle(HttpExchange arg0) throws IOException {
-        LOG.info("'{}'", arg0.getRequestURI());
+        LOG.debug("'{}'", arg0.getRequestURI());
         
         String path = arg0.getRequestURI().getPath();
         
@@ -64,8 +64,11 @@ public class AdminHttpHandler implements HttpHandler {
     }
     
     private void writeResponse(HttpExchange arg0, int code, String content) throws IOException {
-        OutputStream os = arg0.getResponseBody();
+        arg0.getResponseHeaders().set("Server:", "KaryonAdmin");
+        arg0.getResponseHeaders().set("Access-Control-Allow-Origin:", "*");
         arg0.sendResponseHeaders(500, content.length());
+        
+        OutputStream os = arg0.getResponseBody();
         os.write(content.getBytes());
         os.close();
     }

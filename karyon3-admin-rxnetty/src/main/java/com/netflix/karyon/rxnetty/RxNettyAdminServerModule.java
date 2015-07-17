@@ -9,6 +9,7 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 import com.netflix.archaius.ConfigProxyFactory;
 import com.netflix.karyon.admin.AdminModule;
+import com.netflix.karyon.admin.AdminServer;
 
 public class RxNettyAdminServerModule extends AbstractModule {
     @Override
@@ -16,13 +17,13 @@ public class RxNettyAdminServerModule extends AbstractModule {
         install(new AdminModule());
         install(new RxNettyModule());
         
-        bind(AdminView.class).annotatedWith(RxNettyAdmin.class).to(HtmlAdminView.class);
+        bind(AdminView.class).annotatedWith(AdminServer.class).to(HtmlAdminView.class);
     }
     
     @Provides
     @Singleton
-    @RxNettyAdmin
-    protected HttpServer getAdminServer(@RxNettyAdmin ServerConfig config, AdminEndpointHandler handler) {
+    @AdminServer
+    protected HttpServer getAdminServer(@AdminServer ServerConfig config, AdminServerHandler handler) {
         return HttpServer
             .newServer(config.getServerPort())
             .start(handler);
@@ -32,14 +33,14 @@ public class RxNettyAdminServerModule extends AbstractModule {
     // 'karyon.rxnetty.admin'. 
     @Provides
     @Singleton
-    @RxNettyAdmin
+    @AdminServer
     protected ServerConfig getAdminServerConfig(ConfigProxyFactory factory) {
         return factory.newProxy(AdminServerConfig.class);
     }
     
     @Provides
     @Singleton
-    @RxNettyAdmin
+    @AdminServer
     protected ObjectMapper getMapper() {
         return new ObjectMapper();
     }

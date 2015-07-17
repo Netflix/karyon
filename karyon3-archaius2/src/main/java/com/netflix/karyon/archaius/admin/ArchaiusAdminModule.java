@@ -8,8 +8,8 @@ import com.netflix.karyon.admin.AdminModule;
 public final class ArchaiusAdminModule extends AbstractAdminModule {
     @Override
     protected void configure() {
-        bindAdminController("props").to(ArchaiusPropController.class);
-        bindAdminController("props-layers").to(ArchaiusLayerController.class);
+        bindAdminResource("props").to(ArchaiusPropResource.class);
+        bindAdminResource("props-layers").to(ArchaiusLayerResource.class);
     }
     
     @Override

@@ -2,10 +2,10 @@ package com.netflix.karyon.admin.rest;
 
 import java.lang.reflect.Constructor;
 
-public class ConstructorStringConverter implements StringConverter {
+public class ConstructorStringResolver implements StringResolver {
     private Constructor<?> ctor;
 
-    public ConstructorStringConverter(Constructor<?> ctor) {
+    public ConstructorStringResolver(Constructor<?> ctor) {
         this.ctor = ctor;
     }
     

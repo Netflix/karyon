@@ -8,11 +8,10 @@ import java.util.Map;
 
 import org.junit.Test;
 
-import com.netflix.karyon.admin.rest.Controller;
-import com.netflix.karyon.admin.rest.DefaultControllerRegistry;
+import com.netflix.karyon.admin.rest.DefaultResourceContainer;
 
 public class PojoRestTest {
-    public static class TestController implements Controller {
+    public static class TestResource {
         public List<String> list() {
             return Arrays.asList("a", "b");
         }
@@ -41,10 +40,10 @@ public class PojoRestTest {
     
     @Test
     public void test() throws Exception {
-        Map<String, Controller> controllers = new HashMap<>();
-        controllers.put("test", new TestController());
+        Map<String, Object> controllers = new HashMap<>();
+        controllers.put("test", new TestResource());
         
-        DefaultControllerRegistry rest = new DefaultControllerRegistry(controllers);
+        DefaultResourceContainer rest = new DefaultResourceContainer(controllers);
         rest.invoke("test", Collections.<String>emptyList());
         System.out.println(rest.invoke("test", Arrays.asList("1")));
         System.out.println(rest.invoke("test", Arrays.asList("1", "foo")));

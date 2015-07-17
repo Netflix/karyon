@@ -20,17 +20,17 @@ import org.apache.commons.lang3.text.StrSubstitutor;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.io.CharStreams;
 import com.netflix.archaius.Config;
-import com.netflix.karyon.admin.Admin;
-import com.netflix.karyon.admin.rest.ControllerRegistry;
+import com.netflix.karyon.admin.AdminResource;
+import com.netflix.karyon.admin.rest.ResourceContainer;
 
 @Singleton
 public class HtmlAdminView implements AdminView {
-    private final ControllerRegistry registry;
+    private final ResourceContainer registry;
     private final ConcurrentMap<String, String> templates = new ConcurrentHashMap<>();
     private final Config config;
     
     @Inject
-    public HtmlAdminView(@Admin ControllerRegistry registry, Config config) {
+    public HtmlAdminView(@AdminResource ResourceContainer registry, Config config) {
         this.registry = registry;
         this.config = config;
     }

@@ -11,7 +11,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-public class DefaultControllerRegistry implements ControllerRegistry {
+public class DefaultResourceContainer implements ResourceContainer {
     private static final String CAMEL_CASE_PATTERN = "(?<!(^|[A-Z]))(?=[A-Z])|(?<!^)(?=[A-Z][a-z])"; // 3rd edit, getting better
     
     private static class Node {
@@ -76,8 +76,12 @@ public class DefaultControllerRegistry implements ControllerRegistry {
     
     private final Map<String, Node> controllers = new HashMap<>();
     
-    public DefaultControllerRegistry(Map<String, Controller> controllers) throws Exception {
-        for (final Entry<String, Controller> controller : controllers.entrySet()) {
+    public DefaultResourceContainer(Map<String, Object> controllers) throws Exception {
+        this(controllers, new DefaultStringResolverFactory());
+    }
+    
+    public DefaultResourceContainer(Map<String, Object> controllers, StringResolverFactory factory) throws Exception {
+        for (final Entry<String, Object> controller : controllers.entrySet()) {
             Node root = new Node();
             this.controllers.put(controller.getKey(), root);
             
@@ -100,23 +104,12 @@ public class DefaultControllerRegistry implements ControllerRegistry {
                 // Determine binders for each argument
                 // TODO: Bind to DI
                 // TODO: Bind to Optional
-                final List<IndexedStringConverter> converters = new ArrayList<>();
+                final List<IndexedStringResolver> converters = new ArrayList<>();
                 int argIndex = 0;
                 for (Class<?> type : method.getParameterTypes()) {
-                    try {
-                        converters.add(
-                            new IndexedStringConverter(argIndex, 
-                                new ConstructorStringConverter(type.getConstructor(String.class))));
-                    }
-                    catch (NoSuchMethodException e) {   
-                        try {
-                            converters.add(
-                                new IndexedStringConverter(argIndex, 
-                                    new ValueOfStringConverter(type.getDeclaredMethod("valueOf", String.class))));
-                        } catch (Exception e1) {
-                            throw new Exception("TODO");
-                        }
-                    }
+                    converters.add(
+                            new IndexedStringResolver(argIndex, 
+                                    factory.create(type)));
                     argIndex++;
                 }
                 
@@ -181,10 +174,5 @@ public class DefaultControllerRegistry implements ControllerRegistry {
     @Override
     public Set<String> getNames() {
         return controllers.keySet();
-    }
-    
-    @Override
-    public List<String> getActions(String name) {
-        return null;
     }
 }

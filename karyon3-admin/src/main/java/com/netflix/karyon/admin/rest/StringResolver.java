@@ -6,6 +6,6 @@ package com.netflix.karyon.admin.rest;
  * 
  * @author elandau
  */
-public interface StringConverter {
+public interface StringResolver {
     Object convert(String value) throws Exception;
 }

@@ -11,15 +11,14 @@ import com.google.inject.Binding;
 import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.netflix.governator.ProvisionMetrics;
-import com.netflix.karyon.admin.rest.Controller;
 
 @Singleton
-public class GuiceKeysAdminController implements Controller {
+public class GuiceKeysAdminResource {
     private final ProvisionMetrics metrics;
     private final Injector injector;
 
     @Inject
-    public GuiceKeysAdminController(ProvisionMetrics metrics, Injector injector) {
+    public GuiceKeysAdminResource(ProvisionMetrics metrics, Injector injector) {
         this.metrics = metrics;
         this.injector = injector;
     }

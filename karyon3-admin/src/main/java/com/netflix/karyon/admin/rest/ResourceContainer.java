@@ -9,19 +9,21 @@ import java.util.Set;
  * @author elandau
  *
  */
-public interface ControllerRegistry {
+public interface ResourceContainer {
 
     /**
-     * Invoke a controller by providing the path parts. 
+     * Invoke a resource by providing the path parts. 
      * 
      * @param parts
      * @return
      * @throws Exception
      */
-    Object invoke(String controller, List<String> parts) throws Exception;
+    Object invoke(String resource, List<String> parts) throws Exception;
 
+    /**
+     * Return names of all resources
+     * @return
+     */
     Set<String> getNames();
-
-    List<String> getActions(String name);
 
 }

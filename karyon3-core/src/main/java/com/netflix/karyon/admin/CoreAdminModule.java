@@ -6,10 +6,10 @@ import com.netflix.governator.auto.annotations.ConditionalOnModule;
 public final class CoreAdminModule extends AbstractAdminModule {
     @Override
     protected void configure() {
-        bindAdminController("guice-keys").to(GuiceKeysAdminController.class);
-        bindAdminController("env").to(EnvAdminController.class);
-        bindAdminController("jars").to(JarsAdminController.class);
-        bindAdminController("log4j").to(Log4jAdminController.class);
+        bindAdminResource("guice-keys").to(GuiceKeysAdminResource.class);
+        bindAdminResource("env").to(EnvAdminResource.class);
+        bindAdminResource("jars").to(JarsAdminResource.class);
+        bindAdminResource("log4j").to(Log4jAdminResource.class);
     }
     
     @Override

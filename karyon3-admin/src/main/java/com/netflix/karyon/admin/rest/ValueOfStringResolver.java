@@ -2,10 +2,10 @@ package com.netflix.karyon.admin.rest;
 
 import java.lang.reflect.Method;
 
-public class ValueOfStringConverter implements StringConverter {
+public class ValueOfStringResolver implements StringResolver {
     private Method method;
 
-    public ValueOfStringConverter(Method method) {
+    public ValueOfStringResolver(Method method) {
         this.method = method;
     }
     

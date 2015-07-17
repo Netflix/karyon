@@ -10,11 +10,10 @@ import javax.inject.Singleton;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Maps;
-import com.netflix.karyon.admin.rest.Controller;
 import com.netflix.karyon.rxnetty.RxNettyServerRegistry;
 
 @Singleton
-public class RxNettyAdminController implements Controller {
+public class RxNettyAdminResource {
     private final RxNettyServerRegistry registry;
     
     public static interface ServerInfo {
@@ -24,7 +23,7 @@ public class RxNettyAdminController implements Controller {
     }
     
     @Inject
-    public RxNettyAdminController(RxNettyServerRegistry registry) {
+    public RxNettyAdminResource(RxNettyServerRegistry registry) {
         this.registry = registry;
     }
     

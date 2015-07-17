@@ -22,22 +22,23 @@ import rx.Observable;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.net.HttpHeaders;
-import com.netflix.karyon.admin.Admin;
-import com.netflix.karyon.admin.rest.ControllerRegistry;
+import com.netflix.karyon.admin.AdminResource;
+import com.netflix.karyon.admin.AdminServer;
+import com.netflix.karyon.admin.rest.ResourceContainer;
 
 @Singleton
-public class AdminEndpointHandler implements RequestHandler<ByteBuf, ByteBuf> {
-    private static final Logger LOG = LoggerFactory.getLogger(AdminEndpointHandler.class);
+public class AdminServerHandler implements RequestHandler<ByteBuf, ByteBuf> {
+    private static final Logger LOG = LoggerFactory.getLogger(AdminServerHandler.class);
     
-    private final Provider<ControllerRegistry> controllers;
+    private final Provider<ResourceContainer> controllers;
     private final ObjectMapper mapper;
     private final AdminView view;
 
     @Inject
-    public AdminEndpointHandler(
-            @RxNettyAdmin ObjectMapper mapper,
-            @RxNettyAdmin AdminView view,
-            @Admin Provider<ControllerRegistry> controllers) {
+    public AdminServerHandler(
+            @AdminServer ObjectMapper mapper,
+            @AdminServer AdminView view,
+            @AdminResource Provider<ResourceContainer> controllers) {
         this.controllers = controllers;
         this.mapper = mapper;
         this.view = view;
@@ -67,6 +68,7 @@ public class AdminEndpointHandler implements RequestHandler<ByteBuf, ByteBuf> {
                 Object result = controllers.get().invoke(controller, p);
                 return response
                         .setHeader(HttpHeaders.CONTENT_TYPE, "application/json")
+                        .setHeader(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN, "*")
                         .writeStringAndFlushOnEach(Observable.just(mapper.writeValueAsString(result)))
                         ;
             }
