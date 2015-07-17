@@ -28,12 +28,12 @@ public class RxNettyAdminServerModule extends AbstractModule {
             .start(handler);
     }
     
-    // This binds our main server to Archaius configuration using the prefix
-    // 'karyon.rxnetty.shutdown'. See helloworld.properties
+    // This binds our admin server to Archaius configuration using the prefix
+    // 'karyon.rxnetty.admin'. 
     @Provides
     @Singleton
     @RxNettyAdmin
-    protected ServerConfig getShutdownConfig(ConfigProxyFactory factory) {
+    protected ServerConfig getAdminServerConfig(ConfigProxyFactory factory) {
         return factory.newProxy(AdminServerConfig.class);
     }
     

@@ -14,7 +14,6 @@ public class RxNettyAdminTest {
                     .build(),
                 new ArchaiusModule(),
                 new RxNettyAdminServerModule()
-                )
-                .awaitTermination();
+                );
     }
 }
