@@ -6,7 +6,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.netflix.archaius.Config;
-import com.netflix.archaius.visitor.PrintStreamVisitor;
 import com.netflix.governator.DefaultLifecycleListener;
 
 /**
@@ -27,6 +26,6 @@ public class ConfigLifecycleListener extends DefaultLifecycleListener {
     @Override
     public void onStartFailed(Throwable t) {
         LOG.info("Injector failed with final configuration ");
-        config.accept(new PrintStreamVisitor());
+        config.accept(new SLF4ConfigVisitor());
     }
 }
