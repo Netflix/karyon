@@ -22,7 +22,6 @@ import rx.Observable;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.net.HttpHeaders;
-import com.netflix.karyon.admin.AdminResource;
 import com.netflix.karyon.admin.AdminServer;
 import com.netflix.karyon.admin.rest.ResourceContainer;
 
@@ -38,7 +37,7 @@ public class AdminServerHandler implements RequestHandler<ByteBuf, ByteBuf> {
     public AdminServerHandler(
             @AdminServer ObjectMapper mapper,
             @AdminServer AdminView view,
-            @AdminResource Provider<ResourceContainer> controllers) {
+            @AdminServer Provider<ResourceContainer> controllers) {
         this.controllers = controllers;
         this.mapper = mapper;
         this.view = view;

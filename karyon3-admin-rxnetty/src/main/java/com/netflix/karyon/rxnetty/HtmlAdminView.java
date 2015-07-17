@@ -20,7 +20,7 @@ import org.apache.commons.lang3.text.StrSubstitutor;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.io.CharStreams;
 import com.netflix.archaius.Config;
-import com.netflix.karyon.admin.AdminResource;
+import com.netflix.karyon.admin.AdminServer;
 import com.netflix.karyon.admin.rest.ResourceContainer;
 
 @Singleton
@@ -30,7 +30,7 @@ public class HtmlAdminView implements AdminView {
     private final Config config;
     
     @Inject
-    public HtmlAdminView(@AdminResource ResourceContainer registry, Config config) {
+    public HtmlAdminView(@AdminServer ResourceContainer registry, Config config) {
         this.registry = registry;
         this.config = config;
     }
