@@ -7,6 +7,7 @@ import com.netflix.governator.DefaultLifecycleListener;
 import com.netflix.karyon.Karyon;
 import com.netflix.karyon.archaius.ArchaiusKaryonConfiguration;
 import com.netflix.karyon.rxnetty.RxNettyModule;
+import com.netflix.karyon.rxnetty.ShutdownServerModule;
 
 @Singleton
 public class RxNettyHelloWorldApp extends DefaultLifecycleListener {
