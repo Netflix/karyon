@@ -6,5 +6,6 @@ public class RxNettyModule extends AbstractModule {
     @Override
     protected void configure() {
         bind(RxNettyServerStarter.class).asEagerSingleton();
+        bind(RxNettyServerRegistry.class).to(GuiceRxNettyServerRegistry.class);
     }
 }

@@ -14,7 +14,7 @@ public class HelloWorldEndpointModule extends DefaultModule {
     // This is our main RxNetty server
     @Provides
     @Singleton
-    HttpServer getServer(Config c, ServerConfig config, HelloWorldRequestHandler handler) {
+    HttpServer getServer(ServerConfig config, HelloWorldRequestHandler handler) {
         return HttpServer
             .newServer(config.getServerPort())
             .start(handler);

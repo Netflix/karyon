@@ -7,8 +7,11 @@ import io.reactivex.netty.protocol.http.server.RequestHandler;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
+import javax.inject.Singleton;
+
 import rx.Observable;
 
+@Singleton
 public class HelloWorldRequestHandler implements RequestHandler<ByteBuf, ByteBuf> {
     final AtomicInteger counter = new AtomicInteger();
 
