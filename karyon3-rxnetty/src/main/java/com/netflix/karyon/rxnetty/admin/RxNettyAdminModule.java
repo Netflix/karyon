@@ -1,10 +1,12 @@
 package com.netflix.karyon.rxnetty.admin;
 
 import com.netflix.governator.auto.annotations.ConditionalOnModule;
+import com.netflix.governator.auto.annotations.ConditionalOnProfile;
 import com.netflix.karyon.admin.AbstractAdminModule;
 import com.netflix.karyon.admin.AdminModule;
 
 @ConditionalOnModule(AdminModule.class)
+@ConditionalOnProfile("rxadmin")
 public final class RxNettyAdminModule extends AbstractAdminModule {
     @Override
     protected void configure() {

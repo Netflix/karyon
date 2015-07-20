@@ -10,6 +10,7 @@ public final class CoreAdminModule extends AbstractAdminModule {
         bindAdminResource("env").to(EnvAdminResource.class);
         bindAdminResource("jars").to(JarsAdminResource.class);
         bindAdminResource("log4j").to(Log4jAdminResource.class);
+        bindAdminResource("meta").to(MetaAdminResource.class);
     }
     
     @Override

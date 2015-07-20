@@ -17,7 +17,7 @@ import com.netflix.karyon.admin.rest.DefaultResourceContainer;
 public class AdminModule extends AbstractAdminModule {
     @Override
     protected void configure() {
-        this.bindAdminResource("controllers").to(ResourcesAdminResource.class);
+        this.bindAdminResource("resources").to(ResourcesAdminResource.class);
     }
     
     @Singleton

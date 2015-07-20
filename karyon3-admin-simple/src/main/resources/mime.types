@@ -1,0 +1,6 @@
+# comments start with hash marks
+# format is <mime type> <space separated file extensions>
+# for example, for an image mime type and a text mime type
+text/html html htm
+application/json js
+# either place those lines within the files specified by 2-4 or

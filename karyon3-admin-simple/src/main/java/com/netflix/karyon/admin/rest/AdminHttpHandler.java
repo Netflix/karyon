@@ -1,4 +1,4 @@
-package com.netflix.karyon.admin.internal;
+package com.netflix.karyon.admin.rest;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -15,8 +15,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.netflix.archaius.Config;
 import com.netflix.karyon.admin.AdminServer;
-import com.netflix.karyon.admin.rest.ResourceContainer;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 
@@ -24,26 +24,40 @@ import com.sun.net.httpserver.HttpHandler;
 public class AdminHttpHandler implements HttpHandler {
     private static final Logger LOG = LoggerFactory.getLogger(AdminHttpHandler.class);
     
-    private final Provider<ResourceContainer> controllers;
+    private final Provider<ResourceContainer> resources;
     private final ObjectMapper mapper;
+    private final AdminServerConfig config;
+
+    private Config cfg;
 
     @Inject
     public AdminHttpHandler(
             @AdminServer ObjectMapper mapper,
-            @AdminServer Provider<ResourceContainer> controllers) {
-        this.controllers = controllers;
+            @AdminServer Provider<ResourceContainer> controllers, 
+            AdminServerConfig config,
+            Config cfg) {
+        this.resources = controllers;
         this.mapper = mapper;
+        this.config = config;
+        this.cfg = cfg;
     }
     
     @Override
     public void handle(HttpExchange arg0) throws IOException {
-        LOG.debug("'{}'", arg0.getRequestURI());
+        LOG.info("'{}'", arg0.getRequestURI());
         
         String path = arg0.getRequestURI().getPath();
         
+        arg0.getResponseHeaders().set("Server",                      "KaryonAdmin");
+        
         try {
+            // Redirect the server root to the configured remote server using the naming convension
+            //  
             if (path.equals("/")) {
-                writeResponse(arg0, 404, "NotFound");
+                String addr = new Interpolator(cfg).interpolate(config.remoteServer());
+                arg0.getResponseHeaders().set("Location", addr);
+                arg0.sendResponseHeaders(302, 0);
+                arg0.close();
             }
             else {
                 String parts[] = path.substring(1).split("/");
@@ -52,11 +66,12 @@ public class AdminHttpHandler implements HttpHandler {
                 for (int i = 1; i < parts.length; i++) {
                     p.add(parts[i]);
                 }
-                writeResponse(arg0, 404, mapper.writeValueAsString(controllers.get().invoke(controller, p)));
+                arg0.getResponseHeaders().set("Access-Control-Allow-Origin", config.accessControlAllowOrigin());
+                writeResponse(arg0, 200, mapper.writeValueAsString(resources.get().invoke(controller, p)));
             }
         }
         catch (Exception e) {
-//            e.printStackTrace();
+            LOG.error("Error processing request '" + path + "'", e);
             StringWriter sw = new StringWriter();
             e.printStackTrace(new PrintWriter(sw));
             writeResponse(arg0, 500, sw.toString());
@@ -64,9 +79,8 @@ public class AdminHttpHandler implements HttpHandler {
     }
     
     private void writeResponse(HttpExchange arg0, int code, String content) throws IOException {
-        arg0.getResponseHeaders().set("Server:", "KaryonAdmin");
-        arg0.getResponseHeaders().set("Access-Control-Allow-Origin:", "*");
-        arg0.sendResponseHeaders(500, content.length());
+        arg0.getResponseHeaders().set("Content-Type",                "application/json");
+        arg0.sendResponseHeaders(code, content.length());
         
         OutputStream os = arg0.getResponseBody();
         os.write(content.getBytes());

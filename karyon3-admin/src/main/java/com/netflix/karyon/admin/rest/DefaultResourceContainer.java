@@ -146,7 +146,7 @@ public class DefaultResourceContainer implements ResourceContainer {
         if (current != null) {
             Iterator<String> iter = parts.iterator();
             while (iter.hasNext()) {
-                String id = iter.next().toLowerCase();
+                String id = iter.next();
                 args.add(id);
                 if (iter.hasNext()) {
                     String sub = iter.next().toLowerCase();

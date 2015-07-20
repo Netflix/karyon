@@ -23,20 +23,22 @@ public class ArchaiusPropResource {
 
     // props/
     public Map<String, String> list() {
-        return find(config);
+        return find(config, "");
     }
     
     // props/:id (MAP)
     public Map<String, String> find(String prefix) {
-        return find(config.getPrefixedView(prefix));
+        return find(config, prefix);
     }
     
-    private Map<String, String> find(Config config) {
+    private Map<String, String> find(Config config, String regex) {
         Map<String, String> props = new HashMap<>();
         Iterator<String> iter = config.getKeys();
         while (iter.hasNext()) {
             String key = iter.next();
-            props.put(key, (String) config.getString(key, "****"));
+            if (key.matches(regex)) {
+                props.put(key, (String) config.getString(key, "****"));
+            }
         }
         return props;
     }

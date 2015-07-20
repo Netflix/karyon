@@ -1,4 +1,7 @@
-package com.netflix.karyon.admin.internal;
+package com.netflix.karyon.admin.rest;
+
+import java.io.IOException;
+import java.util.Collections;
 
 import javax.inject.Singleton;
 
@@ -8,15 +11,16 @@ import com.google.inject.Provides;
 import com.netflix.archaius.ConfigProxyFactory;
 import com.netflix.karyon.admin.AdminModule;
 import com.netflix.karyon.admin.AdminServer;
+import com.netflix.karyon.admin.HttpServerConfig;
+import com.netflix.karyon.admin.HttpServerModule;
+import com.netflix.karyon.admin.SimpleHttpServer;
 import com.sun.net.httpserver.HttpHandler;
 
-public class SimpleAdminServerModule extends AbstractModule {
+public final class AdminServerModule extends AbstractModule {
     @Override
     protected void configure() {
         install(new AdminModule());
-        
-        bind(HttpHandler.class).annotatedWith(AdminServer.class).to(AdminHttpHandler.class);
-        bind(AdminHttpServer.class).asEagerSingleton();
+        install(new HttpServerModule());
     }
     
     // This binds our admin server to Archaius configuration using the prefix
@@ -24,8 +28,21 @@ public class SimpleAdminServerModule extends AbstractModule {
     @Provides
     @Singleton
     @AdminServer
+    protected HttpServerConfig getAdminServerConfig(AdminServerConfig config) {
+        return config; 
+    }
+    
+    @Provides
+    @Singleton
     protected AdminServerConfig getAdminServerConfig(ConfigProxyFactory factory) {
         return factory.newProxy(AdminServerConfig.class);
+    }
+    
+    @Provides
+    @Singleton
+    @AdminServer
+    protected SimpleHttpServer getAdminServer(@AdminServer HttpServerConfig config, AdminHttpHandler handler) throws IOException {
+        return new SimpleHttpServer(config, Collections.<String, HttpHandler>singletonMap("/", handler));
     }
     
     @Provides
@@ -37,11 +54,11 @@ public class SimpleAdminServerModule extends AbstractModule {
 
     @Override
     public boolean equals(Object obj) {
-        return SimpleAdminServerModule.class.equals(obj.getClass());
+        return AdminServerModule.class.equals(obj.getClass());
     }
 
     @Override
     public int hashCode() {
-        return SimpleAdminServerModule.class.hashCode();
+        return AdminServerModule.class.hashCode();
     }
 }

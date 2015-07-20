@@ -1,10 +1,10 @@
-package com.netflix.karyon.admin.internal;
+package com.netflix.karyon.admin;
 
 import com.netflix.archaius.annotations.Configuration;
 import com.netflix.archaius.annotations.DefaultValue;
 
 @Configuration(prefix="karyon.server.admin")
-public interface AdminServerConfig {
+public interface HttpServerConfig {
     @DefaultValue("null")
     String name();
     
@@ -19,4 +19,7 @@ public interface AdminServerConfig {
 
     @DefaultValue("0")
     int shutdownDelay();
+
+    @DefaultValue("true")
+    boolean enabled();
 }

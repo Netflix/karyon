@@ -10,6 +10,7 @@ public final class ArchaiusAdminModule extends AbstractAdminModule {
     protected void configure() {
         bindAdminResource("props").to(ArchaiusPropResource.class);
         bindAdminResource("props-layers").to(ArchaiusLayerResource.class);
+        bindAdminResource("allprops").to(ArchaiusAllpropsResource.class);
     }
     
     @Override
