@@ -74,18 +74,18 @@ public class DefaultResourceContainer implements ResourceContainer {
         }
     }
     
-    private final Map<String, Node> controllers = new HashMap<>();
+    private final Map<String, Node> resources = new HashMap<>();
     
-    public DefaultResourceContainer(Map<String, Object> controllers) throws Exception {
-        this(controllers, new DefaultStringResolverFactory());
+    public DefaultResourceContainer(Map<String, Object> resource) throws Exception {
+        this(resource, new DefaultStringResolverFactory());
     }
     
-    public DefaultResourceContainer(Map<String, Object> controllers, StringResolverFactory factory) throws Exception {
-        for (final Entry<String, Object> controller : controllers.entrySet()) {
+    public DefaultResourceContainer(Map<String, Object> resources, StringResolverFactory factory) throws Exception {
+        for (final Entry<String, Object> resource : resources.entrySet()) {
             Node root = new Node();
-            this.controllers.put(controller.getKey(), root);
+            this.resources.put(resource.getKey(), root);
             
-            for (final Method method : controller.getValue().getClass().getDeclaredMethods()) {
+            for (final Method method : resource.getValue().getClass().getDeclaredMethods()) {
                 if (!Modifier.isPublic(method.getModifiers())) {
                     continue;
                 }
@@ -121,7 +121,7 @@ public class DefaultResourceContainer implements ResourceContainer {
                             params[i] = converters.get(i).convert(args);
                         }
                         
-                        return method.invoke(controller.getValue(), params);
+                        return method.invoke(resource.getValue(), params);
                     }
                 };
                 
@@ -140,9 +140,9 @@ public class DefaultResourceContainer implements ResourceContainer {
     }
     
     @Override
-    public Object invoke(String controller, List<String> parts) throws Exception {
+    public Object invoke(String resource, List<String> parts) throws Exception {
         List<String> args = new ArrayList<>();
-        Node current = controllers.get(controller);
+        Node current = resources.get(resource);
         if (current != null) {
             Iterator<String> iter = parts.iterator();
             while (iter.hasNext()) {
@@ -168,11 +168,11 @@ public class DefaultResourceContainer implements ResourceContainer {
             }
             return current.listInvoker.invoke(args);
         }
-        throw new Exception("Controller not found for " + controller);
+        throw new Exception("Resource not found for " + resource);
     }
     
     @Override
     public Set<String> getNames() {
-        return controllers.keySet();
+        return resources.keySet();
     }
 }

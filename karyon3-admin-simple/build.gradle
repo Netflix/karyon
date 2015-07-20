@@ -22,6 +22,7 @@ repositories {
 
 dependencies {
     compile project(":karyon3-admin")
+    compile project(":karyon3-admin-simple")
     compile "com.netflix.governator:governator-core:${governator_version}"
     compile "com.netflix.archaius:archaius2-core:${archaius_version}"
     compile "com.fasterxml.jackson.core:jackson-core:${jackson_version}"
