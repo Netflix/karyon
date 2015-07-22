@@ -12,28 +12,28 @@ import com.netflix.karyon.admin.rest.DefaultResourceContainer;
 
 public class PojoRestTest {
     public static class TestResource {
-        public List<String> list() {
+        public List<String> get() {
             return Arrays.asList("a", "b");
         }
         
-        public String find(String name) {
+        public String get(String name) {
             return "found";
         }
         
-        public List<String> listFoo(String name) {
+        public List<String> getFoo(String name) {
             return Arrays.asList("foo_a", "foo_b");
         }
         
-        public String findFoo(String name, String foo) {
+        public String getFoo(String name, String foo) {
             return name + "_" + foo + "_found";
         }
         
-        public List<String> listFooBar(String name, String foo) {
+        public List<String> getFooBar(String name, String foo) {
             return Arrays.asList(name + "_" + foo + "_a", name + "_" + foo + "foo_b");
         }
         
         // root/:name/foo/:foo/bar/:bar
-        public String findFooBar(String name, String foo, String bar) {
+        public String getFooBar(String name, String foo, String bar) {
             return name + "_" + foo + "_" + bar + "_found";
         }
     }
