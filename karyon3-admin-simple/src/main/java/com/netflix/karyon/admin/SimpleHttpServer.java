@@ -32,7 +32,7 @@ public class SimpleHttpServer {
                     .setNameFormat(config.name() + "-%d")
                     .build());
         
-        InetSocketAddress inetSocketAddress = new InetSocketAddress("localhost", config.port());
+        InetSocketAddress inetSocketAddress = new InetSocketAddress(config.port());
         server = HttpServer.create(inetSocketAddress, config.backlog());
         server.setExecutor(service);
         

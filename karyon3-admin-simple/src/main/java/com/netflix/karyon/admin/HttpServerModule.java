@@ -11,11 +11,11 @@ public final class HttpServerModule extends AbstractAdminModule {
     
     @Override
     public boolean equals(Object obj) {
-        return HttpServerModule.class.equals(obj.getClass());
+        return getClass().equals(obj.getClass());
     }
 
     @Override
     public int hashCode() {
-        return HttpServerModule.class.hashCode();
+        return getClass().hashCode();
     }
 }

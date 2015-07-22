@@ -5,7 +5,7 @@ import com.netflix.archaius.annotations.DefaultValue;
 
 @Configuration(prefix="karyon.server.admin")
 public interface HttpServerConfig {
-    @DefaultValue("null")
+    @DefaultValue("unnamed")
     String name();
     
     @DefaultValue("1")
