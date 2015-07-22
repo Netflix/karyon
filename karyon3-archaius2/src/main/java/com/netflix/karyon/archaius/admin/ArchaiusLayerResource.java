@@ -20,22 +20,22 @@ public class ArchaiusLayerResource {
     }
 
     // props-layers (LIST)
-    public Collection<String> list() {
+    public Collection<String> get() {
         return this.config.getConfigNames();
     }
     
     // props-layers/:id (LIST)
-    public Collection<String> find(String layer) {
+    public Collection<String> get(String layer) {
         return Arrays.asList("layer", layer );
     }
 
     // props-layer/:id/props
-    public Collection<String> listProps(String layer) {
+    public Collection<String> getProps(String layer) {
         return null;
     }
     
     // props-layer/:id/props
-    public Collection<String> findProps(String layer, String prefix) {
+    public Collection<String> getProps(String layer, String prefix) {
         return null;
     }
 }

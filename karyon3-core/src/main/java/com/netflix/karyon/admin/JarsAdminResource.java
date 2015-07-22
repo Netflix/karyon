@@ -21,7 +21,7 @@ public class JarsAdminResource {
     
     private static final String JAR_PATTERN = "^jar:file:(.+)!/META-INF/MANIFEST.MF$";
     
-    public List<JarInfo> list() {
+    public List<JarInfo> get() {
         List<JarInfo> jarInfos = new ArrayList<>();
 
         Pattern pattern = Pattern.compile(JAR_PATTERN);

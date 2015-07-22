@@ -16,7 +16,7 @@ public class ResourcesAdminResource {
         this.registry = registry;
     }
     
-    public Set<String> list() {
+    public Set<String> get() {
         return registry.getNames();
     }
 }

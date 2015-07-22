@@ -28,7 +28,8 @@ public class RxNettyAdminResource {
     }
     
     @SuppressWarnings("rawtypes")
-    public Map<String, ServerInfo> list() {
+    // rxnetty/
+    public Map<String, ServerInfo> get() {
         return Maps.transformValues(registry.getServers(), new Function<Provider<HttpServer>, ServerInfo>() {
             @Override
             public ServerInfo apply(final Provider<HttpServer> provider) {
@@ -48,7 +49,8 @@ public class RxNettyAdminResource {
         });
     }
     
-    public ServerInfo find(String name) {
+    // rxnetty/:name
+    public ServerInfo get(String name) {
         Provider<HttpServer> provider = registry.getServers().get(name);
         if (provider == null) {
             return null;

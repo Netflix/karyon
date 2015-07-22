@@ -20,7 +20,7 @@ public class ArchaiusAllpropsResource {
     }
 
     // allprops/
-    public PropsModel list() {
+    public PropsModel get() {
         Map<String, String> props = new HashMap<>();
         Iterator<String> iter = config.getKeys();
         while (iter.hasNext()) {

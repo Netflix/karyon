@@ -25,7 +25,7 @@ public class MetaAdminResource {
         }
     }
     
-    public Map<String, String> list() {
+    public Map<String, String> get() {
         return prop;
     }
 }

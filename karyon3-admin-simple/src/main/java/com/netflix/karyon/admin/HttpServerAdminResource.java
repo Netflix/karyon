@@ -24,7 +24,7 @@ public class HttpServerAdminResource {
         this.registry = registry;
     }
     
-    public Map<String, ServerInfo> list() {
+    public Map<String, ServerInfo> get() {
         return Maps.transformValues(registry.getServers(), new Function<Provider<SimpleHttpServer>, ServerInfo>() {
             @Override
             public ServerInfo apply(final Provider<SimpleHttpServer> provider) {
@@ -33,7 +33,7 @@ public class HttpServerAdminResource {
         });
     }
     
-    public ServerInfo find(String name) {
+    public ServerInfo get(String name) {
         Provider<SimpleHttpServer> provider = registry.getServers().get(name);
         if (provider == null) {
             return null;

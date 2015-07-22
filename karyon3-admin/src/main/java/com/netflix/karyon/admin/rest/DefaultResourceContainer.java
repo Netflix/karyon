@@ -11,7 +11,12 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class DefaultResourceContainer implements ResourceContainer {
+    private static final Logger LOG = LoggerFactory.getLogger(DefaultResourceContainer.class);
+    
     private static final String CAMEL_CASE_PATTERN = "(?<!(^|[A-Z]))(?=[A-Z])|(?<!^)(?=[A-Z][a-z])"; // 3rd edit, getting better
     
     private static class Node {
@@ -38,11 +43,11 @@ public class DefaultResourceContainer implements ResourceContainer {
             return node;
         }
 
-        void setListInvoker(Invoker invoker) {
+        void setGetList(Invoker invoker) {
             this.listInvoker = invoker;
         }
 
-        void setFindInvoker(Invoker invoker) {
+        void setGetItem(Invoker invoker) {
             this.findInvoker = invoker;
         }
         
@@ -80,7 +85,7 @@ public class DefaultResourceContainer implements ResourceContainer {
         this(resource, new DefaultStringResolverFactory());
     }
     
-    public DefaultResourceContainer(Map<String, Object> resources, StringResolverFactory factory) throws Exception {
+    public DefaultResourceContainer(Map<String, Object> resources, StringResolverFactory factory) {
         for (final Entry<String, Object> resource : resources.entrySet()) {
             Node root = new Node();
             this.resources.put(resource.getKey(), root);
@@ -93,7 +98,7 @@ public class DefaultResourceContainer implements ResourceContainer {
                 // Determine verb
                 String[] m = method.getName().split(CAMEL_CASE_PATTERN);
                 Iterator<String> iter = Arrays.asList(m).iterator();
-                String action = iter.next();
+                String verb = iter.next();
                 
                 // Determine nesting of resources
                 Node current = root;
@@ -107,9 +112,13 @@ public class DefaultResourceContainer implements ResourceContainer {
                 final List<IndexedStringResolver> converters = new ArrayList<>();
                 int argIndex = 0;
                 for (Class<?> type : method.getParameterTypes()) {
-                    converters.add(
-                            new IndexedStringResolver(argIndex, 
-                                    factory.create(type)));
+                    try {
+                        converters.add(
+                                new IndexedStringResolver(argIndex, 
+                                        factory.create(type)));
+                    } catch (Exception e) {
+                        LOG.warn("Error processing parameter '{}' of {}:{}", type.getName(), resource.getValue().getClass(), method.getName());
+                    }
                     argIndex++;
                 }
                 
@@ -125,14 +134,16 @@ public class DefaultResourceContainer implements ResourceContainer {
                     }
                 };
                 
-                if ("find".equals(action) || "get".equals(action) || "show".equals(action)) {
-                    current.setFindInvoker(invoker);
-                }
-                else if ("list".equals(action)) {
-                    current.setListInvoker(invoker);
+                if ("get".equals(verb)) {
+                    if (m.length - 1 == argIndex) {
+                        current.setGetList(invoker);
+                    }
+                    else {
+                        current.setGetItem(invoker);
+                    }
                 }
                 else {
-                    throw new Exception(String.format("Invalid method action '%s'.  Supported actions: [list, find]", action));
+                    LOG.warn("Invalid verb '{}' for method {}:{}.  Supported verb: [get]", verb, resource.getValue().getClass(), method.getName());
                 }
             }
             // TODO: Throw exception if no methods

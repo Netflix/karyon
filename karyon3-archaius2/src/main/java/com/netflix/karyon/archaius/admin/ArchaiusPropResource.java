@@ -22,21 +22,21 @@ public class ArchaiusPropResource {
     }
 
     // props/
-    public Map<String, String> list() {
-        return find(config, "");
+    public Map<String, String> get() {
+        return get(config, null);
     }
     
-    // props/:id (MAP)
-    public Map<String, String> find(String prefix) {
-        return find(config, prefix);
+    // props/:regex (MAP)
+    public Map<String, String> get(String regex) {
+        return get(config, regex);
     }
     
-    private Map<String, String> find(Config config, String regex) {
+    private Map<String, String> get(Config config, String regex) {
         Map<String, String> props = new HashMap<>();
         Iterator<String> iter = config.getKeys();
         while (iter.hasNext()) {
             String key = iter.next();
-            if (key.matches(regex)) {
+            if (regex == null || key.matches(regex)) {
                 props.put(key, (String) config.getString(key, "****"));
             }
         }
@@ -44,7 +44,7 @@ public class ArchaiusPropResource {
     }
     
     // props/:id/sources (MAP)
-    public LinkedHashMap<String, String> findSources(String key) {
+    public LinkedHashMap<String, String> getSources(String key) {
         final LinkedHashMap<String, String> result = new LinkedHashMap<>();
         config.accept(new SourcesVisitor(key, result));
         return result;
