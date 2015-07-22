@@ -16,17 +16,16 @@
 
 apply plugin: 'java'
 
-repositories {
-    maven { url 'https://oss.jfrog.org/libs-snapshot' }
-}
-
 dependencies {
-    compile     project(':karyon3-core')
-    compile     project(':karyon3-archaius2')
-
-    compile 	'io.reactivex:rxnetty:0.5.0-SNAPSHOT'
+    compile "com.netflix.governator:governator-core:${governator_version}"
+    compile "com.netflix.archaius:archaius2-core:${archaius_version}"
     
-    testCompile project(':karyon3-log4j2')
+    compile "org.apache.logging.log4j:log4j-core:2.3"
+    compile "org.apache.logging.log4j:log4j-slf4j-impl:2.3"
+    compile "com.lmax:disruptor:3.3.2"
+
+    testCompile "org.hamcrest:hamcrest-core:${hamcrest_version}"
+    testCompile "org.hamcrest:hamcrest-library:${hamcrest_version}"
 }
 
 eclipse {
