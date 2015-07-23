@@ -20,6 +20,7 @@ public class RxNettyServerStarter {
         for (Entry<String, Provider<HttpServer>> entry : registry.getServers().entrySet()) {
             LOG.info("Starting HttpServer '{}'", entry.getKey());
             HttpServer server = entry.getValue().get();
+            server.start();
             LOG.info("Started HttpServer '{}' on port {}", entry.getKey(), server.getServerPort());
         }
     }

@@ -1,6 +1,7 @@
 package com.netflix.karyon.rxnetty;
 
 import io.netty.buffer.ByteBuf;
+import io.reactivex.netty.RxNetty;
 import io.reactivex.netty.protocol.http.server.HttpServer;
 import io.reactivex.netty.protocol.http.server.HttpServerRequest;
 import io.reactivex.netty.protocol.http.server.HttpServerResponse;
@@ -25,17 +26,18 @@ public final class ShutdownServerModule extends DefaultModule {
     @RxNettyShutdown
     HttpServer getShutdownServer(@RxNettyShutdown ServerConfig config, final LifecycleShutdownSignal shutdown) {
         System.out.println("Shutdown Config : " + config);
-        return HttpServer
-            .newServer(config.getServerPort())
-            .start(new RequestHandler<ByteBuf, ByteBuf>() {
+        return RxNetty.newHttpServerBuilder(
+            config.getServerPort(), 
+            new RequestHandler<ByteBuf, ByteBuf>() {
                 @Override
                 public Observable<Void> handle(
                         HttpServerRequest<ByteBuf> request,
                         HttpServerResponse<ByteBuf> response) {
                     shutdown.signal();
-                    return response.writeString(Observable.just("Shutting down"));
+                    return response.writeStringAndFlush("Shutting down");
                 }
-            });
+            })
+            .build();
     }
     
     // This binds our main server to Archaius configuration using the prefix
