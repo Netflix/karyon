@@ -21,7 +21,7 @@ public class HelloWorldRequestHandler implements RequestHandler<ByteBuf, ByteBuf
             HttpServerResponse<ByteBuf> response) {
         if (request.getUri().equals("/")) {
             int count = counter.incrementAndGet();
-            return response.writeString(Observable.just("Hello World " + count + "!"));
+            return response.writeStringAndFlush("Hello World " + count + "!");
         }
         else {
             return Observable.empty();

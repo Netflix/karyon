@@ -1,5 +1,6 @@
 package com.netflix.karyon.example.rxnetty;
 
+import io.reactivex.netty.RxNetty;
 import io.reactivex.netty.protocol.http.server.HttpServer;
 
 import javax.inject.Singleton;
@@ -14,9 +15,7 @@ public class HelloWorldEndpointModule extends DefaultModule {
     @Provides
     @Singleton
     HttpServer getServer(ServerConfig config, HelloWorldRequestHandler handler) {
-        return HttpServer
-            .newServer(config.getServerPort())
-            .start(handler);
+        return RxNetty.newHttpServerBuilder(config.getServerPort(), handler).build();
     }
     
     // This binds our main server to Archaius configuration using the default

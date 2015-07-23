@@ -18,8 +18,6 @@ public class RxNettyAdminResource {
     
     public static interface ServerInfo {
         int getPort();
-
-        String getServerAddress();
     }
     
     @Inject
@@ -39,11 +37,6 @@ public class RxNettyAdminResource {
                     public int getPort() {
                         return server.getServerPort();
                     }
-                    
-                    @Override
-                    public String getServerAddress() {
-                        return server.getServerAddress().toString();
-                    }
                 };
             }
         });
@@ -61,11 +54,6 @@ public class RxNettyAdminResource {
             @Override
             public int getPort() {
                 return server.getServerPort();
-            }
-            
-            @Override
-            public String getServerAddress() {
-                return server.getServerAddress().toString();
             }
         };
     }

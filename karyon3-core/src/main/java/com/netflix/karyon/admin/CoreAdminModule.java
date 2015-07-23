@@ -23,11 +23,11 @@ public final class CoreAdminModule extends AbstractAdminModule {
     
     @Override
     public boolean equals(Object obj) {
-        return CoreAdminModule.class.equals(obj.getClass());
+        return getClass().equals(obj.getClass());
     }
 
     @Override
     public int hashCode() {
-        return CoreAdminModule.class.hashCode();
+        return getClass().hashCode();
     }
 }
