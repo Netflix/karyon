@@ -48,7 +48,7 @@ public class AdminHttpHandler implements HttpHandler {
         
         String path = arg0.getRequestURI().getPath();
         
-        arg0.getResponseHeaders().set("Server",                      "KaryonAdmin");
+        arg0.getResponseHeaders().set("Server", "KaryonAdmin");
         
         try {
             // Redirect the server root to the configured remote server using the naming convension
@@ -59,6 +59,10 @@ public class AdminHttpHandler implements HttpHandler {
                 arg0.sendResponseHeaders(302, 0);
                 arg0.close();
             }
+            else if (path.equals("/favicon.ico")) {
+                arg0.sendResponseHeaders(404, 0);
+                arg0.close();
+            }
             else {
                 String parts[] = path.substring(1).split("/");
                 String controller = parts[0];
@@ -67,7 +71,14 @@ public class AdminHttpHandler implements HttpHandler {
                     p.add(parts[i]);
                 }
                 arg0.getResponseHeaders().set("Access-Control-Allow-Origin", config.accessControlAllowOrigin());
-                writeResponse(arg0, 200, mapper.writeValueAsString(resources.get().invoke(controller, p)));
+                
+                Object response = resources.get().invoke(controller, p);
+                if (response instanceof String) {
+                    writeResponse(arg0, 200, (String)response);
+                }
+                else {
+                    writeResponse(arg0, 200, mapper.writeValueAsString(response));
+                }
             }
         }
         catch (Exception e) {

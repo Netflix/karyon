@@ -3,4 +3,5 @@
 # for example, for an image mime type and a text mime type
 text/html html htm
 application/json js
+image/x-icon ico
 # either place those lines within the files specified by 2-4 or

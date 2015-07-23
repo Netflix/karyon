@@ -28,8 +28,7 @@ $(document).ready(function(){
             navbar.append(li);
         }
         
-        $(".jumbotron").append("<iframe src='/" + activeResource + ".html'></iframe>");
+        $(".jumbotron").append("<iframe class='pageview' frameborder='0' src='/" + activeResource + ".html'></iframe>");
         
     });
-        
 });

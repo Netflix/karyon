@@ -32,7 +32,6 @@ public class HelloWorldApp extends DefaultLifecycleListener {
             new JettyModule(),
             new AdminServerModule(),
             new AdminUIServerModule(),
-//            new RxNettyAdminServerModule(),
             new ArchaiusModule(),
             new ShutdownServerModule(),
             new JerseyServletModule() {

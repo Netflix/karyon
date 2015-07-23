@@ -18,13 +18,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.io.CharStreams;
-import com.netflix.karyon.admin.rest.AdminHttpHandler;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 
 @Singleton
 public class AdminUIHttpHandler implements HttpHandler {
-    private static final Logger LOG = LoggerFactory.getLogger(AdminHttpHandler.class);
+    private static final Logger LOG = LoggerFactory.getLogger(AdminUIHttpHandler.class);
 
     private final ConcurrentMap<String, String> templates = new ConcurrentHashMap<>();
     private final AdminUIServerConfig config;
@@ -68,7 +67,7 @@ public class AdminUIHttpHandler implements HttpHandler {
                 return;
             }
             
-            LOG.info("'{}' Not Fund", path);
+            LOG.info("'{}' Not Found", path);
             writeResponse(arg0, 404, "not found", null);
             return;
         }
