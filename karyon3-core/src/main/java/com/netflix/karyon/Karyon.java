@@ -1,5 +1,6 @@
 package com.netflix.karyon;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -56,14 +57,18 @@ public class HelloWorldApp extends DefaultLifecycleListener {
  */
 public class Karyon {
     public static LifecycleInjector createInjector(GovernatorConfiguration config) {
-        return Governator.createInjector(config, Collections.<Module>emptyList());
+        return createInjector(config, Collections.<Module>emptyList());
     }
     
     public static LifecycleInjector createInjector(GovernatorConfiguration config, Module ... modules) {
-        return Governator.createInjector(config, Arrays.asList(modules));
+        return createInjector(config, Arrays.asList(modules));
     }
     
     public static LifecycleInjector createInjector(GovernatorConfiguration config, List<Module> modules) {
-        return Governator.createInjector(config, modules);
+        List<Module> modulesToInstall = new ArrayList<>();
+        modulesToInstall.add(new CoreModule());
+        modulesToInstall.addAll(modules);
+        
+        return Governator.createInjector(config, modulesToInstall);
     }
 }

@@ -16,18 +16,13 @@
 
 apply plugin: 'java'
 
+repositories {
+    maven { url 'https://oss.jfrog.org/libs-snapshot' }
+}
+
 dependencies {
-    compile project(':karyon3-admin')
-    compile project(':karyon3-healthcheck')
-    compile "com.netflix.governator:governator-core:${governator_version}"
-    compile "com.netflix.governator:governator-servlet:${governator_version}"
-    
     compile "com.google.inject:guice:${guice_version}"
     compile "com.google.inject.extensions:guice-multibindings:${guice_version}"
-    compile "com.google.inject.extensions:guice-grapher:${guice_version}"
-
-    testCompile "org.hamcrest:hamcrest-core:${hamcrest_version}"
-    testCompile "org.hamcrest:hamcrest-library:${hamcrest_version}"
 }
 
 eclipse {
