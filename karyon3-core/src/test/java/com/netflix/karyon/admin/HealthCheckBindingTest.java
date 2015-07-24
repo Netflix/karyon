@@ -34,7 +34,7 @@ public class HealthCheckBindingTest {
             });
         
         HealthCheckRegistry registry = injector.getInstance(HealthCheckRegistry.class);
-        HealthInfoAdminResource res = injector.getInstance(HealthInfoAdminResource.class);
+        HealthCheckResource res = injector.getInstance(HealthCheckResource.class);
         System.out.println(res.get());
     }
 }
