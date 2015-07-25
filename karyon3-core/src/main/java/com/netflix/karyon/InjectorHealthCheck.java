@@ -1,5 +1,7 @@
-package com.netflix.karyon.admin;
+package com.netflix.karyon;
 
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -14,29 +16,31 @@ import com.netflix.karyon.healthcheck.HealthStatuses;
 
 @Singleton
 public class InjectorHealthCheck extends DefaultLifecycleListener implements HealthCheck {
-    
+    private static final DateTimeFormatter DATE_TIME_FORMAT = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss z");
+
     private final LifecycleManager manager;
     private final Map<String, Object> attributes = new HashMap<>();
     
     @Inject
     public InjectorHealthCheck(LifecycleManager manager) {
         this.manager = manager;
-        attributes.put("startTime", System.currentTimeMillis());
+        
+        attributes.put("startTime", DATE_TIME_FORMAT.format(ZonedDateTime.now()));
     }
     
     @Override
     public void onStopped() {
-        attributes.put("stoppedTime", System.currentTimeMillis());
+        attributes.put("stoppedTime", DATE_TIME_FORMAT.format(ZonedDateTime.now()));
     }
 
     @Override
     public void onStarted() {
-        attributes.put("startedTime", System.currentTimeMillis());
+        attributes.put("startedTime", DATE_TIME_FORMAT.format(ZonedDateTime.now()));
     }
 
     @Override
     public void onStartFailed(Throwable t) {
-        attributes.put("failedTime", System.currentTimeMillis());
+        attributes.put("failedTime", DATE_TIME_FORMAT.format(ZonedDateTime.now()));
     }
 
     @Override

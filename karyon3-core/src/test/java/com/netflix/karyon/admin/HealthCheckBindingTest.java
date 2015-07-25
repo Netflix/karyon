@@ -18,7 +18,6 @@ public class HealthCheckBindingTest {
     public void test() {
         LifecycleInjector injector = Governator.createInjector(
             new HealthCheckModule(),
-            new CoreAdminModule(),
             new DefaultModule() {
                 @Provides
                 @Named("hc1")
