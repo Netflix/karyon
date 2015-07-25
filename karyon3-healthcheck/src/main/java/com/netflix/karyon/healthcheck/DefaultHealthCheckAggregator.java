@@ -18,11 +18,11 @@ public class DefaultHealthCheckAggregator implements HealthCheckAggregator {
             
             Long count = counts.get(state);
             if (count == null) {
-                count = 0L;
-                counts.put(state, count);
+                counts.put(state, 1L);
             }
-            count++;
-            counts.put(state, count);
+            else {
+                counts.put(state, count+1);
+            }
         }
 
         if (counts.containsKey(HealthState.States.STOPPED)) {

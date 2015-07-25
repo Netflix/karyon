@@ -7,10 +7,9 @@ package com.netflix.karyon.healthcheck;
  */
 public interface HealthState {
     /**
-     * A component may be healthy but in a degraded state.  Healthy here means that the component
-     * is usable while unhealthy means that any call to the component will result in a failure.
+     * Indicates that a component in this state is usable.  
      * 
-     * @return The component is healthy and usable
+     * @return The component is usable
      */
     boolean isUsable();
     
@@ -49,14 +48,14 @@ public interface HealthState {
         
         ;
 
-        private boolean isHealthy;
-        States(boolean isHealthy){
-            this.isHealthy = isHealthy;
+        private boolean isUsable;
+        States(boolean isUsable){
+            this.isUsable = isUsable;
         }
         
         @Override
         public boolean isUsable() {
-            return isHealthy;
+            return isUsable;
         }
         
     }

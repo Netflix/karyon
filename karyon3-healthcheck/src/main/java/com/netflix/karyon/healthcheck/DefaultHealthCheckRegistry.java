@@ -18,11 +18,21 @@ import com.google.inject.TypeLiteral;
 @Singleton
 public class DefaultHealthCheckRegistry implements HealthCheckRegistry {
     private ConcurrentMap<String, HealthCheck> healthChecks = new ConcurrentHashMap<String, HealthCheck>();
-    private long cacheInterval = 30;
-    private TimeUnit cacheTimeUnits = TimeUnit.SECONDS;
+    private final long cacheInterval;
+    
+    private static class OptionalArguments {
+        @Inject(optional=true)
+        HealthCheckConfiguration config;
+    }
     
     @Inject
-    public DefaultHealthCheckRegistry(Injector injector) {
+    public DefaultHealthCheckRegistry(Injector injector, OptionalArguments args) {
+        HealthCheckConfiguration config 
+                = args.config != null 
+                ? args.config 
+                : new DefaultHealthCheckConfiguration();
+        cacheInterval = config.getCacheInterval();
+        
         for (Binding<HealthCheck> binding : injector.findBindingsByType(TypeLiteral.get(HealthCheck.class))) {
             Key<HealthCheck> key = binding.getKey();
             if (key.getAnnotationType().equals(Named.class)) {
@@ -44,7 +54,7 @@ public class DefaultHealthCheckRegistry implements HealthCheckRegistry {
     }
     
     private HealthCheck wrap(HealthCheck delegate) {
-        return new CachingHealthCheck(delegate, cacheInterval, cacheTimeUnits);
+        return new CachingHealthCheck(delegate, cacheInterval, TimeUnit.SECONDS);
     }
     
     @Override

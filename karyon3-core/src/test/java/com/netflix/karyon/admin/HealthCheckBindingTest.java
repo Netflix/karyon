@@ -2,6 +2,8 @@ package com.netflix.karyon.admin;
 
 import javax.inject.Named;
 
+import junit.framework.Assert;
+
 import org.junit.Test;
 
 import com.google.inject.Provides;
@@ -11,6 +13,8 @@ import com.netflix.governator.LifecycleInjector;
 import com.netflix.karyon.healthcheck.HealthCheck;
 import com.netflix.karyon.healthcheck.HealthCheckModule;
 import com.netflix.karyon.healthcheck.HealthCheckRegistry;
+import com.netflix.karyon.healthcheck.HealthState;
+import com.netflix.karyon.healthcheck.HealthStatus;
 import com.netflix.karyon.healthcheck.HealthStatuses;
 
 public class HealthCheckBindingTest {
@@ -34,6 +38,9 @@ public class HealthCheckBindingTest {
         
         HealthCheckRegistry registry = injector.getInstance(HealthCheckRegistry.class);
         HealthCheckResource res = injector.getInstance(HealthCheckResource.class);
-        System.out.println(res.get());
+        HealthStatus status = res.get();
+        
+        Assert.assertEquals(2, status.getAttributes().size());
+        Assert.assertEquals(HealthState.States.UNHEALTHY, status.getState());
     }
 }
