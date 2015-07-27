@@ -1,4 +1,4 @@
-package com.netflix.karyon.rxnetty;
+package com.netflix.karyon.example.rxnetty;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -10,6 +10,5 @@ import javax.inject.Qualifier;
 @Qualifier
 @Target({ElementType.FIELD, ElementType.PARAMETER, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
-public @interface RxNettyShutdown {
-
+public @interface FooBarServer {
 }

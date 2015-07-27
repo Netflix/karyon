@@ -12,7 +12,7 @@ import javax.inject.Singleton;
 import rx.Observable;
 
 @Singleton
-public class HelloWorldRequestHandler implements RequestHandler<ByteBuf, ByteBuf> {
+public class BarRequestHandler implements RequestHandler<ByteBuf, ByteBuf> {
     final AtomicInteger counter = new AtomicInteger();
 
     @Override
@@ -20,6 +20,6 @@ public class HelloWorldRequestHandler implements RequestHandler<ByteBuf, ByteBuf
             HttpServerRequest<ByteBuf> request,
             HttpServerResponse<ByteBuf> response) {
         int count = counter.incrementAndGet();
-        return response.writeStringAndFlush("Hello World " + count + "!");
+        return response.writeStringAndFlush("Bar " + count + "!");
     }
 }

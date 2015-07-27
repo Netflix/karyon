@@ -10,8 +10,8 @@ import com.netflix.karyon.Karyon;
 import com.netflix.karyon.admin.rest.AdminServerModule;
 import com.netflix.karyon.admin.ui.AdminUIServerModule;
 import com.netflix.karyon.archaius.ArchaiusKaryonConfiguration;
-import com.netflix.karyon.rxnetty.RxNettyModule;
-import com.netflix.karyon.rxnetty.ShutdownServerModule;
+import com.netflix.karyon.rxnetty.RxNettyServerModule;
+import com.netflix.karyon.rxnetty.shutdown.ShutdownServerModule;
 
 @Singleton
 public class RxNettyHelloWorldApp extends DefaultLifecycleListener {
@@ -27,9 +27,22 @@ public class RxNettyHelloWorldApp extends DefaultLifecycleListener {
             new ArchaiusModule(),
             new AdminServerModule(),
             new AdminUIServerModule(),
-            new RxNettyModule(),               // Needed to start the RxNetty servers
-            new ShutdownServerModule(),
-            new HelloWorldEndpointModule()
+            // These bindings will go on the 'default' server
+            new RxNettyServerModule() {
+                @Override
+                protected void configureEndpoints() {
+                    serve("/hello").with(HelloWorldRequestHandler.class);
+                }
+            },
+            // These bindings will go on the 'HelloServer' server
+            new RxNettyServerModule() {
+                @Override
+                protected void configureEndpoints() {
+                    serve(FooBarServer.class, "/foo").with(FooRequestHandler.class);
+                    serve(FooBarServer.class, "/bar").with(BarRequestHandler.class);
+                }
+            },
+            new ShutdownServerModule()
             )
             .awaitTermination();
     }

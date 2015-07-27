@@ -1,4 +1,4 @@
-package com.netflix.karyon.rxnetty;
+package com.netflix.karyon.rxnetty.shutdown;
 
 import io.netty.buffer.ByteBuf;
 import io.reactivex.netty.RxNetty;
@@ -12,9 +12,12 @@ import javax.inject.Singleton;
 import rx.Observable;
 
 import com.google.inject.Provides;
+import com.netflix.archaius.Config;
 import com.netflix.archaius.ConfigProxyFactory;
+import com.netflix.archaius.visitor.PrintStreamVisitor;
 import com.netflix.governator.DefaultModule;
 import com.netflix.governator.LifecycleShutdownSignal;
+import com.netflix.karyon.http.ServerConfig;
 
 public final class ShutdownServerModule extends DefaultModule {
 
@@ -23,9 +26,8 @@ public final class ShutdownServerModule extends DefaultModule {
     // TBD: Should this be part of RxNettyModule
     @Provides
     @Singleton
-    @RxNettyShutdown
-    HttpServer getShutdownServer(@RxNettyShutdown ServerConfig config, final LifecycleShutdownSignal shutdown) {
-        System.out.println("Shutdown Config : " + config);
+    @ShutdownServer
+    HttpServer<ByteBuf, ByteBuf> getShutdownServer(@ShutdownServer ServerConfig config, final LifecycleShutdownSignal shutdown) {
         return RxNetty.newHttpServerBuilder(
             config.getServerPort(), 
             new RequestHandler<ByteBuf, ByteBuf>() {
@@ -44,8 +46,9 @@ public final class ShutdownServerModule extends DefaultModule {
     // 'karyon.rxnetty.shutdown'. See helloworld.properties
     @Provides
     @Singleton
-    @RxNettyShutdown
-    ServerConfig getShutdownConfig(ConfigProxyFactory factory) {
+    @ShutdownServer
+    ServerConfig getShutdownConfig(Config config, ConfigProxyFactory factory) {
+        config.accept(new PrintStreamVisitor());
         return factory.newProxy(ShutdownServerConfig.class);
     }
 
