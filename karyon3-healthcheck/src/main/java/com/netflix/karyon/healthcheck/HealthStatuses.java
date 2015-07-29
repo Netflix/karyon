@@ -16,47 +16,23 @@ public final class HealthStatuses {
     
     private static final DateTimeFormatter DATE_TIME_FORMAT = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss z");
     
-    public static HealthStatus starting() {
-        return create(HealthState.States.STARTING, Collections.<String, Object>emptyMap(), null);
-    }
-    
-    public static HealthStatus starting(Map<String, Object> attr) {
-        return create(HealthState.States.STARTING, attr, null);
-    }
-    
     public static HealthStatus healthy() {
-        return create(HealthState.States.HEALTHY, Collections.<String, Object>emptyMap(), null);
+        return create(true, Collections.<String, Object>emptyMap(), null);
     }
     
     public static HealthStatus healthy(Map<String, Object> attr) {
-        return create(HealthState.States.HEALTHY, attr, null);
-    }
-    
-    public static HealthStatus degraded() {
-        return create(HealthState.States.DEGRADED, Collections.<String, Object>emptyMap(), null);
-    }
-    
-    public static HealthStatus degraded(Map<String, Object> attr) {
-        return create(HealthState.States.DEGRADED, attr, null);
+        return create(true, attr, null);
     }
     
     public static HealthStatus unhealthy(Throwable t) {
-        return create(HealthState.States.UNHEALTHY, Collections.<String, Object>emptyMap(), t);
+        return create(false, Collections.<String, Object>emptyMap(), t);
     }
     
     public static HealthStatus unhealthy(Map<String, Object> attr, Throwable t) {
-        return create(HealthState.States.UNHEALTHY, attr, t);
+        return create(false, attr, t);
     }
     
-    public static HealthStatus stopped() {
-        return create(HealthState.States.STOPPED, Collections.<String, Object>emptyMap(), null);
-    }
-    
-    public static HealthStatus stopped(Map<String, Object> attr) {
-        return create(HealthState.States.STOPPED, attr, null);
-    }
-    
-    public static HealthStatus create(final HealthState state, final Map<String, Object> attributes, final Throwable error) {
+    public static HealthStatus create(final boolean isHealthy, final Map<String, Object> attributes, final Throwable error) {
         ZonedDateTime zonedDateTime = ZonedDateTime.now();
         return new HealthStatus() {
             @Override
@@ -65,8 +41,8 @@ public final class HealthStatuses {
             }
 
             @Override
-            public HealthState getState() {
-                return state;
+            public boolean isHealthy() {
+                return isHealthy;
             }
 
             @Override
@@ -87,7 +63,7 @@ public final class HealthStatuses {
             @Override
             public String toString() {
                 StringBuilder sb = new StringBuilder();
-                sb.append("HealthStatus[state=").append(state.name());
+                sb.append("HealthStatus[healthy=").append(isHealthy());
                 if (attributes != null && !attributes.isEmpty()) {
                     sb.append(", attr=[");
                     for (Entry<String, Object> attr : attributes.entrySet()) {

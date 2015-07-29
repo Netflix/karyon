@@ -22,7 +22,7 @@ public interface HealthStatus {
      * Return the state information 
      * @return
      */
-    public HealthState getState();
+    public boolean isHealthy();
     
     /**
      * Exception providing additional information regarding the failure state.  This could be

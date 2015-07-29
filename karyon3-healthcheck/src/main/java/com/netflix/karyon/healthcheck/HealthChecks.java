@@ -19,15 +19,6 @@ public final class HealthChecks {
         };
     }
     
-    public static HealthCheck alwaysStarting() {
-        return new HealthCheck() {
-            @Override
-            public HealthStatus check() {
-                return HealthStatuses.starting();
-            }
-        };
-    }
-    
     public static HealthCheck memoize(final HealthStatus status) {
         return new HealthCheck() {
             @Override

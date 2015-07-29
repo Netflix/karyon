@@ -20,22 +20,17 @@ public class DefaultHealthCheckRegistry implements HealthCheckRegistry {
     private ConcurrentMap<String, HealthCheck> healthChecks = new ConcurrentHashMap<String, HealthCheck>();
     private final long cacheInterval;
     
-    private static class OptionalArguments {
-        @Inject(optional=true)
-        HealthCheckConfiguration config;
-    }
-    
     @Inject
-    public DefaultHealthCheckRegistry(Injector injector, OptionalArguments args) {
-        HealthCheckConfiguration config 
-                = args.config != null 
-                ? args.config 
-                : new DefaultHealthCheckConfiguration();
+    public DefaultHealthCheckRegistry(Injector injector, HealthCheckConfiguration config) {
         cacheInterval = config.getCacheInterval();
         
         for (Binding<HealthCheck> binding : injector.findBindingsByType(TypeLiteral.get(HealthCheck.class))) {
             Key<HealthCheck> key = binding.getKey();
-            if (key.getAnnotationType().equals(Named.class)) {
+            // Ignore the top-level HealthCheck binding
+            if (key.getAnnotationType() == null) {
+                continue;
+            }
+            else if (key.getAnnotationType().equals(Named.class)) {
                 healthChecks.put(
                         ((Named)key.getAnnotation()).value(), 
                         wrap(binding.getProvider().get()));

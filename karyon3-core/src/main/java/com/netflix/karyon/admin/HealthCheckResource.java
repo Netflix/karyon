@@ -1,13 +1,16 @@
 package com.netflix.karyon.admin;
 
+import java.util.Map;
+
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import com.netflix.karyon.healthcheck.HealthCheckManager;
+import com.netflix.karyon.healthcheck.HealthCheckRegistry;
+import com.netflix.karyon.healthcheck.HealthCheckResolver;
 import com.netflix.karyon.healthcheck.HealthStatus;
 
 /**
- * Resource the performs the healthcheck and returns the current result on every call
+ * Admin resource to access all health checks. 
  * 
  * TODO: Throttle updates
  * @author elandau
@@ -15,15 +18,21 @@ import com.netflix.karyon.healthcheck.HealthStatus;
  */
 @Singleton
 public class HealthCheckResource {
-    private final HealthCheckManager manager;
+    private final HealthCheckRegistry registry;
+    private HealthCheckResolver resolver;
 
     @Inject
-    public HealthCheckResource(HealthCheckManager manager) {
-        this.manager = manager;
+    public HealthCheckResource(HealthCheckRegistry registry, HealthCheckResolver resolver) {
+        this.registry = registry;
+        this.resolver = resolver;
     }
     
     // Perform the actual health check
-    public HealthStatus get() {
-        return manager.check();
+    public Map<String, HealthStatus> get() {
+        return resolver.check(registry.getHealthChecks());
+    }
+    
+    public HealthStatus get(String hcName) {
+        return registry.getHealthChecks().get(hcName).check();
     }
 }

@@ -9,21 +9,20 @@ import org.junit.Test;
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
-import com.google.inject.util.Modules;
 
 public class HealthCheckTest {
     public void testNoHealthStatuses() {
-        Injector injector = Guice.createInjector(new HealthCheckModule());
-        HealthCheckManager manager = injector.getInstance(HealthCheckManager.class);
+        Injector injector = Guice.createInjector();
+        CompositeHealthCheck manager = injector.getInstance(CompositeHealthCheck.class);
         
         HealthStatus status = manager.check();
-        Assert.assertEquals(HealthState.States.STARTING, status.getState());
+        Assert.assertEquals(true, status.isHealthy());
     }
     
     @Test
     public void testOneHealthStatus() {
         Map<String, HealthCheck> healthChecks = new HashMap<String, HealthCheck>();
-        Injector injector = Guice.createInjector(Modules.override(new HealthCheckModule()).with(new AbstractModule() {
+        Injector injector = Guice.createInjector(new AbstractModule() {
             @Override
             protected void configure() {
                 bind(HealthCheckRegistry.class).toInstance(new HealthCheckRegistry() {
@@ -33,26 +32,26 @@ public class HealthCheckTest {
                     }
                 });
             }
-        }));
+        });
         
-        HealthCheckManager manager = injector.getInstance(HealthCheckManager.class);
+        CompositeHealthCheck manager = injector.getInstance(CompositeHealthCheck.class);
         
         HealthStatus status = manager.check();
-        Assert.assertEquals(HealthState.States.HEALTHY, status.getState());
+        Assert.assertEquals(true, status.isHealthy());
         
         healthChecks.put("foo", HealthChecks.alwaysHealthy());
         status = manager.check();
-        Assert.assertEquals(HealthState.States.HEALTHY, status.getState());
+        Assert.assertEquals(true, status.isHealthy());
         
         healthChecks.put("foo", HealthChecks.alwaysUnhealthy());
         status = manager.check();
-        Assert.assertEquals(HealthState.States.UNHEALTHY, status.getState());
+        Assert.assertEquals(false, status.isHealthy());
     }
     
     @Test
     public void testMultipleHealthStatuses() {
         Map<String, HealthCheck> healthChecks = new HashMap<String, HealthCheck>();
-        Injector injector = Guice.createInjector(Modules.override(new HealthCheckModule()).with(new AbstractModule() {
+        Injector injector = Guice.createInjector(new AbstractModule() {
             @Override
             protected void configure() {
                 bind(HealthCheckRegistry.class).toInstance(new HealthCheckRegistry() {
@@ -62,30 +61,30 @@ public class HealthCheckTest {
                     }
                 });
             }
-        }));
+        });
         
-        HealthCheckManager manager = injector.getInstance(HealthCheckManager.class);
+        CompositeHealthCheck manager = injector.getInstance(CompositeHealthCheck.class);
         HealthCheckRegistry registry = injector.getInstance(HealthCheckRegistry.class);
         
         HealthStatus status = manager.check();
-        Assert.assertEquals(HealthState.States.HEALTHY, status.getState());
+        Assert.assertEquals(true, status.isHealthy());
         Assert.assertEquals(0, status.getAttributes().size());
         
         healthChecks.put("foo", HealthChecks.alwaysHealthy());
         healthChecks.put("bar", HealthChecks.alwaysHealthy());
         status = manager.check();
-        Assert.assertEquals(HealthState.States.HEALTHY, status.getState());
+        Assert.assertEquals(true, status.isHealthy());
         Assert.assertEquals(2, status.getAttributes().size());
         
         healthChecks.put("foo", HealthChecks.alwaysUnhealthy());
         status = manager.check();
-        Assert.assertEquals(HealthState.States.UNHEALTHY, status.getState());
+        Assert.assertEquals(false, status.isHealthy());
         Assert.assertEquals(2, status.getAttributes().size());
         
         // This will never happen in reality but interesting to test
         healthChecks.remove("foo");
         status = manager.check();
-        Assert.assertEquals(HealthState.States.HEALTHY, status.getState());
+        Assert.assertEquals(true, status.isHealthy());
         Assert.assertEquals(1, status.getAttributes().size());
     }
 }

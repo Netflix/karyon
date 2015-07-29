@@ -11,9 +11,7 @@ import com.netflix.governator.DefaultModule;
 import com.netflix.governator.Governator;
 import com.netflix.governator.LifecycleInjector;
 import com.netflix.karyon.healthcheck.HealthCheck;
-import com.netflix.karyon.healthcheck.HealthCheckModule;
 import com.netflix.karyon.healthcheck.HealthCheckRegistry;
-import com.netflix.karyon.healthcheck.HealthState;
 import com.netflix.karyon.healthcheck.HealthStatus;
 import com.netflix.karyon.healthcheck.HealthStatuses;
 
@@ -21,7 +19,6 @@ public class HealthCheckBindingTest {
     @Test
     public void test() {
         LifecycleInjector injector = Governator.createInjector(
-            new HealthCheckModule(),
             new DefaultModule() {
                 @Provides
                 @Named("hc1")
@@ -38,9 +35,11 @@ public class HealthCheckBindingTest {
         
         HealthCheckRegistry registry = injector.getInstance(HealthCheckRegistry.class);
         HealthCheckResource res = injector.getInstance(HealthCheckResource.class);
-        HealthStatus status = res.get();
         
-        Assert.assertEquals(2, status.getAttributes().size());
-        Assert.assertEquals(HealthState.States.UNHEALTHY, status.getState());
+        HealthStatus status = res.get("hc1");
+        Assert.assertEquals(true, status.isHealthy());
+        
+        status = res.get("hc2");
+        Assert.assertEquals(false, status.isHealthy());
     }
 }
