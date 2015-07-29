@@ -1,11 +1,13 @@
 package com.netflix.karyon.example.jetty;
 
+import javax.inject.Named;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.inject.Provides;
 import com.netflix.archaius.guice.ArchaiusModule;
 import com.netflix.governator.DefaultLifecycleListener;
 import com.netflix.governator.guice.jetty.JettyModule;
@@ -13,6 +15,7 @@ import com.netflix.karyon.Karyon;
 import com.netflix.karyon.admin.rest.AdminServerModule;
 import com.netflix.karyon.admin.ui.AdminUIServerModule;
 import com.netflix.karyon.archaius.ArchaiusKaryonConfiguration;
+import com.netflix.karyon.healthcheck.HealthCheck;
 import com.netflix.karyon.log4j.ArchaiusLog4J2ConfigurationModule;
 import com.netflix.karyon.rxnetty.ShutdownServerModule;
 import com.sun.jersey.guice.JerseyServletModule;
@@ -38,11 +41,15 @@ public class HelloWorldApp extends DefaultLifecycleListener {
                @Override
                protected void configureServlets() {
                    serve("/*").with(GuiceContainer.class);
-                   
                    bind(GuiceContainer.class).asEagerSingleton();
                    bind(ArchaiusEndpoint.class).asEagerSingleton();
-                   
                    bind(HelloWorldApp.class).asEagerSingleton();
+               }
+
+               @Provides
+               @Named("apphealthcheck")
+               public HealthCheck getAppHealthCheck() {
+                   return new MyHealthCheck();
                }
                
                @Override

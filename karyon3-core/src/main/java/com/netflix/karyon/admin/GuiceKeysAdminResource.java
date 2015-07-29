@@ -23,6 +23,7 @@ public class GuiceKeysAdminResource {
         this.injector = injector;
     }
     
+    // /guice-keys/
     public Set<String> get() {
         Set<String> modules = new HashSet<>();
         for (Entry<Key<?>, Binding<?>> binding : injector.getAllBindings().entrySet()) {

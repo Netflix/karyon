@@ -83,7 +83,7 @@ public class ArchaiusLog4J2ConfigurationFactory extends ConfigurationFactory {
             super.doConfigure();
             
             Layout<? extends Serializable> layout = PatternLayout.createLayout(
-                    "NEW %d %-5p %c{1}:%L %x %m [%t]%n",  // pattern
+                    "%d %-5p %c{1}:%L %x %m [%t]%n",  // pattern
                     this,           // config
                     null,           // replace
                     Charsets.UTF_8, // charset

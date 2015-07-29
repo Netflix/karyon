@@ -16,6 +16,7 @@
 
 rootProject.name='karyon'
 include 'karyon3-core'
+include 'karyon3-healthcheck'
 include 'karyon3-archaius2'
 include 'karyon3-examples'
 include 'karyon3-rxnetty'
