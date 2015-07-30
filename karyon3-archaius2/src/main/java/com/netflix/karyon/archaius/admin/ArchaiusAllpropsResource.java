@@ -1,9 +1,5 @@
 package com.netflix.karyon.archaius.admin;
 
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
@@ -21,13 +17,6 @@ public class ArchaiusAllpropsResource {
 
     // allprops/
     public PropsModel get() {
-        Map<String, String> props = new HashMap<>();
-        Iterator<String> iter = config.getKeys();
-        while (iter.hasNext()) {
-            String key = iter.next();
-            props.put(key, (String) config.getString(key, "****"));
-        }
-        
-        return new PropsModel(props);
+        return new ArchaiusPropResource(config).get();
     }
 }

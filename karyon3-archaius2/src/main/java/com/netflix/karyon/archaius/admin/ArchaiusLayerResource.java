@@ -1,6 +1,5 @@
 package com.netflix.karyon.archaius.admin;
 
-import java.util.Arrays;
 import java.util.Collection;
 
 import javax.inject.Inject;
@@ -25,17 +24,12 @@ public class ArchaiusLayerResource {
     }
     
     // props-layers/:id (LIST)
-    public Collection<String> get(String layer) {
-        return Arrays.asList("layer", layer );
-    }
-
-    // props-layer/:id/props
-    public Collection<String> getProps(String layer) {
-        return null;
+    public PropsModel get(String layer) {
+        return new ArchaiusPropResource(config.getConfig(layer)).get();
     }
     
-    // props-layer/:id/props
-    public Collection<String> getProps(String layer, String prefix) {
-        return null;
+    // props-layer/:id/props/:prefix
+    public PropsModel getProps(String layer, String prefix) {
+        return new ArchaiusPropResource(config.getConfig(layer)).get(prefix);
     }
 }

@@ -9,29 +9,28 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import com.netflix.archaius.Config;
-import com.netflix.archaius.config.CompositeConfig;
 
 // props
 @Singleton
 public class ArchaiusPropResource {
-    private final CompositeConfig config;
+    private final Config config;
 
     @Inject
     public ArchaiusPropResource(Config config) {
-        this.config = (CompositeConfig)config;
+        this.config = config;
     }
 
     // props/
-    public Map<String, String> get() {
+    public PropsModel get() {
         return get(config, null);
     }
     
     // props/:regex (MAP)
-    public Map<String, String> get(String regex) {
+    public PropsModel get(String regex) {
         return get(config, regex);
     }
     
-    private Map<String, String> get(Config config, String regex) {
+    private PropsModel get(Config config, String regex) {
         Map<String, String> props = new HashMap<>();
         Iterator<String> iter = config.getKeys();
         while (iter.hasNext()) {
@@ -40,7 +39,7 @@ public class ArchaiusPropResource {
                 props.put(key, (String) config.getString(key, "****"));
             }
         }
-        return props;
+        return new PropsModel(props);
     }
     
     // props/:id/sources (MAP)
