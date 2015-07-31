@@ -53,6 +53,8 @@ public class ArchaiusBootstrapModule extends AbstractModule {
             final @RuntimeLayer SettableConfig runtime, 
             final @LibrariesLayer CompositeConfig libraries, 
             final @DefaultsLayer SettableConfig defaultsLayer,
+            final @ApplicationLayer CompositeConfig applicationLayer,
+            final @RemoteLayer CompositeConfig remoteLayer,
             final PropertyFactory propertyFactory,
             final ConfigProxyFactory proxyFactory,
             final ArchaiusConfiguration archaiusConfig) {
@@ -68,6 +70,9 @@ public class ArchaiusBootstrapModule extends AbstractModule {
                 bind(SettableConfig.class) .annotatedWith(RuntimeLayer.class).toInstance(runtime);
                 bind(SettableConfig.class) .annotatedWith(DefaultsLayer.class).toInstance(defaultsLayer);
                 bind(CompositeConfig.class).annotatedWith(LibrariesLayer.class).toInstance(libraries);
+                bind(CompositeConfig.class).annotatedWith(ApplicationLayer.class).toInstance(applicationLayer);
+                bind(CompositeConfig.class).annotatedWith(RemoteLayer.class).toInstance(remoteLayer);
+                bind(ConfigProxyFactory.class).toInstance(proxyFactory);
             }
             
             @Provides
