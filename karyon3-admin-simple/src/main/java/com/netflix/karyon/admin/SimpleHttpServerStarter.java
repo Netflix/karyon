@@ -16,9 +16,17 @@ public class SimpleHttpServerStarter {
     @Inject
     SimpleHttpServerStarter(HttpServerRegistry registry) {
         for (Entry<String, Provider<SimpleHttpServer>> entry : registry.getServers().entrySet()) {
-            LOG.info("Starting HttpServer '{}'", entry.getKey());
-            SimpleHttpServer server = entry.getValue().get();
-            LOG.info("Started HttpServer '{}' on port {}", entry.getKey(), server.getServerPort());
+            SimpleHttpServer server = null;
+            try {
+                server = entry.getValue().get();
+                LOG.info("Started HttpServer '{}' on port {}", entry.getKey(), server.getServerPort());
+            }
+            catch (Exception e) {
+                if (server != null) {
+                    LOG.info("Unable to start HttpServer '{}' on port {}", entry.getKey(), server.getServerPort());
+                }
+                throw e;
+            }
         }
     }
 }
