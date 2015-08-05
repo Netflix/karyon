@@ -17,7 +17,6 @@
 package com.netflix.karyon.server;
 
 import java.lang.annotation.Annotation;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -25,14 +24,13 @@ import java.util.Set;
 
 import javax.annotation.Nullable;
 
-import com.google.inject.Module;
-import com.netflix.karyon.spi.DefaultHealthCheckHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.Lists;
 import com.google.inject.Binder;
 import com.google.inject.Injector;
+import com.google.inject.Module;
 import com.netflix.config.ConfigurationManager;
 import com.netflix.governator.configuration.ArchaiusConfigurationProvider;
 import com.netflix.governator.configuration.ConfigurationProvider;
@@ -47,6 +45,7 @@ import com.netflix.karyon.server.eureka.HealthCheckInvocationStrategy;
 import com.netflix.karyon.server.utils.KaryonUtils;
 import com.netflix.karyon.spi.Application;
 import com.netflix.karyon.spi.Component;
+import com.netflix.karyon.spi.DefaultHealthCheckHandler;
 import com.netflix.karyon.spi.HealthCheckHandler;
 import com.netflix.karyon.spi.PropertyNames;
 import com.netflix.karyon.spi.ServiceRegistryClient;
@@ -100,18 +99,10 @@ public class ServerBootstrap {
 
     private static final Logger logger = LoggerFactory.getLogger(ServerBootstrap.class);
 
-    private Set<String> allBasePackages;
     private ClasspathScanner classpathScanner;
 
+    @Deprecated
     void initialize() {
-        readBasePackages();
-
-        List<Class<? extends Annotation>> annotations = Lists.newArrayList();
-        annotations.add(Application.class);
-        annotations.add(Component.class);
-
-        logger.info("Creating a new governator classpath scanner with base packages: " + allBasePackages);
-        classpathScanner = LifecycleInjector.createStandardClasspathScanner(allBasePackages, annotations);
     }
 
     /**
@@ -120,8 +111,8 @@ public class ServerBootstrap {
      */
     Injector bootstrap() {
         LifecycleInjectorBuilder builder = newLifecycleInjectorBuilder()
-                .usingBasePackages(allBasePackages)
-                .usingClasspathScanner(classpathScanner)
+                .usingBasePackages(getBasePackages())
+                .usingClasspathScanner(getClasspathScanner())
                 .withBootstrapModule(getBootstrapModule())
                 .withModules(new KaryonGuiceModule());
         Injector injector = createInjector(builder);
@@ -219,7 +210,7 @@ public class ServerBootstrap {
     protected BootstrapModule getBootstrapModule() {
         return new KaryonBootstrapModule();
     }
-
+    
     /**
      * Specify the base packages to be added for governator classpath scanning. This is in case for any reason one does
      * not want to specify a property {@link PropertyNames#SERVER_BOOTSTRAP_BASE_PACKAGES_OVERRIDE} as mentioned in
@@ -229,7 +220,14 @@ public class ServerBootstrap {
      */
     @Nullable
     protected Collection<String> getBasePackages() {
-        List<String> toReturn = new ArrayList<String>();
+        Set<String> toReturn = new HashSet<String>();
+        toReturn.add("com.netflix");
+        toReturn.addAll(getBaseOverridePackages());
+    	return toReturn;
+    }
+    
+    protected final Collection<String> getBaseOverridePackages() {
+        Set<String> toReturn = new HashSet<String>();
         List<Object> basePackages = ConfigurationManager.getConfigInstance().getList(
                 PropertyNames.SERVER_BOOTSTRAP_BASE_PACKAGES_OVERRIDE);
         for (Object basePackage : basePackages) {
@@ -249,21 +247,19 @@ public class ServerBootstrap {
     @Nullable
     @SuppressWarnings("unused")
     protected ClasspathScanner getClasspathScanner() {
+    	if (classpathScanner == null) {
+    		Collection<String> packages = getBasePackages();
+
+            List<Class<? extends Annotation>> annotations = Lists.newArrayList();
+            annotations.add(Application.class);
+            annotations.add(Component.class);
+
+	        logger.info("Creating a new governator classpath scanner with base packages: " + packages);
+	        classpathScanner = LifecycleInjector.createStandardClasspathScanner(packages, annotations);
+    	}
+
         return classpathScanner;
     }
-
-    private void readBasePackages() {
-        Set<String> _allBasePackages = new HashSet<String>();
-        _allBasePackages.add("com.netflix");
-
-        Collection<String> basePackages = getBasePackages();
-        if (null != basePackages) {
-            _allBasePackages.addAll(basePackages);
-        }
-
-        allBasePackages = _allBasePackages;
-    }
-
     protected class KaryonBootstrapModule implements BootstrapModule {
 
         @Override
