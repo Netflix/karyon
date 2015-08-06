@@ -14,14 +14,19 @@
  *      limitations under the License.
  */
 
+plugins {
+    id 'nebula.netflixoss' version '2.2.9'
+    id 'nebula.provided-base' version '2.0.1'
+}
+
 // Establish version and status
 ext.githubProjectName = rootProject.name // Change if github project name is not the same as the root project's name
 
 ext {
-    governatorVersion="1.2.12"
-    archaiusVersion="0.6.0"
+    governatorVersion="1.8.1"
+    archaiusVersion="0.7.1"
     pytheasVersion="1.11"
-    eurekaVersion="1.1.138"
+    eurekaVersion="1.2.0"
 }
 
 if (JavaVersion.current().isJava8Compatible()) {
@@ -32,16 +37,9 @@ if (JavaVersion.current().isJava8Compatible()) {
   }
 }
 
-buildscript {
-    repositories {
-        mavenLocal()
-        mavenCentral() // maven { url 'http://jcenter.bintray.com' }
-    }
-    apply from: file('gradle/buildscript.gradle'), to: buildscript 
-}
-
 allprojects {
     repositories { 
+        mavenLocal()
         mavenCentral() // maven { url: 'http://jcenter.bintray.com' }
     }
 }
@@ -52,18 +50,20 @@ configurations.all {
     }
 }
 
-apply from: file('gradle/convention.gradle')
-apply from: file('gradle/maven.gradle')
-apply from: file('gradle/check.gradle')
-apply from: file('gradle/license.gradle')
-apply from: file('gradle/release.gradle')
-
 subprojects {
+    apply plugin: 'nebula.netflixoss'
+    apply plugin: 'java'
+    apply plugin: 'nebula.provided-base'
+    
     group = "com.netflix.${githubProjectName}" // TEMPLATE: Set to organization of project
 
+	configurations.all {
+        exclude group: "asm", module: "asm"
+        exclude group: "asm", module: "asm-all"
+    }
+    
     dependencies {
         compile 'org.slf4j:slf4j-api:1.6.4'
-        compile 'com.google.guava:guava:11.0.2'
         testCompile 'junit:junit:4.10'
         testRuntime 'org.slf4j:slf4j-simple:1.7.0'
     }
@@ -91,7 +91,9 @@ project(':karyon-core') {
     dependencies {
         compile project(':karyon-eureka')
         compile 'commons-collections:commons-collections:3.2.1'
-        testCompile 'org.mortbay.jetty:jetty:6.1H.22'
+        compile "com.netflix.governator:governator:$governatorVersion"
+        compile "com.netflix.governator:governator-archaius:$governatorVersion"
+        testCompile 'org.eclipse.jetty:jetty-server:7.6.7.v20120910'
     }
 }
 
@@ -99,14 +101,14 @@ project(':karyon-extensions') {
     dependencies {
         compile project(':karyon-core')
         compile 'javax.servlet:servlet-api:2.5'
-        compile 'com.google.inject.extensions:guice-servlet:3.0'
+        compile 'com.google.inject.extensions:guice-servlet:4.0'
     }
 }
 
 project(':karyon-extensions-testsuite') {
     dependencies {
         compile project(':karyon-extensions')
-        compile 'com.google.inject.extensions:guice-servlet:3.0'
+        compile 'com.google.inject.extensions:guice-servlet:4.0'
         compile 'org.jboss.arquillian.core:arquillian-core-spi:1.1.1.Final'
         compile 'org.jboss.arquillian.container:arquillian-container-spi:1.1.1.Final'
         compile 'org.jboss.arquillian.container:arquillian-container-test-spi:1.1.1.Final'
@@ -128,9 +130,9 @@ project(':karyon-admin') {
         compile 'javax.servlet:servlet-api:2.5'
         compile 'org.eclipse.jetty:jetty-server:7.6.7.v20120910'
         compile 'org.eclipse.jetty:jetty-servlet:7.6.7.v20120910'
-        compile 'com.sun.jersey:jersey-servlet:1.11'
-        compile 'com.sun.jersey.contribs:jersey-guice:1.8'
-        compile 'com.google.inject.extensions:guice-servlet:3.0'
+        compile 'com.sun.jersey:jersey-servlet:1.19'
+        compile 'com.sun.jersey.contribs:jersey-guice:1.19'
+        compile 'com.google.inject.extensions:guice-servlet:4.0'
         compile "com.netflix.pytheas:pytheas-core:$pytheasVersion"
         testCompile project(':karyon-core').sourceSets.test.output
         runtime 'org.codehaus.jackson:jackson-mapper-asl:1.9.11'
