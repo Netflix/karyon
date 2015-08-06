@@ -20,7 +20,6 @@ dependencies {
     compile project(':karyon3-admin')
     compile project(':karyon3-healthcheck')
     compile "com.netflix.governator:governator-core:${governator_version}"
-    compile "com.netflix.governator:governator-servlet:${governator_version}"
     
     compile "com.google.inject:guice:${guice_version}"
     compile "com.google.inject.extensions:guice-multibindings:${guice_version}"
