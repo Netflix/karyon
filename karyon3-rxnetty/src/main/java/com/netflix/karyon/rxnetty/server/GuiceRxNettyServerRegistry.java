@@ -1,4 +1,4 @@
-package com.netflix.karyon.rxnetty;
+package com.netflix.karyon.rxnetty.server;
 
 import io.netty.buffer.ByteBuf;
 import io.reactivex.netty.RxNetty;
@@ -90,7 +90,7 @@ public class GuiceRxNettyServerRegistry implements RxNettyHttpServerRegistry {
                             try {
                                 return RxNetty.createHttpServer(config.getServerPort(), new HttpRoutingRequestHandler(binding.getProvider().get()));
                             } catch (Exception e) {
-                                throw new ProvisionException("Error creatinug server " + qualifier.getCanonicalName(), e);
+                                throw new ProvisionException("Error creating server " + qualifier.getCanonicalName(), e);
                             }
                         }
                     });

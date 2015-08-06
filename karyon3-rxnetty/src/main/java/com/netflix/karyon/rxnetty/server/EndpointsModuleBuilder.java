@@ -1,7 +1,4 @@
-package com.netflix.karyon.rxnetty;
-
-import io.netty.buffer.ByteBuf;
-import io.reactivex.netty.protocol.http.server.RequestHandler;
+package com.netflix.karyon.rxnetty.server;
 
 import java.lang.annotation.Annotation;
 import java.util.List;
@@ -14,6 +11,9 @@ import com.google.inject.TypeLiteral;
 import com.google.inject.internal.UniqueAnnotations;
 import com.google.inject.multibindings.Multibinder;
 import com.netflix.karyon.http.UriPatternType;
+
+import io.netty.buffer.ByteBuf;
+import io.reactivex.netty.protocol.http.server.RequestHandler;
 
 public class EndpointsModuleBuilder {
 
@@ -72,8 +72,6 @@ public class EndpointsModuleBuilder {
                             UriPatternType.get(uriPatternType, pattern),
                             endpointInstance);
                     binder.requestInjection(def);
-                    
-                    Multibinder.newSetBinder(binder, HttpEndpointDefinition.class).addBinding().toInstance(def);
                     
                     Multibinder.newSetBinder(binder, HttpEndpointDefinition.class, qualifier).addBinding().toInstance(def);
                 }

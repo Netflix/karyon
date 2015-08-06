@@ -1,4 +1,4 @@
-package com.netflix.karyon.rxnetty;
+package com.netflix.karyon.rxnetty.server;
 
 import com.google.inject.AbstractModule;
 

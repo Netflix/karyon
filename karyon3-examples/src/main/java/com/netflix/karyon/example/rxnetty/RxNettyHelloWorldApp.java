@@ -10,7 +10,7 @@ import com.netflix.karyon.Karyon;
 import com.netflix.karyon.admin.rest.AdminServerModule;
 import com.netflix.karyon.admin.ui.AdminUIServerModule;
 import com.netflix.karyon.archaius.ArchaiusKaryonConfiguration;
-import com.netflix.karyon.rxnetty.RxNettyServerModule;
+import com.netflix.karyon.rxnetty.server.RxNettyServerModule;
 import com.netflix.karyon.rxnetty.shutdown.ShutdownServerModule;
 
 @Singleton

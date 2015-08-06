@@ -11,7 +11,7 @@ import javax.inject.Singleton;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Maps;
-import com.netflix.karyon.rxnetty.RxNettyHttpServerRegistry;
+import com.netflix.karyon.rxnetty.server.RxNettyHttpServerRegistry;
 
 @Singleton
 public class RxNettyAdminResource {
