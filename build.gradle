@@ -19,8 +19,8 @@ subprojects {
     apply plugin: 'nebula.provided-base'
     apply plugin: "jacoco"
 
-    sourceCompatibility = 1.7
-    targetCompatibility = 1.7
+    sourceCompatibility = 1.8
+    targetCompatibility = 1.8
 
     group = "com.netflix.karyon"
 
