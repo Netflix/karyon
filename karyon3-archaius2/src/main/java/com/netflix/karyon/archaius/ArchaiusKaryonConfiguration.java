@@ -28,7 +28,7 @@ public class ArchaiusKaryonConfiguration extends DefaultKaryonConfiguration {
     private static final String DEFAULT_CONFIG_NAME = "application";
     
     public static abstract class Builder<T extends Builder<T>> extends DefaultKaryonConfiguration.Builder<T> {
-        private String                  configName = "application";
+        private String                  configName = DEFAULT_CONFIG_NAME;
         private Config                  applicationOverrides = null;
         private Map<String, Config>     libraryOverrides = new HashMap<>();
         private Set<Config>             runtimeOverrides = new HashSet<>();
