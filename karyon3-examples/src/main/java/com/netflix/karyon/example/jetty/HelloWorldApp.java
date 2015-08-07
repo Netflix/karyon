@@ -17,7 +17,7 @@ import com.netflix.karyon.admin.ui.AdminUIServerModule;
 import com.netflix.karyon.archaius.ArchaiusKaryonConfiguration;
 import com.netflix.karyon.healthcheck.HealthCheck;
 import com.netflix.karyon.log4j.ArchaiusLog4J2ConfigurationModule;
-import com.netflix.karyon.rxnetty.ShutdownServerModule;
+import com.netflix.karyon.rxnetty.shutdown.ShutdownServerModule;
 import com.sun.jersey.guice.JerseyServletModule;
 import com.sun.jersey.guice.spi.container.servlet.GuiceContainer;
 
