@@ -1,5 +1,6 @@
 package com.netflix.karyon.rxnetty.admin;
 
+import io.netty.buffer.ByteBuf;
 import io.reactivex.netty.protocol.http.server.HttpServer;
 
 import java.util.Map;
@@ -10,28 +11,27 @@ import javax.inject.Singleton;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Maps;
-import com.netflix.karyon.rxnetty.RxNettyServerRegistry;
+import com.netflix.karyon.rxnetty.server.RxNettyHttpServerRegistry;
 
 @Singleton
 public class RxNettyAdminResource {
-    private final RxNettyServerRegistry registry;
+    private final RxNettyHttpServerRegistry registry;
     
     public static interface ServerInfo {
         int getPort();
     }
     
     @Inject
-    public RxNettyAdminResource(RxNettyServerRegistry registry) {
+    public RxNettyAdminResource(RxNettyHttpServerRegistry registry) {
         this.registry = registry;
     }
     
-    @SuppressWarnings("rawtypes")
     // rxnetty/
     public Map<String, ServerInfo> get() {
-        return Maps.transformValues(registry.getServers(), new Function<Provider<HttpServer>, ServerInfo>() {
+        return Maps.transformValues(registry.getServers(), new Function<Provider<HttpServer<ByteBuf, ByteBuf>>, ServerInfo>() {
             @Override
-            public ServerInfo apply(final Provider<HttpServer> provider) {
-                final HttpServer server = provider.get();
+            public ServerInfo apply(final Provider<HttpServer<ByteBuf, ByteBuf>> provider) {
+                final HttpServer<ByteBuf, ByteBuf> server = provider.get();
                 return new ServerInfo() {
                     @Override
                     public int getPort() {
@@ -44,12 +44,12 @@ public class RxNettyAdminResource {
     
     // rxnetty/:name
     public ServerInfo get(String name) {
-        Provider<HttpServer> provider = registry.getServers().get(name);
+        Provider<HttpServer<ByteBuf, ByteBuf>> provider = registry.getServers().get(name);
         if (provider == null) {
             return null;
         }
         
-        final HttpServer server = provider.get();
+        final HttpServer<ByteBuf, ByteBuf> server = provider.get();
         return new ServerInfo() {
             @Override
             public int getPort() {
