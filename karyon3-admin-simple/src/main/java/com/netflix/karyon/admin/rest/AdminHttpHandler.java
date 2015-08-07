@@ -17,6 +17,7 @@ import org.slf4j.LoggerFactory;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.netflix.archaius.Config;
 import com.netflix.karyon.admin.AdminServer;
+import com.netflix.karyon.admin.rest.exception.NotFoundException;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 
@@ -80,6 +81,9 @@ public class AdminHttpHandler implements HttpHandler {
                     writeResponse(arg0, 200, mapper.writeValueAsString(response));
                 }
             }
+        }
+        catch (NotFoundException e) {
+            writeResponse(arg0, 404, e.getMessage());
         }
         catch (Exception e) {
             LOG.error("Error processing request '" + path + "'", e);

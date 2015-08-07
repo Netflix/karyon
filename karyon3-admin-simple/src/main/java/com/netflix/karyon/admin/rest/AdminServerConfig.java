@@ -12,7 +12,7 @@ public interface AdminServerConfig extends HttpServerConfig{
     @DefaultValue("8077")
     int port();
     
-    @DefaultValue("http://localhost:8078/index.html?serverId=${@serverId}&resourceId=info")
+    @DefaultValue("http://${@serverId}:8078/index.html?serverId=${@serverId}&resourceId=info")
     String remoteServer();
     
     @DefaultValue("${@serverId}")
