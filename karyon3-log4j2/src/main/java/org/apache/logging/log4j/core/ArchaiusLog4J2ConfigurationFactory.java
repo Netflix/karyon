@@ -1,13 +1,13 @@
 package org.apache.logging.log4j.core;
 
-import java.io.Serializable;
 import java.util.Iterator;
+import java.util.Set;
 
+import javax.annotation.Nullable;
 import javax.inject.Inject;
 
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.core.appender.ConsoleAppender;
 import org.apache.logging.log4j.core.config.Configuration;
 import org.apache.logging.log4j.core.config.ConfigurationFactory;
 import org.apache.logging.log4j.core.config.ConfigurationSource;
@@ -15,9 +15,9 @@ import org.apache.logging.log4j.core.config.LoggerConfig;
 import org.apache.logging.log4j.core.config.Order;
 import org.apache.logging.log4j.core.config.plugins.Plugin;
 import org.apache.logging.log4j.core.config.xml.XmlConfiguration;
-import org.apache.logging.log4j.core.layout.PatternLayout;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Charsets;
 import com.netflix.archaius.Config;
 
 /**
@@ -42,14 +42,25 @@ import com.netflix.archaius.Config;
 @Plugin(name = "ArchaiusLog4j2ConfigurationFactory", category = ConfigurationFactory.CATEGORY)
 @Order(10)
 public class ArchaiusLog4J2ConfigurationFactory extends ConfigurationFactory {
+	
     
     public static final String[] SUFFIXES = new String[] {".xml", "*"};
     
     private static Config config;
+    private static Set<Log4jConfiguration> appenders;
+    
+    private static final Logger LOG = LoggerFactory.getLogger(ArchaiusLog4J2ConfigurationFactory.class);
     
     @Inject
     public static void initialize(Config _config) {
         config = _config;
+        LoggerContext ctx = (LoggerContext) LogManager.getContext(false);
+        ctx.reconfigure();
+    }
+    
+    @Inject()
+    public static void initialize(@Nullable Set<Log4jConfiguration> _appenders) {
+        appenders=_appenders;
         LoggerContext ctx = (LoggerContext) LogManager.getContext(false);
         ctx.reconfigure();
     }
@@ -61,14 +72,19 @@ public class ArchaiusLog4J2ConfigurationFactory extends ConfigurationFactory {
 
     @Override
     public Configuration getConfiguration(ConfigurationSource source) {
-        if (config != null) {
-            System.out.println("Creating archaius based Configuration");
-            return new ArchaiusLog4j2Configuration(source);
-        }
-        else {
-            System.out.println("Creating default XmlConfiguration");
-            return new XmlConfiguration(source);
-        }
+    	
+		XmlConfiguration result;
+
+		if (config != null) {
+			LOG.info("Creating archaius based Configuration");
+			result = new ArchaiusLog4j2Configuration(source);
+		} else {
+			LOG.info("Creating default XmlConfiguration");
+			result = new XmlConfiguration(source);
+		}
+
+	
+        return result;
     }
     
     public static class ArchaiusLog4j2Configuration extends XmlConfiguration {
@@ -81,22 +97,12 @@ public class ArchaiusLog4J2ConfigurationFactory extends ConfigurationFactory {
         @Override
         protected void doConfigure() {
             super.doConfigure();
-            
-            Layout<? extends Serializable> layout = PatternLayout.createLayout(
-                    "%d %-5p %c{1}:%L %x %m [%t]%n",  // pattern
-                    this,           // config
-                    null,           // replace
-                    Charsets.UTF_8, // charset
-                    true,           // alwaysWriteExceptions
-                    false,          // noConsoleNoAnsi
-                    null,           // header
-                    null);          // footer
-
-            // Add the Console appender
-            Appender appender;
-            appender = ConsoleAppender.createAppender(layout, null, null, "Console",  null,  null);
-            appender.start();
-            getRootLogger().addAppender(appender, Level.INFO, null);
+ 
+            if (appenders != null) {
+    			for (Log4jConfiguration appender : appenders) {
+    				appender.doConfigure(this);
+    			}
+    		}
             
             // TOD: Get materialized view
             
@@ -106,7 +112,7 @@ public class ArchaiusLog4J2ConfigurationFactory extends ConfigurationFactory {
             while (iter.hasNext()) {
                 String name = iter.next();
                 String value = loggerProps.getString(name); // TODO: Full log4j.logger value parsing
-                System.out.println("Setting logger " + name + " => " + value);
+                LOG.debug("Setting logger " + name + " => " + value);
                 this.addLogger(name, new LoggerConfig(name, Level.getLevel(value), true));
             }
         }
