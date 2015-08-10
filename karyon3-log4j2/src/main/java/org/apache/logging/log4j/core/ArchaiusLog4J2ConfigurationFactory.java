@@ -3,7 +3,6 @@ package org.apache.logging.log4j.core;
 import java.util.Iterator;
 import java.util.Set;
 
-import javax.annotation.Nullable;
 import javax.inject.Inject;
 
 import org.apache.logging.log4j.Level;
@@ -47,20 +46,14 @@ public class ArchaiusLog4J2ConfigurationFactory extends ConfigurationFactory {
     public static final String[] SUFFIXES = new String[] {".xml", "*"};
     
     private static Config config;
-    private static Set<Log4jConfiguration> appenders;
+    private static Set<Log4jConfigurator> configurators;
     
     private static final Logger LOG = LoggerFactory.getLogger(ArchaiusLog4J2ConfigurationFactory.class);
     
     @Inject
-    public static void initialize(Config _config) {
+    public static void initialize(Config _config, Set<Log4jConfigurator> _configurators) {
         config = _config;
-        LoggerContext ctx = (LoggerContext) LogManager.getContext(false);
-        ctx.reconfigure();
-    }
-    
-    @Inject()
-    public static void initialize(@Nullable Set<Log4jConfiguration> _appenders) {
-        appenders=_appenders;
+        configurators=_configurators;
         LoggerContext ctx = (LoggerContext) LogManager.getContext(false);
         ctx.reconfigure();
     }
@@ -72,18 +65,17 @@ public class ArchaiusLog4J2ConfigurationFactory extends ConfigurationFactory {
 
     @Override
     public Configuration getConfiguration(ConfigurationSource source) {
-    	
-		XmlConfiguration result;
 
-		if (config != null) {
-			LOG.info("Creating archaius based Configuration");
-			result = new ArchaiusLog4j2Configuration(source);
-		} else {
-			LOG.info("Creating default XmlConfiguration");
-			result = new XmlConfiguration(source);
-		}
+        XmlConfiguration result;
 
-	
+        if (config != null) {
+            LOG.info("Creating archaius based Configuration");
+            result = new ArchaiusLog4j2Configuration(source);
+        } else {
+            LOG.info("Creating default XmlConfiguration");
+            result = new XmlConfiguration(source);
+        }
+
         return result;
     }
     
@@ -98,14 +90,14 @@ public class ArchaiusLog4J2ConfigurationFactory extends ConfigurationFactory {
         protected void doConfigure() {
             super.doConfigure();
  
-            if (appenders != null) {
-    			for (Log4jConfiguration appender : appenders) {
-    				appender.doConfigure(this);
-    			}
-    		}
-            
+            if (configurators != null) {
+                for (Log4jConfigurator configurator : configurators) {
+                    configurator.doConfigure(this);
+                }
+            }
+
             // TOD: Get materialized view
-            
+
             // Set up all the log level overrides
             Config loggerProps = config.getPrefixedView("log4j.logger");
             Iterator<String> iter = loggerProps.getKeys();
