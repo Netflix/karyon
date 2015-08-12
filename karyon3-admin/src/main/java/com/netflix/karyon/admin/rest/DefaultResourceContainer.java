@@ -14,6 +14,8 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.netflix.karyon.admin.rest.exception.NotFoundException;
+
 public class DefaultResourceContainer implements ResourceContainer {
     private static final Logger LOG = LoggerFactory.getLogger(DefaultResourceContainer.class);
     
@@ -163,23 +165,23 @@ public class DefaultResourceContainer implements ResourceContainer {
                     String sub = iter.next().toLowerCase();
                     current = current.getChild(sub);
                     if (current == null) {
-                        throw new Exception(String.format("Sub resource '%s' does not exist", sub));
+                        throw new NotFoundException(String.format("Sub resource '%s' does not exist", sub));
                     }
                 }
                 else {
                     if (current.findInvoker == null) {
-                        throw new Exception("Invoker not found for " + parts);
+                        throw new NotFoundException("Invoker not found for " + parts);
                     }
                     return current.findInvoker.invoke(args);
                 }
             }
             
             if (current.listInvoker == null) {
-                throw new Exception("Invoker not found for " + parts);
+                throw new NotFoundException("Invoker not found for " + parts);
             }
             return current.listInvoker.invoke(args);
         }
-        throw new Exception("Resource not found for " + resource);
+        throw new NotFoundException("Resource not found for " + resource);
     }
     
     @Override

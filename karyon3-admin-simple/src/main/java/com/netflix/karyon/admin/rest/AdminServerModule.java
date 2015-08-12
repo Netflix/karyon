@@ -1,13 +1,15 @@
 package com.netflix.karyon.admin.rest;
 
 import java.io.IOException;
-import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 import javax.inject.Singleton;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
+import com.google.inject.multibindings.MapBinder;
 import com.netflix.archaius.ConfigProxyFactory;
 import com.netflix.karyon.admin.AdminModule;
 import com.netflix.karyon.admin.AdminServer;
@@ -21,6 +23,8 @@ public final class AdminServerModule extends AbstractModule {
     protected void configure() {
         install(new AdminModule());
         install(new HttpServerModule());
+        
+        MapBinder.newMapBinder(binder(), String.class, HttpHandler.class, AdminServer.class);
     }
     
     // This binds our admin server to Archaius configuration using the prefix
@@ -41,8 +45,11 @@ public final class AdminServerModule extends AbstractModule {
     @Provides
     @Singleton
     @AdminServer
-    protected SimpleHttpServer getAdminServer(@AdminServer HttpServerConfig config, AdminHttpHandler handler) throws IOException {
-        return new SimpleHttpServer(config, Collections.<String, HttpHandler>singletonMap("/", handler));
+    protected SimpleHttpServer getAdminServer(@AdminServer HttpServerConfig config, @AdminServer Map<String, HttpHandler> otherHandlers, AdminHttpHandler adminHandler) throws IOException {
+        LinkedHashMap<String, HttpHandler> handlers = new LinkedHashMap<>();
+        handlers.putAll(otherHandlers);
+        handlers.put("/", adminHandler);
+        return new SimpleHttpServer(config, handlers);
     }
     
     @Provides
