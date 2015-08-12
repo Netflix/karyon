@@ -31,7 +31,7 @@ public class CompositeHealthCheckTest {
         });
         
         HealthCheck hc = injector.getInstance(HealthCheck.class);
-        Assert.assertTrue(hc.check().isHealthy());
+        Assert.assertTrue(hc.check().join().isHealthy());
         
     }
     
@@ -46,7 +46,7 @@ public class CompositeHealthCheckTest {
         });
         
         HealthCheck hc = injector.getInstance(HealthCheck.class);
-        Assert.assertTrue(hc.check().isHealthy());
+        Assert.assertTrue(hc.check().join().isHealthy());
         
     }
     
@@ -61,7 +61,7 @@ public class CompositeHealthCheckTest {
         });
         
         HealthCheck hc = injector.getInstance(HealthCheck.class);
-        Assert.assertFalse(hc.check().isHealthy());
+        Assert.assertFalse(hc.check().join().isHealthy());
     }
     
     @Test
@@ -76,7 +76,7 @@ public class CompositeHealthCheckTest {
         });
         
         HealthCheck hc = injector.getInstance(HealthCheck.class);
-        HealthStatus status = hc.check();
+        HealthStatus status = hc.check().join();
         Assert.assertFalse(status.isHealthy());
         Assert.assertEquals(2, status.getAttributes().size());
         

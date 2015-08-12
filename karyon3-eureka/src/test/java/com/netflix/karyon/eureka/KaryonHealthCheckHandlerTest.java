@@ -3,6 +3,8 @@ package com.netflix.karyon.eureka;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import junit.framework.Assert;
+
 import org.junit.Test;
 
 import com.google.inject.AbstractModule;
@@ -11,8 +13,10 @@ import com.netflix.appinfo.HealthCheckHandler;
 import com.netflix.appinfo.InstanceInfo.InstanceStatus;
 import com.netflix.archaius.guice.ArchaiusModule;
 import com.netflix.governator.Governator;
-
-import junit.framework.Assert;
+import com.netflix.karyon.ApplicationLifecycle;
+import com.netflix.karyon.LifecycleState;
+import com.netflix.karyon.ManualApplicationLifecycleState;
+import com.netflix.karyon.healthcheck.HealthCheck;
 
 public class KaryonHealthCheckHandlerTest {
 	@Singleton
@@ -38,7 +42,7 @@ public class KaryonHealthCheckHandlerTest {
 	@Test
 	public void testSuccessful() {
 		final Tracker tracker = new Tracker();
-		Injector injector = Governator.createInjector(new ArchaiusModule(), new AbstractModule() {
+		Injector injector = Governator.createInjector(new ArchaiusModule(), new EurekaHealthCheckModule(), new AbstractModule() {
 			@Override
 			protected void configure() {
 		        bind(HealthCheckHandler.class).to(KaryonHealthCheckHandler.class);
@@ -56,10 +60,9 @@ public class KaryonHealthCheckHandlerTest {
 		final Tracker tracker = new Tracker();
 		Injector injector = null;
 		try {
-			injector = Governator.createInjector(new ArchaiusModule(), new AbstractModule() {
+			injector = Governator.createInjector(new ArchaiusModule(), new EurekaHealthCheckModule(), new AbstractModule() {
 				@Override
 				protected void configure() {
-			        bind(HealthCheckHandler.class).to(KaryonHealthCheckHandler.class);
 					bind(Tracker.class).toInstance(tracker);
 					requestInjection(tracker);
 					bind(FailedSingleton.class).asEagerSingleton();
@@ -71,5 +74,51 @@ public class KaryonHealthCheckHandlerTest {
 			Assert.assertEquals(InstanceStatus.DOWN, tracker.handler.getStatus(InstanceStatus.STARTING));
 
 		}
+	}
+	
+	@Test
+	public void testManualStart() {
+	    final Tracker tracker = new Tracker();
+        Injector injector = Governator.createInjector(new ArchaiusModule(), new EurekaHealthCheckModule(), new AbstractModule() {
+            @Override
+            protected void configure() {
+                bind(ApplicationLifecycle.class).to(ManualApplicationLifecycleState.class);
+                bind(Tracker.class).toInstance(tracker);
+                requestInjection(tracker);
+            }
+        });
+        
+        Assert.assertEquals(InstanceStatus.STARTING, tracker.initialStatus);
+        Assert.assertEquals(InstanceStatus.STARTING, tracker.handler.getStatus(InstanceStatus.STARTING));
+        
+        HealthCheck hc = injector.getInstance(HealthCheck.class);
+        HealthCheckHandler handler = injector.getInstance(HealthCheckHandler.class);
+        ApplicationLifecycle status = injector.getInstance(ApplicationLifecycle.class);
+        
+        Assert.assertEquals(LifecycleState.Starting, status.getState());
+        Assert.assertEquals(true, hc.check().join().isHealthy());
+        Assert.assertEquals(InstanceStatus.STARTING, handler.getStatus(InstanceStatus.STARTING));
+
+        // Now mark the app as UP
+        status.setStarted();
+        
+        Assert.assertEquals(LifecycleState.Started, status.getState());
+        Assert.assertEquals(true, hc.check().join().isHealthy());
+        Assert.assertEquals(InstanceStatus.UP, handler.getStatus(InstanceStatus.STARTING));
+
+        // Now mark the app as FAILED
+        status.setFailed();
+        
+        Assert.assertEquals(LifecycleState.Failed, status.getState());
+        Assert.assertEquals(true, hc.check().join().isHealthy());
+        Assert.assertEquals(InstanceStatus.DOWN, handler.getStatus(InstanceStatus.STARTING));
+
+        // Now mark the app as STOPPED
+        status.setStopped();
+        
+        Assert.assertEquals(LifecycleState.Stopped, status.getState());
+        Assert.assertEquals(true, hc.check().join().isHealthy());
+        Assert.assertEquals(InstanceStatus.OUT_OF_SERVICE, handler.getStatus(InstanceStatus.STARTING));
+
 	}
 }

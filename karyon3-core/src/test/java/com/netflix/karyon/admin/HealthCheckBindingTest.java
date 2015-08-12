@@ -12,8 +12,8 @@ import com.netflix.governator.Governator;
 import com.netflix.governator.LifecycleInjector;
 import com.netflix.karyon.healthcheck.HealthCheck;
 import com.netflix.karyon.healthcheck.HealthCheckRegistry;
+import com.netflix.karyon.healthcheck.HealthChecks;
 import com.netflix.karyon.healthcheck.HealthStatus;
-import com.netflix.karyon.healthcheck.HealthStatuses;
 
 public class HealthCheckBindingTest {
     @Test
@@ -23,13 +23,13 @@ public class HealthCheckBindingTest {
                 @Provides
                 @Named("hc1")
                 public HealthCheck getHealthCheck1() {
-                    return () -> HealthStatuses.healthy(); 
+                    return HealthChecks.alwaysHealthy(); 
                 }
                 
                 @Provides
                 @Named("hc2")
                 public HealthCheck getHealthCheck2() {
-                    return () -> HealthStatuses.unhealthy(new Exception("foo")); 
+                    return HealthChecks.alwaysHealthy(); 
                 }
             });
         

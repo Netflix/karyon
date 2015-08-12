@@ -4,6 +4,14 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
+/**
+ * Default implementation for aggregating multiple resolved health statueses into a single
+ * HealthStatus where the composite HealthStatus is healthy only if ALL child HealthStatus's
+ * are healthy.
+ * 
+ * @author elandau
+ *
+ */
 public class DefaultHealthCheckAggregator implements HealthCheckAggregator {
 
     @Override
