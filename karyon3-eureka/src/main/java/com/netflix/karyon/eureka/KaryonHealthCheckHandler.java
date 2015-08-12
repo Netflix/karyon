@@ -47,7 +47,7 @@ public class KaryonHealthCheckHandler implements HealthCheckHandler {
         switch (applicationLifecycle.getState()) {
         case Starting:
             try {
-                return !healthCheck.check().get(config.getTimeout(), TimeUnit.MILLISECONDS).isHealthy()
+                return !healthCheck.check().get(config.getTimeoutInMillis(), TimeUnit.MILLISECONDS).isHealthy()
                         ? InstanceStatus.DOWN
                         : InstanceStatus.STARTING;
             } 
@@ -57,7 +57,7 @@ public class KaryonHealthCheckHandler implements HealthCheckHandler {
             
         case Started:
             try {
-                return healthCheck.check().get(config.getTimeout(), TimeUnit.MILLISECONDS).isHealthy() 
+                return healthCheck.check().get(config.getTimeoutInMillis(), TimeUnit.MILLISECONDS).isHealthy() 
                         ? InstanceStatus.UP 
                         : InstanceStatus.DOWN;
             }

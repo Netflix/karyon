@@ -1,13 +1,11 @@
 package com.netflix.karyon.example.jetty;
 
-import javax.inject.Named;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.inject.Provides;
 import com.netflix.archaius.guice.ArchaiusModule;
 import com.netflix.governator.DefaultLifecycleListener;
 import com.netflix.governator.guice.jetty.JettyModule;
@@ -44,12 +42,7 @@ public class HelloWorldApp extends DefaultLifecycleListener {
                    bind(GuiceContainer.class).asEagerSingleton();
                    bind(ArchaiusEndpoint.class).asEagerSingleton();
                    bind(HelloWorldApp.class).asEagerSingleton();
-               }
-
-               @Provides
-               @Named("apphealthcheck")
-               public HealthCheck getAppHealthCheck() {
-                   return new MyHealthCheck();
+                   bind(HealthCheck.class).to(FooServiceHealthCheck.class);
                }
                
                @Override
