@@ -6,6 +6,8 @@ import javax.ws.rs.Path;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.netflix.archaius.config.MapConfig;
+import com.netflix.archaius.exceptions.ConfigException;
 import com.netflix.archaius.guice.ArchaiusModule;
 import com.netflix.governator.DefaultLifecycleListener;
 import com.netflix.governator.GovernatorFeatures;
@@ -25,11 +27,17 @@ import com.sun.jersey.guice.spi.container.servlet.GuiceContainer;
 public class HelloWorldApp extends DefaultLifecycleListener {
     private static final Logger LOG = LoggerFactory.getLogger(HelloWorldApp.class);
     
-    public static void main(String[] args) throws InterruptedException {
+    public static void main(String[] args) throws InterruptedException, ConfigException {
 
         Karyon.createInjector(
             ArchaiusKaryonConfiguration.builder()
                 .withConfigName("helloworld")
+                .withApplicationOverrides(MapConfig.builder()
+                    .put("@serverId", "localhost")
+                    .put("@appId", "Hello World!")
+                    .put("@region", "us-east-1")
+                    .build()
+                    )
                 .disable(GovernatorFeatures.SHUTDOWN_ON_ERROR)
                 .build(),
             new ArchaiusLog4J2ConfigurationModule(),
@@ -47,6 +55,8 @@ public class HelloWorldApp extends DefaultLifecycleListener {
                    bind(ArchaiusEndpoint.class).asEagerSingleton();
                    bind(HelloWorldApp.class).asEagerSingleton();
                    bind(HealthCheck.class).to(FooServiceHealthCheck.class);
+                   
+                   bind(LongDelayService.class).asEagerSingleton();
                }
                
                @Override

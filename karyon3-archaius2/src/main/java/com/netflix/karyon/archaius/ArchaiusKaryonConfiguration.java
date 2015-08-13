@@ -33,6 +33,7 @@ public class ArchaiusKaryonConfiguration extends DefaultKaryonConfiguration {
         private Map<String, Config>     libraryOverrides = new HashMap<>();
         private Set<Config>             runtimeOverrides = new HashSet<>();
         private Set<Config>             defaults = new HashSet<>();
+        private Properties              props = new Properties();
         
         /**
          * Configuration name to use for property loading.  Default configuration
@@ -45,6 +46,11 @@ public class ArchaiusKaryonConfiguration extends DefaultKaryonConfiguration {
          */
         public T withConfigName(String value) {
             this.configName = value;
+            return This();
+        }
+        
+        public T withApplicationName(String value) {
+            props.put("@appId", value);
             return This();
         }
         
@@ -85,6 +91,13 @@ public class ArchaiusKaryonConfiguration extends DefaultKaryonConfiguration {
         }
         
         public ArchaiusKaryonConfiguration build() {
+            if (!props.isEmpty()) {
+                try {
+                    withRuntimeOverrides(MapConfig.from(props));
+                } catch (ConfigException e) {
+                    throw new RuntimeException(e);
+                }
+            }
             return new ArchaiusKaryonConfiguration(this);
         };
     }

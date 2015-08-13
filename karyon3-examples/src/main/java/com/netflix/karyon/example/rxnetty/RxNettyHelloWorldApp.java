@@ -23,9 +23,11 @@ public class RxNettyHelloWorldApp extends DefaultLifecycleListener {
             ArchaiusKaryonConfiguration.builder()
                 .withConfigName("rxnetty-helloworld")
                 .withApplicationOverrides(MapConfig.builder()
-                        .put("@serverId", "localhost")
-                        .build()
-                        )
+                    .put("@serverId", "localhost")
+                    .put("@appId", "RxNettyHelloWorld")
+                    .put("@region", "us-east-1")
+                    .build()
+                    )
                 .build(),
             new ArchaiusModule(),
             new AdminServerModule(),

@@ -62,7 +62,7 @@
          });
          
         $.get('http://' + host + ':8077/meta', function (meta) { 
-            $('#header-appname').html(meta.appname);
+            $('#header-appname').html(meta.appId);
             $('#header-region').html(meta.region);
             $('#header-serverId').html(meta.serverId);
          });
