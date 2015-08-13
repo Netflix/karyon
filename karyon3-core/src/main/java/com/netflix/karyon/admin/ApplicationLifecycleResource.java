@@ -29,7 +29,9 @@ public class ApplicationLifecycleResource {
 
             @Override
             public String getReason() {
-                return manager.getFailureReason().toString();
+                return manager.getFailureReason() == null 
+                    ? ""
+                    : manager.getFailureReason().toString();
             }
         };
     }

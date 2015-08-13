@@ -4,6 +4,13 @@
     var host = hash[0];
     var tab = hash[1];
 
+    var stateLabel = {
+       'Starting' : 'label-primary',
+       'Started'  : 'label-success',
+       'Stopped'  : 'label-default',
+       'Failed'   : 'label-danger',
+    };
+
     function updateSidebar(sammy, context, h, t) {
         var changed = false;
         if (h !== host) {
@@ -38,6 +45,22 @@
             });
         }
     }
+    
+    function updateHeader(sammy, context, h, t) {
+        $.get('http://' + host + ':8077/lifecycle', function (lifecycle) { 
+                 $('#header-lifecycle-state').html(lifecycle.state);
+                 $('#header-lifecycle-state').addClass(stateLabel[lifecycle.state]);
+             });
+             
+        $.get('http://' + host + ':8077/health', function (health) { 
+            if (health.healthy === true) {
+                $('#header-healthy').html("Healthy").addClass('label-success');
+            }
+            else {
+                $('#header-healthy').html("Not Healthy").addClass('label-danger');
+            }
+         });
+    }
 
     function toList(obj) {
         var items = [];
@@ -60,57 +83,58 @@
     }
 
     var app = $.sammy('#main-content', function() {
-
-    this.post('#/', function(context) {
-        window.location = '#/' + this.params['host'];
-    });
-
-    this.get('#/:host', function(context) {
-        window.location = '#/' + this.params['host'] + '/appinfo';
-    });
-
-    this.get('#/:host/:tab', function(context) {
-        var params = this.params;
-        updateSidebar(this, context, params['host'], params['tab']);
-        this.load(
-               params['tab'] + ".html", 
-               {
-                   error : function(response) {
-                       $.get('http://' + params['host'] + ':8077/' + toPath(params['tab']), function(json) { 
-                           var code = JSON.stringify(json, null, 2);
-                           $.get('code.template', function (template) {
-                               var rendered = Mustache.render(template, {'lang': 'json', 'code': code});
-                               $('#main-content').html(rendered);
-                               $('#main-content').each(function (i, block) {
-                               hljs.highlightBlock(block);
+    
+        this.post('#/', function(context) {
+            window.location = '#/' + this.params['host'];
+        });
+    
+        this.get('#/:host', function(context) {
+            window.location = '#/' + this.params['host'] + '/appinfo';
+        });
+    
+        this.get('#/:host/:tab', function(context) {
+            var params = this.params;
+            updateSidebar(this, context, params['host'], params['tab']);
+            updateHeader(this, context, params['host'], params['tab']);
+            this.load(
+                   params['tab'] + ".html", 
+                   {
+                       error : function(response) {
+                           $.get('http://' + params['host'] + ':8077/' + toPath(params['tab']), function(json) { 
+                               var code = JSON.stringify(json, null, 2);
+                               $.get('code.template', function (template) {
+                                   var rendered = Mustache.render(template, {'lang': 'json', 'code': code});
+                                   $('#main-content').html(rendered);
+                                   $('#main-content').each(function (i, block) {
+                                   hljs.highlightBlock(block);
+                                   });
                                });
+                           })
+                           .fail(function() {
+                               $('#main-content').html("Error loading page " + params['tab']);
                            });
-                       })
-                       .fail(function() {
-                           $('#main-content').html("Error loading page " + params['tab']);
-                       });
+                       }
                    }
-               }
-            )
-            .then(function(html) {
-               $('#main-content').html(html);
-            });
-    });
-
-    this.get('#/:host/:tab/:query', function(context) {
-        var params = this.params;
-        updateSidebar(this, context, params['host'], params['tab']);
-        console.log('query [' + params['query'] + ']');
-        this.load('http://' + params['host'] + ':8077/' + params['tab'])
-            .then(function (json) {
-                var obj = JSON.parse(json);
-                showCode(obj);
+                )
+                .then(function(html) {
+                   $('#main-content').html(html);
+                });
+        });
+    
+        this.get('#/:host/:tab/:query', function(context) {
+            var params = this.params;
+            updateSidebar(this, context, params['host'], params['tab']);
+            console.log('query [' + params['query'] + ']');
+            this.load('http://' + params['host'] + ':8077/' + params['tab'])
+                .then(function (json) {
+                    var obj = JSON.parse(json);
+                    showCode(obj);
+                });
             });
         });
-    });
       
-    $(function() {
-        app.run('#/');
-    });  
-
-})(jQuery);
+        $(function() {
+            app.run('#/');
+        });  
+    }
+)(jQuery);
