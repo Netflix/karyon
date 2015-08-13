@@ -1,15 +1,16 @@
 package com.netflix.karyon.healthcheck;
 
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 
 import javax.inject.Singleton;
 
 import com.google.inject.Inject;
 
 /**
- * Health check that is derived from multiple health checks.  The
+ * {@link HealthCheck} that is derived from multiple health checks.  The
  * default implementation returns the worst health status from any 
- * health checks registered via the HealthCheckRegistry.  It is however
+ * health checks registered via the {@link HealthCheckRegistry}.  It is however
  * possible to manually construct the CompositeHealthCheck form a subset
  * of known healthchecks as an opt in way to compose multiple health checks.
  * 
@@ -38,7 +39,7 @@ import com.google.inject.Inject;
 @Singleton
 public class CompositeHealthCheck implements HealthCheck {
     private final HealthCheckAggregator aggregator;
-    private final HealthCheckResolver resolver;
+    private final HealthCheckInvoker resolver;
     private final HealthCheckRegistry registry;
 
     public CompositeHealthCheck(Map<String, HealthCheck> healthChecks) {
@@ -54,11 +55,11 @@ public class CompositeHealthCheck implements HealthCheck {
     }
     
     @Inject
-    public CompositeHealthCheck(HealthCheckRegistry registry, HealthCheckResolver resolver, HealthCheckAggregator aggregator) {
+    public CompositeHealthCheck(HealthCheckRegistry registry, HealthCheckInvoker resolver, HealthCheckAggregator aggregator) {
         this.registry = registry;
         
         this.resolver = resolver == null 
-                ? new DefaultHealthCheckResolver()
+                ? new DefaultHealthCheckInvoker()
                 : resolver;
         this.aggregator = aggregator == null 
                 ? new DefaultHealthCheckAggregator()
@@ -66,7 +67,9 @@ public class CompositeHealthCheck implements HealthCheck {
     }
     
     @Override
-    public HealthStatus check() {
-        return aggregator.aggregate(resolver.check(registry.getHealthChecks()));
+    public CompletableFuture<HealthStatus> check() {
+        return resolver
+            .check(registry.getHealthChecks())
+            .thenApply((statuses) -> aggregator.aggregate(statuses));
     }
 }

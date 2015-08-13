@@ -15,6 +15,12 @@ import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.TypeLiteral;
 
+/**
+ * HealthCheck registry that derives all available health checks from Guice bindings.
+ * 
+ * @author elandau
+ *
+ */
 @Singleton
 public class DefaultHealthCheckRegistry implements HealthCheckRegistry {
     private ConcurrentMap<String, HealthCheck> healthChecks = new ConcurrentHashMap<String, HealthCheck>();
@@ -30,16 +36,19 @@ public class DefaultHealthCheckRegistry implements HealthCheckRegistry {
             if (key.getAnnotationType() == null) {
                 continue;
             }
+            // @Named
             else if (key.getAnnotationType().equals(Named.class)) {
                 healthChecks.put(
                         ((Named)key.getAnnotation()).value(), 
                         wrap(binding.getProvider().get()));
             }
+            // @Named (guice annotation)
             else if (key.getAnnotationType().equals(com.google.inject.name.Named.class)) {
                 healthChecks.put(
                         ((com.google.inject.name.Named)key.getAnnotation()).value(), 
                         wrap(binding.getProvider().get()));
             }
+            // Qualified annotation, multibinding, or set binding
             else {
                 healthChecks.put(
                         key.getAnnotation().toString(), 

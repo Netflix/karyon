@@ -1,8 +1,10 @@
 package com.netflix.karyon.healthcheck;
 
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.function.BiConsumer;
 
 /**
  * Health check implementation that caches the response
@@ -23,7 +25,7 @@ public class CachingHealthCheck implements HealthCheck {
     }
     
     @Override
-    public HealthStatus check() {
+    public CompletableFuture<HealthStatus> check() {
         long lastExpireTime = this.expireTime.get();
         long currentTime  = System.nanoTime();
         
@@ -31,19 +33,29 @@ public class CachingHealthCheck implements HealthCheck {
             long expireTime = currentTime + interval;
             if (this.expireTime.compareAndSet(lastExpireTime, expireTime)) {
                 if (busy.compareAndSet(false, true)) {
-                    try {
-                        status = delegate.check();
-                    }
-                    catch (Exception e) {
-                        status = HealthStatuses.unhealthy(e);
-                    }
-                    finally {
-                        busy.set(false);
-                    }
+                    return delegate.check().whenComplete(new BiConsumer<HealthStatus, Throwable>() {
+                        @Override
+                        public void accept(HealthStatus t, Throwable u) {
+                            try {
+                                if (t != null) {
+                                    status = t;
+                                }
+                                else if (u != null) {
+                                    status = HealthStatuses.unhealthy(u);
+                                }
+                                else {
+                                    status = HealthStatuses.unhealthy(new Exception("Unknown"));
+                                }
+                            }
+                            finally {
+                                busy.set(false);
+                            }
+                        }
+                    });
                 }
             }
         }
         
-        return status;
+        return CompletableFuture.completedFuture(status);
     }
 }

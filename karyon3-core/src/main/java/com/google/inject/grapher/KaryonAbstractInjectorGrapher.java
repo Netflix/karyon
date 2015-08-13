@@ -14,7 +14,7 @@ import com.google.inject.ConfigurationException;
 import com.google.inject.Injector;
 import com.google.inject.Key;
 
-public abstract class MyAbstractInjectorGrapher implements InjectorGrapher {
+public abstract class KaryonAbstractInjectorGrapher implements InjectorGrapher {
     private final RootKeySetCreator rootKeySetCreator;
     private final AliasCreator aliasCreator;
     private final NodeCreator nodeCreator;
@@ -69,11 +69,11 @@ public abstract class MyAbstractInjectorGrapher implements InjectorGrapher {
         }
     }
 
-    public MyAbstractInjectorGrapher() {
+    public KaryonAbstractInjectorGrapher() {
         this(new GrapherParameters());
     }
 
-    public MyAbstractInjectorGrapher(GrapherParameters options) {
+    public KaryonAbstractInjectorGrapher(GrapherParameters options) {
         this.rootKeySetCreator = options.getRootKeySetCreator();
         this.aliasCreator = options.getAliasCreator();
         this.nodeCreator = options.getNodeCreator();

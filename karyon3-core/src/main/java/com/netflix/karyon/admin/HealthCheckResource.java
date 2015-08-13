@@ -1,12 +1,9 @@
 package com.netflix.karyon.admin;
 
-import java.util.Map;
-
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import com.netflix.karyon.healthcheck.HealthCheckRegistry;
-import com.netflix.karyon.healthcheck.HealthCheckResolver;
+import com.netflix.karyon.healthcheck.HealthCheck;
 import com.netflix.karyon.healthcheck.HealthStatus;
 
 /**
@@ -18,21 +15,15 @@ import com.netflix.karyon.healthcheck.HealthStatus;
  */
 @Singleton
 public class HealthCheckResource {
-    private final HealthCheckRegistry registry;
-    private HealthCheckResolver resolver;
+    private final HealthCheck healthcheck;
 
     @Inject
-    public HealthCheckResource(HealthCheckRegistry registry, HealthCheckResolver resolver) {
-        this.registry = registry;
-        this.resolver = resolver;
+    public HealthCheckResource(HealthCheck healthcheck) {
+        this.healthcheck = healthcheck;
     }
     
     // Perform the actual health check
-    public Map<String, HealthStatus> get() {
-        return resolver.check(registry.getHealthChecks());
-    }
-    
-    public HealthStatus get(String hcName) {
-        return registry.getHealthChecks().get(hcName).check();
+    public HealthStatus get() {
+        return healthcheck.check().join();
     }
 }

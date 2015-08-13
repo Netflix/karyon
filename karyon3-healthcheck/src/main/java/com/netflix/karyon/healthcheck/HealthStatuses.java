@@ -24,6 +24,14 @@ public final class HealthStatuses {
         return create(true, attr, null);
     }
     
+    public static HealthStatus unhealthy() {
+        return create(false, Collections.<String, Object>emptyMap(), null);
+    }
+    
+    public static HealthStatus unhealthy(Map<String, Object> attr) {
+        return create(false, attr, null);
+    }
+    
     public static HealthStatus unhealthy(Throwable t) {
         return create(false, Collections.<String, Object>emptyMap(), t);
     }

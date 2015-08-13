@@ -1,6 +1,7 @@
 package com.netflix.karyon.healthcheck;
 
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 
 import com.google.inject.ImplementedBy;
 
@@ -11,12 +12,12 @@ import com.google.inject.ImplementedBy;
  * 
  * @author elandau
  */
-@ImplementedBy(DefaultHealthCheckResolver.class)
-public interface HealthCheckResolver {
+@ImplementedBy(DefaultHealthCheckInvoker.class)
+public interface HealthCheckInvoker {
     /**
      * 
      * @param healthChecks
      * @return
      */
-    Map<String, HealthStatus> check(Map<String, HealthCheck> healthChecks);
+    CompletableFuture<Map<String, HealthStatus>> check(Map<String, HealthCheck> healthChecks);
 }

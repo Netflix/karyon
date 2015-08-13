@@ -5,8 +5,8 @@ import java.util.Map;
 import com.google.inject.ImplementedBy;
 
 /**
- * Policy for aggregating multiple HealthStatuses into a single HealthStatus that will
- * normally become the HealthStatus exposed by the application.
+ * Policy for aggregating multiple HealthStatus's into a single HealthStatus that will
+ * normally become the HealthStatus exposed by the application.  
  * 
  * @author elandau
  */
