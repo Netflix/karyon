@@ -54,11 +54,17 @@
              
         $.get('http://' + host + ':8077/health', function (health) { 
             if (health.healthy === true) {
-                $('#header-healthy').html("Healthy").addClass('label-success');
+                $('#header-healthy').html("Healthy").removeClass('label-danger').addClass('label-success');
             }
             else {
-                $('#header-healthy').html("Not Healthy").addClass('label-danger');
+                $('#header-healthy').html("Not Healthy").removeClass('label-success').addClass('label-danger');
             }
+         });
+         
+        $.get('http://' + host + ':8077/meta', function (meta) { 
+            $('#header-appname').html(meta.appname);
+            $('#header-region').html(meta.region);
+            $('#header-serverId').html(meta.serverId);
          });
     }
 
