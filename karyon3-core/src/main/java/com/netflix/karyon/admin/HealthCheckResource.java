@@ -21,7 +21,7 @@ public class HealthCheckResource {
     public HealthCheckResource(HealthCheck healthcheck) {
         this.healthcheck = healthcheck;
     }
-    
+
     // Perform the actual health check
     public HealthStatus get() {
         return healthcheck.check().join();

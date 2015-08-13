@@ -1,0 +1,116 @@
+(function($) {
+
+    var hash = window.location.href.replace(/^.*?#/,'').split('/');
+    var host = hash[0];
+    var tab = hash[1];
+
+    function updateSidebar(sammy, context, h, t) {
+        var changed = false;
+        if (h !== host) {
+            context.log('host changed from ' + host + ' to ' + h);
+            host = h;
+            changed = true;
+        }
+
+        if (t !== tab) {
+            context.log('tab changed from ' + tab + ' to ' + t);
+            tab = t;
+            changed = true;
+        }
+
+        if (changed) {
+            sammy.load('http://' + host + ':8077/resources')
+                 .then(function (json) {
+                     var items = JSON.parse(json);
+                     items.push('appinfo');
+                     items.sort();
+                     var tabs = items.map(function (name) {
+                     return {
+                        'name':  name,
+                        'class': (name === tab) ? 'active' : 'non-active',
+                        'href':  '#/' + host + '/' + name
+                     };
+                 });
+                 $.get('sidebar.template', function (template) {
+                     var rendered = Mustache.render(template, {'tabs': tabs});
+                     $('#main-sidebar').html(rendered);
+                 });
+            });
+        }
+    }
+
+    function toList(obj) {
+        var items = [];
+        for (k in obj) {
+            items.push({'key': k, 'value': obj[k]});
+        }
+        return items;
+    }
+
+    function fixNames(obj) {
+        var props = {};
+        for (k in obj) {
+            props[k.replace(/[.]/g, "_")] = obj[k];
+        }
+        return props;
+    }
+
+    function toPath(tab) {
+        return (tab === "appinfo") ? 'props' : tab;
+    }
+
+    var app = $.sammy('#main-content', function() {
+
+    this.post('#/', function(context) {
+        window.location = '#/' + this.params['host'];
+    });
+
+    this.get('#/:host', function(context) {
+        window.location = '#/' + this.params['host'] + '/appinfo';
+    });
+
+    this.get('#/:host/:tab', function(context) {
+        var params = this.params;
+        updateSidebar(this, context, params['host'], params['tab']);
+        this.load(
+               params['tab'] + ".html", 
+               {
+                   error : function(response) {
+                       $.get('http://' + params['host'] + ':8077/' + toPath(params['tab']), function(json) { 
+                           var code = JSON.stringify(json, null, 2);
+                           $.get('code.template', function (template) {
+                               var rendered = Mustache.render(template, {'lang': 'json', 'code': code});
+                               $('#main-content').html(rendered);
+                               $('#main-content').each(function (i, block) {
+                               hljs.highlightBlock(block);
+                               });
+                           });
+                       })
+                       .fail(function() {
+                           $('#main-content').html("Error loading page " + params['tab']);
+                       });
+                   }
+               }
+            )
+            .then(function(html) {
+               $('#main-content').html(html);
+            });
+    });
+
+    this.get('#/:host/:tab/:query', function(context) {
+        var params = this.params;
+        updateSidebar(this, context, params['host'], params['tab']);
+        console.log('query [' + params['query'] + ']');
+        this.load('http://' + params['host'] + ':8077/' + params['tab'])
+            .then(function (json) {
+                var obj = JSON.parse(json);
+                showCode(obj);
+            });
+        });
+    });
+      
+    $(function() {
+        app.run('#/');
+    });  
+
+})(jQuery);

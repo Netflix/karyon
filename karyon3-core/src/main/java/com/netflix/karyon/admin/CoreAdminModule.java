@@ -16,7 +16,9 @@ public final class CoreAdminModule extends AbstractAdminModule {
         bindAdminResource("jars").to(JarsAdminResource.class);
         bindAdminResource("meta").to(MetaAdminResource.class);
         bindAdminResource("health").to(HealthCheckResource.class);
-
+        bindAdminResource("lifecycle").to(ApplicationLifecycleResource.class);
+        bindAdminResource("di-provision").to(DIProvisionResource.class);
+        
         // These are needed in DIGraphResource
         bind(NameFactory.class).to(ShortNameFactory.class);
         bind(PortIdFactory.class).to(PortIdFactoryImpl.class);

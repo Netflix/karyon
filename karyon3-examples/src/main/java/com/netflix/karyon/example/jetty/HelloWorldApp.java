@@ -8,6 +8,8 @@ import org.slf4j.LoggerFactory;
 
 import com.netflix.archaius.guice.ArchaiusModule;
 import com.netflix.governator.DefaultLifecycleListener;
+import com.netflix.governator.GovernatorFeatures;
+import com.netflix.governator.ProvisionDebugModule;
 import com.netflix.governator.guice.jetty.JettyModule;
 import com.netflix.karyon.Karyon;
 import com.netflix.karyon.admin.rest.AdminServerModule;
@@ -28,8 +30,10 @@ public class HelloWorldApp extends DefaultLifecycleListener {
         Karyon.createInjector(
             ArchaiusKaryonConfiguration.builder()
                 .withConfigName("helloworld")
+                .disable(GovernatorFeatures.SHUTDOWN_ON_ERROR)
                 .build(),
             new ArchaiusLog4J2ConfigurationModule(),
+            new ProvisionDebugModule(),
             new JettyModule(),
             new AdminServerModule(),
             new AdminUIServerModule(),

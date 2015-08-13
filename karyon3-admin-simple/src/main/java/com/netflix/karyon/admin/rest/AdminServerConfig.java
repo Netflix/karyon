@@ -12,7 +12,7 @@ public interface AdminServerConfig extends HttpServerConfig{
     @DefaultValue("8077")
     int port();
     
-    @DefaultValue("http://${@serverId}:8078/index.html?serverId=${@serverId}&resourceId=info")
+    @DefaultValue("http://${@serverId}:8078/index.html#/${@serverId}/info")
     String remoteServer();
     
     @DefaultValue("${@serverId}")
@@ -20,4 +20,7 @@ public interface AdminServerConfig extends HttpServerConfig{
 
     @DefaultValue("*")
     String accessControlAllowOrigin();
+    
+    @DefaultValue("true")
+    Boolean prettyPrint();
 }

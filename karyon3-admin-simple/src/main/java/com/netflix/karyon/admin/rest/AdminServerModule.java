@@ -7,6 +7,7 @@ import java.util.Map;
 import javax.inject.Singleton;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 import com.google.inject.multibindings.MapBinder;
@@ -55,8 +56,13 @@ public final class AdminServerModule extends AbstractModule {
     @Provides
     @Singleton
     @AdminServer
-    protected ObjectMapper getMapper() {
-        return new ObjectMapper();
+    protected ObjectMapper getMapper(AdminServerConfig config) {
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
+        if (config.prettyPrint()) {
+            mapper.enable(SerializationFeature.INDENT_OUTPUT);
+        }
+        return mapper;
     }
 
     @Override

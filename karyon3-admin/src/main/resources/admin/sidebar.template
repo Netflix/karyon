@@ -1,0 +1,3 @@
+{{#tabs}}
+<li class="{{class}}"><a href="{{href}}">{{name}}</a></li>
+{{/tabs}}
