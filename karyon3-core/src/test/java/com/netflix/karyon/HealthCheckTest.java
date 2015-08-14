@@ -11,10 +11,8 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import com.google.inject.AbstractModule;
-import com.google.inject.Guice;
 import com.google.inject.Injector;
-import com.netflix.karyon.HealthCheck;
-import com.netflix.karyon.HealthCheckStatus;
+import com.netflix.governator.Governator;
 import com.netflix.karyon.healthcheck.HealthIndicator;
 import com.netflix.karyon.healthcheck.HealthIndicatorRegistry;
 import com.netflix.karyon.healthcheck.HealthIndicatorStatus;
@@ -53,25 +51,20 @@ public class HealthCheckTest {
     
     @Test
     public void testNoHealthStatuses() {
-        Injector injector = Guice.createInjector();
-        HealthCheck manager = injector.getInstance(HealthCheck.class);
+        Injector injector = Governator.createInjector();
+        HealthCheck hc = injector.getInstance(HealthCheck.class);
         
-        HealthCheckStatus status = manager.check().join();
+        HealthCheckStatus status = hc.check().join();
         Assert.assertEquals(LifecycleState.Running, status.getState());
     }
     
     @Test
     public void testOneHealthStatus() {
         List<HealthIndicator> indicators = new ArrayList<>();
-        Injector injector = Guice.createInjector(new AbstractModule() {
+        Injector injector = Governator.createInjector(new AbstractModule() {
             @Override
             protected void configure() {
-                bind(HealthIndicatorRegistry.class).toInstance(new HealthIndicatorRegistry() {
-                    @Override
-                    public List<HealthIndicator> getHealthIndicators() {
-                        return indicators;
-                    }
-                });
+                bind(HealthIndicatorRegistry.class).toInstance(HealthIndicatorRegistry.from(indicators));
             }
         });
         
@@ -92,15 +85,10 @@ public class HealthCheckTest {
     @Test
     public void testMultipleHealthStatuses() {
         List<HealthIndicator> indicators = new ArrayList<>();
-        Injector injector = Guice.createInjector(new AbstractModule() {
+        Injector injector = Governator.createInjector(new AbstractModule() {
             @Override
             protected void configure() {
-                bind(HealthIndicatorRegistry.class).toInstance(new HealthIndicatorRegistry() {
-                    @Override
-                    public List<HealthIndicator> getHealthIndicators() {
-                        return indicators;
-                    }
-                });
+                bind(HealthIndicatorRegistry.class).toInstance(HealthIndicatorRegistry.from(indicators));
             }
         });
         
@@ -109,22 +97,23 @@ public class HealthCheckTest {
         
         HealthCheckStatus status = manager.check().join();
         Assert.assertEquals(LifecycleState.Running, status.getState());
-        Assert.assertEquals(0, status.getAttributes().size());
+        Assert.assertEquals(0, status.getIndicators().size());
         
         indicators.add(HealthIndicators.alwaysHealthy("foo"));
         indicators.add(HealthIndicators.alwaysHealthy("bar"));
         status = manager.check().join();
         Assert.assertEquals(LifecycleState.Running, status.getState());
-        Assert.assertEquals(2, status.getAttributes().size());
+        Assert.assertEquals(2, status.getIndicators().size());
         
         indicators.add(HealthIndicators.alwaysUnhealthy("foo"));
         status = manager.check().join();
         Assert.assertEquals(LifecycleState.Failed, status.getState());
-        Assert.assertEquals(2, status.getAttributes().size());
+        Assert.assertEquals(3, status.getIndicators().size());
         
         // This will never happen in reality but interesting to test
+        indicators.remove(2);
         status = manager.check().join();
         Assert.assertEquals(LifecycleState.Running, status.getState());
-        Assert.assertEquals(1, status.getAttributes().size());
+        Assert.assertEquals(2, status.getIndicators().size());
     }
 }

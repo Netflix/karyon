@@ -26,17 +26,17 @@ import com.google.inject.TypeLiteral;
  */
 @Singleton
 public class DefaultHealthIndicatorRegistry implements HealthIndicatorRegistry {
-    private CopyOnWriteArrayList<HealthIndicator> healthChecks = new CopyOnWriteArrayList<HealthIndicator>();
+    private CopyOnWriteArrayList<HealthIndicator> indicators = new CopyOnWriteArrayList<HealthIndicator>();
     
     @Inject
     public DefaultHealthIndicatorRegistry(Injector injector) {
         for (Binding<HealthIndicator> binding : injector.findBindingsByType(TypeLiteral.get(HealthIndicator.class))) {
-            healthChecks.add(binding.getProvider().get());
+            indicators.add(binding.getProvider().get());
         }
     }
     
     @Override
     public List<HealthIndicator> getHealthIndicators() {
-        return Collections.unmodifiableList(healthChecks);
+        return Collections.unmodifiableList(indicators);
     }
 }

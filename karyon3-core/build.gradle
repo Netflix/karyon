@@ -25,6 +25,7 @@ dependencies {
     compile "com.google.inject.extensions:guice-multibindings:${guice_version}"
     compile "com.google.inject.extensions:guice-grapher:${guice_version}"
 
+    testCompile project(':karyon3-log4j2')
     testCompile "org.hamcrest:hamcrest-core:${hamcrest_version}"
     testCompile "org.hamcrest:hamcrest-library:${hamcrest_version}"
 }

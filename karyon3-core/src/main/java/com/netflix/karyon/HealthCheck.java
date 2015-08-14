@@ -58,7 +58,7 @@ public class HealthCheck {
             switch (lifecycle.getState()) {
             case Starting:
             case Running:
-                state = !isHealthy
+                state = isHealthy
                       ? lifecycle.getState()
                       : LifecycleState.Failed;
                 break;

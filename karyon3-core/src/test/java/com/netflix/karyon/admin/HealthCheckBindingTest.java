@@ -1,11 +1,19 @@
 package com.netflix.karyon.admin;
 
+import java.util.Map.Entry;
+
+import javax.inject.Named;
+import javax.inject.Singleton;
+
 import junit.framework.Assert;
 
 import org.junit.Test;
 
-import com.google.inject.multibindings.ProvidesIntoSet;
-import com.netflix.governator.DefaultModule;
+import com.google.inject.AbstractModule;
+import com.google.inject.Binding;
+import com.google.inject.Key;
+import com.google.inject.Provides;
+import com.google.inject.multibindings.Multibinder;
 import com.netflix.governator.Governator;
 import com.netflix.governator.LifecycleInjector;
 import com.netflix.karyon.HealthCheck;
@@ -19,29 +27,31 @@ public class HealthCheckBindingTest {
     @Test
     public void test() {
         LifecycleInjector injector = Governator.createInjector(
-            new DefaultModule() {
-                @ProvidesIntoSet
+            new AbstractModule() {
+                @Provides
+                @Singleton
+                @Named("hc1")
                 public HealthIndicator getHealthCheck1() {
                     return HealthIndicators.alwaysHealthy("hc1"); 
                 }
                 
-                @ProvidesIntoSet
-                public HealthIndicator getHealthCheck2() {
-                    return HealthIndicators.alwaysUnhealthy("hc2"); 
+                @Override
+                protected void configure() {
+                    Multibinder.newSetBinder(binder(), HealthIndicator.class).addBinding().toInstance(HealthIndicators.alwaysUnhealthy("hc2"));
+                    
                 }
             });
         
+        for (Entry<Key<?>, Binding<?>> binding : injector.getAllBindings().entrySet()) {
+            System.out.println(binding.getKey());
+        }
+        
         HealthIndicatorRegistry registry = injector.getInstance(HealthIndicatorRegistry.class);
+        Assert.assertEquals(2, registry.getHealthIndicators().size());
         HealthCheckResource res = injector.getInstance(HealthCheckResource.class);
         
-//        HealthIndicatorStatus status1 = injector.getInstance(Key.get(HealthIndicator.class, Names.named("hc1"))).check().join();
-//        Assert.assertEquals(true, status1.isHealthy());
-//        
-//        HealthIndicatorStatus status2 = injector.getInstance(Key.get(HealthIndicator.class, Names.named("hc2"))).check().join();
-//        Assert.assertEquals(false, status2.isHealthy());
-//        
         HealthCheckStatus status = injector.getInstance(HealthCheck.class).check().join();
-        Assert.assertEquals(LifecycleState.Running, status.getState());
-        Assert.assertEquals(2, status.getAttributes().size());
+        Assert.assertEquals(LifecycleState.Failed, status.getState());
+        Assert.assertEquals(2, status.getIndicators().size());
     }
 }
