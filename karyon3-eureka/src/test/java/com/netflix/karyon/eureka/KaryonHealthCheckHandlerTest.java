@@ -16,7 +16,7 @@ import com.netflix.governator.Governator;
 import com.netflix.karyon.ApplicationLifecycle;
 import com.netflix.karyon.LifecycleState;
 import com.netflix.karyon.ManualApplicationLifecycleState;
-import com.netflix.karyon.healthcheck.HealthCheck;
+import com.netflix.karyon.healthcheck.HealthIndicator;
 
 public class KaryonHealthCheckHandlerTest {
 	@Singleton
@@ -91,7 +91,7 @@ public class KaryonHealthCheckHandlerTest {
         Assert.assertEquals(InstanceStatus.STARTING, tracker.initialStatus);
         Assert.assertEquals(InstanceStatus.STARTING, tracker.handler.getStatus(InstanceStatus.STARTING));
         
-        HealthCheck hc = injector.getInstance(HealthCheck.class);
+        HealthIndicator hc = injector.getInstance(HealthIndicator.class);
         HealthCheckHandler handler = injector.getInstance(HealthCheckHandler.class);
         ApplicationLifecycle status = injector.getInstance(ApplicationLifecycle.class);
         
@@ -102,7 +102,7 @@ public class KaryonHealthCheckHandlerTest {
         // Now mark the app as UP
         status.setStarted();
         
-        Assert.assertEquals(LifecycleState.Started, status.getState());
+        Assert.assertEquals(LifecycleState.Running, status.getState());
         Assert.assertEquals(true, hc.check().join().isHealthy());
         Assert.assertEquals(InstanceStatus.UP, handler.getStatus(InstanceStatus.STARTING));
 

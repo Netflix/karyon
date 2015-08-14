@@ -17,7 +17,7 @@ import com.netflix.karyon.Karyon;
 import com.netflix.karyon.admin.rest.AdminServerModule;
 import com.netflix.karyon.admin.ui.AdminUIServerModule;
 import com.netflix.karyon.archaius.ArchaiusKaryonConfiguration;
-import com.netflix.karyon.healthcheck.HealthCheck;
+import com.netflix.karyon.healthcheck.HealthIndicator;
 import com.netflix.karyon.log4j.ArchaiusLog4J2ConfigurationModule;
 import com.netflix.karyon.rxnetty.shutdown.ShutdownServerModule;
 import com.sun.jersey.guice.JerseyServletModule;
@@ -54,7 +54,7 @@ public class HelloWorldApp extends DefaultLifecycleListener {
                    bind(GuiceContainer.class).asEagerSingleton();
                    bind(ArchaiusEndpoint.class).asEagerSingleton();
                    bind(HelloWorldApp.class).asEagerSingleton();
-                   bind(HealthCheck.class).to(FooServiceHealthCheck.class);
+                   bind(HealthIndicator.class).to(FooServiceHealthIndicator.class);
                    
                    bind(LongDelayService.class).asEagerSingleton();
                }

@@ -3,8 +3,8 @@ package com.netflix.karyon.admin;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import com.netflix.karyon.healthcheck.HealthCheck;
-import com.netflix.karyon.healthcheck.HealthStatus;
+import com.netflix.karyon.HealthCheck;
+import com.netflix.karyon.HealthCheckStatus;
 
 /**
  * Admin resource to access all health checks. 
@@ -15,15 +15,15 @@ import com.netflix.karyon.healthcheck.HealthStatus;
  */
 @Singleton
 public class HealthCheckResource {
-    private final HealthCheck healthcheck;
+    private final HealthCheck healthCheck;
 
     @Inject
-    public HealthCheckResource(HealthCheck healthcheck) {
-        this.healthcheck = healthcheck;
+    public HealthCheckResource(HealthCheck healthCheck) {
+        this.healthCheck = healthCheck;
     }
 
-    // Perform the actual health check
-    public HealthStatus get() {
-        return healthcheck.check().join();
+    public HealthCheckStatus get() {
+        return healthCheck.check().join();
     }
+
 }

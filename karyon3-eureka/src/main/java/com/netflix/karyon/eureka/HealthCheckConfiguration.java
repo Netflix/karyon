@@ -5,6 +5,6 @@ import com.netflix.archaius.annotations.DefaultValue;
 
 @Configuration(prefix="karyon.eureka.health")
 public interface HealthCheckConfiguration {
-    @DefaultValue("10")
+    @DefaultValue("10000")
     int getTimeoutInMillis();
 }

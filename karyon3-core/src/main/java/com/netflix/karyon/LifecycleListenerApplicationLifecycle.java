@@ -12,7 +12,7 @@ public class LifecycleListenerApplicationLifecycle extends ManualApplicationLife
 
     @Inject
     public LifecycleListenerApplicationLifecycle() {
-        this(LifecycleState.Started);
+        this(LifecycleState.Running);
     }
     
     public LifecycleListenerApplicationLifecycle(LifecycleState initialState) {
@@ -22,7 +22,7 @@ public class LifecycleListenerApplicationLifecycle extends ManualApplicationLife
     
     @Override
     public synchronized void onStarted() {
-        injectorState = LifecycleState.Started;
+        injectorState = LifecycleState.Running;
         updateState();
     }
 
@@ -51,6 +51,6 @@ public class LifecycleListenerApplicationLifecycle extends ManualApplicationLife
         if (injectorState.equals(LifecycleState.Starting) || baseState.equals(LifecycleState.Starting)) {
             return LifecycleState.Starting;
         }
-        return LifecycleState.Started;
+        return LifecycleState.Running;
     }
 }

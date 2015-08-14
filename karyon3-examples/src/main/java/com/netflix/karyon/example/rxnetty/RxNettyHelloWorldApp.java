@@ -11,8 +11,8 @@ import com.netflix.karyon.Karyon;
 import com.netflix.karyon.admin.rest.AdminServerModule;
 import com.netflix.karyon.admin.ui.AdminUIServerModule;
 import com.netflix.karyon.archaius.ArchaiusKaryonConfiguration;
-import com.netflix.karyon.example.jetty.FooServiceHealthCheck;
-import com.netflix.karyon.healthcheck.HealthCheck;
+import com.netflix.karyon.example.jetty.FooServiceHealthIndicator;
+import com.netflix.karyon.healthcheck.HealthIndicator;
 import com.netflix.karyon.rxnetty.server.RxNettyServerModule;
 import com.netflix.karyon.rxnetty.shutdown.ShutdownServerModule;
 
@@ -51,7 +51,7 @@ public class RxNettyHelloWorldApp extends DefaultLifecycleListener {
             new AbstractModule() {
                 @Override
                 protected void configure() {
-                    bind(HealthCheck.class).to(FooServiceHealthCheck.class);
+                    bind(HealthIndicator.class).to(FooServiceHealthIndicator.class);
                 }
             }
             )
