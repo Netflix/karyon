@@ -1,19 +1,9 @@
-$.urlParam = function(name){
-    var results = new RegExp('[\?&]' + name + '=([^&#]*)').exec(window.parent.location.href);
-    if (results==null){
-       return null;
-    }
-    else{
-       return results[1] || 0;
-    }
-}
-
 $(document).ready(function(){
-    console.log("Parent: " + window.parent.location.href);
-    
-    var serverId = $.urlParam("serverId");
-    var serverUrl = "http://" + serverId + ":8077";
-    $.get(serverUrl + "/di-graph", function(graph) {
+    var hash = window.location.href.replace(/^.*?#/,'').split('/');
+    var host = hash[1];
+    var tab = hash[2];
+        
+    $.get("http://" + host + ":8077/di-graph", function(graph) {
         console.log(graph);
         
         var nodes = {};
@@ -47,7 +37,7 @@ $(document).ready(function(){
             .on("tick", tick)
             .start();
         
-        var svg = d3.select("body").append("svg")
+        var svg = d3.select("#main-content").append("svg")
             .attr("width", width)
             .attr("height", height);
         

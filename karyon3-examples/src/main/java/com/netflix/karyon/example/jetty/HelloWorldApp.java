@@ -6,14 +6,18 @@ import javax.ws.rs.Path;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.netflix.archaius.config.MapConfig;
+import com.netflix.archaius.exceptions.ConfigException;
 import com.netflix.archaius.guice.ArchaiusModule;
 import com.netflix.governator.DefaultLifecycleListener;
+import com.netflix.governator.GovernatorFeatures;
+import com.netflix.governator.ProvisionDebugModule;
 import com.netflix.governator.guice.jetty.JettyModule;
 import com.netflix.karyon.Karyon;
 import com.netflix.karyon.admin.rest.AdminServerModule;
 import com.netflix.karyon.admin.ui.AdminUIServerModule;
 import com.netflix.karyon.archaius.ArchaiusKaryonConfiguration;
-import com.netflix.karyon.healthcheck.HealthCheck;
+import com.netflix.karyon.healthcheck.HealthIndicator;
 import com.netflix.karyon.log4j.ArchaiusLog4J2ConfigurationModule;
 import com.netflix.karyon.rxnetty.shutdown.ShutdownServerModule;
 import com.sun.jersey.guice.JerseyServletModule;
@@ -23,13 +27,21 @@ import com.sun.jersey.guice.spi.container.servlet.GuiceContainer;
 public class HelloWorldApp extends DefaultLifecycleListener {
     private static final Logger LOG = LoggerFactory.getLogger(HelloWorldApp.class);
     
-    public static void main(String[] args) throws InterruptedException {
+    public static void main(String[] args) throws InterruptedException, ConfigException {
 
         Karyon.createInjector(
             ArchaiusKaryonConfiguration.builder()
                 .withConfigName("helloworld")
+                .withApplicationOverrides(MapConfig.builder()
+                    .put("@serverId", "localhost")
+                    .put("@appId", "Hello World!")
+                    .put("@region", "us-east-1")
+                    .build()
+                    )
+                .disable(GovernatorFeatures.SHUTDOWN_ON_ERROR)
                 .build(),
             new ArchaiusLog4J2ConfigurationModule(),
+            new ProvisionDebugModule(),
             new JettyModule(),
             new AdminServerModule(),
             new AdminUIServerModule(),
@@ -42,7 +54,9 @@ public class HelloWorldApp extends DefaultLifecycleListener {
                    bind(GuiceContainer.class).asEagerSingleton();
                    bind(ArchaiusEndpoint.class).asEagerSingleton();
                    bind(HelloWorldApp.class).asEagerSingleton();
-                   bind(HealthCheck.class).to(FooServiceHealthCheck.class);
+                   bind(HealthIndicator.class).to(FooServiceHealthIndicator.class);
+                   
+                   bind(LongDelayService.class).asEagerSingleton();
                }
                
                @Override

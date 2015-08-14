@@ -2,7 +2,7 @@ package com.netflix.karyon;
 
 public enum LifecycleState {
     Starting,
-    Started,
-    Stopped,
-    Failed
+    Running,
+    Stopping,
+    Stopped
 }

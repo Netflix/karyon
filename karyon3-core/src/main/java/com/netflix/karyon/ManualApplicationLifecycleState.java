@@ -55,7 +55,7 @@ public class ManualApplicationLifecycleState implements ApplicationLifecycle {
 
     @Override
     public void setStarted() {
-        setState(LifecycleState.Started);
+        setState(LifecycleState.Running);
     }
 
     @Override
@@ -65,7 +65,7 @@ public class ManualApplicationLifecycleState implements ApplicationLifecycle {
 
     @Override
     public void setFailed() {
-        setState(LifecycleState.Failed);
+        setState(LifecycleState.Stopped);
     }
 
     @Override

@@ -14,9 +14,10 @@ import com.netflix.appinfo.InstanceInfo.InstanceStatus;
 import com.netflix.archaius.guice.ArchaiusModule;
 import com.netflix.governator.Governator;
 import com.netflix.karyon.ApplicationLifecycle;
+import com.netflix.karyon.HealthCheck;
+import com.netflix.karyon.HealthState;
 import com.netflix.karyon.LifecycleState;
 import com.netflix.karyon.ManualApplicationLifecycleState;
-import com.netflix.karyon.healthcheck.HealthCheck;
 
 public class KaryonHealthCheckHandlerTest {
 	@Singleton
@@ -71,7 +72,7 @@ public class KaryonHealthCheckHandlerTest {
 		}
 		catch (RuntimeException e) {
 			Assert.assertEquals(InstanceStatus.STARTING, tracker.initialStatus);
-			Assert.assertEquals(InstanceStatus.DOWN, tracker.handler.getStatus(InstanceStatus.STARTING));
+			Assert.assertEquals(InstanceStatus.OUT_OF_SERVICE, tracker.handler.getStatus(InstanceStatus.STARTING));
 
 		}
 	}
@@ -96,28 +97,28 @@ public class KaryonHealthCheckHandlerTest {
         ApplicationLifecycle status = injector.getInstance(ApplicationLifecycle.class);
         
         Assert.assertEquals(LifecycleState.Starting, status.getState());
-        Assert.assertEquals(true, hc.check().join().isHealthy());
+        Assert.assertEquals(HealthState.Starting, hc.check().join().getState());
         Assert.assertEquals(InstanceStatus.STARTING, handler.getStatus(InstanceStatus.STARTING));
 
         // Now mark the app as UP
         status.setStarted();
         
-        Assert.assertEquals(LifecycleState.Started, status.getState());
-        Assert.assertEquals(true, hc.check().join().isHealthy());
+        Assert.assertEquals(LifecycleState.Running, status.getState());
+        Assert.assertEquals(HealthState.Healthy, hc.check().join().getState());
         Assert.assertEquals(InstanceStatus.UP, handler.getStatus(InstanceStatus.STARTING));
 
         // Now mark the app as FAILED
         status.setFailed();
         
-        Assert.assertEquals(LifecycleState.Failed, status.getState());
-        Assert.assertEquals(true, hc.check().join().isHealthy());
-        Assert.assertEquals(InstanceStatus.DOWN, handler.getStatus(InstanceStatus.STARTING));
+        Assert.assertEquals(LifecycleState.Stopped, status.getState());
+        Assert.assertEquals(HealthState.OutOfService, hc.check().join().getState());
+        Assert.assertEquals(InstanceStatus.OUT_OF_SERVICE, handler.getStatus(InstanceStatus.STARTING));
 
         // Now mark the app as STOPPED
         status.setStopped();
         
         Assert.assertEquals(LifecycleState.Stopped, status.getState());
-        Assert.assertEquals(true, hc.check().join().isHealthy());
+        Assert.assertEquals(HealthState.OutOfService, hc.check().join().getState());
         Assert.assertEquals(InstanceStatus.OUT_OF_SERVICE, handler.getStatus(InstanceStatus.STARTING));
 
 	}
