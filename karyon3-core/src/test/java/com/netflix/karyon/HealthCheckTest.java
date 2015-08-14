@@ -42,12 +42,11 @@ public class HealthCheckTest {
 
     @Test
     public void testAsyncStatus() throws InterruptedException, ExecutionException {
-        HealthIndicator check = delayed(1, TimeUnit.SECONDS, HealthIndicatorStatuses.healthy("foo"));
-        TimeUnit.SECONDS.sleep(2);
+        HealthIndicator check = delayed(100, TimeUnit.MILLISECONDS, HealthIndicatorStatuses.healthy("foo"));
+        TimeUnit.MILLISECONDS.sleep(200);
         check.check().whenComplete((result, error) -> System.out.println("Completed"));
-        TimeUnit.SECONDS.sleep(2);
+        TimeUnit.MILLISECONDS.sleep(200);
     }
-    
     
     @Test
     public void testNoHealthStatuses() {
@@ -55,7 +54,7 @@ public class HealthCheckTest {
         HealthCheck hc = injector.getInstance(HealthCheck.class);
         
         HealthCheckStatus status = hc.check().join();
-        Assert.assertEquals(LifecycleState.Running, status.getState());
+        Assert.assertEquals(HealthState.Healthy, status.getState());
     }
     
     @Test
@@ -71,15 +70,15 @@ public class HealthCheckTest {
         HealthCheck manager = injector.getInstance(HealthCheck.class);
         
         HealthCheckStatus status = manager.check().join();
-        Assert.assertEquals(LifecycleState.Running, status.getState());
+        Assert.assertEquals(HealthState.Healthy, status.getState());
         
         indicators.add(HealthIndicators.alwaysHealthy("foo"));
         status = manager.check().join();
-        Assert.assertEquals(LifecycleState.Running, status.getState());
+        Assert.assertEquals(HealthState.Healthy, status.getState());
         
         indicators.add(HealthIndicators.alwaysUnhealthy("foo"));
         status = manager.check().join();
-        Assert.assertEquals(LifecycleState.Failed, status.getState());
+        Assert.assertEquals(HealthState.Unhealthy, status.getState());
     }
     
     @Test
@@ -96,24 +95,24 @@ public class HealthCheckTest {
         HealthIndicatorRegistry registry = injector.getInstance(HealthIndicatorRegistry.class);
         
         HealthCheckStatus status = manager.check().join();
-        Assert.assertEquals(LifecycleState.Running, status.getState());
+        Assert.assertEquals(HealthState.Healthy, status.getState());
         Assert.assertEquals(0, status.getIndicators().size());
         
         indicators.add(HealthIndicators.alwaysHealthy("foo"));
         indicators.add(HealthIndicators.alwaysHealthy("bar"));
         status = manager.check().join();
-        Assert.assertEquals(LifecycleState.Running, status.getState());
+        Assert.assertEquals(HealthState.Healthy, status.getState());
         Assert.assertEquals(2, status.getIndicators().size());
         
         indicators.add(HealthIndicators.alwaysUnhealthy("foo"));
         status = manager.check().join();
-        Assert.assertEquals(LifecycleState.Failed, status.getState());
+        Assert.assertEquals(HealthState.Unhealthy, status.getState());
         Assert.assertEquals(3, status.getIndicators().size());
         
         // This will never happen in reality but interesting to test
         indicators.remove(2);
         status = manager.check().join();
-        Assert.assertEquals(LifecycleState.Running, status.getState());
+        Assert.assertEquals(HealthState.Healthy, status.getState());
         Assert.assertEquals(2, status.getIndicators().size());
     }
 }

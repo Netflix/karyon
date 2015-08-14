@@ -18,6 +18,7 @@ import com.netflix.governator.Governator;
 import com.netflix.governator.LifecycleInjector;
 import com.netflix.karyon.HealthCheck;
 import com.netflix.karyon.HealthCheckStatus;
+import com.netflix.karyon.HealthState;
 import com.netflix.karyon.LifecycleState;
 import com.netflix.karyon.healthcheck.HealthIndicator;
 import com.netflix.karyon.healthcheck.HealthIndicatorRegistry;
@@ -51,7 +52,7 @@ public class HealthCheckBindingTest {
         HealthCheckResource res = injector.getInstance(HealthCheckResource.class);
         
         HealthCheckStatus status = injector.getInstance(HealthCheck.class).check().join();
-        Assert.assertEquals(LifecycleState.Failed, status.getState());
+        Assert.assertEquals(HealthState.Unhealthy, status.getState());
         Assert.assertEquals(2, status.getIndicators().size());
     }
 }

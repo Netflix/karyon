@@ -12,19 +12,19 @@ import com.netflix.karyon.healthcheck.HealthIndicatorStatus;
  *
  */
 public class HealthCheckStatus {
-    private final LifecycleState state;
+    private final HealthState state;
     private final List<HealthIndicatorStatus> indicators;
     
-    public static HealthCheckStatus healthy(LifecycleState state) {
+    public static HealthCheckStatus healthy(HealthState state) {
         return new HealthCheckStatus(state, Collections.emptyList());
     }
     
-    public HealthCheckStatus(LifecycleState state, List<HealthIndicatorStatus> indicators) {
+    public HealthCheckStatus(HealthState state, List<HealthIndicatorStatus> indicators) {
         this.state = state;
         this.indicators = indicators;
     }
     
-    public LifecycleState getState() {
+    public HealthState getState() {
         return state;
     }
     

@@ -54,8 +54,10 @@ public final class HealthIndicatorStatuses {
             }
 
             @Override
-            public Throwable getError() {
-                return error;
+            public String getError() {
+                return error != null
+                        ? error.toString()
+                        : null;
             }
 
             @Override

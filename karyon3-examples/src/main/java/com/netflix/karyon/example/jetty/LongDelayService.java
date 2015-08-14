@@ -10,7 +10,7 @@ public class LongDelayService {
     @Inject
     public LongDelayService() {
         try {
-            TimeUnit.SECONDS.sleep(20);
+            TimeUnit.SECONDS.sleep(5);
         } catch (InterruptedException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();

@@ -34,7 +34,7 @@ public class LifecycleListenerApplicationLifecycle extends ManualApplicationLife
 
     @Override
     public synchronized void onStartFailed(Throwable t) {
-        injectorState = LifecycleState.Failed;
+        injectorState = LifecycleState.Stopped;
         updateState();
     }
 
@@ -42,8 +42,8 @@ public class LifecycleListenerApplicationLifecycle extends ManualApplicationLife
     protected LifecycleState resolveState() {
         LifecycleState baseState = super.resolveState();
         
-        if (injectorState.equals(LifecycleState.Failed) || baseState.equals(LifecycleState.Failed)) {
-            return LifecycleState.Failed;
+        if (injectorState.equals(LifecycleState.Stopped) || baseState.equals(LifecycleState.Stopped)) {
+            return LifecycleState.Stopped;
         }
         if (injectorState.equals(LifecycleState.Stopped) || baseState.equals(LifecycleState.Stopped)) {
             return LifecycleState.Stopped;

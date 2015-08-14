@@ -30,7 +30,7 @@ public class FooServiceHealthIndicator implements HealthIndicator {
                 Map<String, Object> attributes = new HashMap<>();
                 attributes.put("errorRate", errorRate);
                 
-                if (service.getErrorRate() > 0.5) {
+                if (errorRate > 0.5) {
                     return HealthIndicatorStatuses.unhealthy(getName(), attributes);
                 }
                 else {

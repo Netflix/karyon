@@ -34,13 +34,13 @@ public class KaryonHealthCheckHandler implements HealthCheckHandler {
             case Starting:
                 return InstanceStatus.STARTING;
                 
-            case Running:
+            case Healthy:
                 return InstanceStatus.UP;
                 
-            case Failed:
+            case Unhealthy:
                 return InstanceStatus.DOWN;
                 
-            case Stopped:
+            case OutOfService:
                 return InstanceStatus.OUT_OF_SERVICE;
                 
             default:

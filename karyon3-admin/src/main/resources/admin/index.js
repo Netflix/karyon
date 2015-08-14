@@ -4,11 +4,20 @@
     var host = hash[0];
     var tab = hash[1];
 
-    var stateLabel = {
+    var lifecycleStateLabel = {
        'Starting' : 'label-primary',
        'Started'  : 'label-success',
+       'Running'  : 'label-success',
+       'Stopping' : 'label-default',
        'Stopped'  : 'label-default',
        'Failed'   : 'label-danger',
+    };
+
+    var healthStateLabel = {
+        'Starting'      : 'label-primary',
+        'Healthy'       : 'label-success',
+        'Unhealthy'     : 'label-danger',
+        'OutOfService'  : 'label-warning',
     };
 
     function updateSidebar(sammy, context, h, t) {
@@ -47,18 +56,14 @@
     }
     
     function updateHeader(sammy, context, h, t) {
-        $.get('http://' + host + ':8077/lifecycle', function (lifecycle) { 
-                 $('#header-lifecycle-state').html(lifecycle.state);
-                 $('#header-lifecycle-state').addClass(stateLabel[lifecycle.state]);
-             });
+        $.get('http://' + host + ':8077/guice-lifecycle', function (lifecycle) { 
+             $('#header-lifecycle-state').html(lifecycle.state);
+             $('#header-lifecycle-state').removeClass().addClass("label " + lifecycleStateLabel[lifecycle.state]);
+         });
              
         $.get('http://' + host + ':8077/health', function (health) { 
-            if (health.healthy === true) {
-                $('#header-healthy').html("Healthy").removeClass('label-danger').addClass('label-success');
-            }
-            else {
-                $('#header-healthy').html("Not Healthy").removeClass('label-success').addClass('label-danger');
-            }
+             $('#header-health-state').html(health.state);
+             $('#header-health-state').removeClass().addClass("label " + healthStateLabel[health.state]);
          });
          
         $.get('http://' + host + ':8077/meta', function (meta) { 

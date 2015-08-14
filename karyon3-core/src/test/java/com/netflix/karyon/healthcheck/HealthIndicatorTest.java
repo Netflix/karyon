@@ -10,6 +10,7 @@ import com.google.inject.name.Names;
 import com.netflix.governator.Governator;
 import com.netflix.karyon.HealthCheck;
 import com.netflix.karyon.HealthCheckStatus;
+import com.netflix.karyon.HealthState;
 import com.netflix.karyon.LifecycleState;
 
 public class HealthIndicatorTest {
@@ -23,7 +24,7 @@ public class HealthIndicatorTest {
         
         HealthCheck hc = injector.getInstance(HealthCheck.class);
         HealthCheckStatus status = hc.check().join();
-        Assert.assertEquals(LifecycleState.Running, hc.check().join().getState());
+        Assert.assertEquals(HealthState.Healthy, hc.check().join().getState());
         Assert.assertEquals(0, status.getIndicators().size());
     }
     
@@ -38,7 +39,7 @@ public class HealthIndicatorTest {
         
         HealthCheck hc = injector.getInstance(HealthCheck.class);
         HealthCheckStatus status = hc.check().join();
-        Assert.assertEquals(LifecycleState.Running, hc.check().join().getState());
+        Assert.assertEquals(HealthState.Healthy, hc.check().join().getState());
         Assert.assertEquals(1, status.getIndicators().size());
     }
     
@@ -54,7 +55,7 @@ public class HealthIndicatorTest {
         
         HealthCheck hc = injector.getInstance(HealthCheck.class);
         HealthCheckStatus status = hc.check().join();
-        Assert.assertEquals(LifecycleState.Failed, hc.check().join().getState());
+        Assert.assertEquals(HealthState.Unhealthy, hc.check().join().getState());
         Assert.assertEquals(2, status.getIndicators().size());
         
     }
@@ -69,7 +70,7 @@ public class HealthIndicatorTest {
         });
         HealthCheck hc = injector.getInstance(HealthCheck.class);
         HealthCheckStatus status = hc.check().join();
-        Assert.assertEquals(LifecycleState.Failed, status.getState());
+        Assert.assertEquals(HealthState.Unhealthy, status.getState());
         Assert.assertEquals(1, status.getIndicators().size());
     }
     
@@ -85,7 +86,7 @@ public class HealthIndicatorTest {
         
         HealthCheck hc = injector.getInstance(HealthCheck.class);
         HealthCheckStatus status = hc.check().join();
-        Assert.assertEquals(LifecycleState.Failed, hc.check().join().getState());
+        Assert.assertEquals(HealthState.Unhealthy, hc.check().join().getState());
         Assert.assertEquals(2, status.getIndicators().size());
         
     }

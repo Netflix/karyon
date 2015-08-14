@@ -9,7 +9,7 @@ import com.google.inject.ImplementedBy;
  * Registry of active HealthIndicator's.  The HealthIndicator are used by {@link HealthCheck} to 
  * determine the application health.
  * 
- * The default registry, {@link DefaultHealthIndicatorRegistry} uses Guice bindings to determine the
+ * The default registry, {@link AllHealthIndicatorRegistry} uses Guice bindings to determine the
  * list of all active indicators.  To create a curated list of {@link HealthIndicator}s regardless of 
  * Guice bindings create a binding to HealthIndicatorRegistry as follows
  * 
@@ -17,7 +17,7 @@ import com.google.inject.ImplementedBy;
  * {@code
  * @Provides
  * @Singleton
- * HealthIndicatorRegistry getHealthIndicatorRegistry(@Named("CPU") HealthIndicator cpuIndicator, @Named("foo") HealthIndicator fooIndicator) {
+ * HealthIndicatorRegistry getHealthIndicatorRegistry(@Named("cpu") HealthIndicator cpuIndicator, @Named("foo") HealthIndicator fooIndicator) {
  *    return HealthIndicatorRegistry.from(cpuIndicator, fooIndicator);
  * }
  * }
@@ -25,7 +25,7 @@ import com.google.inject.ImplementedBy;
  * 
  * @author elandau
  */
-@ImplementedBy(DefaultHealthIndicatorRegistry.class)
+@ImplementedBy(AllHealthIndicatorRegistry.class)
 public interface HealthIndicatorRegistry {
     /**
      * Return a list of all active health checks
@@ -42,7 +42,7 @@ public interface HealthIndicatorRegistry {
             };     
     }
 
-    public static HealthIndicatorRegistry from(HealthIndicator healthChecks) {
+    public static HealthIndicatorRegistry from(HealthIndicator... healthChecks) {
         return from(Arrays.asList(healthChecks));
     }
 }

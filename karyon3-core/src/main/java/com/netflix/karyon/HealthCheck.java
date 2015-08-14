@@ -33,47 +33,53 @@ public class HealthCheck {
         final CompletableFuture<List<HealthIndicatorStatus>> future = new CompletableFuture<>();
         
         final List<HealthIndicator> indicators = registry.getHealthIndicators();
-        if (indicators.isEmpty()) {
-            return CompletableFuture.completedFuture(HealthCheckStatus.healthy(lifecycle.getState()));
-        }
-        
-        // Run all the HealthIndicators and collect the statuses.
         final List<HealthIndicatorStatus> statuses = new CopyOnWriteArrayList<>();
-        final AtomicInteger counter = new AtomicInteger(indicators.size());
-        for (HealthIndicator indicator : indicators) {
-            indicator.check().thenAccept((result) -> {
-                // Aggregate the health checks
-                statuses.add(result);
-                
-                // Reached the last health check so complete the future
-                if (counter.decrementAndGet() == 0) {
-                    future.complete(statuses);
-                }
-            });
+        if (indicators.isEmpty()) {
+            future.complete(statuses);
+        }
+        else {
+            // Run all the HealthIndicators and collect the statuses.
+            final AtomicInteger counter = new AtomicInteger(indicators.size());
+            for (HealthIndicator indicator : indicators) {
+                indicator.check().thenAccept((result) -> {
+                    // Aggregate the health checks
+                    statuses.add(result);
+                    
+                    // Reached the last health check so complete the future
+                    if (counter.decrementAndGet() == 0) {
+                        future.complete(statuses);
+                    }
+                });
+            }
         }
         
         return future.thenApply((t) -> {
-            boolean isHealthy = calcIsHealth(t);
-            LifecycleState state;
-            switch (lifecycle.getState()) {
-            case Starting:
-            case Running:
-                state = isHealthy
-                      ? lifecycle.getState()
-                      : LifecycleState.Failed;
-                break;
-                
-            case Stopped:
-            case Failed:
-            default:
-                state = lifecycle.getState();
-                break;
+            HealthState state;
+            if (!calcIsHealthy(t)) {
+                state = HealthState.Unhealthy;
+            }
+            else {
+                switch (lifecycle.getState()) {
+                case Starting:
+                    state = HealthState.Starting;
+                    break;
+                  
+                case Running:
+                    state = HealthState.Healthy;
+                    break;
+                    
+                case Stopping:
+                case Stopped:
+                default:
+                    state = HealthState.OutOfService;
+                    break;
+                }
             }
             return new HealthCheckStatus(state, t);
         });
     }
     
-    private boolean calcIsHealth(List<HealthIndicatorStatus> statuses) {
+    private boolean calcIsHealthy(List<HealthIndicatorStatus> statuses) {
         for (HealthIndicatorStatus status : statuses) {
             if (!status.isHealthy()) {
                 return false;

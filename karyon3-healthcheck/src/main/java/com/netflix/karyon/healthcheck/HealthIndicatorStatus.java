@@ -27,7 +27,7 @@ public interface HealthIndicatorStatus {
      * Exception providing additional information regarding the failure state.  This could be
      * the last known exception. 
      */
-    public Throwable getError();
+    public String getError();
     
     /**
      * The status include an exception
