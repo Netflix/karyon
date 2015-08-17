@@ -13,8 +13,8 @@ import com.netflix.karyon.healthcheck.HealthIndicatorRegistry;
 import com.netflix.karyon.healthcheck.HealthIndicatorStatus;
 
 /**
- * Determine a the health of an application by combining the ApplicationLifecycle state
- * with the health checks. 
+ * Determine the health of an application by combining the ApplicationLifecycle state
+ * with the {@link HealthIndicator}s tracked by the {@link HealthIndicatorRegistry}.   
  * 
  * @author elandau
  */
@@ -79,6 +79,11 @@ public class HealthCheck {
         });
     }
     
+    /**
+     * Return false is any of the health indicators are unhealthy.
+     * @param statuses
+     * @return
+     */
     private boolean calcIsHealthy(List<HealthIndicatorStatus> statuses) {
         for (HealthIndicatorStatus status : statuses) {
             if (!status.isHealthy()) {

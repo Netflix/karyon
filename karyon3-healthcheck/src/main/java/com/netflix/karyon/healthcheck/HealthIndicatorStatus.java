@@ -12,14 +12,11 @@ public interface HealthIndicatorStatus {
     /**
      * Map of named attributes that provide additional information regarding the health.
      * For example, a CPU health check may return Unhealthy with attribute "usage"="90%"
-     * 
-     * @return
      */
     public Map<String, Object> getAttributes();
     
     /**
-     * Return the state information 
-     * @return
+     * @return True if healthy or false otherwise.
      */
     public boolean isHealthy();
     
@@ -30,20 +27,17 @@ public interface HealthIndicatorStatus {
     public String getError();
     
     /**
-     * The status include an exception
-     * @return
+     * @return True if the status includes a error description
      */
     public boolean hasError();
     
     /**
-     * Time when healthcheck was conducted
-     * @return
+     * @return Time when healthcheck was conducted
      */
     public String getTimestamp();
     
     /**
-     * Return name of HealthIndicator from which this status was created
-     * @return
+     * @return Name of HealthIndicator from which this status was created
      */
     public String getName();
 }

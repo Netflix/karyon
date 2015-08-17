@@ -1,7 +1,5 @@
 package com.netflix.karyon;
 
-import java.util.function.Function;
-
 import com.google.inject.ImplementedBy;
 
 /**
