@@ -7,6 +7,6 @@ import com.netflix.karyon.healthcheck.HealthIndicator;
 public class CoreModule extends AbstractModule {
     @Override
     protected void configure() {
-        bind(HealthIndicator.class).annotatedWith(Names.named("guice")).to(InjectorHealthIndicator.class);
+        bind(HealthIndicator.class).annotatedWith(Names.named("guice")).to(InjectorHealthIndicator.class).asEagerSingleton();
     }
 }
