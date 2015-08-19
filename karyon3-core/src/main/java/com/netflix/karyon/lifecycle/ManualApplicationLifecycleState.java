@@ -1,4 +1,4 @@
-package com.netflix.karyon;
+package com.netflix.karyon.lifecycle;
 
 import java.util.ArrayList;
 import java.util.List;

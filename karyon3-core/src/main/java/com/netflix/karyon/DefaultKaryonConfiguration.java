@@ -11,6 +11,8 @@ import com.netflix.governator.auto.ModuleListProviders;
  *
  */
 public class DefaultKaryonConfiguration extends DefaultGovernatorConfiguration {
+    private static final String KARYON_PROFILES = "karyon.profiles";
+    
     /**
      * Polymorphic builder.
      * 
@@ -36,14 +38,13 @@ public class DefaultKaryonConfiguration extends DefaultGovernatorConfiguration {
     }
     
     public DefaultKaryonConfiguration() {
-        super(builder()
-            .addModuleListProvider(ModuleListProviders.forPackagesConditional("com.netflix.karyon"))
-            );
+        super(builder());
     }
     
     protected DefaultKaryonConfiguration(Builder<?> builder) {
         super(builder
             .addModuleListProvider(ModuleListProviders.forPackagesConditional("com.netflix.karyon"))
+            .addProfiles(System.getProperty(KARYON_PROFILES))
             );
     }
 }

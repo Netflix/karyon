@@ -5,17 +5,23 @@ import com.netflix.archaius.annotations.DefaultValue;
 import com.netflix.karyon.admin.HttpServerConfig;
 
 @Configuration(prefix="karyon.server.admin")
-public interface AdminServerConfig extends HttpServerConfig{
+public interface AdminServerConfig extends HttpServerConfig {
+    /**
+     *  Overrides HttpServer Config
+     */
     @DefaultValue("Admin")
     String name();
     
     @DefaultValue("8077")
     int port();
     
-    @DefaultValue("http://${@serverId}:8078/index.html#/${@serverId}/info")
+    /**
+     * Admin specific settings
+     */
+    @DefaultValue("http://${@hostname}:8078/index.html#/${@hostname}:8077/info")
     String remoteServer();
     
-    @DefaultValue("${@serverId}")
+    @DefaultValue("${@hostname}")
     String localServer();
 
     @DefaultValue("*")

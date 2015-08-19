@@ -1,4 +1,4 @@
-package com.netflix.karyon;
+package com.netflix.karyon.health;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -8,9 +8,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import javax.inject.Singleton;
 
 import com.google.inject.Inject;
-import com.netflix.karyon.healthcheck.HealthIndicator;
-import com.netflix.karyon.healthcheck.HealthIndicatorRegistry;
-import com.netflix.karyon.healthcheck.HealthIndicatorStatus;
+import com.netflix.karyon.lifecycle.ApplicationLifecycle;
 
 /**
  * Determine the health of an application by combining the ApplicationLifecycle state

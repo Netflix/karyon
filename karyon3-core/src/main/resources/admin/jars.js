@@ -3,7 +3,7 @@ $(document).ready(function(){
     var host = hash[1];
     var tab = hash[2];
         
-    $.get("http://" + host + ":8077/jars", function(jars) {
+    $.get("http://" + host + "/jars", function(jars) {
         $.get('jars.template', function (template) {
             var rendered = Mustache.render(template, {'rows': jars});
             $('#main-content').html(rendered);

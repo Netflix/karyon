@@ -8,10 +8,11 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
 import com.google.inject.name.Names;
 import com.netflix.governator.Governator;
-import com.netflix.karyon.HealthCheck;
-import com.netflix.karyon.HealthCheckStatus;
-import com.netflix.karyon.HealthState;
-import com.netflix.karyon.LifecycleState;
+import com.netflix.karyon.health.HealthCheck;
+import com.netflix.karyon.health.HealthCheckStatus;
+import com.netflix.karyon.health.HealthIndicator;
+import com.netflix.karyon.health.HealthIndicators;
+import com.netflix.karyon.health.HealthState;
 
 public class HealthIndicatorTest {
     @Test

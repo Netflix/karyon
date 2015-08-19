@@ -13,11 +13,11 @@ import com.netflix.appinfo.HealthCheckHandler;
 import com.netflix.appinfo.InstanceInfo.InstanceStatus;
 import com.netflix.archaius.guice.ArchaiusModule;
 import com.netflix.governator.Governator;
-import com.netflix.karyon.ApplicationLifecycle;
-import com.netflix.karyon.HealthCheck;
-import com.netflix.karyon.HealthState;
-import com.netflix.karyon.LifecycleState;
-import com.netflix.karyon.ManualApplicationLifecycleState;
+import com.netflix.karyon.health.HealthCheck;
+import com.netflix.karyon.health.HealthState;
+import com.netflix.karyon.lifecycle.ApplicationLifecycle;
+import com.netflix.karyon.lifecycle.LifecycleState;
+import com.netflix.karyon.lifecycle.ManualApplicationLifecycleState;
 
 public class KaryonHealthCheckHandlerTest {
 	@Singleton

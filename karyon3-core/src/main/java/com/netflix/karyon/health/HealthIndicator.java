@@ -1,4 +1,4 @@
-package com.netflix.karyon.healthcheck;
+package com.netflix.karyon.health;
 
 import java.util.concurrent.CompletableFuture;
 
@@ -10,13 +10,35 @@ import java.util.concurrent.CompletableFuture;
  * HealthIndicator can inject types that are to be consulted for health indication, call out to shell 
  * scripts or call a remote service.  
  * 
- * To register a head indicator,
+ * To register a health indicator,
  * <pre>
  * {@code
  * Multbindings.newSetBinder(binder()).addBinding().to(MyHealthIndicator.class);
  * }
  * </pre>
  *  
+ * Here is a sample health indicator implementation. 
+ * 
+ * <pre>
+ * {@code 
+ * public class MyHealthIndicator implements HealthIndicator {
+ *     @Inject
+ *     public MyHealthIndicator(MyService service) {
+ *         this.service = service;
+ *     }
+ *     
+ *     @Override
+ *     public CompletableFuture<HealthIndicatorStatus> check() {
+ *          if (service.getErrorRate() > 0.1) {
+ *              return CompletableFuture.completedFuture(HealthIndicatorStatuses.unhealthy(getName()));
+ *          }
+ *          else {
+ *              return CompletableFuture.completedFuture(HealthIndicatorStatuses.healthy(getName()));
+ *          }
+ *     }
+ * }
+ * }
+ * <pre>
  * @author elandau
  *
  */

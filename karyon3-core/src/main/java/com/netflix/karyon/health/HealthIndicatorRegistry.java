@@ -1,4 +1,4 @@
-package com.netflix.karyon.healthcheck;
+package com.netflix.karyon.health;
 
 import java.util.Arrays;
 import java.util.List;

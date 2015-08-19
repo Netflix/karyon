@@ -1,9 +1,7 @@
-package com.netflix.karyon;
+package com.netflix.karyon.health;
 
 import java.util.Collections;
 import java.util.List;
-
-import com.netflix.karyon.healthcheck.HealthIndicatorStatus;
 
 /**
  * Immutable status returned by {@link HealthCheck}

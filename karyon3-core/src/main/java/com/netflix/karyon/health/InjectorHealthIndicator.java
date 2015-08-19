@@ -1,13 +1,10 @@
-package com.netflix.karyon;
+package com.netflix.karyon.health;
 
 import java.util.concurrent.CompletableFuture;
 
 import javax.inject.Singleton;
 
 import com.netflix.governator.DefaultLifecycleListener;
-import com.netflix.karyon.healthcheck.HealthIndicator;
-import com.netflix.karyon.healthcheck.HealthIndicatorStatus;
-import com.netflix.karyon.healthcheck.HealthIndicatorStatuses;
 
 @Singleton
 public class InjectorHealthIndicator extends DefaultLifecycleListener implements HealthIndicator {

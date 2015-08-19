@@ -12,7 +12,7 @@ import com.netflix.karyon.admin.rest.AdminServerModule;
 import com.netflix.karyon.admin.ui.AdminUIServerModule;
 import com.netflix.karyon.archaius.ArchaiusKaryonConfiguration;
 import com.netflix.karyon.example.jetty.FooServiceHealthIndicator;
-import com.netflix.karyon.healthcheck.HealthIndicator;
+import com.netflix.karyon.health.HealthIndicator;
 import com.netflix.karyon.rxnetty.server.RxNettyServerModule;
 import com.netflix.karyon.rxnetty.shutdown.ShutdownServerModule;
 

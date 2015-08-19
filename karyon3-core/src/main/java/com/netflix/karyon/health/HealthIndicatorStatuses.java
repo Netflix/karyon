@@ -1,4 +1,4 @@
-package com.netflix.karyon.healthcheck;
+package com.netflix.karyon.health;
 
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;

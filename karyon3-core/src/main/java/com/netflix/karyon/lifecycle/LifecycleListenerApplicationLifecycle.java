@@ -1,4 +1,4 @@
-package com.netflix.karyon;
+package com.netflix.karyon.lifecycle;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;

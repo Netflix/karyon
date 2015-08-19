@@ -16,13 +16,13 @@ import com.google.inject.Provides;
 import com.google.inject.multibindings.Multibinder;
 import com.netflix.governator.Governator;
 import com.netflix.governator.LifecycleInjector;
-import com.netflix.karyon.HealthCheck;
-import com.netflix.karyon.HealthCheckStatus;
-import com.netflix.karyon.HealthState;
-import com.netflix.karyon.LifecycleState;
-import com.netflix.karyon.healthcheck.HealthIndicator;
-import com.netflix.karyon.healthcheck.HealthIndicatorRegistry;
-import com.netflix.karyon.healthcheck.HealthIndicators;
+import com.netflix.karyon.health.HealthCheck;
+import com.netflix.karyon.health.HealthCheckStatus;
+import com.netflix.karyon.health.HealthIndicator;
+import com.netflix.karyon.health.HealthIndicatorRegistry;
+import com.netflix.karyon.health.HealthIndicators;
+import com.netflix.karyon.health.HealthState;
+import com.netflix.karyon.lifecycle.LifecycleState;
 
 public class HealthCheckBindingTest {
     @Test

@@ -3,7 +3,7 @@ $(document).ready(function(){
     var host = hash[1];
     var tab = hash[2];
         
-    $.get("http://" + host + ":8077/allprops", function(propMap) {
+    $.get("http://" + host + "/allprops", function(propMap) {
         $.get('allprops.template', function (template) {
             var props = [];
             $.each(propMap.props, function(key, value) {

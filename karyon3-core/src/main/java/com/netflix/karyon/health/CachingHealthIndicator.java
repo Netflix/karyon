@@ -1,4 +1,4 @@
-package com.netflix.karyon.healthcheck;
+package com.netflix.karyon.health;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
