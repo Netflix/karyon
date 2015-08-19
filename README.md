@@ -1,13 +1,16 @@
 Karyon3
 ---------
-Karyon3 is an application integration framework focused on bootstrapping an application using netflix OSS such as Governator, Archaius, Eureka and RxNetty.  Karyon3 makes use of dependency injection (specifically using Google Guice) with Goveranator's context based conditional module loading to transparently load bindings and configurations for the environment in which the application is running.  Karyon3 is broken up into sub-projects on functional and dependency boundaries to reduce pulling in excessive dependencies.  
+Karyon3 is a integration framework focused on bootstrapping JVM application using netflix OSS such as Governator, Archaius, Eureka and RxNetty.  Karyon3 makes use of dependency injection (specifically using Google Guice) with Goveranator's context based conditional module loading to transparently load bindings and configurations for the environment in which the application is running.  Karyon3 is broken up into sub-projects on functional and dependency boundaries to reduce pulling in excessive dependencies.  
 
 Core features
-* Minimize dependencies
-* Context based auto-configuration
-* Health check
-* Admin console
-* Integration with core Netflix OSS
+- Minimize dependencies
+- Context based auto-configuration
+- Health check
+- Admin console
+- Integration with core Netflix OSS
+-- Archaius
+-- Eureka
+-- RxNetty
 
 ----------
 Getting Started
@@ -94,10 +97,7 @@ Finally, reference the context listener in web.xml
 ----------
 Running in Jetty
 ----------------------
-
-----------
-Application Lifecycle
---------------------------
+TODO
 
 ----------
 Conditional module loading
@@ -109,6 +109,70 @@ TODO: see Governator Conditional Loading Documentation
 ----------
 Archaius Configuration
 ----------------------------
+Karyon3 uses Archaius2 to manage the application configuration.   Archaius provides a simple override structure through which configuration may be loaded and overwritten.  The configuration is fully DI'd and is therefore injectable into any code.  
+
+### Configuration proxy
+Archaius encourages the user of java interfaces to model configuration for a class as opposed to depending on a specific configuration API (such as apache commons) or mapping to Pojo setters (makes it difficult to have final fields).  To simplify the use of interfaces Archaius provides a mechanism to bind a proxied implementation to the configuration.  This approach has several benefits, 
+*  Typed configuration mapping
+*  Decouple configuration representation from configuration format
+*  Mockable configuration
+*  Decouple configuration from executable code
+
+A configuration interface looks like this,
+
+```java
+@Configuration(prefix="foo")  // Optional prefix
+@ConfigurationSource("foo")   // Will load foo.properties (and cascade overrides)
+public interface FooConfig {
+    @DefaultValue("50")
+    int getTimeout(); // Will bind to property foo.timeout
+}
+```
+
+The configuration interfaces is used like this,
+```java
+public class Foo { 
+    @Inject
+    Foo(FooConfig config) {
+    }
+}
+```
+
+To create the proxied configuration
+``` java
+new AbstractModule() {
+    @Provides
+    @Singleton
+    FooConfig getFooConfiguration(ConfigProxyFactory factory) {
+        return factory.newProxy(FooConfig.class);
+    }
+}
+```
+
+For more complex configurations that can't be modeled as an interface it is still possible to just inject archaius's Config and access properties manually.
+
+```java
+public class Foo {
+    @Inject
+    Foo(Config config) {
+        config.getInteger("foo.timeout", 50);
+    }
+}
+```
+
+### Dynamic configuration 
+TODO
+
+### Loading Configuration Files
+TODO
+
+### ServerContext
+TODO
+
+----------
+Application Lifecycle
+--------------------------
+TODO
 
 ----------
 Admin Console
@@ -131,6 +195,7 @@ AdminUIServerModule
 
 ### Writing a custom REST endpoint
 TODO
+
 ### Writing a custom UI page
 TODO
 
@@ -150,6 +215,7 @@ The HealthCheck API is broken up into several abstractions to allow for maximum 
 * HealthCheck - combines application lifecycle + indicators to derive a meaningful health state
 
 ### Using HealthCheck
+```java
 @Path("/health")
 public class HealthCheckResource {
     @Inject
@@ -162,6 +228,7 @@ public class HealthCheckResource {
        return healthCheck.check().join();
    }   
 }
+```
 
 ### Custom health check 
 To create a custom health indicator simply implement HealthIndicator and inject any objects that are needed to determine the health state.  
@@ -201,11 +268,21 @@ TBD
 Eureka Integration
 -----------------------
 First, add the following dependency 
+
 ```gradle
 compile 'com.netflix.karyon:karyon3-eureka:3.0.1-rc.28'
 ```
 
-Integrates application lifecycle + health check into eureka
+Next add the EurekaModule from OSS eureka-client
+
+```gradle
+Karyon.createInjector(
+    ArchaiusKaryonConfiguration.createDefault(),
+    new EurekaModule(),
+    ...
+```
+
+Using conditional loading the Karyon will auto-install a module that will bridge Karyon's health check with Eureka's V2 health check
 
 ----------
 Jersey Integration
@@ -232,11 +309,91 @@ Karyon.createInjector(
 ```
 
 ----------
-RxNetty
------------
-TODO
+RxNetty Server
+-------------------
+NOTE: Karyon currently uses RxNetty 0.4.x until 0.5.x is released.
+
+Karyon provides a mechanism to define and configure multiple RxNetty servers within a single application with servlet style request routing similar to ServletModule.   Based on these bindings Karyon will auto-start the servers as the injector is created.  
+
+To add RxNetty support
+```gradle
+compile 'com.netflix.karyon:karyon3-rxnetty:3.0.1-rc.28'
+```
+
+To specify basic URL routes for an RxNetty Server
+```gradle
+Karyon.createInjector(
+    ArchaiusKaryonConfiguration.createDefault(),
+    new RxNettyServerModule() {
+        @Override
+        protected void configureEndpoints() {
+            serve("/hello").with(HelloWorldRequestHandler.class);
+        }
+    },
+    ...
+```
+
+HelloWorldRequestHandler is a standard RxNetty request handler
+```java
+@Singleton
+public class HelloWorldRequestHandler implements RequestHandler<ByteBuf, ByteBuf> {
+    @Override
+    public Observable<Void> handle(
+            HttpServerRequest<ByteBuf> request,
+            HttpServerResponse<ByteBuf> response) {
+        return response.writeStringAndFlush("Hello World!");
+    }
+}
+```
+
+### Server configuration
+Karyon will auto-create a default binding for ServerConfig.  However, an alternate ServerConfig may be provided by specifying the binding to ServerConfig.  
+
+```properties
+karyon.httpserver.serverPort=7001
+```
+
+### Qualified RxNetty Server
+Qualified RxNetty servers makes it possible to expose services (such as admin) over other ports.
+
+```gradle
+Karyon.createInjector(
+    ArchaiusKaryonConfiguration.createDefault(),
+    new RxNettyServerModule() {
+        @Override
+        protected void configureEndpoints() {
+            serve(FooServer.class, "/foo").with(FooRequestHandler.class);
+        }
+    },
+    ...
+```
+
+Where the port number is defined in the property 
+```properties
+karyon.httpserver.serverPort=7001
+```
+### Raw usage of RxNetty 
+If not interested in the built in routing an RxNetty server may be constructed manually using a simple @Provides method.
+
+```java
+new AbstractModule() {
+    @Provides
+    @Singleton
+    HttpServer<ByteBuf, ByteBuf> getShutdownServer() {
+        return RxNetty.newHttpServerBuilder(
+            80, 
+            new FooRequestHandler()
+            )
+            .build();
+    }
+}
+```
 
 ----------
 Logging
 -----------
+TODO
+
+Testing
+----------
 TODO
