@@ -35,7 +35,7 @@
         }
 
         if (changed) {
-            sammy.load('http://' + host + ':8077/resources')
+            sammy.load('http://' + host + '/resources')
                  .then(function (json) {
                      var items = JSON.parse(json);
                      items.push('appinfo');
@@ -56,17 +56,17 @@
     }
     
     function updateHeader(sammy, context, h, t) {
-        $.get('http://' + host + ':8077/guice-lifecycle', function (lifecycle) { 
+        $.get('http://' + host + '/guice-lifecycle', function (lifecycle) { 
              $('#header-lifecycle-state').html(lifecycle.state);
              $('#header-lifecycle-state').removeClass().addClass("label " + lifecycleStateLabel[lifecycle.state]);
          });
              
-        $.get('http://' + host + ':8077/health', function (health) { 
+        $.get('http://' + host + '/health', function (health) { 
              $('#header-health-state').html(health.state);
              $('#header-health-state').removeClass().addClass("label " + healthStateLabel[health.state]);
          });
          
-        $.get('http://' + host + ':8077/meta', function (meta) { 
+        $.get('http://' + host + '/meta', function (meta) { 
             $('#header-appname').html(meta.appId);
             $('#header-region').html(meta.region);
             $('#header-serverId').html(meta.serverId);
@@ -111,7 +111,7 @@
                    params['tab'] + ".html", 
                    {
                        error : function(response) {
-                           $.get('http://' + params['host'] + ':8077/' + toPath(params['tab']), function(json) { 
+                           $.get('http://' + params['host'] + '/' + toPath(params['tab']), function(json) { 
                                var code = JSON.stringify(json, null, 2);
                                $.get('code.template', function (template) {
                                    var rendered = Mustache.render(template, {'lang': 'json', 'code': code});
@@ -136,7 +136,7 @@
             var params = this.params;
             updateSidebar(this, context, params['host'], params['tab']);
             console.log('query [' + params['query'] + ']');
-            this.load('http://' + params['host'] + ':8077/' + params['tab'])
+            this.load('http://' + params['host'] + '/' + params['tab'])
                 .then(function (json) {
                     var obj = JSON.parse(json);
                     showCode(obj);

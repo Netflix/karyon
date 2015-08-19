@@ -13,11 +13,14 @@ import org.junit.Test;
 import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
 import com.netflix.governator.Governator;
-import com.netflix.karyon.healthcheck.HealthIndicator;
-import com.netflix.karyon.healthcheck.HealthIndicatorRegistry;
-import com.netflix.karyon.healthcheck.HealthIndicatorStatus;
-import com.netflix.karyon.healthcheck.HealthIndicatorStatuses;
-import com.netflix.karyon.healthcheck.HealthIndicators;
+import com.netflix.karyon.health.HealthCheck;
+import com.netflix.karyon.health.HealthCheckStatus;
+import com.netflix.karyon.health.HealthIndicator;
+import com.netflix.karyon.health.HealthIndicatorRegistry;
+import com.netflix.karyon.health.HealthIndicatorStatus;
+import com.netflix.karyon.health.HealthIndicatorStatuses;
+import com.netflix.karyon.health.HealthIndicators;
+import com.netflix.karyon.health.HealthState;
 
 public class HealthCheckTest {
     

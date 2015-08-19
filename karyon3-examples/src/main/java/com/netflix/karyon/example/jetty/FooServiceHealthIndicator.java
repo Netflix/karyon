@@ -8,9 +8,9 @@ import java.util.function.Supplier;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import com.netflix.karyon.healthcheck.HealthIndicator;
-import com.netflix.karyon.healthcheck.HealthIndicatorStatus;
-import com.netflix.karyon.healthcheck.HealthIndicatorStatuses;
+import com.netflix.karyon.health.HealthIndicator;
+import com.netflix.karyon.health.HealthIndicatorStatus;
+import com.netflix.karyon.health.HealthIndicatorStatuses;
 
 @Singleton
 public class FooServiceHealthIndicator implements HealthIndicator {

@@ -7,7 +7,7 @@ import javax.inject.Singleton;
 import com.google.inject.Inject;
 import com.netflix.appinfo.HealthCheckHandler;
 import com.netflix.appinfo.InstanceInfo.InstanceStatus;
-import com.netflix.karyon.HealthCheck;
+import com.netflix.karyon.health.HealthCheck;
 
 /**
  * Eureka HealthCheckHandler implementation that combines Karyon's HealthCheck with
@@ -18,7 +18,7 @@ import com.netflix.karyon.HealthCheck;
  */
 @Singleton
 public class KaryonHealthCheckHandler implements HealthCheckHandler {
-    private final HealthCheck               healthCheck;
+    private final HealthCheck        healthCheck;
     private HealthCheckConfiguration config;
     
     @Inject

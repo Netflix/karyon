@@ -3,7 +3,7 @@ $(document).ready(function(){
     var host = hash[1];
     var tab = hash[2];
         
-    $.get("http://" + host + ":8077/di-graph", function(graph) {
+    $.get("http://" + host + "/di-graph", function(graph) {
         console.log(graph);
         
         var nodes = {};

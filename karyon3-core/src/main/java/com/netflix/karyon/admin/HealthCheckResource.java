@@ -3,8 +3,8 @@ package com.netflix.karyon.admin;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import com.netflix.karyon.HealthCheck;
-import com.netflix.karyon.HealthCheckStatus;
+import com.netflix.karyon.health.HealthCheck;
+import com.netflix.karyon.health.HealthCheckStatus;
 
 /**
  * Admin resource to access all health checks. 

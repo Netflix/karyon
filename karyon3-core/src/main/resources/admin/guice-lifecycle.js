@@ -10,7 +10,7 @@ $(document).ready(function(){
        'Failed'   : 'label-danger',
     };
     
-    $.get("http://" + host + ":8077/"+tab, function(lifecycle) {
+    $.get("http://" + host + "/"+tab, function(lifecycle) {
         $('#lifecycle-state').html(lifecycle.state);
         $('#lifecycle-reason').html(lifecycle.reason);
         $('#lifecycle-state').addClass(stateLabel[lifecycle.state]);
