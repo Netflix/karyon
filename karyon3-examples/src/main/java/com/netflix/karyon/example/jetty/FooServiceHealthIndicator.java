@@ -8,16 +8,17 @@ import java.util.function.Supplier;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import com.netflix.karyon.health.HealthIndicator;
+import com.netflix.karyon.health.AbstractHealthIndicator;
 import com.netflix.karyon.health.HealthIndicatorStatus;
 import com.netflix.karyon.health.HealthIndicatorStatuses;
 
 @Singleton
-public class FooServiceHealthIndicator implements HealthIndicator {
+public class FooServiceHealthIndicator extends AbstractHealthIndicator {
     private FooService service;
 
     @Inject
     public FooServiceHealthIndicator(FooService service) {
+        super("foo");
         this.service = service;
     }
     
@@ -31,17 +32,13 @@ public class FooServiceHealthIndicator implements HealthIndicator {
                 attributes.put("errorRate", errorRate);
                 
                 if (errorRate > 0.5) {
-                    return HealthIndicatorStatuses.unhealthy(getName(), attributes);
+                    return unhealthy(attributes);
                 }
                 else {
-                    return HealthIndicatorStatuses.healthy(getName(), attributes);
+                    return healthy(attributes);
                 }
             }
         });
     }
 
-    @Override
-    public String getName() {
-        return "foo";
-    }
 }
