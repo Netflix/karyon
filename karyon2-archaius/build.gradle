@@ -17,7 +17,8 @@ apply plugin: 'osgi'
 
 dependencies {
     compile project(':karyon2-governator')
-    compile 'com.netflix.archaius:archaius-core:0.6.3'
+    compile 'com.netflix.archaius:archaius-core:0.7.2'
+    compile "com.netflix.governator:governator-archaius:$governator_version"
 }
 
 jar {

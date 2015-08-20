@@ -23,7 +23,6 @@ dependencies {
         compile 'com.sun.jersey.contribs:jersey-guice:${jersey_version}'
         compile "com.sun.jersey:jersey-servlet:${jersey_version}"
         compile "com.sun.jersey:jersey-server:${jersey_version}"
-        compile 'com.google.inject.extensions:guice-servlet:3.0'
         compile "com.netflix.pytheas:pytheas-core:${pytheas_version}"
         compile "com.sun.jersey:jersey-core:${jersey_version}"
         runtime 'org.codehaus.jackson:jackson-mapper-asl:1.9.11'
