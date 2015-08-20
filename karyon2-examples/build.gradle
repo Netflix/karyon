@@ -25,7 +25,6 @@ dependencies {
     compile project(':karyon2-servo')
 
     compile 'org.codehaus.jettison:jettison:1.2'
-    compile 'com.google.inject:guice:3.0'
     compile 'org.slf4j:slf4j-api:1.7.0'
     runtime 'org.slf4j:slf4j-simple:1.7.0'
 }
