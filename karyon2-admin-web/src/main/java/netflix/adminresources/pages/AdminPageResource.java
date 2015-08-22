@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 import javax.annotation.PostConstruct;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -72,8 +73,8 @@ public class AdminPageResource {
             }
             return new Viewable(adminPageRegistry.getPageInfo(view).getPageTemplate(), model);
         }
-
-        return new Viewable("/webadmin/" + view + "/index.ftl", model);
+        LOG.info("Can not find " + view);
+        throw new WebApplicationException(Response.Status.NOT_FOUND);
     }
 
     @POST
