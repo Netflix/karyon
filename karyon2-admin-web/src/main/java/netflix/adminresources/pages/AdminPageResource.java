@@ -73,7 +73,6 @@ public class AdminPageResource {
             }
             return new Viewable(adminPageRegistry.getPageInfo(view).getPageTemplate(), model);
         }
-        LOG.info("Can not find " + view);
         throw new WebApplicationException(Response.Status.NOT_FOUND);
     }
 
