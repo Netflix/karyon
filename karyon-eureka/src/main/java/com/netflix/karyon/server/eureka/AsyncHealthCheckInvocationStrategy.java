@@ -16,6 +16,22 @@
 
 package com.netflix.karyon.server.eureka;
 
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
+
+import javax.annotation.PostConstruct;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.google.common.annotations.VisibleForTesting;
+import com.google.common.util.concurrent.SettableFuture;
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.google.inject.Inject;
 import com.netflix.config.DynamicIntProperty;
 import com.netflix.config.DynamicPropertyFactory;
@@ -23,17 +39,6 @@ import com.netflix.governator.annotations.Configuration;
 import com.netflix.governator.guice.lazy.LazySingleton;
 import com.netflix.karyon.spi.HealthCheckHandler;
 import com.netflix.karyon.spi.PropertyNames;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.annotation.PostConstruct;
-import java.util.concurrent.Callable;
-import java.util.concurrent.FutureTask;
-import java.util.concurrent.SynchronousQueue;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * An implementation of {@link HealthCheckInvocationStrategy} that calls the underlying {@link HealthCheckHandler}
@@ -52,7 +57,6 @@ import java.util.concurrent.atomic.AtomicReference;
  */
 @LazySingleton
 public class AsyncHealthCheckInvocationStrategy implements HealthCheckInvocationStrategy {
-
     protected static final Logger logger = LoggerFactory.getLogger(AsyncHealthCheckInvocationStrategy.class);
 
     @Configuration(
@@ -61,80 +65,94 @@ public class AsyncHealthCheckInvocationStrategy implements HealthCheckInvocation
     )
     protected int HEALTH_CHECK_TIMEOUT_DEFAULT = 1000;
 
-    private final DynamicIntProperty HEALTH_CHECK_TIMEOUT_MILLIS =
-            DynamicPropertyFactory.getInstance().getIntProperty(PropertyNames.HEALTH_CHECK_TIMEOUT_MILLIS,
-                    HEALTH_CHECK_TIMEOUT_DEFAULT);
-
-    private HealthCheckHandler healthCheckHandler;
-    private AtomicReference<HealthCheckTask> currentFuture;
-    private SynchronousQueue<Boolean> healthCheckFeeder;
-
-    /**
-     * This is used when {@link #invokeCheck()} gets a future which is not yet started the execution. This essentially
-     * will be a race-condition where-in the task finishes execution between the time {@link #invokeCheck()} signals
-     * the health check thread to execute the handler and does a {@link #currentFuture#get()}. In this case, we just
-     * use the last computed value.
-     */
-    private volatile int lastComputedStatus = 500;
-
-    private Thread healthChecker;
-    private AtomicBoolean started = new AtomicBoolean();
-
+    private final DynamicIntProperty HEALTH_CHECK_TIMEOUT_MILLIS;
+    private final HealthCheckHandler healthCheckHandler;
+    
+    private AtomicReference<Future<Integer>> currentFuture = new AtomicReference<Future<Integer>>();
+    private ExecutorService executor;
+    private AtomicInteger executeCounter = new AtomicInteger(0);
+    private AtomicInteger invokeCounter = new AtomicInteger(0);
+    
     @Inject
     public AsyncHealthCheckInvocationStrategy(HealthCheckHandler healthCheckHandler) {
         logger.info(String.format("Application health check handler to be used by karyon: %s", healthCheckHandler.getClass().getName()));
         this.healthCheckHandler = healthCheckHandler;
-        currentFuture = new AtomicReference<HealthCheckTask>(new HealthCheckTask());
-        healthCheckFeeder = new SynchronousQueue<Boolean>();
-        healthChecker = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    while (healthCheckFeeder.take()) { // blocks till something is available.
-                        currentFuture.get().run();
-                    }
-                    logger.info("Karyon health check thread swallowed the poison pill and stopped gracefully!");
-                } catch (InterruptedException e) {
-                    logger.info("Karyon health check thread interrupted, no new health checks will be done and the health will always be unhealthy.");
-                    currentFuture.set(new HealthCheckTask(true));
-                }
-            }
-        });
-        healthChecker.setDaemon(true);
+        this.currentFuture = new AtomicReference<Future<Integer>>();
+        this.HEALTH_CHECK_TIMEOUT_MILLIS = DynamicPropertyFactory.getInstance().getIntProperty(PropertyNames.HEALTH_CHECK_TIMEOUT_MILLIS,
+                HEALTH_CHECK_TIMEOUT_DEFAULT);
     }
 
+    @VisibleForTesting
+    public AsyncHealthCheckInvocationStrategy(HealthCheckHandler healthCheckHandler, int timeout) {
+        logger.info(String.format("Application health check handler to be used by karyon: %s", healthCheckHandler.getClass().getName()));
+        this.healthCheckHandler = healthCheckHandler;
+        this.currentFuture = new AtomicReference<Future<Integer>>();
+        this.HEALTH_CHECK_TIMEOUT_MILLIS = DynamicPropertyFactory.getInstance().getIntProperty(PropertyNames.HEALTH_CHECK_TIMEOUT_MILLIS,
+                timeout);
+    }
+    
     @PostConstruct
-    public void start() {
-        if (!started.compareAndSet(false, true)) {
-            return;
+    public synchronized void start() {
+        if (this.executor == null) {
+            this.executor = Executors.newSingleThreadExecutor(new ThreadFactoryBuilder().setNameFormat("AsyncHealthCheck-%d").setDaemon(true).build());
         }
-        healthChecker.start();
     }
 
     @Override
     public int invokeCheck() throws TimeoutException {
-        if (!healthCheckFeeder.offer(true)) {
-            logger.debug("Async healthcheck already in progress, will use the existing result.");
-        }
-
-        HealthCheckTask currFuture = currentFuture.get();
-        try {
-            return currFuture.get(HEALTH_CHECK_TIMEOUT_MILLIS.get(), TimeUnit.MILLISECONDS);
-        } catch (InterruptedException e) {
-            Thread.interrupted(); /// reset the interrupted status.
-            logger.error("Async health check interrupted, this is deemed as failure.", e);
-        } catch (TimeoutException e) {
-            if (!currFuture.isStarted()) { // This will happen if the health check task finishes between healthCheckFeeder.offer() & currentFuture.get()
-                if (logger.isDebugEnabled()) {
-                    logger.debug("Async health check strategy got a future that was not started, returning last computed status: " + lastComputedStatus);
+        invokeCounter.incrementAndGet();
+        
+        while (true) {
+            final SettableFuture<Integer> future = SettableFuture.create();
+            // Use CAS on a settable future to take ownership of calculating the health check
+            if (currentFuture.compareAndSet(null, future)) {
+                executor.submit(new Runnable() {
+                    @Override
+                    public void run() {
+                        executeCounter.incrementAndGet();
+                        try {
+                            future.set(healthCheckHandler.getStatus());
+                        }
+                        catch (Exception e) {
+                            logger.debug("Async health check had an error {}", e.getMessage());
+                            // Any error translated to a 500
+                            future.set(500);
+                        }
+                        finally {
+                            // Only allow resetting of the state from within the worker 
+                            // thread
+                            currentFuture.set(null);
+                        }
+                    }
+                });
+                
+                try {
+                    return future.get(HEALTH_CHECK_TIMEOUT_MILLIS.get(), TimeUnit.MILLISECONDS);
                 }
-                return lastComputedStatus;
+                catch (TimeoutException e) {
+                    throw new TimeoutException();
+                }
+                catch (Exception e) {
+                    future.set(500);
+                }
             }
-            throw e;
-        } catch (Exception e) {
-            logger.error("Async health check failed, this is deemed as failure.", e);
+            // Health check is already being performed so try to attach to the existing test
+            // or try again in case the pending check completed
+            else {
+                Future<Integer> pending =  currentFuture.get();
+                if (pending != null) {
+                    try {
+                        return pending.get(HEALTH_CHECK_TIMEOUT_MILLIS.get(), TimeUnit.MILLISECONDS);
+                    }
+                    catch (TimeoutException e) {
+                        throw new TimeoutException();
+                    }
+                    catch (Exception e) {
+                        return 500;
+                    }
+                }
+            }
         }
-        return 500;
     }
 
     @Override
@@ -142,55 +160,18 @@ public class AsyncHealthCheckInvocationStrategy implements HealthCheckInvocation
         return healthCheckHandler;
     }
 
-    public void stop() throws InterruptedException {
-        if (healthCheckFeeder.offer(false)) {
-            logger.info("Healthchecker poison pill offer failed, interrupting the thread.");
-            healthChecker.interrupt();
-        }
+    int getInvokeCounter() {
+        return this.invokeCounter.get();
     }
-
-    private class HealthCheckTask extends FutureTask<Integer> {
-
-        private volatile boolean started;
-
-        private HealthCheckTask() {
-            this(false);
-        }
-
-        private HealthCheckTask(final boolean alwaysUnhealthy) {
-            super(new Callable<Integer>() {
-                @Override
-                public Integer call() throws Exception {
-                    if (alwaysUnhealthy) {
-                        return 500;
-                    }
-                    return healthCheckHandler.getStatus();
-                }
-            });
-        }
-
-        @Override
-        public void run() {
-            started = true;
-            super.run();
-        }
-
-        public boolean isStarted() {
-            return started;
-        }
-
-        @Override
-        protected void done() {
-            if (!isCancelled()) {
-                try {
-                    lastComputedStatus = get(1, TimeUnit.MILLISECONDS);
-                } catch (Exception e) {
-                    logger.info(
-                            "Failed to set the last computed status for health check invocation. Current last computed status: "
-                            + lastComputedStatus, e);
-                }
-            }
-            currentFuture.compareAndSet(this, new HealthCheckTask()); // Whenever it is done, do a fresh check on demand
+    
+    int getExecuteCounter() {
+        return this.executeCounter.get();
+    }
+    
+    public synchronized void stop() throws InterruptedException {
+        if (executor != null) {
+            executor.shutdown();
+            executor = null;
         }
     }
 }
