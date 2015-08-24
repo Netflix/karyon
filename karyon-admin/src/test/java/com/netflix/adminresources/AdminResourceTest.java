@@ -16,6 +16,17 @@
 
 package com.netflix.adminresources;
 
+import java.net.ConnectException;
+
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
+
 import com.google.inject.Injector;
 import com.netflix.config.ConcurrentCompositeConfiguration;
 import com.netflix.config.ConfigurationManager;
@@ -23,16 +34,6 @@ import com.netflix.karyon.server.KaryonServer;
 import com.netflix.karyon.server.eureka.SyncHealthCheckInvocationStrategy;
 import com.netflix.karyon.spi.PropertyNames;
 import com.netflix.karyon.util.KaryonTestSetupUtil;
-
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.conn.HttpHostConnectException;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
 
 /**
  * @author Nitesh Kant
@@ -73,7 +74,7 @@ public class AdminResourceTest {
         Assert.assertEquals("admin resource health check failed.", 200, response.getStatusLine().getStatusCode());
     }
 
-    @Test (expected = HttpHostConnectException.class)
+    @Test (expected = ConnectException.class)
     public void testCustomPort() throws Exception {
         ((ConcurrentCompositeConfiguration) ConfigurationManager.getConfigInstance())
                 .setOverrideProperty(AdminResourcesContainer.CONTAINER_LISTEN_PORT, CUSTOM_LISTEN_PORT);
