@@ -32,24 +32,8 @@ public class LocalServerContextConfigSeeder implements ConfigSeeder {
             .put(ServerContext.DATACENTER,      "cloud")
             .put(ServerContext.REGION,          "us-west-2")
             .put(ServerContext.ZONE,            "us-west-2a")
-            .put(ServerContext.SERVER_ID,       "${@hostname}")
+            .put(ServerContext.SERVER_ID,       "${" + ServerContext.HOSTNAME + "}")
             .put(ServerContext.AMI,             "ami-dev")
-            
-            // Netflix specific metadata
-            .put(ServerContext.ENVIRONMENT,     "test")
-            .put(ServerContext.CLUSTER,         "cluster-dev")
-            .put(ServerContext.ASG,             "asg-dev")    
-            .put(ServerContext.STACK,           "")
-            .put(ServerContext.APP_ID,          "")
-            
-            .put("NETFLIX_ENVIRONMENT",         "${" + ServerContext.ENVIRONMENT + "}")
-            .put("NETFLIX_CLUSTER",             "${" + ServerContext.CLUSTER + "}")
-            .put("NETFLIX_AUTO_SCALE_GROUP",    "${" + ServerContext.ASG + "}")
-            .put("NETFLIX_STACK",               "${" + ServerContext.STACK + "}")
-            .put("NETFLIX_APP",                 "${" + ServerContext.APP_ID + "}")
-
-            // Redirects for legacy amazon metadata
-            .put("netflix.datacenter",         "${" + ServerContext.DATACENTER + "}")
             .build();
     }
 }
