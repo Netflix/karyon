@@ -20,7 +20,7 @@ dependencies {
     compile     project(':karyon3-core')
     compile     project(':karyon3-admin')
     
-    compile "com.netflix.archaius:archaius2-core:${archaius_version}"
+    compile group: "com.netflix.archaius", name: "archaius2-core", version: "${archaius_version}", changing: true
     compile "com.netflix.archaius:archaius2-guice:${archaius_version}"
     compile "com.netflix.archaius:archaius2-persisted2:${archaius_version}"
     compile "com.netflix.archaius:archaius2-archaius1-bridge:${archaius_version}"
