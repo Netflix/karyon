@@ -24,16 +24,6 @@ public class Ec2ServerContextConfigSeeder implements ConfigSeeder {
             .put(ServerContext.SERVER_ID,       "${EC2_INSTANCE_ID}")
             .put(ServerContext.AMI,             "${EC2_AMI_ID}")
             .put(ServerContext.REGION,          "${EC2_REGION}")
-            
-            // Netflix specific metadata
-            .put(ServerContext.ENVIRONMENT,     "${NETFLIX_ENVIRONMENT}")
-            .put(ServerContext.CLUSTER,         "${NETFLIX_CLUSTER}")
-            .put(ServerContext.ASG,             "${NETFLIX_AUTO_SCALE_GROUP}")
-            .put(ServerContext.STACK,           "${NETFLIX_STACK}")
-            .put(ServerContext.APP_ID,          "${NETFLIX_APP}")
-            
-            // Redirects for legacy amazon metadata
-            .put("netflix.datacenter",          "cloud")
             .build();
     }
 }
