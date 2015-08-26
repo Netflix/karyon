@@ -103,6 +103,15 @@ public class WebAdminTest {
     }
 
     @Test
+    public void testInvalidEndpoint() throws Exception {
+        final String localhostUrlBase = String.format("http://localhost:%d/", adminServerPort);
+        final HttpClient client = new DefaultHttpClient();
+        HttpGet badGet = new HttpGet(localhostUrlBase + "/admin/not-there");
+        final HttpResponse resp = client.execute(badGet);
+        assertEquals(404, resp.getStatusLine().getStatusCode());
+    }
+
+    @Test
     public void testMaskedResources() throws Exception {
         HttpClient client = new DefaultHttpClient();
         final String endPoint = String.format("http://localhost:%d/webadmin/archprops", adminServerPort);
