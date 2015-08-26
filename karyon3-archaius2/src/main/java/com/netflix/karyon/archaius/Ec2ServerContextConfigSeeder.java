@@ -13,27 +13,26 @@ public class Ec2ServerContextConfigSeeder implements ConfigSeeder {
     public Config get(Config config) {
         return MapConfig.builder()
             // Amazon specific metadata
-            .put(ServerContext.DOMAIN,          config.getString("EC2_DOMAIN", ""))
-            .put(ServerContext.HOSTNAME,        config.getString("EC2_HOSTNAME", ""))
-            .put(ServerContext.PUBLIC_HOSTNAME, config.getString("EC2_PUBLIC_HOSTNAME", ""))
-            .put(ServerContext.PUBLIC_IPV4,     config.getString("EC2_PUBLIC_IPV4", ""))
-            .put(ServerContext.LOCAL_HOSTNAME,  config.getString("EC2_LOCAL_HOSTNAME", ""))
-            .put(ServerContext.LOCAL_IPV4,      config.getString("EC2_LOCAL_IPV4", ""))
-            .put(ServerContext.DATACENTER,      config.getString("EC2_REGION", ""))
-            .put(ServerContext.RACK,            config.getString("EC2_AVAILABILITY_ZONE", ""))
-            .put(ServerContext.SERVER_ID,       config.getString("EC2_INSTANCE_ID", ""))
-            .put(ServerContext.AMI,             config.getString("EC2_AMI_ID", ""))
+            .put(ServerContext.DOMAIN,          "${EC2_DOMAIN}")
+            .put(ServerContext.HOSTNAME,        "${EC2_HOSTNAME}")
+            .put(ServerContext.PUBLIC_HOSTNAME, "${EC2_PUBLIC_HOSTNAME}")
+            .put(ServerContext.PUBLIC_IPV4,     "${EC2_PUBLIC_IPV4}")
+            .put(ServerContext.LOCAL_HOSTNAME,  "${EC2_LOCAL_HOSTNAME}")
+            .put(ServerContext.LOCAL_IPV4,      "${EC2_LOCAL_IPV4}")
+            .put(ServerContext.DATACENTER,      "cloud")
+            .put(ServerContext.ZONE,            "${EC2_AVAILABILITY_ZONE}")
+            .put(ServerContext.SERVER_ID,       "${EC2_INSTANCE_ID}")
+            .put(ServerContext.AMI,             "${EC2_AMI_ID}")
+            .put(ServerContext.REGION,          "${EC2_REGION}")
             
             // Netflix specific metadata
-            .put(ServerContext.ENVIRONMENT,     config.getString("NETFLIX_ENVIRONMENT", ""))
-            .put(ServerContext.CLUSTER,         config.getString("NETFLIX_CLUSTER", ""))
-            .put(ServerContext.ASG,             config.getString("NETFLIX_AUTO_SCALE_GROUP", ""))
-            .put(ServerContext.STACK,           config.getString("NETFLIX_STACK", ""))
-            .put(ServerContext.APP_ID,          config.getString("NETFLIX_APP", ""))
+            .put(ServerContext.ENVIRONMENT,     "${NETFLIX_ENVIRONMENT}")
+            .put(ServerContext.CLUSTER,         "${NETFLIX_CLUSTER}")
+            .put(ServerContext.ASG,             "${NETFLIX_AUTO_SCALE_GROUP}")
+            .put(ServerContext.STACK,           "${NETFLIX_STACK}")
+            .put(ServerContext.APP_ID,          "${NETFLIX_APP}")
             
             // Redirects for legacy amazon metadata
-            .put("@zone",                       "${" + ServerContext.RACK + "}")
-            .put("@region",                     "${" + ServerContext.DATACENTER + "}")
             .put("netflix.datacenter",          "cloud")
             .build();
     }

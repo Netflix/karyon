@@ -29,8 +29,9 @@ public class LocalServerContextConfigSeeder implements ConfigSeeder {
             .put(ServerContext.PUBLIC_IPV4,     IP.getHostAddress())
             .put(ServerContext.LOCAL_HOSTNAME,  IP.getHostName())
             .put(ServerContext.LOCAL_IPV4,      IP.getHostAddress())
-            .put(ServerContext.DATACENTER,      "us-west-1")
-            .put(ServerContext.RACK,            "zone-dev")
+            .put(ServerContext.DATACENTER,      "cloud")
+            .put(ServerContext.REGION,          "us-west-2")
+            .put(ServerContext.ZONE,            "us-west-2a")
             .put(ServerContext.SERVER_ID,       "${@hostname}")
             .put(ServerContext.AMI,             "ami-dev")
             
@@ -41,10 +42,14 @@ public class LocalServerContextConfigSeeder implements ConfigSeeder {
             .put(ServerContext.STACK,           "")
             .put(ServerContext.APP_ID,          "")
             
+            .put("NETFLIX_ENVIRONMENT",         "${" + ServerContext.ENVIRONMENT + "}")
+            .put("NETFLIX_CLUSTER",             "${" + ServerContext.CLUSTER + "}")
+            .put("NETFLIX_AUTO_SCALE_GROUP",    "${" + ServerContext.ASG + "}")
+            .put("NETFLIX_STACK",               "${" + ServerContext.STACK + "}")
+            .put("NETFLIX_APP",                 "${" + ServerContext.APP_ID + "}")
+
             // Redirects for legacy amazon metadata
-            .put("@zone",                       "${" + ServerContext.RACK + "}")
-            .put("@region",                     "${" + ServerContext.DATACENTER + "}")
-            .put("netflix.datacenter",          "cloud")
+            .put("netflix.datacenter",         "${" + ServerContext.DATACENTER + "}")
             .build();
     }
 }
