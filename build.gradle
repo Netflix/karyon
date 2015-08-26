@@ -1,6 +1,7 @@
 buildscript {
     repositories { 
 	jcenter() 
+	maven { url 'https://oss.jfrog.org/libs-snapshot' }
     }
     dependencies {
         classpath 'com.netflix.nebula:gradle-extra-configurations-plugin:2.2.0'
@@ -26,6 +27,7 @@ subprojects {
 
     repositories {
         jcenter()
+	maven { url 'https://oss.jfrog.org/libs-snapshot' }
     }
 
     dependencies {

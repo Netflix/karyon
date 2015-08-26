@@ -12,8 +12,9 @@ public final class ServerContext {
     public static final String PUBLIC_IPV4     = "@publicIpv4";
     public static final String LOCAL_HOSTNAME  = "@localHostname";
     public static final String LOCAL_IPV4      = "@localIpv4";
-    public static final String DATACENTER      = "@datacenter";     // 'region' on EC2
-    public static final String RACK            = "@rack";           // 'zone' on EC2
+    public static final String DATACENTER      = "@datacenter";     // 'cloud'
+    public static final String REGION          = "@region";         // 'us-east', ..
+    public static final String ZONE            = "@zoneId";         // 'zone' on EC2
     public static final String CLUSTER         = "@cluster";
     public static final String AMI             = "@ami";
     public static final String ASG             = "@asg";    
