@@ -9,6 +9,7 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import com.netflix.archaius.Config;
+import com.netflix.archaius.visitor.PropertyOverrideVisitor;
 
 // props
 @Singleton
@@ -44,8 +45,6 @@ public class ArchaiusPropResource {
     
     // props/:id/sources (MAP)
     public LinkedHashMap<String, String> getSources(String key) {
-        final LinkedHashMap<String, String> result = new LinkedHashMap<>();
-        config.accept(new SourcesVisitor(key, result));
-        return result;
+        return config.accept(new PropertyOverrideVisitor(key));
     }
 }

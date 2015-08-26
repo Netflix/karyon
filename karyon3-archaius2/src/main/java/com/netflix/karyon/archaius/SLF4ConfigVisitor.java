@@ -6,20 +6,22 @@ import org.slf4j.LoggerFactory;
 import com.netflix.archaius.Config;
 import com.netflix.archaius.config.CompositeConfig;
 
-public class SLF4ConfigVisitor implements Config.Visitor, CompositeConfig.CompositeVisitor {
+public class SLF4ConfigVisitor implements CompositeConfig.CompositeVisitor<Void> {
     private static final Logger LOG = LoggerFactory.getLogger(SLF4ConfigVisitor.class.getSimpleName());
     private String prefix = "";
     
     @Override
-    public void visit(Config config, String key) {
-        LOG.debug(prefix + key + " = " + config.getString(key));
+    public Void visit(Config config, String key) {
+        LOG.info(prefix + key + " = " + config.getString(key));
+        return null;
     }
 
     @Override
-    public void visit(String name, Config child) {
-        LOG.debug(prefix + "Config: " + name);
+    public Void visit(String name, Config child) {
+        LOG.info(prefix + "Config: " + name);
         prefix += "  ";
         child.accept(this);
         prefix = prefix.substring(0, prefix.length()-2);
+        return null;
     }
 }
