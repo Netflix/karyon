@@ -20,10 +20,9 @@ tasks.withType(Javadoc).each {
 }
 
 dependencies {
-    dependencies {
-        compile ('com.netflix.karyon:karyon-eureka:1.+')
-        compile project(':karyon2-admin')
-    }
+    compile ('com.netflix.karyon:karyon-eureka:1.+')
+    testRuntime ('com.sun.jersey:jersey-core:1.18.1') { force = true }
+    compile project(':karyon2-admin')
 }
 
 eclipse {
