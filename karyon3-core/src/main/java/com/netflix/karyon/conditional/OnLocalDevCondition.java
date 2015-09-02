@@ -9,7 +9,7 @@ import com.netflix.governator.auto.PropertySource;
 import com.netflix.governator.auto.conditions.OnJUnitCondition;
 
 @Singleton
-public class OnLocalDevCondition implements Condition<ConditionalOnLocalDevTest> {
+public class OnLocalDevCondition implements Condition<ConditionalOnLocalDev> {
     private final GovernatorConfiguration config;
     private final OnJUnitCondition junitCondition;
 
@@ -20,7 +20,7 @@ public class OnLocalDevCondition implements Condition<ConditionalOnLocalDevTest>
     }
     
     @Override
-    public boolean check(ConditionalOnLocalDevTest condition) {
+    public boolean check(ConditionalOnLocalDev condition) {
         return config.getProfiles().contains("local") || junitCondition.check(null);
     }
     
