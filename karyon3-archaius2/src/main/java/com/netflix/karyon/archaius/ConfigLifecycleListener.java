@@ -25,7 +25,7 @@ public class ConfigLifecycleListener extends DefaultLifecycleListener {
     
     @Override
     public void onStartFailed(Throwable t) {
-        LOG.info("Injector failed with final configuration ");
-        config.accept(new SLF4ConfigVisitor());
+        LOG.debug("Injector failed with final configuration ");
+        config.accept(new SLF4JConfigVisitor());
     }
 }
