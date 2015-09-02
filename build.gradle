@@ -1,6 +1,7 @@
 buildscript {
     repositories { 
 	jcenter() 
+	maven { url 'https://oss.jfrog.org/libs-snapshot' }
     }
     dependencies {
         classpath 'com.netflix.nebula:gradle-extra-configurations-plugin:2.2.0'
@@ -12,6 +13,11 @@ plugins {
 }
 
 ext.githubProjectName = "com.netflix.karyon"
+
+configurations.all {
+    // check for updates every build
+    resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
+}
 
 subprojects {
     apply plugin: 'nebula.netflixoss'
@@ -26,6 +32,7 @@ subprojects {
 
     repositories {
         jcenter()
+	maven { url 'https://oss.jfrog.org/libs-snapshot' }
     }
 
     dependencies {
