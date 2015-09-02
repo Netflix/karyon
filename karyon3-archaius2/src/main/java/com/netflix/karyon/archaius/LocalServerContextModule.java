@@ -5,9 +5,9 @@ import com.google.inject.multibindings.Multibinder;
 import com.netflix.archaius.guice.ConfigSeeder;
 import com.netflix.archaius.inject.DefaultsLayer;
 import com.netflix.governator.auto.annotations.Bootstrap;
-import com.netflix.karyon.conditional.ConditionalOnLocalDev;
+import com.netflix.karyon.conditional.ConditionalOnLocalDevTest;
 
-@ConditionalOnLocalDev
+@ConditionalOnLocalDevTest
 @Bootstrap
 public class LocalServerContextModule extends AbstractModule {
 
