@@ -6,7 +6,6 @@ import com.google.inject.AbstractModule;
 import com.netflix.archaius.config.MapConfig;
 import com.netflix.archaius.exceptions.ConfigException;
 import com.netflix.archaius.guice.ArchaiusModule;
-import com.netflix.governator.DefaultLifecycleListener;
 import com.netflix.karyon.Karyon;
 import com.netflix.karyon.admin.rest.AdminServerModule;
 import com.netflix.karyon.admin.ui.AdminUIServerModule;
@@ -17,7 +16,7 @@ import com.netflix.karyon.rxnetty.server.RxNettyServerModule;
 import com.netflix.karyon.rxnetty.shutdown.ShutdownServerModule;
 
 @Singleton
-public class RxNettyHelloWorldApp extends DefaultLifecycleListener {
+public class RxNettyHelloWorldApp {
     public static void main(String[] args) throws InterruptedException, ConfigException {
         Karyon.createInjector(
             ArchaiusKaryonConfiguration.builder()
