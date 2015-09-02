@@ -23,6 +23,7 @@ import com.netflix.archaius.inject.DefaultsLayer;
 import com.netflix.archaius.inject.LibrariesLayer;
 import com.netflix.archaius.inject.RuntimeLayer;
 import com.netflix.karyon.DefaultKaryonConfiguration;
+import com.netflix.karyon.ServerContext;
 
 public class ArchaiusKaryonConfiguration extends DefaultKaryonConfiguration {
     private static final String DEFAULT_CONFIG_NAME = "application";
@@ -50,7 +51,7 @@ public class ArchaiusKaryonConfiguration extends DefaultKaryonConfiguration {
         }
         
         public T withApplicationName(String value) {
-            props.put("@appId", value);
+            props.put(ServerContext.APP_ID, value);
             return This();
         }
         
