@@ -8,35 +8,33 @@ Core features
 - Health check
 - Admin console
 - Integration with core Netflix OSS
--- Archaius
--- Eureka
--- RxNetty
+
+Note that Karyon3 is meant to be container agnostic and can run inside Tomcat, spawn a Jetty or RxNetty server.
 
 ----------
 Getting Started
 -------------------
-Karyon is available on maven central
+Karyon is currently available as a snapshot via jfrog.
 
 ```java
-compile "com.netflix.karyon:karyon3-core:3.0.1-rc.29'
+repositories {
+    maven { url 'http://oss.jfrog.org/oss-snapshot-local' }
+}
+compile "com.netflix.karyon:karyon3-core:3.0.1-SNAPSHOT'
 ```
 
 ----------
 Main
 -------
-A Karyon3 based main should normally consist of a single line of code to create the injector via Karyon, given a configuration and a set of modules, plus block on the application to terminate (this can be made event drive).   Karyon encourages a clear separation between the injector creation, binding specification (via Guice modules) and code which should only use the JSR330 annotations. 
+A Karyon3 based main should normally consist of a simple block of code to create the injector via Karyon given a configuration and a set of modules, plus block on the application to terminate (this can be made event drive).   Karyon encourages a clear separation between the injector creation, binding specification (via Guice modules) and code which should only use the JSR330 annotations. 
 
 ```java
 public class HelloWorld {
     public static void main(String[] args) {
         Karyon.createInjector(
-            // 
+            // Default archaius based karyon configuration
             ArchaiusKaryonConfiguration.createDefault(),
             // Add any guice module
-            new ArchaiusLog4J2ConfigurationModule(),
-            new AdminServerModule(),
-            new AdminUIServerModule(),
-            new ArchaiusModule(),
             new ApplicationModule())
             // Block until the application terminates
            .awaitTermination();
@@ -48,7 +46,7 @@ Running in Tomcat
 -----------------------
 To run in tomcat simply extend Governator's GovernatorServletContextListener and create the injector just as you would a standalone application.
 
-First, add a dependency on governator-servlet
+First, add a dependency on governator-servlet (TODO: Make this a karyon sub-project)
 
 ```gradle
 compile "com.netflix.governator:governator-servlet:1.9.3"
@@ -95,16 +93,56 @@ Finally, reference the context listener in web.xml
 
 ```
 ----------
-Running in Jetty
+Running with Jetty
 ----------------------
-TODO
+```java
+public class HelloWorld {
+    public static void main(String[] args) {
+        Karyon.createInjector(
+            // Default archaius based karyon configuration
+            ArchaiusKaryonConfiguration.createDefault(),
+            // Add any guice module
+            new ApplicationModule(),
+            <b>new JettyModule()</b>)
+            // Block until the application terminates
+           .awaitTermination();
+    }
+}
+```
 
 ----------
 Conditional module loading
 ----------------------------------
-Karyon makes use of Governator's conditional module loading to auto install Guice modules based on the application runtime environment.  For example, if the application is using Eureka and running in EC2 Karyon will auto-load the configuration necessary to connect to Eureka in EC2.
+Karyon makes use of Governator's conditional module loading to auto install Guice modules based on the application runtime environment.  Conditionals can depend on property values, modules having been installed, bindings, etc.  An example use case would be to set the appropriate bindings for running Eureka locally as opposed to running in the cloud without requiring the developer to know which specific bindings to override.  For conditional bindings to work all the jars must be in the classpath and the modules made known to Karyon/Governator via a ModuleListProvider (such as ClassPathModuleListProvider, ServiceLoaderModuleListProvider, etc...).  By default karyon will include any modules under the 'com.netflix.karyon' package.
 
-TODO: see Governator Conditional Loading Documentation
+```java
+Karyon.createInjector(
+    ArchaiusKaryonConfiguration.builder()
+        .addModuleListProvider(ModuleListProvides.forPackage("org.example")
+        .build(),
+    ...);
+```
+
+In addition to the conditionals built in to Governator Karyon offers two key conditionals, ConditionalOnLocalDev and ConditionalOnEc2 that can be used to load specific modules (i.e. bindings) for local development and unit tests or when running in an EC2 environment.  
+
+For example,
+```java
+@ConditionalOnLocalDev
+public class Module extends AbstractModule {
+    @Override
+    protected void configure() {
+        bind(Foo.class).to(**FooImpl1.class**);
+    }
+}
+
+@ConditionalOnLocalDev
+public class Module extends AbstractModule {
+    @Override
+    protected void configure() {
+        bind(Foo.class).to(**FooImpl2.class**);
+    }
+}
+```
 
 ----------
 Archaius Configuration
@@ -177,7 +215,7 @@ TODO
 ----------
 Admin Console
 -------------------
-The admin console provides invaluable insight into the internal state of a running instance.  To minimize dependencies needed to run the admin console Karyon uses a naming convention based routing to expose Pojo's as REST endpoints using the Oracle JDK built in web server.  
+The admin console provides invaluable insight into the internal state of a running instance.  To minimize dependencies needed to run the admin console Karyon uses convention based routing to expose Pojo's as REST endpoints using the Oracle JDK built in web server.  
 
 To enable the Admin Console REST server (default port 8077)
 ```java
@@ -193,11 +231,48 @@ import com.netflix.karyon.admin.ui.AdminUIServerModule;
 AdminUIServerModule
 ```
 
-### Writing a custom REST endpoint
-TODO
+The REST and Admin ports are completely decoupled so that the UI may be hosted (and modified) remotely.  
 
+```properties
+karyon.server.admin.remoteServer=http://org.example.adminserver:80/index.html#/${@publicHostname}:8077/")
+```
+
+### Writing a custom REST endpoint
+```java
+@Singleton
+public class MyAdminResource {
+   @Inject
+   public MyAdminResource() {
+   }
+
+   // maps to '/'
+   List<SomeEntity> get() {
+   }
+
+   // maps to '/:key'
+   SomeEntity get(String key) {
+   }
+
+   // maps to '/:key/sub'
+   List<SomeSubEntity> getSub(String key, String sub) {
+   }
+}
+```
+
+Note that this scheme is very limited and will likely be modified in the future to support a subset of JAX-RS annotations.
+
+```java
+@ConditionalOnModule(AdminModule.class)
+public MyAdminModule extends AbstractAdminModule {
+   @Override
+   public void configure() {
+       // Will map the root path of the above MyAdminResource to '/my-admin'
+       bindAdminResource("my-admin").to(MyAdminResource.class);
+   }
+}
+```
 ### Writing a custom UI page
-TODO
+By default Karyon3 will display the raw JSON data returned by an admin endpoint.  A custom UI may be added by include a file '/admin/my-admin.html' with your admin jar.  
 
 ----------
 Health check
@@ -214,7 +289,7 @@ The HealthCheck API is broken up into several abstractions to allow for maximum 
 * HealthIndicatorRegistry - registry of all health indicators to consider for health check.   The default HealthIndicatorRegistry ANDs all bound HealthIndicator (MapBinding, Multibinding, Qualified Binding).  Altenatively and application may manually construct a HealthIndicatorRegistry from a curated set of HealthIndicators.
 * HealthCheck - combines application lifecycle + indicators to derive a meaningful health state
 
-### Using HealthCheck
+### Using HealthCheck in a Jersey resource
 ```java
 @Path("/health")
 public class HealthCheckResource {
@@ -225,15 +300,16 @@ public class HealthCheckResource {
 
    @GET
    public HealthCheckStatus doCheck() {
-       return healthCheck.check().join();
+       return healthCheck.check().get();
    }   
 }
 ```
 
 ### Custom health check 
-To create a custom health indicator simply implement HealthIndicator and inject any objects that are needed to determine the health state.  
+To create a custom health indicator simply implement HealthIndicator, inject any objects that are needed to determine the health state, and implement you logic in check().  Note that check returns a future so that the healthcheck system can implement a timeout.  The check() implementation is therefore expected to be well behaved and NOT block.
+  
 ```java
-public class MyHealthIndicator implements HealthIndicator {
+public class MyHealthIndicator extends AbstractHealthIndicator {
     @Inject
     public MyHealthIndicator(MyService service) {
         this.service = service;
@@ -242,10 +318,10 @@ public class MyHealthIndicator implements HealthIndicator {
     @Override
     public CompletableFuture<HealthIndicatorStatus> check() {
         if (service.getErrorRate() > 0.1) {
-            return CompletableFuture.completedFuture(HealthIndicatorStatuses.unhealthy(getName()));
+            return CompletableFuture.completedFuture(healthy(getName()));
         }
         else {
-             return CompletableFuture.completedFuture(HealthIndicatorStatuses.healthy(getName()));
+             return CompletableFuture.completedFuture(healthy(getName()));
         }
     }
  
@@ -255,12 +331,14 @@ public class MyHealthIndicator implements HealthIndicator {
     }
 }
 ```
+
 To enable the HealthIndicator simply register it as a set binding.  It will automatically be picked up by the default HealthIndicatorRegistry
 ```java
 Multbindings.newSetBinder(binder()).addBinding().to(MyHealthIndicator.class);
 ```
-### Curated health indicator
+### Curated health check registry
 TBD
+
 ### Configuration based health indicator
 TBD
 
@@ -270,7 +348,7 @@ Eureka Integration
 First, add the following dependency 
 
 ```gradle
-compile 'com.netflix.karyon:karyon3-eureka:3.0.1-rc.28'
+compile 'com.netflix.karyon:karyon3-eureka:3.0.1-SNAPSHOT'
 ```
 
 Next add the EurekaModule from OSS eureka-client
@@ -282,7 +360,9 @@ Karyon.createInjector(
     ...
 ```
 
-Using conditional loading the Karyon will auto-install a module that will bridge Karyon's health check with Eureka's V2 health check
+Using to conditional loading the Karyon will auto-install a module that will bridge Karyon's health check with Eureka's V2 health check.  
+
+TODO: manually mark instance as UP
 
 ----------
 Jersey Integration
@@ -317,7 +397,7 @@ Karyon provides a mechanism to define and configure multiple RxNetty servers wit
 
 To add RxNetty support
 ```gradle
-compile 'com.netflix.karyon:karyon3-rxnetty:3.0.1-rc.28'
+compile 'com.netflix.karyon:karyon3-rxnetty:3.0.1-SNAPSHOT'
 ```
 
 To specify basic URL routes for an RxNetty Server
