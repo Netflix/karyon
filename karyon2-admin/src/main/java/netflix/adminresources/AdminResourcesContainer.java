@@ -32,6 +32,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
+import javax.servlet.Filter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -118,6 +119,7 @@ public class AdminResourcesContainer {
                 final Context rootHandler = new Context();
                 rootHandler.setContextPath("/");
                 rootHandler.addFilter(new FilterHolder(adminResourceInjector.getInstance(RedirectFilter.class)), "/*", Handler.DEFAULT);
+                applyAdditionalFilters(rootHandler);
                 rootHandler.addServlet(new ServletHolder(new DefaultServlet()), "/*");
 
                 // admin page template resources
@@ -129,6 +131,7 @@ public class AdminResourcesContainer {
                 adminTemplatesResHandler.setSessionHandler(new SessionHandler());
                 adminTemplatesResHandler.addFilter(LoggingFilter.class, "/*", Handler.DEFAULT);
                 adminTemplatesResHandler.addFilter(new FilterHolder(adminResourceInjector.getInstance(RedirectFilter.class)), "/*", Handler.DEFAULT);
+                applyAdditionalFilters(adminTemplatesResHandler);
                 adminTemplatesResHandler.addFilter(new FilterHolder(arfTemplatesResources), "/*", Handler.DEFAULT);
                 adminTemplatesResHandler.addServlet(new ServletHolder(new DefaultServlet()), "/*");
 
@@ -140,6 +143,7 @@ public class AdminResourcesContainer {
                 final Context adminDataResHandler = new Context();
                 adminDataResHandler.setContextPath(adminContainerConfig.ajaxDataResourceContext());
                 adminDataResHandler.addFilter(new FilterHolder(adminResourceInjector.getInstance(RedirectFilter.class)), "/*", Handler.DEFAULT);
+                applyAdditionalFilters(adminDataResHandler);
                 adminDataResHandler.addFilter(new FilterHolder(arfDataResources), "/*", Handler.DEFAULT);
                 adminDataResHandler.addServlet(new ServletHolder(new DefaultServlet()), "/*");
 
@@ -220,6 +224,15 @@ public class AdminResourcesContainer {
 
     private boolean shouldShareResourcesWithParentInjector() {
         return appInjector != null && ! adminContainerConfig.shouldIsolateResources();
+    }
+
+    private void applyAdditionalFilters(final Context contextHandler) {
+        final List<Filter> rootFilters = adminContainerConfig.additionalFilters();
+        if (rootFilters != null && !rootFilters.isEmpty()) {
+            for(Filter f : rootFilters) {
+                contextHandler.addFilter(new FilterHolder(f), "/*", Handler.DEFAULT);
+            }
+        }
     }
 
     @PreDestroy

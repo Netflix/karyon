@@ -1,11 +1,18 @@
 package netflix.admin;
 
 import com.netflix.config.ConfigurationManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.inject.Singleton;
+import javax.servlet.Filter;
+import java.util.ArrayList;
+import java.util.List;
 
 @Singleton
 public class AdminConfigImpl implements AdminContainerConfig {
+    private Logger logger = LoggerFactory.getLogger(this.getClass());
+
     public static final String NETFLIX_ADMIN_TEMPLATE_CONTEXT = "netflix.admin.template.context";
     public static final String TEMPLATE_CONTEXT_DEFAULT = "/admin";
 
@@ -27,6 +34,9 @@ public class AdminConfigImpl implements AdminContainerConfig {
     public static final String NETFLIX_ADMIN_RESOURCES_ISOLATE = "netflix.admin.resources.isolate";
     public static final boolean ISOLATE_RESOURCES_DEFAULT = false;
 
+    public static final String NETFLIX_ADMIN_ROOT_CTX_FILTERS = "netflix.admin.root.context.filters";
+    public static final String DEFAULT_ROOT_CONTEXT_FILTERS = "";
+
 
     private final String templateResContext;
     private final String resourceContext;
@@ -35,6 +45,7 @@ public class AdminConfigImpl implements AdminContainerConfig {
     private final int listenPort;
     private final boolean isEnabled;
     private final boolean isResourcesIsolated;
+    private final String rootContextFilters;
 
     public AdminConfigImpl() {
         isEnabled = ConfigurationManager.getConfigInstance().getBoolean(SERVER_ENABLE_PROP_NAME, SERVER_ENABLE_DEFAULT);
@@ -44,6 +55,7 @@ public class AdminConfigImpl implements AdminContainerConfig {
         viewableResources = ConfigurationManager.getConfigInstance().getString(JERSEY_VIEWABLE_RESOURCES, JERSEY_VIEWABLE_RESOURCES_DEFAULT);
         listenPort = ConfigurationManager.getConfigInstance().getInt(CONTAINER_LISTEN_PORT, LISTEN_PORT_DEFAULT);
         isResourcesIsolated = ConfigurationManager.getConfigInstance().getBoolean(NETFLIX_ADMIN_RESOURCES_ISOLATE, ISOLATE_RESOURCES_DEFAULT);
+        rootContextFilters = ConfigurationManager.getConfigInstance().getString(NETFLIX_ADMIN_ROOT_CTX_FILTERS, DEFAULT_ROOT_CONTEXT_FILTERS);
     }
 
     @Override
@@ -84,5 +96,29 @@ public class AdminConfigImpl implements AdminContainerConfig {
     @Override
     public int listenPort() {
         return listenPort;
+    }
+
+    @Override
+    public List<Filter> additionalFilters() {
+        if (rootContextFilters.isEmpty()) {
+            new ArrayList<>();
+        }
+
+        List<Filter> filters = new ArrayList<>();
+        final String[] filterClasses = rootContextFilters.split(",");
+        for (String filterClass : filterClasses) {
+            try {
+                final Class<?> filterCls = Class.forName(filterClass);
+                if (Filter.class.isAssignableFrom(filterCls)) {
+                    Filter filter = (Filter) filterCls.newInstance();
+                    filters.add(filter);
+                }
+            } catch (InstantiationException | IllegalAccessException e) {
+                logger.warn("Filter class can not be instantiated " + filterClass);
+            } catch (ClassNotFoundException e) {
+                logger.warn("Filter class not found " + filterClass);
+            }
+        }
+        return filters;
     }
 }

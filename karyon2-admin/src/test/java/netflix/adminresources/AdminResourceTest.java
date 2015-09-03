@@ -28,7 +28,6 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.junit.After;
-import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -91,10 +90,33 @@ public class AdminResourceTest {
     public void checkPing() throws Exception {
         final int port = startServerAndGetListeningPort();
         HttpClient client = new DefaultHttpClient();
-        HttpGet healthGet =
-                new HttpGet(String.format("http://localhost:%d/jr/ping", port));
+        HttpGet healthGet = new HttpGet(String.format("http://localhost:%d/jr/ping", port));
         HttpResponse response = client.execute(healthGet);
         assertEquals("admin resource ping resource failed.", 200, response.getStatusLine().getStatusCode());
+    }
+
+    @Test
+    public void checkAuthFilter() throws Exception {
+        setConfig(AdminConfigImpl.NETFLIX_ADMIN_ROOT_CTX_FILTERS, "netflix.adminresources.AuthFilter");
+        final int port = startServerAndGetListeningPort();
+        HttpClient client = new DefaultHttpClient();
+
+        HttpGet healthGet = new HttpGet(String.format("http://localhost:%d/jr/ping", port));
+        HttpResponse response = client.execute(healthGet);
+        assertEquals("admin resource ping resource failed.", 200, response.getStatusLine().getStatusCode());
+        consumeResponse(response);
+
+        healthGet = new HttpGet(String.format("http://localhost:%d/main/ping", port));
+        response = client.execute(healthGet);
+        assertEquals("admin resource ping resource failed.", 403, response.getStatusLine().getStatusCode());
+        consumeResponse(response);
+
+        healthGet = new HttpGet(String.format("http://localhost:%d/foo/ping", port));
+        response = client.execute(healthGet);
+        assertEquals("admin resource ping resource failed.", 404, response.getStatusLine().getStatusCode());
+
+        final AbstractConfiguration configInst = ConfigurationManager.getConfigInstance();
+        configInst.clearProperty(AdminConfigImpl.NETFLIX_ADMIN_ROOT_CTX_FILTERS);
     }
 
     @Test

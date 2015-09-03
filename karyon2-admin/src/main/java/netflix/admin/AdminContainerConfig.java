@@ -2,6 +2,9 @@ package netflix.admin;
 
 import com.google.inject.ImplementedBy;
 
+import javax.servlet.Filter;
+import java.util.List;
+
 @ImplementedBy(AdminConfigImpl.class)
 public interface AdminContainerConfig {
     boolean shouldIsolateResources();
@@ -12,4 +15,6 @@ public interface AdminContainerConfig {
     String jerseyViewableResourcePkgList();
     boolean shouldScanClassPathForPluginDiscovery();
     int listenPort();
+    List<Filter> additionalFilters();
+
 }
