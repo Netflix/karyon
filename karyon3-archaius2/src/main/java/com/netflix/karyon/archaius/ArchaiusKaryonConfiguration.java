@@ -2,38 +2,60 @@ package com.netflix.karyon.archaius;
 
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Key;
-import com.google.inject.Module;
 import com.google.inject.multibindings.MapBinder;
 import com.google.inject.multibindings.Multibinder;
 import com.google.inject.name.Names;
 import com.netflix.archaius.Config;
+import com.netflix.archaius.config.CompositeConfig;
+import com.netflix.archaius.config.DefaultSettableConfig;
+import com.netflix.archaius.config.EnvironmentConfig;
 import com.netflix.archaius.config.MapConfig;
+import com.netflix.archaius.config.SettableConfig;
+import com.netflix.archaius.config.SystemConfig;
 import com.netflix.archaius.exceptions.ConfigException;
 import com.netflix.archaius.guice.ConfigSeeder;
 import com.netflix.archaius.guice.ConfigSeeders;
+import com.netflix.archaius.guice.RootLayer;
+import com.netflix.archaius.inject.ApplicationLayer;
 import com.netflix.archaius.inject.ApplicationOverrideLayer;
 import com.netflix.archaius.inject.DefaultsLayer;
 import com.netflix.archaius.inject.LibrariesLayer;
+import com.netflix.archaius.inject.RemoteLayer;
 import com.netflix.archaius.inject.RuntimeLayer;
+import com.netflix.governator.auto.AbstractPropertySource;
+import com.netflix.governator.auto.PropertySource;
 import com.netflix.karyon.DefaultKaryonConfiguration;
 import com.netflix.karyon.ServerContext;
 
+/**
+ * Extension to the archaius configuration which includes bootstrapping of archaius2.
+ * 
+ * @author elandau
+ *
+ */
 public class ArchaiusKaryonConfiguration extends DefaultKaryonConfiguration {
-    private static final String DEFAULT_CONFIG_NAME = "application";
+    private static final String DEFAULT_CONFIG_NAME     = "application";
+    
+    private static final String RUNTIME_LAYER_NAME      = "RUNTIME";
+    private static final String REMOTE_LAYER_NAME       = "REMOTE";
+    private static final String SYSTEM_LAYER_NAME       = "SYSTEM";
+    private static final String ENVIRONMENT_LAYER_NAME  = "ENVIRONMENT";
+    private static final String APPLICATION_LAYER_NAME  = "APPLICATION";
+    private static final String LIBRARIES_LAYER_NAME    = "LIBRARIES";
+    private static final String DEFAULTS_LAYER_NAME     = "DEFAULTS";
     
     public static abstract class Builder<T extends Builder<T>> extends DefaultKaryonConfiguration.Builder<T> {
         private String                  configName = DEFAULT_CONFIG_NAME;
         private Config                  applicationOverrides = null;
         private Map<String, Config>     libraryOverrides = new HashMap<>();
         private Set<Config>             runtimeOverrides = new HashSet<>();
-        private Set<Config>             defaults = new HashSet<>();
+        private Set<Config>             defaultSeeders = new HashSet<>();
         private Properties              props = new Properties();
         
         /**
@@ -78,7 +100,7 @@ public class ArchaiusKaryonConfiguration extends DefaultKaryonConfiguration {
         }
         
         public T withDefaults(Config config) throws ConfigException {
-            this.defaults.add(config);
+            this.defaultSeeders.add(config);
             return This();
         }
         
@@ -91,7 +113,7 @@ public class ArchaiusKaryonConfiguration extends DefaultKaryonConfiguration {
             return This();
         }
         
-        public ArchaiusKaryonConfiguration build() {
+        public ArchaiusKaryonConfiguration build() throws Exception {
             if (!props.isEmpty()) {
                 try {
                     withRuntimeOverrides(MapConfig.from(props));
@@ -99,6 +121,78 @@ public class ArchaiusKaryonConfiguration extends DefaultKaryonConfiguration {
                     throw new RuntimeException(e);
                 }
             }
+            
+            SettableConfig  runtimeLayer     = new DefaultSettableConfig();
+            SettableConfig  defaultsLayer    = new DefaultSettableConfig();
+            CompositeConfig overrideLayer    = new CompositeConfig();
+            CompositeConfig applicationLayer = new CompositeConfig();
+            CompositeConfig librariesLayer   = new CompositeConfig();
+            
+            if (applicationOverrides != null) {
+                applicationLayer.addConfig("overrides", applicationOverrides);
+            }
+            
+            final CompositeConfig rootConfig = CompositeConfig.builder()
+                    .withConfig(RUNTIME_LAYER_NAME,              runtimeLayer)
+                    .withConfig(REMOTE_LAYER_NAME,               overrideLayer)
+                    .withConfig(SYSTEM_LAYER_NAME,               SystemConfig.INSTANCE)
+                    .withConfig(ENVIRONMENT_LAYER_NAME,          EnvironmentConfig.INSTANCE)
+                    .withConfig(APPLICATION_LAYER_NAME,          applicationLayer)
+                    .withConfig(LIBRARIES_LAYER_NAME,            librariesLayer)
+                    .withConfig(DEFAULTS_LAYER_NAME,             defaultsLayer)
+                    .build();
+                    ;
+
+            PropertySource propertySource = new AbstractPropertySource() {
+                    @Override
+                    public String get(String key) {
+                        return rootConfig.getString(key, null);
+                    }
+
+                    @Override
+                    public String get(String key, String defaultValue) {
+                        return rootConfig.getString(key, defaultValue);
+                    }
+                };
+
+            this.withPropertySource(propertySource);
+            
+            this.addOverrideModule(new AbstractModule() {
+                @Override
+                protected void configure() {
+                    bind(SettableConfig.class).annotatedWith(RuntimeLayer.class).toInstance(runtimeLayer);
+                    bind(SettableConfig.class).annotatedWith(DefaultsLayer.class).toInstance(defaultsLayer);
+                    bind(CompositeConfig.class).annotatedWith(ApplicationLayer.class).toInstance(applicationLayer);
+                    bind(CompositeConfig.class).annotatedWith(RemoteLayer.class).toInstance(overrideLayer);
+                    bind(CompositeConfig.class).annotatedWith(LibrariesLayer.class).toInstance(librariesLayer);
+                    
+                    bind(Config.class).annotatedWith(RootLayer.class).toInstance(rootConfig);
+                    
+                    bind(String.class).annotatedWith(ApplicationLayer.class).toInstance(configName);
+                    bindConstant().annotatedWith(Names.named("karyon.configName")).to(configName);
+                    
+                    MapBinder<String, Config> libraries = MapBinder.newMapBinder(binder(), String.class, Config.class, LibrariesLayer.class);
+                    for (Map.Entry<String, Config> config : libraryOverrides.entrySet()) {
+                        libraries.addBinding(config.getKey()).toInstance(config.getValue());
+                    }
+                    
+                    Multibinder<ConfigSeeder> runtime = Multibinder.newSetBinder(binder(), ConfigSeeder.class, RuntimeLayer.class);
+                    for (Config config : runtimeOverrides) {
+                        runtime.addBinding().toInstance(ConfigSeeders.from(config));
+                    }
+                    
+                    Multibinder<ConfigSeeder> defaults = Multibinder.newSetBinder(binder(), ConfigSeeder.class, DefaultsLayer.class);
+                    for (Config config : defaultSeeders) {
+                        defaults.addBinding().toInstance(ConfigSeeders.from(config));
+                    }
+                }
+                
+                @Override
+                public String toString() {
+                    return "ArchaiusKaryonConfigurationModule";
+                }
+            });
+            
             return new ArchaiusKaryonConfiguration(this);
         };
     }
@@ -114,84 +208,11 @@ public class ArchaiusKaryonConfiguration extends DefaultKaryonConfiguration {
         return new BuilderWrapper();
     }
     
-    private final String configName;
-    
-    // TODO: Should we make these immutable
-    private final Config              applicationOverrides;
-    private final Map<String, Config> libraryOverrides;
-    private final Set<Config>         runtimeOverrides;
-    private final Set<Config>         defaultOverrides;
-
-    
     public ArchaiusKaryonConfiguration() {
-        super();
-        
-        configName = DEFAULT_CONFIG_NAME;
-        applicationOverrides = null;
-        libraryOverrides = new HashMap<>();
-        runtimeOverrides = new HashSet<>();
-        defaultOverrides = new HashSet<>();
+        this(builder());
     }
     
-    private ArchaiusKaryonConfiguration(@SuppressWarnings("rawtypes") Builder<?> builder) {
+    private ArchaiusKaryonConfiguration(Builder<?> builder) {
         super(builder);
-        this.configName = builder.configName;
-        this.applicationOverrides = builder.applicationOverrides;
-        this.libraryOverrides = builder.libraryOverrides;
-        this.runtimeOverrides = builder.runtimeOverrides;
-        this.defaultOverrides = builder.defaults;
-    }
-    
-    public List<Module> getBootstrapModules() {
-        List<Module> modules = super.getBootstrapModules();
-        modules.add(new ArchaiusBootstrapModule()); 
-        modules.add(new AbstractModule() {
-            @Override
-            protected void configure() {
-                this.bindConstant().annotatedWith(Names.named("karyon.configName")).to(getConfigurationName());
-                
-                Config appOverride = getApplicationOverrides();
-                if (appOverride != null) {
-                    bind(Key.get(Config.class, ApplicationOverrideLayer.class)).toInstance(appOverride);
-                }
-                
-                MapBinder<String, Config> libraries = MapBinder.newMapBinder(binder(), String.class, Config.class, LibrariesLayer.class);
-                for (Map.Entry<String, Config> config : getLibraryOverrides().entrySet()) {
-                    libraries.addBinding(config.getKey()).toInstance(config.getValue());
-                }
-                
-                Multibinder<ConfigSeeder> runtime = Multibinder.newSetBinder(binder(), ConfigSeeder.class, RuntimeLayer.class);
-                for (Config config : getRuntimeOverrides()) {
-                    runtime.addBinding().toInstance(ConfigSeeders.from(config));
-                }
-                
-                Multibinder<ConfigSeeder> defaults = Multibinder.newSetBinder(binder(), ConfigSeeder.class, DefaultsLayer.class);
-                for (Config config : getDefaultOverrides()) {
-                    defaults.addBinding().toInstance(ConfigSeeders.from(config));
-                }
-            }
-        });
-        
-        return modules;
-    }
-    
-    public Config getApplicationOverrides() {
-        return this.applicationOverrides;
-    }
-    
-    public Set<Config> getRuntimeOverrides() {
-        return this.runtimeOverrides;
-    }
-    
-    public Set<Config> getDefaultOverrides() {
-        return this.defaultOverrides;
-    }
-    
-    public Map<String, Config> getLibraryOverrides() {
-        return this.libraryOverrides;
-    }
-    
-    public String getConfigurationName() {
-        return configName;
     }
 }

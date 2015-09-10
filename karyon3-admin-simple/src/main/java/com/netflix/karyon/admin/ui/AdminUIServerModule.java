@@ -5,16 +5,16 @@ import java.util.Collections;
 
 import javax.inject.Singleton;
 
-import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 import com.netflix.archaius.ConfigProxyFactory;
+import com.netflix.governator.DefaultModule;
 import com.netflix.karyon.admin.AdminUIServer;
 import com.netflix.karyon.admin.HttpServerConfig;
 import com.netflix.karyon.admin.HttpServerModule;
 import com.netflix.karyon.admin.SimpleHttpServer;
 import com.sun.net.httpserver.HttpHandler;
 
-public final class AdminUIServerModule extends AbstractModule {
+public final class AdminUIServerModule extends DefaultModule {
     @Override
     protected void configure() {
         install(new HttpServerModule());

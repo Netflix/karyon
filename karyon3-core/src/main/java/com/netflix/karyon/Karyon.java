@@ -1,13 +1,6 @@
 package com.netflix.karyon;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-
-import com.google.inject.Module;
 import com.netflix.governator.Governator;
-import com.netflix.governator.GovernatorConfiguration;
 import com.netflix.governator.LifecycleInjector;
 
 /**
@@ -25,17 +18,20 @@ import com.netflix.governator.LifecycleInjector;
 public class HelloWorldApp extends DefaultLifecycleListener {
     public static void main(String[] args) throws InterruptedException {
         Karyon.createInjector(
-             new ArchaiusGovernatorConfiguration(),
-             new JettyModule(),
-             new JerseyServletModule() {
-                @Override
-                protected void configureServlets() {
-                    serve("/*").with(GuiceContainer.class);
-                    bind(GuiceContainer.class).asEagerSingleton();
-                    
-                    bind(HelloWorldApp.class).asEagerSingleton();
-                }  
-            }
+             ArchaiusGovernatorConfiguration.builder()
+                 .addModules(
+                     new JettyModule(),
+                     new JerseyServletModule() {
+                        @Override
+                        protected void configureServlets() {
+                            serve("/*").with(GuiceContainer.class);
+                            bind(GuiceContainer.class).asEagerSingleton();
+                            
+                            bind(HelloWorldApp.class).asEagerSingleton();
+                        }  
+                    }
+                )
+                .build()
             )
             .awaitTermination();
     }
@@ -44,7 +40,6 @@ public class HelloWorldApp extends DefaultLifecycleListener {
     public String sayHello() {
         return "hello world";
     }
-
     @Override
     public void onStarted() {
         System.out.println("Started ***** ");
@@ -56,19 +51,7 @@ public class HelloWorldApp extends DefaultLifecycleListener {
  *
  */
 public class Karyon {
-    public static LifecycleInjector createInjector(GovernatorConfiguration config) {
-        return createInjector(config, Collections.<Module>emptyList());
-    }
-    
-    public static LifecycleInjector createInjector(GovernatorConfiguration config, Module ... modules) {
-        return createInjector(config, Arrays.asList(modules));
-    }
-    
-    public static LifecycleInjector createInjector(GovernatorConfiguration config, List<Module> modules) {
-        List<Module> modulesToInstall = new ArrayList<>();
-        modulesToInstall.add(new CoreModule());
-        modulesToInstall.addAll(modules);
-        
-        return Governator.createInjector(config, modulesToInstall);
+    public static LifecycleInjector createInjector(KaryonConfiguration config) {
+        return Governator.createInjector(config);
     }
 }

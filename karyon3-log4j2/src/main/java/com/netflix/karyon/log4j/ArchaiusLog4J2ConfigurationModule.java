@@ -3,8 +3,8 @@ package com.netflix.karyon.log4j;
 import org.apache.logging.log4j.core.ArchaiusLog4J2ConfigurationFactory;
 import org.apache.logging.log4j.core.Log4jConfigurator;
 
-import com.google.inject.AbstractModule;
 import com.google.inject.multibindings.Multibinder;
+import com.netflix.governator.DefaultModule;
 
 /**
  * Add this to the list of Guice modules to enable reconfiguration of log4j2
@@ -15,7 +15,7 @@ import com.google.inject.multibindings.Multibinder;
  * @author elandau
  *
  */
-public class ArchaiusLog4J2ConfigurationModule extends AbstractModule {
+public class ArchaiusLog4J2ConfigurationModule extends DefaultModule {
     @Override
     protected void configure() {
         this.requestStaticInjection(ArchaiusLog4J2ConfigurationFactory.class);
