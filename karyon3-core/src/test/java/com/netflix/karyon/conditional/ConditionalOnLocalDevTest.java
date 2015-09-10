@@ -10,8 +10,8 @@ import com.netflix.governator.Governator;
 
 public class ConditionalOnLocalDevTest {
     @Test
-    public void test() {
-        Injector injector = Governator.createInjector(DefaultGovernatorConfiguration.builder().build());
+    public void test() throws Exception {
+        Injector injector = Governator.createInjector(DefaultGovernatorConfiguration.createDefault());
         OnLocalDevCondition condition = injector.getInstance(OnLocalDevCondition.class);
         Assert.assertTrue(condition.check(null));
     }

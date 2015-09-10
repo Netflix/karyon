@@ -8,10 +8,10 @@ import javax.inject.Singleton;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
-import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 import com.google.inject.multibindings.MapBinder;
 import com.netflix.archaius.ConfigProxyFactory;
+import com.netflix.governator.DefaultModule;
 import com.netflix.karyon.admin.AdminModule;
 import com.netflix.karyon.admin.AdminServer;
 import com.netflix.karyon.admin.HttpServerConfig;
@@ -19,7 +19,7 @@ import com.netflix.karyon.admin.HttpServerModule;
 import com.netflix.karyon.admin.SimpleHttpServer;
 import com.sun.net.httpserver.HttpHandler;
 
-public final class AdminServerModule extends AbstractModule {
+public final class AdminServerModule extends DefaultModule {
     @Override
     protected void configure() {
         install(new AdminModule());

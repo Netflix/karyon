@@ -10,7 +10,6 @@ import javax.inject.Singleton;
 
 import com.netflix.karyon.health.AbstractHealthIndicator;
 import com.netflix.karyon.health.HealthIndicatorStatus;
-import com.netflix.karyon.health.HealthIndicatorStatuses;
 
 @Singleton
 public class FooServiceHealthIndicator extends AbstractHealthIndicator {

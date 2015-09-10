@@ -7,7 +7,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.netflix.archaius.config.MapConfig;
-import com.netflix.archaius.exceptions.ConfigException;
 import com.netflix.archaius.guice.ArchaiusModule;
 import com.netflix.governator.DefaultLifecycleListener;
 import com.netflix.governator.GovernatorFeatures;
@@ -27,7 +26,7 @@ import com.sun.jersey.guice.spi.container.servlet.GuiceContainer;
 public class HelloWorldApp extends DefaultLifecycleListener {
     private static final Logger LOG = LoggerFactory.getLogger(HelloWorldApp.class);
     
-    public static void main(String[] args) throws InterruptedException, ConfigException {
+    public static void main(String[] args) throws Exception {
 
         Karyon.createInjector(
             ArchaiusKaryonConfiguration.builder()
@@ -37,31 +36,33 @@ public class HelloWorldApp extends DefaultLifecycleListener {
                     .build()
                     )
                 .disable(GovernatorFeatures.SHUTDOWN_ON_ERROR)
-                .build(),
-            new ArchaiusLog4J2ConfigurationModule(),
-            new ProvisionDebugModule(),
-            new JettyModule(),
-            new AdminServerModule(),
-            new AdminUIServerModule(),
-            new ArchaiusModule(),
-            new ShutdownServerModule(),
-            new JerseyServletModule() {
-               @Override
-               protected void configureServlets() {
-                   serve("/*").with(GuiceContainer.class);
-                   bind(GuiceContainer.class).asEagerSingleton();
-                   bind(ArchaiusEndpoint.class).asEagerSingleton();
-                   bind(HelloWorldApp.class).asEagerSingleton();
-                   bind(HealthIndicator.class).to(FooServiceHealthIndicator.class);
-                   
-                   bind(LongDelayService.class).asEagerSingleton();
-               }
-               
-               @Override
-               public String toString() {
-                   return "JerseyServletModule";
-               }
-           }
+                .addModules(
+                    new ArchaiusLog4J2ConfigurationModule(),
+                    new ProvisionDebugModule(),
+                    new JettyModule(),
+                    new AdminServerModule(),
+                    new AdminUIServerModule(),
+                    new ArchaiusModule(),
+                    new ShutdownServerModule(),
+                    new JerseyServletModule() {
+                       @Override
+                       protected void configureServlets() {
+                           serve("/*").with(GuiceContainer.class);
+                           bind(GuiceContainer.class).asEagerSingleton();
+                           bind(ArchaiusEndpoint.class).asEagerSingleton();
+                           bind(HelloWorldApp.class).asEagerSingleton();
+                           bind(HealthIndicator.class).to(FooServiceHealthIndicator.class);
+                           
+                           bind(LongDelayService.class).asEagerSingleton();
+                       }
+                       
+                       @Override
+                       public String toString() {
+                           return "JerseyServletModule";
+                       }
+                   }
+                )
+                .build()
            )
            .awaitTermination();
     }

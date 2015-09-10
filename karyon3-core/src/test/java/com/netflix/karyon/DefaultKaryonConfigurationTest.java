@@ -9,9 +9,8 @@ import com.google.inject.Stage;
 
 public class DefaultKaryonConfigurationTest {
     @Test
-    public void testConfiguration() {
-        DefaultKaryonConfiguration config = new DefaultKaryonConfiguration();
-        assertThat(config.getBootstrapModules().size(), equalTo(0));
+    public void testConfiguration() throws Exception {
+        DefaultKaryonConfiguration config = DefaultKaryonConfiguration.createDefault();
         assertThat(config.getProfiles().size(), equalTo(0));
         assertThat(config.getStage(), equalTo(Stage.DEVELOPMENT));
     }

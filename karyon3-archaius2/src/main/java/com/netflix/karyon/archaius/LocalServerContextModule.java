@@ -1,15 +1,13 @@
 package com.netflix.karyon.archaius;
 
-import com.google.inject.AbstractModule;
 import com.google.inject.multibindings.Multibinder;
 import com.netflix.archaius.guice.ConfigSeeder;
 import com.netflix.archaius.inject.DefaultsLayer;
-import com.netflix.governator.auto.annotations.Bootstrap;
+import com.netflix.governator.DefaultModule;
 import com.netflix.karyon.conditional.ConditionalOnLocalDev;
 
 @ConditionalOnLocalDev
-@Bootstrap
-public class LocalServerContextModule extends AbstractModule {
+public class LocalServerContextModule extends DefaultModule {
 
     @Override
     protected void configure() {

@@ -1,7 +1,6 @@
 package com.netflix.karyon;
 
 import com.netflix.governator.DefaultGovernatorConfiguration;
-import com.netflix.governator.GovernatorConfiguration;
 import com.netflix.governator.auto.ModuleListProviders;
 
 /**
@@ -10,7 +9,7 @@ import com.netflix.governator.auto.ModuleListProviders;
  * @author elandau
  *
  */
-public class DefaultKaryonConfiguration extends DefaultGovernatorConfiguration {
+public class DefaultKaryonConfiguration extends DefaultGovernatorConfiguration implements KaryonConfiguration {
     private static final String KARYON_PROFILES = "karyon.profiles";
     
     /**
@@ -21,7 +20,17 @@ public class DefaultKaryonConfiguration extends DefaultGovernatorConfiguration {
      * @param <T>
      */
     public static abstract class Builder<T extends Builder<T>> extends DefaultGovernatorConfiguration.Builder<T> {
-        public GovernatorConfiguration build() {
+        protected Builder() {
+            addModule(new CoreModule());
+            addModuleListProvider(ModuleListProviders.forPackagesConditional("com.netflix.karyon"));
+            
+            String karyonProfiles = System.getProperty(KARYON_PROFILES);
+            if (karyonProfiles != null) {
+                addProfiles(System.getProperty(karyonProfiles));
+            }
+        }
+        
+        public DefaultKaryonConfiguration build() throws Exception {
             return new DefaultKaryonConfiguration(this);
         }
     }
@@ -37,14 +46,11 @@ public class DefaultKaryonConfiguration extends DefaultGovernatorConfiguration {
         return new BuilderWrapper();
     }
     
-    public DefaultKaryonConfiguration() {
-        super(builder());
+    public static DefaultKaryonConfiguration createDefault() throws Exception {
+        return builder().build();
     }
-    
-    protected DefaultKaryonConfiguration(Builder<?> builder) {
-        super(builder
-            .addModuleListProvider(ModuleListProviders.forPackagesConditional("com.netflix.karyon"))
-            .addProfiles(System.getProperty(KARYON_PROFILES))
-            );
+
+    public DefaultKaryonConfiguration(Builder<?> builder) {
+        super(builder);
     }
 }

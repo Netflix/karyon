@@ -10,9 +10,9 @@ import com.netflix.governator.auto.annotations.OverrideModule;
 import com.netflix.governator.guice.jetty.JettyConfig;
 import com.netflix.governator.guice.jetty.JettyModule;
 
-@OverrideModule(JettyModule.class)
+@OverrideModule
 @ConditionalOnModule(JettyModule.class)
-public class JettyOverrideModule extends DefaultModule {
+public final class JettyOverrideModule extends DefaultModule {
     @Provides
     @Singleton
     private JettyConfig getDefaultConfig(ConfigProxyFactory factory) {
