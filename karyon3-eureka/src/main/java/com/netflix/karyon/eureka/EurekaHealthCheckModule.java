@@ -2,10 +2,10 @@ package com.netflix.karyon.eureka;
 
 import javax.inject.Singleton;
 
-import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 import com.netflix.appinfo.HealthCheckHandler;
 import com.netflix.archaius.ConfigProxyFactory;
+import com.netflix.governator.DefaultModule;
 
 /**
  * Add this module to your project to enable Eureka client and registration
@@ -13,7 +13,7 @@ import com.netflix.archaius.ConfigProxyFactory;
  * @author elandau
  *
  */
-public final class EurekaHealthCheckModule extends AbstractModule {
+public final class EurekaHealthCheckModule extends DefaultModule {
     @Override
     protected void configure() {
         // Connect Eureka's HealtCheckHandler to injector lifecycle + HealthCheck

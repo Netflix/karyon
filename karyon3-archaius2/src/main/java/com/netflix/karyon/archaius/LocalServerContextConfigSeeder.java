@@ -34,6 +34,18 @@ public class LocalServerContextConfigSeeder implements ConfigSeeder {
             .put(ServerContext.ZONE,            "us-west-2a")
             .put(ServerContext.SERVER_ID,       "${" + ServerContext.HOSTNAME + "}")
             .put(ServerContext.AMI,             "ami-dev")
+            
+            .put("EC2_DOMAIN",              "${" + ServerContext.DOMAIN + "}")
+            .put("EC2_HOSTNAME",            "${" + ServerContext.HOSTNAME + "}")
+            .put("EC2_PUBLIC_HOSTNAME",     "${" + ServerContext.PUBLIC_HOSTNAME + "}")
+            .put("EC2_PUBLIC_IPV4",         "${" + ServerContext.PUBLIC_IPV4 + "}")
+            .put("EC2_LOCAL_HOSTNAME",      "${" + ServerContext.LOCAL_HOSTNAME + "}")
+            .put("EC2_LOCAL_IPV4",          "${" + ServerContext.LOCAL_IPV4 + "}")
+            .put("EC2_AVAILABILITY_ZONE",   "${" + ServerContext.ZONE + "}")
+            .put("EC2_INSTANCE_ID",         "${" + ServerContext.SERVER_ID + "}")
+            .put("EC2_AMI_ID",              "${" + ServerContext.AMI + "}")
+            .put("EC2_REGION",              "${" + ServerContext.REGION + "}")
+            
             .build();
     }
 }
