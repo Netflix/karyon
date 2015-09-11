@@ -26,7 +26,7 @@ public class DefaultKaryonConfiguration extends DefaultGovernatorConfiguration i
             
             String karyonProfiles = System.getProperty(KARYON_PROFILES);
             if (karyonProfiles != null) {
-                addProfiles(System.getProperty(karyonProfiles));
+                addProfiles(karyonProfiles);
             }
         }
         
