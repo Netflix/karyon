@@ -33,10 +33,13 @@ public class HelloWorld {
     public static void main(String[] args) {
         Karyon.createInjector(
             // Default archaius based karyon configuration
-            ArchaiusKaryonConfiguration.createDefault(),
-            // Add any guice module
-            new ApplicationModule())
-            // Block until the application terminates
+            ArchaiusKaryonConfiguration.builder()
+                .addModules(
+	                // Add any guice module
+	                new ApplicationModule())
+                )
+                .build())
+	        // Block until the application terminates
            .awaitTermination();
     }
 }
@@ -49,7 +52,7 @@ To run in tomcat simply extend Governator's GovernatorServletContextListener and
 First, add a dependency on governator-servlet (TODO: Make this a karyon sub-project)
 
 ```gradle
-compile "com.netflix.governator:governator-servlet:1.9.3"
+compile "com.netflix.governator:governator-servlet:1.10.0"
 ```
 
 Next, write your ContextListener
@@ -60,14 +63,17 @@ public class MyContextListener extends GovernatorServletContextListener {
     @Override
     protected Injector createInjector() {
         return Karyon.createInjector(
-                ArchaiusKaryonConfiguration.createDefault(),
-                new EurekaModule(),
-                new ArchaiusModule(),
-                new ServletModule() {
-                    ...
-                }
-                // ... more modules
-        );
+                ArchaiusKaryonConfiguration.builder()
+                .addModules(
+                    new EurekaModule(),
+                    new ArchaiusModule(),
+                    new ServletModule() {
+                        ...
+                    }
+                    // ... more modules
+                )
+                .build()
+        ));
     }
 ```
 
@@ -100,11 +106,15 @@ public class HelloWorld {
     public static void main(String[] args) {
         Karyon.createInjector(
             // Default archaius based karyon configuration
-            ArchaiusKaryonConfiguration.createDefault(),
-            // Add any guice module
-            new ApplicationModule(),
-            <b>new JettyModule()</b>)
-            // Block until the application terminates
+            ArchaiusKaryonConfiguration.builder()
+            .addModules(
+                // Add any guice module
+                new ApplicationModule(),
+                new JettyModule()
+            )
+            .build()
+            )
+           // Block until the application terminates
            .awaitTermination();
     }
 }
@@ -119,8 +129,8 @@ Karyon makes use of Governator's conditional module loading to auto install Guic
 Karyon.createInjector(
     ArchaiusKaryonConfiguration.builder()
         .addModuleListProvider(ModuleListProvides.forPackage("org.example")
-        .build(),
-    ...);
+        .build()
+    );
 ```
 
 In addition to the conditionals built in to Governator Karyon offers two key conditionals, ConditionalOnLocalDev and ConditionalOnEc2 that can be used to load specific modules (i.e. bindings) for local development and unit tests or when running in an EC2 environment.  
@@ -131,7 +141,7 @@ For example,
 public class Module extends AbstractModule {
     @Override
     protected void configure() {
-        bind(Foo.class).to(**FooImpl1.class**);
+        bind(Foo.class).to(FooImpl1.class);
     }
 }
 
@@ -139,7 +149,7 @@ public class Module extends AbstractModule {
 public class Module extends AbstractModule {
     @Override
     protected void configure() {
-        bind(Foo.class).to(**FooImpl2.class**);
+        bind(Foo.class).to(FooImpl2.class);
     }
 }
 ```
@@ -355,9 +365,12 @@ Next add the EurekaModule from OSS eureka-client
 
 ```gradle
 Karyon.createInjector(
-    ArchaiusKaryonConfiguration.createDefault(),
-    new EurekaModule(),
-    ...
+    ArchaiusKaryonConfiguration.builder()
+       .addModule(
+          new EurekaModule()
+       )
+       .build()
+       ...
 ```
 
 Using to conditional loading the Karyon will auto-install a module that will bridge Karyon's health check with Eureka's V2 health check.  
@@ -377,15 +390,18 @@ compile 'com.sun.jersey.contribs:jersey-guice:1.18.1'
 Then simply add a JerseyServletModule implementation to the list of modules passed to Karyon
 ```java
 Karyon.createInjector(
-    ArchaiusKaryonConfiguration.createDefault(),
-    new JerseyServletModule() {
-        @Override
-        protected void configureServlets() {
-            serve("/*").with(GuiceContainer.class);
-            bind(GuiceContainer.class).asEagerSingleton();
-            bind(SomeJerseyClass.class).asEagerSingleton();
-        }
-    });
+    ArchaiusKaryonConfiguration.builder()
+        .addModules(
+		    new JerseyServletModule() {
+		        @Override
+		        protected void configureServlets() {
+		            serve("/*").with(GuiceContainer.class);
+		            bind(GuiceContainer.class).asEagerSingleton();
+		            bind(SomeJerseyClass.class).asEagerSingleton();
+		        }
+		    })
+		.build()
+	 );
 ```
 
 ----------
@@ -403,13 +419,16 @@ compile 'com.netflix.karyon:karyon3-rxnetty:3.0.1-SNAPSHOT'
 To specify basic URL routes for an RxNetty Server
 ```gradle
 Karyon.createInjector(
-    ArchaiusKaryonConfiguration.createDefault(),
-    new RxNettyServerModule() {
-        @Override
-        protected void configureEndpoints() {
-            serve("/hello").with(HelloWorldRequestHandler.class);
-        }
-    },
+    ArchaiusKaryonConfiguration.builder()
+    .addModules(
+	    new RxNettyServerModule() {
+	        @Override
+	        protected void configureEndpoints() {
+	            serve("/hello").with(HelloWorldRequestHandler.class);
+	        }
+	    }
+	)
+	.build()
     ...
 ```
 
@@ -438,13 +457,14 @@ Qualified RxNetty servers makes it possible to expose services (such as admin) o
 
 ```gradle
 Karyon.createInjector(
-    ArchaiusKaryonConfiguration.createDefault(),
-    new RxNettyServerModule() {
-        @Override
-        protected void configureEndpoints() {
-            serve(FooServer.class, "/foo").with(FooRequestHandler.class);
-        }
-    },
+    ArchaiusKaryonConfiguration.builder()
+    .addModules(
+	    new RxNettyServerModule() {
+	        @Override
+	        protected void configureEndpoints() {
+	            serve(FooServer.class, "/foo").with(FooRequestHandler.class);
+	        }
+	    },
     ...
 ```
 
