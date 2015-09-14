@@ -13,23 +13,23 @@ import javax.inject.Qualifier;
  * Admin resources and meant to be very lightweight with no dependencies.
  * Resource endpoints are derived via naming convention from the method names
  * using REST semantics.
- * 
+ *
  * // Resource {name} derived from multi-binding string
- * class MyResource {
+ * public class MyResource {
  *     // {name}/
- *     public list() { 
+ *     public List&lt;Object&gt; get() {
  *     }
  *     
  *     // {name}/{id}
- *     public get(String id) {
+ *     public Object get(String id) {
  *     }
  *     
  *     // {name}/{id}/child
- *     public listChild(String id) {
+ *     public List&lt;Object&gt; listChild(String id) {
  *     }
  *     
  *     // {name}/{id}/child/{childId}
- *     public getChild(String id, String childId) {
+ *     public Object getChild(String id, String childId) {
  *     }
  * }
  * 
