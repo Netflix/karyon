@@ -77,12 +77,7 @@ public class AdminHttpHandler implements HttpHandler {
                 exchange.getResponseHeaders().set("Access-Control-Allow-Origin", config.accessControlAllowOrigin());
                 
                 Object response = resources.get().invoke(controller, p);
-                if (response instanceof String) {
-                    writeResponse(exchange, 200, (String)response);
-                }
-                else {
-                    writeResponse(exchange, 200, mapper.writeValueAsString(response));
-                }
+                writeResponse(exchange, 200, response);
             }
         }
         catch (NotFoundException e) {
@@ -101,29 +96,26 @@ public class AdminHttpHandler implements HttpHandler {
         return (encoding != null && encoding.toLowerCase().contains("gzip"));
     }
 
-    private byte[] compress(byte[] input) throws IOException {
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        try (GZIPOutputStream out = new GZIPOutputStream(baos)) {
-            out.write(input);
-        }
-        return baos.toByteArray();
+    private OutputStream getOutputStream(boolean useGzip, HttpExchange exchange) throws IOException {
+        return useGzip
+            ? new GZIPOutputStream(exchange.getResponseBody())
+            : exchange.getResponseBody();
     }
 
-    private byte[] getBytes(boolean useGzip, String content) throws IOException {
-        byte[] raw = content.getBytes(Charset.forName("UTF-8"));
-        return useGzip ? compress(raw) : raw;
-    }
-
-    private void writeResponse(HttpExchange exchange, int code, String content) throws IOException {
+    private void writeResponse(HttpExchange exchange, int code, Object payload) throws IOException {
         final boolean useGzip = shouldUseGzip(exchange);
         exchange.getResponseHeaders().set("Content-Type", "application/json");
         if (useGzip) {
             exchange.getResponseHeaders().set("Content-Encoding", "gzip");
         }
-        final byte[] data = getBytes(useGzip, content);
-        exchange.sendResponseHeaders(code, data.length);
-        try (OutputStream os = exchange.getResponseBody()) {
-            os.write(data);
+        // Size of 0 indicates to use a chunked response
+        exchange.sendResponseHeaders(code, 0);
+        try (OutputStream os = getOutputStream(useGzip, exchange)) {
+            if (payload instanceof String) {
+                os.write(((String) payload).getBytes(Charset.forName("UTF-8")));
+            } else {
+                mapper.writeValue(os, payload);
+            }
         }
     }
 }
