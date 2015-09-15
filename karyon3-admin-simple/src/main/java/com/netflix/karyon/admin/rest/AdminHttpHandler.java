@@ -1,9 +1,11 @@
 package com.netflix.karyon.admin.rest;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.zip.GZIPOutputStream;
@@ -99,10 +101,17 @@ public class AdminHttpHandler implements HttpHandler {
         return (encoding != null && encoding.toLowerCase().contains("gzip"));
     }
 
-    private OutputStream getOutputStream(boolean useGzip, HttpExchange exchange) throws IOException {
-        return useGzip
-            ? new GZIPOutputStream(exchange.getResponseBody())
-            : exchange.getResponseBody();
+    private byte[] compress(byte[] input) throws IOException {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        try (GZIPOutputStream out = new GZIPOutputStream(baos)) {
+            out.write(input);
+        }
+        return baos.toByteArray();
+    }
+
+    private byte[] getBytes(boolean useGzip, String content) throws IOException {
+        byte[] raw = content.getBytes(Charset.forName("UTF-8"));
+        return useGzip ? compress(raw) : raw;
     }
 
     private void writeResponse(HttpExchange exchange, int code, String content) throws IOException {
@@ -111,9 +120,10 @@ public class AdminHttpHandler implements HttpHandler {
         if (useGzip) {
             exchange.getResponseHeaders().set("Content-Encoding", "gzip");
         }
-        exchange.sendResponseHeaders(code, content.length());
-        try (OutputStream os = getOutputStream(useGzip, exchange)) {
-            os.write(content.getBytes());
+        final byte[] data = getBytes(useGzip, content);
+        exchange.sendResponseHeaders(code, data.length);
+        try (OutputStream os = exchange.getResponseBody()) {
+            os.write(data);
         }
     }
 }
