@@ -1,7 +1,7 @@
 karyon
 ======
 
-[![Build Status](https://netflixoss.ci.cloudbees.com/job/karyon-master/badge/icon)](https://netflixoss.ci.cloudbees.com/job/karyon-master/)
+[![Build Status](https://travis-ci.org/Netflix/karyon.svg)](https://travis-ci.org/Netflix/karyon/builds)
 
 Karyon in the context of molecular biology is essentially "a part of the cell containing DNA and RNA and responsible for growth and reproduction."
 
