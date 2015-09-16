@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.zip.GZIPOutputStream;
@@ -75,12 +76,7 @@ public class AdminHttpHandler implements HttpHandler {
                 exchange.getResponseHeaders().set("Access-Control-Allow-Origin", config.accessControlAllowOrigin());
                 
                 Object response = resources.get().invoke(controller, p);
-                if (response instanceof String) {
-                    writeResponse(exchange, 200, (String)response);
-                }
-                else {
-                    writeResponse(exchange, 200, mapper.writeValueAsString(response));
-                }
+                writeResponse(exchange, 200, response);
             }
         }
         catch (NotFoundException e) {
@@ -105,15 +101,20 @@ public class AdminHttpHandler implements HttpHandler {
             : exchange.getResponseBody();
     }
 
-    private void writeResponse(HttpExchange exchange, int code, String content) throws IOException {
+    private void writeResponse(HttpExchange exchange, int code, Object payload) throws IOException {
         final boolean useGzip = shouldUseGzip(exchange);
         exchange.getResponseHeaders().set("Content-Type", "application/json");
         if (useGzip) {
             exchange.getResponseHeaders().set("Content-Encoding", "gzip");
         }
-        exchange.sendResponseHeaders(code, content.length());
+        // Size of 0 indicates to use a chunked response
+        exchange.sendResponseHeaders(code, 0);
         try (OutputStream os = getOutputStream(useGzip, exchange)) {
-            os.write(content.getBytes());
+            if (payload instanceof String) {
+                os.write(((String) payload).getBytes(Charset.forName("UTF-8")));
+            } else {
+                mapper.writeValue(os, payload);
+            }
         }
     }
 }
