@@ -7,7 +7,6 @@ import java.util.Properties;
 import java.util.Set;
 
 import com.google.inject.AbstractModule;
-import com.google.inject.Key;
 import com.google.inject.multibindings.MapBinder;
 import com.google.inject.multibindings.Multibinder;
 import com.google.inject.name.Names;
@@ -23,7 +22,6 @@ import com.netflix.archaius.guice.ConfigSeeder;
 import com.netflix.archaius.guice.ConfigSeeders;
 import com.netflix.archaius.guice.RootLayer;
 import com.netflix.archaius.inject.ApplicationLayer;
-import com.netflix.archaius.inject.ApplicationOverrideLayer;
 import com.netflix.archaius.inject.DefaultsLayer;
 import com.netflix.archaius.inject.LibrariesLayer;
 import com.netflix.archaius.inject.RemoteLayer;
@@ -50,6 +48,11 @@ public class ArchaiusKaryonConfiguration extends DefaultKaryonConfiguration {
     private static final String LIBRARIES_LAYER_NAME    = "LIBRARIES";
     private static final String DEFAULTS_LAYER_NAME     = "DEFAULTS";
     
+    static {
+        System.setProperty("archaius.default.configuration.class",      "com.netflix.archaius.bridge.StaticAbstractConfiguration");
+        System.setProperty("archaius.default.deploymentContext.class",  "com.netflix.archaius.bridge.StaticDeploymentContext");
+    }
+
     public static abstract class Builder<T extends Builder<T>> extends DefaultKaryonConfiguration.Builder<T> {
         private String                  configName = DEFAULT_CONFIG_NAME;
         private Config                  applicationOverrides = null;
@@ -113,7 +116,15 @@ public class ArchaiusKaryonConfiguration extends DefaultKaryonConfiguration {
             return This();
         }
         
+        
         public ArchaiusKaryonConfiguration build() throws Exception {
+            initialize(); 
+            return new ArchaiusKaryonConfiguration(this);
+        }
+        
+        protected void initialize() throws Exception {
+            super.initialize();
+            
             if (!props.isEmpty()) {
                 try {
                     withRuntimeOverrides(MapConfig.from(props));
@@ -192,8 +203,6 @@ public class ArchaiusKaryonConfiguration extends DefaultKaryonConfiguration {
                     return "ArchaiusKaryonConfigurationModule";
                 }
             });
-            
-            return new ArchaiusKaryonConfiguration(this);
         };
     }
     
