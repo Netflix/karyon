@@ -5,13 +5,14 @@ buildscript {
     }
     dependencies {
         classpath 'com.netflix.nebula:gradle-extra-configurations-plugin:2.2.0'
+        classpath 'com.netflix.nebula:gradle-netflixoss-project-plugin:3.1.2-rc.1' // remove when done with rc
     }
 }
 
 plugins {
-    id 'nebula.netflixoss' version '2.2.9'
+    //id 'nebula.netflixoss' version '3.1.2'
 }
-
+apply plugin: 'nebula.netflixoss' // remove once done with rc
 ext.githubProjectName = "com.netflix.karyon"
 
 configurations.all {
