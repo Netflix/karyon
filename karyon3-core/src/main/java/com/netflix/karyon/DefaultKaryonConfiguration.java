@@ -20,17 +20,18 @@ public class DefaultKaryonConfiguration extends DefaultGovernatorConfiguration i
      * @param <T>
      */
     public static abstract class Builder<T extends Builder<T>> extends DefaultGovernatorConfiguration.Builder<T> {
-        protected Builder() {
+        protected void initialize() throws Exception {
             addModule(new CoreModule());
             addModuleListProvider(ModuleListProviders.forPackagesConditional("com.netflix.karyon"));
             
-            String karyonProfiles = System.getProperty(KARYON_PROFILES);
+            String karyonProfiles = this.propertySource.get(KARYON_PROFILES);
             if (karyonProfiles != null) {
                 addProfiles(karyonProfiles);
             }
         }
         
         public DefaultKaryonConfiguration build() throws Exception {
+            initialize();
             return new DefaultKaryonConfiguration(this);
         }
     }

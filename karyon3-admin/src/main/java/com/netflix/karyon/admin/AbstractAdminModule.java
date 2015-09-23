@@ -14,4 +14,14 @@ public abstract class AbstractAdminModule extends DefaultModule {
     protected LinkedBindingBuilder<Object> bindAdminResource(String name) {
         return MapBinder.newMapBinder(binder(), String.class, Object.class, AdminResource.class).addBinding(name);
     }
+    
+    @Override
+    public boolean equals(Object obj) {
+        return getClass().equals(obj.getClass());
+    }
+
+    @Override
+    public int hashCode() {
+        return getClass().hashCode();
+    }
 }
