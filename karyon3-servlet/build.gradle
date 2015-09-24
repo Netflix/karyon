@@ -19,10 +19,14 @@ apply plugin: 'java'
 dependencies {
     compile     project(':karyon3-core')
     compile     project(':karyon3-archaius2')
-    compile     "com.netflix.governator:governator-servlet:${governator_version}"
     compile     "com.sun.jersey.contribs:jersey-guice:${jersey_version}"
 
+    provided    "javax.servlet:servlet-api:2.5"
+
     testCompile project(':karyon3-log4j2')
+    testCompile project(':karyon3-jetty')
+    testCompile 'org.eclipse.jetty:jetty-server:9.2.12.v20150709'
+    testCompile 'org.eclipse.jetty:jetty-webapp:9.2.12.v20150709'
 }
 
 eclipse {

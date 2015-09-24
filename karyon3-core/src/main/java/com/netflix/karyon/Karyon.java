@@ -13,7 +13,7 @@ import com.netflix.governator.LifecycleInjector;
  * any application services simply being bound asEagerSingleton.  
  * 
 <pre>
-@{code
+{@code
 @Path("/")
 public class HelloWorldApp extends DefaultLifecycleListener {
     public static void main(String[] args) throws InterruptedException {
