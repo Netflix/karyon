@@ -9,7 +9,7 @@ public abstract class AbstractHealthIndicator implements HealthIndicator {
     /**
      *  Creates an AbstractHealthIndicator with the specified name
      * 
-     * @paran name name     Name of this Health Indicator
+     * @param name name     Name of this Health Indicator
      * 
      */
     public AbstractHealthIndicator(String name) {

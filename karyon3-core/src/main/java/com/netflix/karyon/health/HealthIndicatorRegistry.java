@@ -15,11 +15,13 @@ import com.google.inject.ImplementedBy;
  * 
  * <pre>
  * {@code
+ * 
  * @Provides
  * @Singleton
  * HealthIndicatorRegistry getHealthIndicatorRegistry(@Named("cpu") HealthIndicator cpuIndicator, @Named("foo") HealthIndicator fooIndicator) {
  *    return HealthIndicatorRegistry.from(cpuIndicator, fooIndicator);
  * }
+ * 
  * }
  * </pre>
  * 
