@@ -16,7 +16,7 @@ import com.netflix.governator.DefaultModule;
 public final class EurekaHealthCheckModule extends DefaultModule {
     @Override
     protected void configure() {
-        // Connect Eureka's HealtCheckHandler to injector lifecycle + HealthCheck
+        // Connect Eureka's HealthCheckHandler to injector lifecycle + HealthCheck
         bind(HealthCheckHandler.class).to(KaryonHealthCheckHandler.class);
     }
     
