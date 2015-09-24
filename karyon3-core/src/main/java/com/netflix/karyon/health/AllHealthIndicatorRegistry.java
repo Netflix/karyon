@@ -18,8 +18,7 @@ import com.google.inject.TypeLiteral;
  * be picked up here.  Named bindings and mapbindings will also be added but only the name returned from 
  * {@link HealthIndicator#getName()} will be used.
  * 
- * See HealthIndicatorRegsitry for more details on creating a curated list of {@link HealthIndcator}s
- * </pre>
+ * See HealthIndicatorRegsitry for more details on creating a curated list of {@link HealthIndicator}s
  * 
  * @author elandau
  *

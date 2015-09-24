@@ -55,10 +55,11 @@ import com.google.inject.ImplementedBy;
  * {@code
  * @Singleton
  * public class Foo {
- *    private final ApplicationLifecycle appLifecycle
+ *    private final ApplicationLifecycle appLifecycle;
+ *    
  *    @Inject
  *    public Foo(ApplicationLifecycle appLifecycle) {
- *        this.appLifecycle = appLifecycle; }
+ *        this.appLifecycle = appLifecycle;
  *    }
  *    
  *    public void someFunctionWithStartupLogic() {
