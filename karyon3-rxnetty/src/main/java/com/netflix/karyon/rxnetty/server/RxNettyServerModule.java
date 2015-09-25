@@ -18,61 +18,54 @@ import com.netflix.karyon.http.DefaultServer;
  * or simple prefix.  
  * 
  * Example,
- * <pre>
- * {@code
+ * <code>
     new RxNettyServerModule() {
-        @Override
+        {@literal @}Override
         protected void configureEndpoints() {
             serve("/foo").with(FooRequestHandler.class);
             serve("*.html", "*.ico").with(StaticFileRequestHandler.class);
         }
-    },
- * }
+    }
+ * </code>
  * 
  * To support multiple servers (i.e ports) simply qualify the serve() statements with a standard DI Qualifier.
  * By default Karyon will construct an HttpServer and ServerConfig using the same Qualifier and associate
  * the server with these routes.  
  * 
- * <pre>
- * {@code
+ * <code>
     new RxNettyServerModule() {
-        @Override
+        {@literal @}Override
         protected void configureEndpoints() {
             serve(MyServerName.class, "/foo").with(FooRequestHandler.class);
         }
-    },
- * }
- * </pre>
+   }
+ * </code>
  * 
  * By default configuration for the server will be associate with the prefix: karyon.httpserver.{SimpleQualifierName}.
  * Where SimpleQulifierName is the simple class name of the qualifier.  Alternatively a custom configuration may
  * be constructed using the binding
  * 
- * <pre>
- * {@code
+ * <code>
     new AbstractModule() {
-        @Provides
-        @Singleton
-        @MyServerQualifier
+        {@literal @}Provides
+        {@literal @}Singleton
+        {@literal @}MyServerQualifier
         public ServerConfig getServerConfig() { 
             return ...;  // 
         }
     }
- * }
- * </pre>
+ * </code>
  *  
- * By default Kayron will configure a plain RxNetty HttpServer<ByteBuf, ByteBuf>.  To construct a server with custom 
+ * By default Kayron will configure a plain RxNetty HttpServer{@literal <}ByteBuf, ByteBuf{@literal >}.  To construct a server with custom 
  * configuration simply create a binding for the qualified server (note that the default server has an implicit qualifier
  * of DefaultServer.class)
  * 
- * <pre>
- * {@code
- *  
+ * <code>
     new AbstractModule() {
-        @Provides
-        @Singleton
-        @MyServerQualifier
-        HttpServer<ByteBuf, ByteBuf> getShutdownServer(@MyServerQualifier ServerConfig config, final @MyServerQualifier Set<HttpEndpointDefinition> defs) {
+        {@literal @}Provides
+        {@literal @}Singleton
+        {@literal @}MyServerQualifier
+        HttpServer{@literal <}ByteBuf, ByteBuf{@literal >} getShutdownServer({@literal @}MyServerQualifier ServerConfig config, final {@literal @}MyServerQualifier Set{@literal <}HttpEndpointDefinition{@literal >} defs) {
             return RxNetty.newHttpServerBuilder(
                 config.getServerPort(), 
                 new HttpRoutingRequestHandler(def)
@@ -80,8 +73,8 @@ import com.netflix.karyon.http.DefaultServer;
                 .build();
         }
     }
- * }
- * </pre>
+ * </code>
+ * 
  * @author elandau
  *
  */
@@ -142,11 +135,6 @@ public abstract class RxNettyServerModule extends AbstractModule {
         return endpointsModuleBuilder.serveRegex(qualifier, patterns);
     }
 
-    /**
-     * See the EDSL examples at {@link EndpointModule#configureEndpoints()}
-     *
-     * @since 2.0
-     */
     public static interface EndpointKeyBindingBuilder {
         void with(Class<? extends RequestHandler<ByteBuf, ByteBuf>> endpointKey);
         void with(Key<? extends RequestHandler<ByteBuf, ByteBuf>> endpointKey);

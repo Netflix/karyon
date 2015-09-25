@@ -11,34 +11,32 @@ import java.util.concurrent.CompletableFuture;
  * scripts or call a remote service.  
  * 
  * To register a health indicator,
- * <pre>
- * {@code
+ * <code>
  * Multbindings.newSetBinder(binder()).addBinding().to(MyHealthIndicator.class);
- * }
- * </pre>
+ * </code>
  *  
  * Here is a sample health indicator implementation. 
  * 
- * <pre>
- * {@code 
- * public class MyHealthIndicator implements HealthIndicator {
- *     @Inject
+ * <code>
+ * public class MyHealthIndicator extends AbstractHealthIndicator {
+ *     {@literal @}Inject
  *     public MyHealthIndicator(MyService service) {
  *         this.service = service;
  *     }
  *     
- *     @Override
- *     public CompletableFuture<HealthIndicatorStatus> check() {
- *          if (service.getErrorRate() > 0.1) {
- *              return CompletableFuture.completedFuture(HealthIndicatorStatuses.unhealthy(getName()));
+ *     {@literal @}Inject
+ *     
+ *     public CompletableFuture{@literal <}HealthIndicatorStatus{@literal >} check() {
+ *          if (service.getErrorRate() {@literal >} 0.1) {
+ *              return CompletableFuture.completedFuture(unhealthy(getName()));
  *          }
  *          else {
- *              return CompletableFuture.completedFuture(HealthIndicatorStatuses.healthy(getName()));
+ *              return CompletableFuture.completedFuture(healthy(getName()));
  *          }
  *     }
  * }
- * }
- * </pre>
+ * </code>
+ * 
  * @author elandau
  *
  */
