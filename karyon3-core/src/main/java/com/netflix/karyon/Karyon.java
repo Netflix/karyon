@@ -12,42 +12,41 @@ import com.netflix.governator.LifecycleInjector;
  * shutdown mechanism.  All application services are specified using Guice modules, with
  * any application services simply being bound asEagerSingleton.  
  * 
-<pre>
-{@code
-@Path("/")
-public class HelloWorldApp extends DefaultLifecycleListener {
-    public static void main(String[] args) throws InterruptedException {
-        Karyon.createInjector(
-             ArchaiusGovernatorConfiguration.builder()
-                 .addModules(
-                     new JettyModule(),
-                     new JerseyServletModule() {
-                        @Override
-                        protected void configureServlets() {
-                            serve("/*").with(GuiceContainer.class);
-                            bind(GuiceContainer.class).asEagerSingleton();
-                            
-                            bind(HelloWorldApp.class).asEagerSingleton();
-                        }  
-                    }
-                )
-                .build()
-            )
-            .awaitTermination();
-    }
-    
-    @GET
-    public String sayHello() {
-        return "hello world";
-    }
-    
-    @Override
-    public void onStarted() {
-        System.out.println("Started ***** ");
-    }
-}
-}
-</pre>
+ * <code>
+ * 
+ *  {@literal @}Path("/")
+ *  public class HelloWorldApp extends DefaultLifecycleListener {
+ *      public static void main(String[] args) throws InterruptedException {
+ *          Karyon.createInjector(
+ *               ArchaiusGovernatorConfiguration.builder()
+ *                   .addModules(
+ *                       new JettyModule(),
+ *                       new JerseyServletModule() {
+ *                          {@literal @}Override
+ *                          protected void configureServlets() {
+ *                              serve("/*").with(GuiceContainer.class);
+ *                              bind(GuiceContainer.class).asEagerSingleton();
+ *                              
+ *                              bind(HelloWorldApp.class).asEagerSingleton();
+ *                          }  
+ *                      }
+ *                  )
+ *                  .build()
+ *              )
+ *              .awaitTermination();
+ *      }
+ *      
+ *      {@literal @}GET
+ *      public String sayHello() {
+ *          return "hello world";
+ *      }
+ *      
+ *      {@literal @}Override
+ *      public void onStarted() {
+ *          System.out.println("Started ***** ");
+ *      }
+ *  }
+ * </code>
  * @author elandau
  *
  */

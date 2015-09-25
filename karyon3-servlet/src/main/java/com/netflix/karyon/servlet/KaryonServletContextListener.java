@@ -16,17 +16,15 @@ import com.netflix.governator.LifecycleInjector;
  * ServletContextListener's contextDestroyed event.  
  * 
  * To use, subclass your main server class from GovernatorServletContextListener
- * <pre>
- * {@code 
- * 
+ * <code>
 package com.cloudservice.StartServer;
 public class StartServer extends KaryonServletContextListener
 {
-    @Override
+    {@literal @}Override
     protected LifecycleInjector createInjector() {
         return Governator.createInjector(
             new JerseyServletModule() {
-                @Override
+                {@literal @}Override
                 protected void configureServlets() {
                     serve("/REST/*").with(GuiceContainer.class);
                     binder().bind(GuiceContainer.class).asEagerSingleton();
@@ -37,12 +35,11 @@ public class StartServer extends KaryonServletContextListener
         );
     }
 }
- * }
- * </pre>
+ * </code>
  * 
  * Then reference this class from web.xml.
  *
- <PRE>
+ * <code>
      &lt;filter&gt;
          &lt;filter-name&gt;guiceFilter&lt;/filter-name&gt;
          &lt;filter-class&gt;com.google.inject.servlet.GuiceFilter&lt;/filter-class&gt;
@@ -57,7 +54,7 @@ public class StartServer extends KaryonServletContextListener
          &lt;listener-class&gt;com.cloudservice.StartServer&lt;/listener-class&gt;
      &lt;/listener&gt;
 
- </PRE>
+ * </code>
  *
  * @author Eran Landau
  */

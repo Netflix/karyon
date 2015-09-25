@@ -13,17 +13,13 @@ import com.google.inject.ImplementedBy;
  * list of all active indicators.  To create a curated list of {@link HealthIndicator}s regardless of 
  * Guice bindings create a binding to HealthIndicatorRegistry as follows
  * 
- * <pre>
- * {@code
- * 
- * @Provides
- * @Singleton
- * HealthIndicatorRegistry getHealthIndicatorRegistry(@Named("cpu") HealthIndicator cpuIndicator, @Named("foo") HealthIndicator fooIndicator) {
+ * <code>
+ * {@literal @}Provides
+ * {@literal @}Singleton
+ * HealthIndicatorRegistry getHealthIndicatorRegistry({@literal @}Named("cpu") HealthIndicator cpuIndicator, {@literal @}Named("foo") HealthIndicator fooIndicator) {
  *    return HealthIndicatorRegistry.from(cpuIndicator, fooIndicator);
  * }
- * 
- * }
- * </pre>
+ * </code>
  * 
  * @author elandau
  */

@@ -16,20 +16,17 @@ import com.google.inject.ImplementedBy;
  * 
  * To make lifecycle state entirely manual set the following binding
  * 
- * <pre>
- * {@code
+ * <code>
  * bind(ApplicationLifecycle.class).to(ManualApplicationLifecycle.class);
- * }
- * </pre>
+ * </code>
  * 
  * The inject ApplicationLifecycle and set it to Starting based on your custom logic
  * 
- * <pre>
- * {@code
- * @Singleton
+ * <code>
+ * {@literal @}Singleton
  * public class Foo {
  *    private final ApplicationLifecycle appLifecycle
- *    @Inject
+ *    {@literal @}Inject
  *    public Foo(ApplicationLifecycle appLifecycle) {
  *        this.appLifecycle = appLifecycle; }
  *    }
@@ -38,26 +35,22 @@ import com.google.inject.ImplementedBy;
  *        this.appLifecycle.setStarted();
  *    }
  * }
- * }
- * </pre>
+ * </code>
  * 
  * To linked ApplicationLifecycle to both to DI lifecycle and manual state,
  * 
- * <pre>
- * {@code
+ * <code>
  * bind(ApplicationLifecycle.class).toInstance(new LifecycleListenerApplicationLifecycle(LifecycleState.Starting));
- * }
- * </pre>
+ * </code>
  * 
  * The manually set the lifecycle,
  * 
- * <pre>
- * {@code
- * @Singleton
+ * <code>
+ * {@literal @}Singleton
  * public class Foo {
  *    private final ApplicationLifecycle appLifecycle;
  *    
- *    @Inject
+ *    {@literal @}Inject
  *    public Foo(ApplicationLifecycle appLifecycle) {
  *        this.appLifecycle = appLifecycle;
  *    }
@@ -66,8 +59,7 @@ import com.google.inject.ImplementedBy;
  *        this.appLifecycle.setStarted();
  *    }
  * }
- * }
- * </pre>
+ * </code>
  * 
  * @author elandau
  *

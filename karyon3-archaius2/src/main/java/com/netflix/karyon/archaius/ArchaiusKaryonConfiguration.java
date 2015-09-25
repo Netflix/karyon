@@ -65,7 +65,7 @@ public class ArchaiusKaryonConfiguration extends DefaultKaryonConfiguration {
          * Configuration name to use for property loading.  Default configuration
          * name is 'application'.  This value is injectable as
          *  
-         *      @Named("karyon.configName") String configName
+         * <code>{@literal @}Named("karyon.configName") String configName</code>
          * 
          * @param value
          * @return
