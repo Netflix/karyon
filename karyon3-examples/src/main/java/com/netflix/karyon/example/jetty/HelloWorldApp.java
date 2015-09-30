@@ -35,6 +35,7 @@ public class HelloWorldApp extends DefaultLifecycleListener {
                     .put("@appId", "Hello World!")
                     .build()
                     )
+                .addProfile("local")
                 .disable(GovernatorFeatures.SHUTDOWN_ON_ERROR)
                 .addModules(
                     new ArchaiusLog4J2ConfigurationModule(),
