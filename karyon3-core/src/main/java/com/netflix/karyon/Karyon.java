@@ -1,7 +1,6 @@
 package com.netflix.karyon;
 
-import com.netflix.governator.Governator;
-import com.netflix.governator.LifecycleInjector;
+
 
 /**
  * Karyon is the core bootstrapper for a Guice based application with auto module loading
@@ -51,7 +50,7 @@ import com.netflix.governator.LifecycleInjector;
  *
  */
 public class Karyon {
-    public static LifecycleInjector createInjector(KaryonConfiguration config) {
-        return Governator.createInjector(config);
+    public static KaryonBuilder builder() {
+        return new KaryonBuilder();
     }
 }

@@ -22,11 +22,11 @@ import org.junit.Test;
 import com.google.inject.servlet.GuiceFilter;
 import com.google.inject.servlet.ServletModule;
 import com.netflix.governator.LifecycleInjector;
-import com.netflix.karyon.DefaultKaryonConfiguration;
 import com.netflix.karyon.Karyon;
 
 public class ServletContextListenerTest {
     private static String RESPONSE = "Hello World!";
+    
     @Singleton
     public static class MyServlet extends HttpServlet {
         protected void doGet(HttpServletRequest req, HttpServletResponse resp)
@@ -40,16 +40,15 @@ public class ServletContextListenerTest {
     public static class TestServletContextListener extends KaryonServletContextListener {
         @Override
         protected LifecycleInjector createInjector() throws Exception {
-            return Karyon.createInjector(
-                DefaultKaryonConfiguration.builder()
-                    .addModules(
+            return Karyon.builder()
+                .addModules(
                         new ServletModule() {
                             @Override
                             protected void configureServlets() {
                                 serve("/").with(MyServlet.class);
                             }
                         })
-                    .build());
+                .start();
         }
     }
 

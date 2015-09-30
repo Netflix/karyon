@@ -21,7 +21,6 @@ repositories {
 }
 
 dependencies {
-    compile project(":karyon3-healthcheck")
     compile project(":karyon3-core")
     compile project(":karyon3-archaius2")
 

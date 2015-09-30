@@ -53,7 +53,6 @@ public class StartServer extends KaryonServletContextListener
      &lt;listener&gt;
          &lt;listener-class&gt;com.cloudservice.StartServer&lt;/listener-class&gt;
      &lt;/listener&gt;
-
  * </code>
  *
  * @author Eran Landau
