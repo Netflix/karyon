@@ -42,7 +42,7 @@ public class KaryonBuilder extends DefaultGovernatorConfiguration.Builder<Karyon
     
     /**
      * Shortcut to creating the injector
-     * @return
+     * @return The builder
      * @throws Exception
      */
     public LifecycleInjector start() throws Exception {
@@ -51,7 +51,6 @@ public class KaryonBuilder extends DefaultGovernatorConfiguration.Builder<Karyon
     
     /**
      * Shortcut to creating the injector and waiting for it to terminate
-     * @return
      * @throws Exception
      */
     public void startAndAwaitTermination() throws Exception {
