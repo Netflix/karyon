@@ -114,12 +114,13 @@ public class AdminResourcesContainer {
                 }
 
                 server = new Server(adminContainerConfig.listenPort());
+                final List<Filter> additionaFilters = adminContainerConfig.additionalFilters();
 
                 // redirect filter based on configurable RedirectRules
                 final Context rootHandler = new Context();
                 rootHandler.setContextPath("/");
                 rootHandler.addFilter(new FilterHolder(adminResourceInjector.getInstance(RedirectFilter.class)), "/*", Handler.DEFAULT);
-                applyAdditionalFilters(rootHandler);
+                applyAdditionalFilters(rootHandler, additionaFilters);
                 rootHandler.addServlet(new ServletHolder(new DefaultServlet()), "/*");
 
                 // admin page template resources
@@ -131,7 +132,7 @@ public class AdminResourcesContainer {
                 adminTemplatesResHandler.setSessionHandler(new SessionHandler());
                 adminTemplatesResHandler.addFilter(LoggingFilter.class, "/*", Handler.DEFAULT);
                 adminTemplatesResHandler.addFilter(new FilterHolder(adminResourceInjector.getInstance(RedirectFilter.class)), "/*", Handler.DEFAULT);
-                applyAdditionalFilters(adminTemplatesResHandler);
+                applyAdditionalFilters(adminTemplatesResHandler, additionaFilters);
                 adminTemplatesResHandler.addFilter(new FilterHolder(arfTemplatesResources), "/*", Handler.DEFAULT);
                 adminTemplatesResHandler.addServlet(new ServletHolder(new DefaultServlet()), "/*");
 
@@ -143,7 +144,7 @@ public class AdminResourcesContainer {
                 final Context adminDataResHandler = new Context();
                 adminDataResHandler.setContextPath(adminContainerConfig.ajaxDataResourceContext());
                 adminDataResHandler.addFilter(new FilterHolder(adminResourceInjector.getInstance(RedirectFilter.class)), "/*", Handler.DEFAULT);
-                applyAdditionalFilters(adminDataResHandler);
+                applyAdditionalFilters(adminDataResHandler, additionaFilters);
                 adminDataResHandler.addFilter(new FilterHolder(arfDataResources), "/*", Handler.DEFAULT);
                 adminDataResHandler.addServlet(new ServletHolder(new DefaultServlet()), "/*");
 
@@ -226,10 +227,9 @@ public class AdminResourcesContainer {
         return appInjector != null && ! adminContainerConfig.shouldIsolateResources();
     }
 
-    private void applyAdditionalFilters(final Context contextHandler) {
-        final List<Filter> rootFilters = adminContainerConfig.additionalFilters();
-        if (rootFilters != null && !rootFilters.isEmpty()) {
-            for(Filter f : rootFilters) {
+    private void applyAdditionalFilters(final Context contextHandler, List<Filter> additionalFilters) {
+        if (additionalFilters != null && !additionalFilters.isEmpty()) {
+            for(Filter f : additionalFilters) {
                 contextHandler.addFilter(new FilterHolder(f), "/*", Handler.DEFAULT);
             }
         }

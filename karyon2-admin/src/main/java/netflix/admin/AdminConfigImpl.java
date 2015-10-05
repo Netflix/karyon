@@ -34,8 +34,8 @@ public class AdminConfigImpl implements AdminContainerConfig {
     public static final String NETFLIX_ADMIN_RESOURCES_ISOLATE = "netflix.admin.resources.isolate";
     public static final boolean ISOLATE_RESOURCES_DEFAULT = false;
 
-    public static final String NETFLIX_ADMIN_ROOT_CTX_FILTERS = "netflix.admin.root.context.filters";
-    public static final String DEFAULT_ROOT_CONTEXT_FILTERS = "";
+    public static final String NETFLIX_ADMIN_CTX_FILTERS = "netflix.admin.additional.filters";
+    public static final String DEFAULT_CONTEXT_FILTERS = "";
 
 
     private final String templateResContext;
@@ -55,7 +55,7 @@ public class AdminConfigImpl implements AdminContainerConfig {
         viewableResources = ConfigurationManager.getConfigInstance().getString(JERSEY_VIEWABLE_RESOURCES, JERSEY_VIEWABLE_RESOURCES_DEFAULT);
         listenPort = ConfigurationManager.getConfigInstance().getInt(CONTAINER_LISTEN_PORT, LISTEN_PORT_DEFAULT);
         isResourcesIsolated = ConfigurationManager.getConfigInstance().getBoolean(NETFLIX_ADMIN_RESOURCES_ISOLATE, ISOLATE_RESOURCES_DEFAULT);
-        rootContextFilters = ConfigurationManager.getConfigInstance().getString(NETFLIX_ADMIN_ROOT_CTX_FILTERS, DEFAULT_ROOT_CONTEXT_FILTERS);
+        rootContextFilters = ConfigurationManager.getConfigInstance().getString(NETFLIX_ADMIN_CTX_FILTERS, DEFAULT_CONTEXT_FILTERS);
     }
 
     @Override

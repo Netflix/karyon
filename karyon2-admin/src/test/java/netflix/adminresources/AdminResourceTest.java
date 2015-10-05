@@ -97,7 +97,7 @@ public class AdminResourceTest {
 
     @Test
     public void checkAuthFilter() throws Exception {
-        setConfig(AdminConfigImpl.NETFLIX_ADMIN_ROOT_CTX_FILTERS, "netflix.adminresources.AuthFilter");
+        setConfig(AdminConfigImpl.NETFLIX_ADMIN_CTX_FILTERS, "netflix.adminresources.AuthFilter");
         final int port = startServerAndGetListeningPort();
         HttpClient client = new DefaultHttpClient();
 
@@ -116,7 +116,7 @@ public class AdminResourceTest {
         assertEquals("admin resource ping resource failed.", 404, response.getStatusLine().getStatusCode());
 
         final AbstractConfiguration configInst = ConfigurationManager.getConfigInstance();
-        configInst.clearProperty(AdminConfigImpl.NETFLIX_ADMIN_ROOT_CTX_FILTERS);
+        configInst.clearProperty(AdminConfigImpl.NETFLIX_ADMIN_CTX_FILTERS);
     }
 
     @Test
