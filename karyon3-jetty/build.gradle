@@ -21,7 +21,6 @@ dependencies {
     compile     project(':karyon3-archaius2')
     compile 	 "com.netflix.governator:governator-jetty:${governator_version}"
 
-    compile     'com.sun.jersey.contribs:jersey-guice:1.19'
     testCompile project(':karyon3-log4j2')
 }
 

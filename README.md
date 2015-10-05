@@ -16,11 +16,14 @@ Getting Started
 -------------------
 Karyon is currently available as a snapshot via jfrog.
 
-```java
+```groovy
 repositories {
     maven { url 'http://oss.jfrog.org/oss-snapshot-local' }
 }
-compile "com.netflix.karyon:karyon3-core:3.0.1-SNAPSHOT'
+
+dependencies {
+    compile "com.netflix.karyon:karyon3-core:3.0.1-SNAPSHOT"
+}
 ```
 
 ----------
@@ -30,7 +33,7 @@ A Karyon3 based main should normally consist of a simple block of code to create
 
 ```java
 public class HelloWorld {
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
         Karyon.createInjector(
             // Default archaius based karyon configuration
             ArchaiusKaryonConfiguration.builder()
@@ -344,7 +347,7 @@ public class MyHealthIndicator extends AbstractHealthIndicator {
 
 To enable the HealthIndicator simply register it as a set binding.  It will automatically be picked up by the default HealthIndicatorRegistry
 ```java
-Multbindings.newSetBinder(binder()).addBinding().to(MyHealthIndicator.class);
+Multibinder.newSetBinder(binder(), HealthIndicator.class).addBinding().to(MyHealthIndicator.class);
 ```
 ### Curated health check registry
 TBD
