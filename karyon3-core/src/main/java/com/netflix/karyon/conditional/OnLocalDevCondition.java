@@ -32,7 +32,8 @@ public class OnLocalDevCondition implements Condition<ConditionalOnLocalDev> {
             return false;
         }
         
-        return cmd.startsWith("org.eclipse.jdt.internal.junit.runner") || 
+        return cmd.startsWith("org.eclipse.jdt.internal.junit.runner") ||
+               cmd.startsWith("com.intellij.rt.execution.application.AppMain") ||
                cmd.contains("Gradle Test Executor");
     }
     

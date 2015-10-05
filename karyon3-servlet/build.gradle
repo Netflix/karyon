@@ -19,7 +19,7 @@ apply plugin: 'java'
 dependencies {
     compile     project(':karyon3-core')
     compile     project(':karyon3-archaius2')
-    compile     "com.sun.jersey.contribs:jersey-guice:${jersey_version}"
+    compile     "com.google.inject.extensions:guice-servlet:${guice_version}"
 
     provided    "javax.servlet:servlet-api:2.5"
 
