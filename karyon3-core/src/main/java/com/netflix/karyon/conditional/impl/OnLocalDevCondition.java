@@ -1,12 +1,12 @@
-package com.netflix.karyon.conditional;
+package com.netflix.karyon.conditional.impl;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import com.netflix.governator.GovernatorConfiguration;
-import com.netflix.governator.auto.Condition;
-import com.netflix.governator.auto.PropertySource;
-import com.netflix.governator.auto.conditions.OnJUnitCondition;
+import com.netflix.karyon.KaryonConfiguration;
+import com.netflix.karyon.PropertySource;
+import com.netflix.karyon.conditional.Condition;
+import com.netflix.karyon.conditional.ConditionalOnLocalDev;
 
 /**
  * Conditional to add to a module that should be loaded when running in 'local' profile
@@ -17,11 +17,11 @@ import com.netflix.governator.auto.conditions.OnJUnitCondition;
  */
 @Singleton
 public class OnLocalDevCondition implements Condition<ConditionalOnLocalDev> {
-    private final GovernatorConfiguration config;
+    private final KaryonConfiguration config;
     private final boolean inTest;
 
     @Inject
-    public OnLocalDevCondition(PropertySource source, GovernatorConfiguration config, OnJUnitCondition junitCondition) {
+    public OnLocalDevCondition(PropertySource source, KaryonConfiguration config, OnJUnitCondition junitCondition) {
         this.config = config;
         this.inTest = isInTest();
     }

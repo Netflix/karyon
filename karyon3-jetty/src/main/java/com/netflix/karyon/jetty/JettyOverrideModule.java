@@ -5,10 +5,10 @@ import javax.inject.Singleton;
 import com.google.inject.Provides;
 import com.netflix.archaius.ConfigProxyFactory;
 import com.netflix.governator.DefaultModule;
-import com.netflix.governator.auto.annotations.ConditionalOnModule;
-import com.netflix.governator.auto.annotations.OverrideModule;
 import com.netflix.governator.guice.jetty.JettyConfig;
 import com.netflix.governator.guice.jetty.JettyModule;
+import com.netflix.karyon.conditional.ConditionalOnModule;
+import com.netflix.karyon.conditional.OverrideModule;
 
 @OverrideModule
 @ConditionalOnModule(JettyModule.class)

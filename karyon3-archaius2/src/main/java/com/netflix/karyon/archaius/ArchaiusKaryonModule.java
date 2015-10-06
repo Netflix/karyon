@@ -10,6 +10,7 @@ import com.google.inject.AbstractModule;
 import com.google.inject.multibindings.MapBinder;
 import com.google.inject.multibindings.Multibinder;
 import com.google.inject.name.Names;
+import com.netflix.archaius.CascadeStrategy;
 import com.netflix.archaius.Config;
 import com.netflix.archaius.config.CompositeConfig;
 import com.netflix.archaius.config.DefaultSettableConfig;
@@ -18,6 +19,7 @@ import com.netflix.archaius.config.MapConfig;
 import com.netflix.archaius.config.SettableConfig;
 import com.netflix.archaius.config.SystemConfig;
 import com.netflix.archaius.exceptions.ConfigException;
+import com.netflix.archaius.guice.ArchaiusModule;
 import com.netflix.archaius.guice.ConfigSeeder;
 import com.netflix.archaius.guice.ConfigSeeders;
 import com.netflix.archaius.guice.RootLayer;
@@ -26,18 +28,17 @@ import com.netflix.archaius.inject.DefaultsLayer;
 import com.netflix.archaius.inject.LibrariesLayer;
 import com.netflix.archaius.inject.RemoteLayer;
 import com.netflix.archaius.inject.RuntimeLayer;
-import com.netflix.governator.auto.AbstractPropertySource;
-import com.netflix.governator.auto.PropertySource;
-import com.netflix.karyon.DefaultKaryonConfiguration;
+import com.netflix.karyon.AbstractKaryonModule;
+import com.netflix.karyon.AbstractPropertySource;
+import com.netflix.karyon.PropertySource;
 import com.netflix.karyon.ServerContext;
 
 /**
- * Extension to the archaius configuration which includes bootstrapping of archaius2.
- * 
- * @author elandau
- *
+ * Entry point for applications using Archaius as the configuration mechanism.  This
+ * DSL provided here extends the core Karyon.Dsl with method specific to customizing
+ * archaius
  */
-public class ArchaiusKaryonConfiguration extends DefaultKaryonConfiguration {
+public class ArchaiusKaryonModule extends AbstractKaryonModule {
     private static final String DEFAULT_CONFIG_NAME     = "application";
     
     private static final String RUNTIME_LAYER_NAME      = "RUNTIME";
@@ -52,78 +53,80 @@ public class ArchaiusKaryonConfiguration extends DefaultKaryonConfiguration {
         System.setProperty("archaius.default.configuration.class",      "com.netflix.archaius.bridge.StaticAbstractConfiguration");
         System.setProperty("archaius.default.deploymentContext.class",  "com.netflix.archaius.bridge.StaticDeploymentContext");
     }
+    
+    private String                  configName = DEFAULT_CONFIG_NAME;
+    private Config                  applicationOverrides = null;
+    private Map<String, Config>     libraryOverrides = new HashMap<>();
+    private Set<Config>             runtimeOverrides = new HashSet<>();
+    private Set<Config>             defaultSeeders = new HashSet<>();
+    private Properties              props = new Properties();
 
-    public static abstract class Builder<T extends Builder<T>> extends DefaultKaryonConfiguration.Builder<T> {
-        private String                  configName = DEFAULT_CONFIG_NAME;
-        private Config                  applicationOverrides = null;
-        private Map<String, Config>     libraryOverrides = new HashMap<>();
-        private Set<Config>             runtimeOverrides = new HashSet<>();
-        private Set<Config>             defaultSeeders = new HashSet<>();
-        private Properties              props = new Properties();
-        
-        /**
-         * Configuration name to use for property loading.  Default configuration
-         * name is 'application'.  This value is injectable as
-         *  
-         * <code>{@literal @}Named("karyon.configName") String configName</code>
-         * 
-         * @param value
-         * @return
-         */
-        public T withConfigName(String value) {
-            this.configName = value;
-            return This();
-        }
-        
-        public T withApplicationName(String value) {
-            props.put(ServerContext.APP_ID, value);
-            return This();
-        }
-        
-        public T withApplicationOverrides(Properties prop) throws ConfigException {
-            return withApplicationOverrides(MapConfig.from(prop));
-        }
-        
-        public T withApplicationOverrides(Config config) throws ConfigException {
-            this.applicationOverrides = config;
-            return This();
-        }
-        
-        public T withRuntimeOverrides(Properties prop) throws ConfigException {
-            return withRuntimeOverrides(MapConfig.from(prop));
-        }
-        
-        public T withRuntimeOverrides(Config config) throws ConfigException {
-            this.runtimeOverrides.add(config);
-            return This();
-        }
-        
-        public T withDefaults(Properties prop) throws ConfigException {
-            return withDefaults(MapConfig.from(prop));
-        }
-        
-        public T withDefaults(Config config) throws ConfigException {
-            this.defaultSeeders.add(config);
-            return This();
-        }
-        
-        public T withLibraryOverrides(String name, Properties prop) throws ConfigException {
-            return withLibraryOverrides(name, MapConfig.from(prop));
-        }
-        
-        public T withLibraryOverrides(String name, Config config) throws ConfigException {
-            this.libraryOverrides.put(name, config);
-            return This();
-        }
-        
-        
-        public ArchaiusKaryonConfiguration build() throws Exception {
-            initialize(); 
-            return new ArchaiusKaryonConfiguration(this);
-        }
-        
-        protected void initialize() throws Exception {
-            super.initialize();
+    private Class<? extends CascadeStrategy> cascadeStrategy = KaryonCascadeStrategy.class;
+    
+    /**
+     * Configuration name to use for property loading.  Default configuration
+     * name is 'application'.  This value is injectable as
+     *  
+     * <code>{@literal @}Named("karyon.configName") String configName</code>
+     * 
+     * @param value
+     * @return
+     */
+    public ArchaiusKaryonModule withConfigName(String value) {
+        this.configName = value;
+        return this;
+    }
+    
+    public ArchaiusKaryonModule withApplicationName(String value) {
+        props.put(ServerContext.APP_ID, value);
+        return this;
+    }
+    
+    public ArchaiusKaryonModule withApplicationOverrides(Properties prop) throws ConfigException {
+        return withApplicationOverrides(MapConfig.from(prop));
+    }
+    
+    public ArchaiusKaryonModule withApplicationOverrides(Config config) throws ConfigException {
+        this.applicationOverrides = config;
+        return this;
+    }
+    
+    public ArchaiusKaryonModule withRuntimeOverrides(Properties prop) throws ConfigException {
+        return withRuntimeOverrides(MapConfig.from(prop));
+    }
+    
+    public ArchaiusKaryonModule withRuntimeOverrides(Config config) throws ConfigException {
+        this.runtimeOverrides.add(config);
+        return this;
+    }
+    
+    public ArchaiusKaryonModule withDefaults(Properties prop) throws ConfigException {
+        return withDefaults(MapConfig.from(prop));
+    }
+    
+    public ArchaiusKaryonModule withDefaults(Config config) throws ConfigException {
+        this.defaultSeeders.add(config);
+        return this;
+    }
+    
+    public ArchaiusKaryonModule withLibraryOverrides(String name, Properties prop) throws ConfigException {
+        return withLibraryOverrides(name, MapConfig.from(prop));
+    }
+    
+    public ArchaiusKaryonModule withLibraryOverrides(String name, Config config) throws ConfigException {
+        this.libraryOverrides.put(name, config);
+        return this;
+    }
+    
+    public ArchaiusKaryonModule withCascadeStrategy(Class<? extends CascadeStrategy> cascadeStrategy) {
+        this.cascadeStrategy = cascadeStrategy;
+        return this;
+    }
+    
+    @Override
+    protected void configure() {
+        try {
+            addModules(new ArchaiusModule());
             
             if (!props.isEmpty()) {
                 try {
@@ -153,22 +156,22 @@ public class ArchaiusKaryonConfiguration extends DefaultKaryonConfiguration {
                     .withConfig(DEFAULTS_LAYER_NAME,             defaultsLayer)
                     .build();
                     ;
-
+    
             PropertySource propertySource = new AbstractPropertySource() {
                     @Override
                     public String get(String key) {
                         return rootConfig.getString(key, null);
                     }
-
+    
                     @Override
                     public String get(String key, String defaultValue) {
                         return rootConfig.getString(key, defaultValue);
                     }
                 };
-
-            this.withPropertySource(propertySource);
+    
+            setPropertySource(propertySource);
             
-            this.addOverrideModule(new AbstractModule() {
+            addOverrideModules(new AbstractModule() {
                 @Override
                 protected void configure() {
                     bind(SettableConfig.class).annotatedWith(RuntimeLayer.class).toInstance(runtimeLayer);
@@ -196,32 +199,28 @@ public class ArchaiusKaryonConfiguration extends DefaultKaryonConfiguration {
                     for (Config config : defaultSeeders) {
                         defaults.addBinding().toInstance(ConfigSeeders.from(config));
                     }
+                    
+                    bind(CascadeStrategy.class).to(cascadeStrategy);
                 }
                 
+                @Override
+                public boolean equals(Object obj) {
+                    return getClass().equals(obj.getClass());
+                }
+    
+                @Override
+                public int hashCode() {
+                    return getClass().hashCode();
+                }
+    
                 @Override
                 public String toString() {
                     return "ArchaiusKaryonConfigurationModule";
                 }
-            });
-        };
-    }
-    
-    private static class BuilderWrapper extends Builder<BuilderWrapper> {
-        @Override
-        protected BuilderWrapper This() {
-            return this;
+            });   
         }
-    }
-    
-    public static Builder<?> builder() {
-        return new BuilderWrapper();
-    }
-    
-    public ArchaiusKaryonConfiguration() {
-        this(builder());
-    }
-    
-    private ArchaiusKaryonConfiguration(Builder<?> builder) {
-        super(builder);
+        catch (Exception e) {
+            throw new RuntimeException("Failed to configure archaius", e);
+        }
     }
 }

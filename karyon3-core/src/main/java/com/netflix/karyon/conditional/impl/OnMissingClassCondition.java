@@ -1,0 +1,24 @@
+package com.netflix.karyon.conditional.impl;
+
+import com.netflix.karyon.conditional.Condition;
+import com.netflix.karyon.conditional.ConditionalOnMissingClass;
+
+public class OnMissingClassCondition implements Condition<ConditionalOnMissingClass> {
+    @Override
+    public boolean check(ConditionalOnMissingClass condition) {
+        for (String name : condition.value()) {
+            try {
+                Class.forName(name, false, ClassLoader.getSystemClassLoader());
+                return false;
+            } catch (ClassNotFoundException e) {
+            }
+        }
+        return true;
+    }
+    
+    @Override
+    public String toString() {
+        return "OnMissingClassCondition[]";
+    }
+
+}

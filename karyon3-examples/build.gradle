@@ -23,6 +23,7 @@ repositories {
 dependencies {
     compile     project(':karyon3-core')
     compile     project(':karyon3-rxnetty')
+    compile     project(':karyon3-servlet')
     compile     project(':karyon3-archaius2')
     compile     project(':karyon3-jetty')
     compile     project(':karyon3-admin-simple')

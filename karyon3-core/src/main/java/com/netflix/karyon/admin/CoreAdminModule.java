@@ -4,7 +4,7 @@ import com.google.inject.grapher.NameFactory;
 import com.google.inject.grapher.ShortNameFactory;
 import com.google.inject.grapher.graphviz.PortIdFactory;
 import com.google.inject.grapher.graphviz.PortIdFactoryImpl;
-import com.netflix.governator.auto.annotations.ConditionalOnModule;
+import com.netflix.karyon.conditional.ConditionalOnModule;
 
 @ConditionalOnModule(AdminModule.class)
 public final class CoreAdminModule extends AbstractAdminModule {

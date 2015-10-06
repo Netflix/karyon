@@ -1,9 +1,9 @@
 package com.netflix.karyon.jetty;
 
-import com.netflix.governator.auto.annotations.ConditionalOnModule;
 import com.netflix.governator.guice.jetty.JettyModule;
 import com.netflix.karyon.admin.AbstractAdminModule;
 import com.netflix.karyon.admin.AdminModule;
+import com.netflix.karyon.conditional.ConditionalOnModule;
 
 /**
  * Admin module for exposing Jetty's configuration information

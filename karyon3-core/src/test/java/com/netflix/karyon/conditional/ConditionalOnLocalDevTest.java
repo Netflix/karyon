@@ -5,13 +5,14 @@ import junit.framework.Assert;
 import org.junit.Test;
 
 import com.google.inject.Injector;
-import com.netflix.governator.DefaultGovernatorConfiguration;
-import com.netflix.governator.Governator;
+import com.netflix.karyon.Karyon;
+import com.netflix.karyon.KaryonFeatures;
+import com.netflix.karyon.conditional.impl.OnLocalDevCondition;
 
 public class ConditionalOnLocalDevTest {
     @Test
     public void test() throws Exception {
-        Injector injector = Governator.createInjector(DefaultGovernatorConfiguration.createDefault());
+        Injector injector = Karyon.create().disableFeature(KaryonFeatures.USE_ARCHAIUS).start();
         OnLocalDevCondition condition = injector.getInstance(OnLocalDevCondition.class);
         Assert.assertTrue(condition.check(null));
     }

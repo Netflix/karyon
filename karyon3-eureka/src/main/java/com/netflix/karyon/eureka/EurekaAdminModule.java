@@ -1,9 +1,9 @@
 package com.netflix.karyon.eureka;
 
 import com.netflix.discovery.guice.EurekaModule;
-import com.netflix.governator.auto.annotations.ConditionalOnModule;
 import com.netflix.karyon.admin.AbstractAdminModule;
 import com.netflix.karyon.admin.AdminModule;
+import com.netflix.karyon.conditional.ConditionalOnModule;
 
 @ConditionalOnModule({AdminModule.class, EurekaModule.class})
 public final class EurekaAdminModule extends AbstractAdminModule {

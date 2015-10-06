@@ -24,6 +24,8 @@ dependencies {
     compile group: "com.netflix.archaius", name: "archaius2-guice", version: "${archaius_version}", changing: true
     compile group: "com.netflix.archaius", name: "archaius2-persisted2", version: "${archaius_version}", changing: true
     compile group: "com.netflix.archaius", name: "archaius2-archaius1-bridge", version: "${archaius_version}", changing: true
+
+    testCompile project(':karyon3-junit')
 }
 
 eclipse {
