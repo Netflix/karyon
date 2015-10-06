@@ -7,7 +7,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.netflix.archaius.config.MapConfig;
-import com.netflix.archaius.guice.ArchaiusModule;
 import com.netflix.governator.DefaultLifecycleListener;
 import com.netflix.governator.ProvisionDebugModule;
 import com.netflix.governator.guice.jetty.JettyModule;
@@ -39,7 +38,6 @@ public class HelloWorldApp extends DefaultLifecycleListener {
                 new JettyModule(),
                 new AdminServerModule(),
                 new AdminUIServerModule(),
-                new ArchaiusModule(),
                 new ShutdownServerModule(),
                 new JerseyServletModule() {
                     @Override
