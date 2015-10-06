@@ -11,9 +11,19 @@ public enum KaryonFeatures implements KaryonFeature {
      * startup failure.  This allows the admin page to stay up so that the process may be 
      * debugged more easily. 
      */
-    SHUTDOWN_ON_ERROR(true, "karyon.feature.shutdownOnError"),
+    SHUTDOWN_ON_ERROR(true, "karyon.features.shutdownOnError"),
     
-    USE_DEFAULT_PACKAGES(true, "karyon.feature.defaultPackages"),
+    /**
+     * When enabled will auto install Karyon's default settings including classpath
+     * scanning of 'com.netflix.karyon' for conditional modules
+     */
+    USE_DEFAULT_KARYON_MODULE(true, "karyon.features.defaultModule"), 
+    
+    /**
+     * When enabled will auto install the Karyon-Archaius integration unless already
+     * installed.
+     */
+    USE_ARCHAIUS(true, "karyon.features.archaius"),
     ;
 
     private final boolean enabled;

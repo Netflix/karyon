@@ -12,6 +12,11 @@ import javax.inject.Singleton;
 @Singleton
 public class DefaultPropertySource extends AbstractPropertySource {
 
+    public static final DefaultPropertySource INSTANCE = new DefaultPropertySource();
+    
+    private DefaultPropertySource() {
+    }
+    
     @Override
     public String get(String key) {
         return get(key, (String)null);

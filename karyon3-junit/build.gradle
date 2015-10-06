@@ -16,16 +16,15 @@
 
 apply plugin: 'java'
 
-dependencies {
-    compile     project(':karyon3-core')
-    compile     project(':karyon3-admin')
-    
-    compile group: "com.netflix.archaius", name: "archaius2-core", version: "${archaius_version}", changing: true
-    compile group: "com.netflix.archaius", name: "archaius2-guice", version: "${archaius_version}", changing: true
-    compile group: "com.netflix.archaius", name: "archaius2-persisted2", version: "${archaius_version}", changing: true
-    compile group: "com.netflix.archaius", name: "archaius2-archaius1-bridge", version: "${archaius_version}", changing: true
+repositories {
+    maven { url 'https://oss.jfrog.org/libs-snapshot' }
+}
 
-    testCompile project(':karyon3-junit')
+dependencies {
+    compile project(":karyon3-core")
+    compile 'org.slf4j:slf4j-api:1.7.6'
+    provided 'junit:junit:4.10'
+
 }
 
 eclipse {

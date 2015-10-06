@@ -7,17 +7,17 @@ import java.util.List;
 import com.google.inject.Module;
 import com.google.inject.Stage;
 
-public abstract class AbstractKaryonDslModule implements KaryonDslModule {
-    private KaryonDsl<?> karyon;
+public abstract class AbstractKaryonModule implements KaryonModule {
+    private Karyon karyon;
     
     @Override
-    final public void configure(KaryonDsl<?> builder) throws Exception {
-        this.karyon = builder;
+    final public void configure(Karyon karyon) {
+        this.karyon = karyon;
         configure();
         this.karyon = null;
     }
     
-    protected abstract void configure() throws Exception;
+    protected abstract void configure();
     
     protected void addAutoModuleListProvider(ModuleListProvider finder) {
         karyon.addAutoModuleListProvider(finder);

@@ -10,6 +10,7 @@ import com.google.inject.AbstractModule;
 import com.google.inject.multibindings.MapBinder;
 import com.google.inject.multibindings.Multibinder;
 import com.google.inject.name.Names;
+import com.netflix.archaius.CascadeStrategy;
 import com.netflix.archaius.Config;
 import com.netflix.archaius.config.CompositeConfig;
 import com.netflix.archaius.config.DefaultSettableConfig;
@@ -27,8 +28,8 @@ import com.netflix.archaius.inject.DefaultsLayer;
 import com.netflix.archaius.inject.LibrariesLayer;
 import com.netflix.archaius.inject.RemoteLayer;
 import com.netflix.archaius.inject.RuntimeLayer;
+import com.netflix.karyon.AbstractKaryonModule;
 import com.netflix.karyon.AbstractPropertySource;
-import com.netflix.karyon.Karyon;
 import com.netflix.karyon.PropertySource;
 import com.netflix.karyon.ServerContext;
 
@@ -39,9 +40,9 @@ import com.netflix.karyon.ServerContext;
  * 
  * @author elandau
  *
- * @param <T>
+ * @param <ArchaiusKaryonModule>
  */
-public class ArchaiusKaryon<T extends ArchaiusKaryon<T>> {
+public class ArchaiusKaryonModule extends AbstractKaryonModule {
     private static final String DEFAULT_CONFIG_NAME     = "application";
     
     private static final String RUNTIME_LAYER_NAME      = "RUNTIME";
@@ -57,73 +58,78 @@ public class ArchaiusKaryon<T extends ArchaiusKaryon<T>> {
         System.setProperty("archaius.default.deploymentContext.class",  "com.netflix.archaius.bridge.StaticDeploymentContext");
     }
     
-    public static abstract class Dsl<T extends Dsl<T>> extends Karyon.Dsl<T> {
-        private String                  configName = DEFAULT_CONFIG_NAME;
-        private Config                  applicationOverrides = null;
-        private Map<String, Config>     libraryOverrides = new HashMap<>();
-        private Set<Config>             runtimeOverrides = new HashSet<>();
-        private Set<Config>             defaultSeeders = new HashSet<>();
-        private Properties              props = new Properties();
-        
-        /**
-         * Configuration name to use for property loading.  Default configuration
-         * name is 'application'.  This value is injectable as
-         *  
-         * <code>{@literal @}Named("karyon.configName") String configName</code>
-         * 
-         * @param value
-         * @return
-         */
-        public T withConfigName(String value) {
-            this.configName = value;
-            return self();
-        }
-        
-        public T withApplicationName(String value) {
-            props.put(ServerContext.APP_ID, value);
-            return self();
-        }
-        
-        public T withApplicationOverrides(Properties prop) throws ConfigException {
-            return withApplicationOverrides(MapConfig.from(prop));
-        }
-        
-        public T withApplicationOverrides(Config config) throws ConfigException {
-            this.applicationOverrides = config;
-            return self();
-        }
-        
-        public T withRuntimeOverrides(Properties prop) throws ConfigException {
-            return withRuntimeOverrides(MapConfig.from(prop));
-        }
-        
-        public T withRuntimeOverrides(Config config) throws ConfigException {
-            this.runtimeOverrides.add(config);
-            return self();
-        }
-        
-        public T withDefaults(Properties prop) throws ConfigException {
-            return withDefaults(MapConfig.from(prop));
-        }
-        
-        public T withDefaults(Config config) throws ConfigException {
-            this.defaultSeeders.add(config);
-            return self();
-        }
-        
-        public T withLibraryOverrides(String name, Properties prop) throws ConfigException {
-            return withLibraryOverrides(name, MapConfig.from(prop));
-        }
-        
-        public T withLibraryOverrides(String name, Config config) throws ConfigException {
-            this.libraryOverrides.put(name, config);
-            return self();
-        }
-        
-        @Override
-        protected void preCreate() throws Exception {
-            super.preCreate();
-            
+    private String                  configName = DEFAULT_CONFIG_NAME;
+    private Config                  applicationOverrides = null;
+    private Map<String, Config>     libraryOverrides = new HashMap<>();
+    private Set<Config>             runtimeOverrides = new HashSet<>();
+    private Set<Config>             defaultSeeders = new HashSet<>();
+    private Properties              props = new Properties();
+
+    private Class<? extends CascadeStrategy> cascadeStrategy = KaryonCascadeStrategy.class;
+    
+    /**
+     * Configuration name to use for property loading.  Default configuration
+     * name is 'application'.  This value is injectable as
+     *  
+     * <code>{@literal @}Named("karyon.configName") String configName</code>
+     * 
+     * @param value
+     * @return
+     */
+    public ArchaiusKaryonModule withConfigName(String value) {
+        this.configName = value;
+        return this;
+    }
+    
+    public ArchaiusKaryonModule withApplicationName(String value) {
+        props.put(ServerContext.APP_ID, value);
+        return this;
+    }
+    
+    public ArchaiusKaryonModule withApplicationOverrides(Properties prop) throws ConfigException {
+        return withApplicationOverrides(MapConfig.from(prop));
+    }
+    
+    public ArchaiusKaryonModule withApplicationOverrides(Config config) throws ConfigException {
+        this.applicationOverrides = config;
+        return this;
+    }
+    
+    public ArchaiusKaryonModule withRuntimeOverrides(Properties prop) throws ConfigException {
+        return withRuntimeOverrides(MapConfig.from(prop));
+    }
+    
+    public ArchaiusKaryonModule withRuntimeOverrides(Config config) throws ConfigException {
+        this.runtimeOverrides.add(config);
+        return this;
+    }
+    
+    public ArchaiusKaryonModule withDefaults(Properties prop) throws ConfigException {
+        return withDefaults(MapConfig.from(prop));
+    }
+    
+    public ArchaiusKaryonModule withDefaults(Config config) throws ConfigException {
+        this.defaultSeeders.add(config);
+        return this;
+    }
+    
+    public ArchaiusKaryonModule withLibraryOverrides(String name, Properties prop) throws ConfigException {
+        return withLibraryOverrides(name, MapConfig.from(prop));
+    }
+    
+    public ArchaiusKaryonModule withLibraryOverrides(String name, Config config) throws ConfigException {
+        this.libraryOverrides.put(name, config);
+        return this;
+    }
+    
+    public ArchaiusKaryonModule withCascadeStrategy(Class<? extends CascadeStrategy> cascadeStrategy) {
+        this.cascadeStrategy = cascadeStrategy;
+        return this;
+    }
+    
+    @Override
+    protected void configure() {
+        try {
             addModules(new ArchaiusModule());
             
             if (!props.isEmpty()) {
@@ -197,6 +203,8 @@ public class ArchaiusKaryon<T extends ArchaiusKaryon<T>> {
                     for (Config config : defaultSeeders) {
                         defaults.addBinding().toInstance(ConfigSeeders.from(config));
                     }
+                    
+                    bind(CascadeStrategy.class).to(cascadeStrategy);
                 }
                 
                 @Override
@@ -213,19 +221,10 @@ public class ArchaiusKaryon<T extends ArchaiusKaryon<T>> {
                 public String toString() {
                     return "ArchaiusKaryonConfigurationModule";
                 }
-            });        
+            });   
+        }
+        catch (Exception e) {
+            throw new RuntimeException("Failed to configure archaius", e);
         }
     }
-    
-    private static class BuilderWrapper extends Dsl<BuilderWrapper> {
-        @Override
-        protected BuilderWrapper self() {
-            return this;
-        }
-    }
-
-    public static Dsl<?> bootstrap() {
-        return new BuilderWrapper();
-    }
-
 }

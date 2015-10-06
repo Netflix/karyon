@@ -10,10 +10,11 @@ import com.netflix.archaius.config.MapConfig;
 import com.netflix.governator.DefaultLifecycleListener;
 import com.netflix.governator.ProvisionDebugModule;
 import com.netflix.governator.guice.jetty.JettyModule;
+import com.netflix.karyon.Karyon;
 import com.netflix.karyon.KaryonFeatures;
 import com.netflix.karyon.admin.rest.AdminServerModule;
 import com.netflix.karyon.admin.ui.AdminUIServerModule;
-import com.netflix.karyon.archaius.ArchaiusKaryon;
+import com.netflix.karyon.archaius.ArchaiusKaryonModule;
 import com.netflix.karyon.health.HealthIndicator;
 import com.netflix.karyon.log4j.ArchaiusLog4J2ConfigurationModule;
 import com.netflix.karyon.rxnetty.shutdown.ShutdownServerModule;
@@ -25,11 +26,13 @@ public class HelloWorldApp extends DefaultLifecycleListener {
     private static final Logger LOG = LoggerFactory.getLogger(HelloWorldApp.class);
     
     public static void main(String[] args) throws Exception {
-        ArchaiusKaryon.bootstrap()
-            .withConfigName("helloworld")
-            .withApplicationOverrides(MapConfig.builder()
-                .put("@appId", "Hello World!")
-                .build()
+        Karyon
+            .from(new ArchaiusKaryonModule()
+                .withConfigName("helloworld")
+                .withApplicationOverrides(MapConfig.builder()
+                    .put("@appId", "Hello World!")
+                    .build()
+                    )
                 )
             .addProfile("local")
             .addModules(

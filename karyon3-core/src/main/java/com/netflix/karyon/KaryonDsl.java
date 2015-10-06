@@ -19,6 +19,6 @@ public interface KaryonDsl<T> {
     T enableFeature(KaryonFeature feature);
     T disableFeature(KaryonFeature feature);
     T setPropertySource(PropertySource propertySource);
-    T using(KaryonDslModule suite) throws Exception;
+    T using(KaryonModule suite) throws Exception;
     PropertySource getPropertySource();
 }

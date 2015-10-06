@@ -15,6 +15,6 @@ package com.netflix.karyon;
  * @author elandau
  *
  */
-public interface KaryonDslModule {
-    void configure(KaryonDsl<?> builder) throws Exception;
+public interface KaryonModule {
+    void configure(Karyon karyon);
 }

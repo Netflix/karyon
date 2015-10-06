@@ -1,10 +1,11 @@
 package com.netflix.karyon;
 
 /**
- * Base interface for all governator features to be implemented by an 
+ * Base interface for all {@link Karyon} features to be implemented by an 
  * enum, such as {@link KaryonFeatures}.  Each feature has an implicit
- * default value if not specified.  Features are set on KaryonConfiguration.
+ * default value. 
  * 
+ * @see Karyon
  * @author elandau
  */
 public interface KaryonFeature {

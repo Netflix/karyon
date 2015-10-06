@@ -41,7 +41,7 @@ public class ServletContextListenerTest {
         @Override
         protected LifecycleInjector createInjector() throws Exception {
             return Karyon
-                .bootstrap()
+                .from()
                 .addModules(
                         new ServletModule() {
                             @Override

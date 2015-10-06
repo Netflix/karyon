@@ -1,8 +1,8 @@
 package com.netflix.karyon;
 
-public class DefaultKaryonSuite extends AbstractKaryonDslModule {
+public class DefaultKaryonModule extends AbstractKaryonModule {
     @Override
-    protected void configure() throws Exception {
+    protected void configure() {
         // TODO: This should probably not be added for ALL instances of KaryonBuilder.
         addAutoModuleListProvider(ModuleListProviders.forPackagesConditional("com.netflix.karyon"));
         addAutoModuleListProvider(ModuleListProviders.forPackagesConditional("com.google.inject.servlet"));

@@ -35,7 +35,7 @@ import com.netflix.karyon.conditional.ConditionalOnProfile;
  * <pre>
  * {@code
      Karyon
-        .bootstrap()
+        .create()
         .addModules(
              new JettyModule(),
              new JerseyServletModule() {
@@ -72,244 +72,286 @@ import com.netflix.karyon.conditional.ConditionalOnProfile;
  *
  * @param <T>
  */
-public class Karyon<T extends Karyon<T>> {
+public class Karyon {
     private static final String KARYON_PROFILES = "karyon.profiles";
     
-    public static abstract class Dsl<T extends Dsl<T>> implements KaryonDsl<T> {
-        protected PropertySource              propertySource    = new DefaultPropertySource();
-        protected Set<String>                 profiles          = new LinkedHashSet<>();
-        protected List<ModuleListProvider>    moduleProviders   = new ArrayList<>();
-        protected Map<KaryonFeature, Boolean> features          = new HashMap<>();
-        protected Stage                       stage             = Stage.DEVELOPMENT;
-        protected List<Module>                modules           = new ArrayList<>();
-        protected List<Module>                overrideModules   = new ArrayList<>();
+    protected PropertySource              propertySource    = DefaultPropertySource.INSTANCE;
+    protected Set<String>                 profiles          = new LinkedHashSet<>();
+    protected List<ModuleListProvider>    moduleProviders   = new ArrayList<>();
+    protected Map<KaryonFeature, Boolean> features          = new HashMap<>();
+    protected Stage                       stage             = Stage.DEVELOPMENT;
+    protected List<Module>                modules           = new ArrayList<>();
+    protected List<Module>                overrideModules   = new ArrayList<>();
 
-        /**
-         * Add main Guice modules to your application
-         * @param modules
-         * @return
-         */
-        public T addModules(Module ... modules) {
-            this.modules.addAll(Arrays.asList(modules));
-            return self();
-        }
-        
-        /**
-         * Add main Guice modules to your application
-         * @param modules
-         * @return
-         */
-        public T addModules(List<Module> modules) {
-            modules.addAll(modules);
-            return self();
-        }
-        
-        /**
-         * Add override modules for any modules add via addModules or that are 
-         * conditionally loaded.  This is useful for testing or when an application
-         * absolutely needs to override a binding to fix a binding problem in the
-         * code modules
-         * @param modules
-         * @return
-         */
-        public T addOverrideModules(Module ... modules) {
-            overrideModules.addAll(Arrays.asList(modules));
-            return self();
-        }
-        
-        /**
-         * Add override modules for any modules add via addModules or that are 
-         * conditionally loaded.  This is useful for testing or when an application
-         * absolutely needs to override a binding to fix a binding problem in the
-         * code modules
-         * @param modules
-         * @return
-         */
-        public T addOverrideModules(List<Module> modules) {
-            overrideModules.addAll(modules);
-            return self();
-        }
-
-        /**
-         * Specify the Guice stage in which the application is running.  By default Karyon
-         * runs in Stage.DEVELOPMENT to achieve default lazy singleton behavior. 
-         * @param stage
-         * @return
-         */
-        public T inStage(Stage stage) {
-            this.stage = stage;
-            return self();
-        }
-        
-        /**
-         * Add a module finder such as a ServiceLoaderModuleFinder or ClassPathScannerModuleFinder
-         * @param finder
-         * @return
-         */
-        public T addAutoModuleListProvider(ModuleListProvider finder) {
-            moduleProviders.add(finder);
-            return self();
-        }
-        
-        /**
-         * Add a runtime profile.  @see {@link ConditionalOnProfile}
-         * 
-         * @param profile
-         */
-        public T addProfile(String profile) {
-            if (profile != null) {
-                profiles.add(profile);
-            }
-            return self();
-        }
-
-        /**
-         * Add a runtime profiles.  @see {@link ConditionalOnProfile}
-         * 
-         * @param profile
-         */
-        public T addProfiles(String... profiles) {
-            if (profiles != null) {
-                this.profiles.addAll(Arrays.asList(profiles));
-            }
-            return self();
-        }
-        
-        /**
-         * Add a runtime profiles.  @see {@link ConditionalOnProfile}
-         * 
-         * @param profile
-         */
-        public T addProfiles(Collection<String> profiles) {
-            if (profiles != null) {
-                this.profiles.addAll(profiles);
-            }
-            return self();
-        }
-        
-        /**
-         * Enable the specified feature
-         * @param feature
-         */
-        public T enableFeature(KaryonFeature feature) {
-            if (feature != null) {
-                features.put(feature, true);
-            }
-            return self();
-        }
-
-        /**
-         * Disable the specified feature
-         * @param feature
-         */
-        public T disableFeature(KaryonFeature feature) {
-            if (feature != null) {
-                features.put(feature, false);
-            }
-            return self();
-        }
-        
-        public T setPropertySource(PropertySource propertySource) {
-            this.propertySource = propertySource;
-            return self();
-        }
-
-        public PropertySource getPropertySource() {
-            return this.propertySource;
-        }
-        
-        /**
-         * Call this anywhere in the process of manipulating the builder to apply a reusable
-         * sequence of calls to the builder 
-         * 
-         * @param suite
-         * @return The builder
-         * @throws Exception
-         */
-        public T using(KaryonDslModule suite) throws Exception {
-            suite.configure(this);
-            return self();
-        }
-        
-        /**
-         * Shortcut to creating the injector
-         * @return The builder
-         * @throws Exception
-         */
-        public LifecycleInjector start() throws Exception {
-            preCreate();
-            return LifecycleInjectorCreator.createInjector(new KaryonConfiguration() {
-                @Override
-                public List<Module> getModules() {
-                    return modules;
-                }
-
-                @Override
-                public List<Module> getOverrideModules() {
-                    return overrideModules;
-                }
-
-                @Override
-                public List<ModuleListProvider> getAutoModuleListProviders() {
-                    return moduleProviders;
-                }
-
-                @Override
-                public Set<String> getProfiles() {
-                    return profiles;
-                }
-
-                @Override
-                public PropertySource getPropertySource() {
-                    return propertySource;
-                }
-
-                @Override
-                public Stage getStage() {
-                    return stage;
-                }
-
-                @Override
-                public boolean isFeatureEnabled(KaryonFeature feature) {
-                    return Dsl.this.isFeatureEnabled(feature);
-                }
-            });
-        }
-        
-        protected void preCreate() throws Exception {
-            String karyonProfiles = getPropertySource().get(KARYON_PROFILES);
-            if (karyonProfiles != null) {
-                 addProfiles(karyonProfiles);
-            }
-            
-            if (isFeatureEnabled(KaryonFeatures.USE_DEFAULT_PACKAGES)) 
-                using(new DefaultKaryonSuite());
-        }
-        
-        boolean isFeatureEnabled(KaryonFeature feature) {
-            if (propertySource != null) {
-                Boolean value = propertySource.get(feature.getKey(), Boolean.class);
-                if (value != null && value == true) {
-                    return true;
-                }
-            }
-            Boolean value = features.get(feature);
-            return value == null
-                    ? feature.isEnabledByDefault()
-                    : value;
-        }
-        
-        abstract protected T self();
+    // This is a hack to make sure that if archaius is used at some point we make use
+    // of the bridge so any access to the legacy Archaius1 API is actually backed by 
+    // the Archaius2 implementation
+    static {
+        System.setProperty("archaius.default.configuration.class",      "com.netflix.archaius.bridge.StaticAbstractConfiguration");
+        System.setProperty("archaius.default.deploymentContext.class",  "com.netflix.archaius.bridge.StaticDeploymentContext");
     }
     
-    private static class BuilderWrapper extends Dsl<BuilderWrapper> {
-        @Override
-        protected BuilderWrapper self() {
-            return this;
+    /**
+     * Add main Guice modules to your application
+     * @param modules
+     * @return
+     */
+    public Karyon addModules(Module ... modules) {
+        if (modules != null) {
+            this.modules.addAll(Arrays.asList(modules));
         }
+        return this;
+    }
+    
+    /**
+     * Add main Guice modules to your application
+     * @param modules
+     * @return
+     */
+    public Karyon addModules(List<Module> modules) {
+        if (modules != null) {
+            this.modules.addAll(modules);
+        }
+        return this;
+    }
+    
+    /**
+     * Add override modules for any modules add via addModules or that are 
+     * conditionally loaded.  This is useful for testing or when an application
+     * absolutely needs to override a binding to fix a binding problem in the
+     * code modules
+     * @param modules
+     * @return
+     */
+    public Karyon addOverrideModules(Module ... modules) {
+        if (modules != null) {
+            this.overrideModules.addAll(Arrays.asList(modules));
+        }
+        return this;
+    }
+    
+    /**
+     * Add override modules for any modules add via addModules or that are 
+     * conditionally loaded.  This is useful for testing or when an application
+     * absolutely needs to override a binding to fix a binding problem in the
+     * code modules
+     * @param modules
+     * @return
+     */
+    public Karyon addOverrideModules(List<Module> modules) {
+        if (modules != null) {
+            this.overrideModules.addAll(modules);
+        }
+        return this;
     }
 
-    public static Dsl<?> bootstrap() {
-        return new BuilderWrapper();
+    /**
+     * Specify the Guice stage in which the application is running.  By default Karyon
+     * runs in Stage.DEVELOPMENT to achieve default lazy singleton behavior. 
+     * @param stage
+     * @return
+     */
+    public Karyon inStage(Stage stage) {
+        this.stage = stage;
+        return this;
+    }
+    
+    /**
+     * Add a module finder such as a ServiceLoaderModuleFinder or ClassPathScannerModuleFinder
+     * @param provider
+     * @return
+     */
+    public Karyon addAutoModuleListProvider(ModuleListProvider provider) {
+        if (provider != null) {
+            this.moduleProviders.add(provider);
+        }
+        return this;
+    }
+    
+    /**
+     * Add a runtime profile.  @see {@link ConditionalOnProfile}
+     * 
+     * @param profile
+     */
+    public Karyon addProfile(String profile) {
+        if (profile != null) {
+            this.profiles.add(profile);
+        }
+        return this;
+    }
+
+    /**
+     * Add a runtime profiles.  @see {@link ConditionalOnProfile}
+     * 
+     * @param profile
+     */
+    public Karyon addProfiles(String... profiles) {
+        if (profiles != null) {
+            this.profiles.addAll(Arrays.asList(profiles));
+        }
+        return this;
+    }
+    
+    /**
+     * Add a runtime profiles.  @see {@link ConditionalOnProfile}
+     * 
+     * @param profile
+     */
+    public Karyon addProfiles(Collection<String> profiles) {
+        if (profiles != null) {
+            this.profiles.addAll(profiles);
+        }
+        return this;
+    }
+    
+    /**
+     * Enable the specified feature
+     * @param feature
+     */
+    public Karyon enableFeature(KaryonFeature feature) {
+        return enableFeature(feature, true);
+    }
+    
+    /**
+     * Enable or disable the specified feature
+     * @param feature
+     */
+    public Karyon enableFeature(KaryonFeature feature, boolean enabled) {
+        if (feature != null) {
+            this.features.put(feature, enabled);
+        }
+        return this;
+    }
+
+    /**
+     * Disable the specified feature
+     * @param feature
+     */
+    public Karyon disableFeature(KaryonFeature feature) {
+        return enableFeature(feature, false);
+    }
+    
+    public Karyon setPropertySource(PropertySource propertySource) {
+        this.propertySource = propertySource;
+        return this;
+    }
+
+    public PropertySource getPropertySource() {
+        return this.propertySource;
+    }
+    
+    /**
+     * Call this anywhere in the process of manipulating the builder to apply a reusable
+     * sequence of calls to the builder 
+     * 
+     * @param module
+     * @return The builder
+     * @throws Exception
+     */
+    public Karyon apply(KaryonModule module) {
+        module.configure(this);
+        return this;
+    }
+    
+    /**
+     * 
+     */
+    public LifecycleInjector start() {
+        return start(null);
+    }
+    
+    /**
+     * Shortcut to creating the injector
+     * @return The builder
+     * @throws Exception
+     */
+    public LifecycleInjector start(String[] args) {
+        if (this.getPropertySource().equals(DefaultPropertySource.INSTANCE) && isFeatureEnabled(KaryonFeatures.USE_ARCHAIUS)) { 
+            try {
+                apply((KaryonModule) Class.forName("com.netflix.karyon.archaius.ArchaiusKaryonModule").newInstance());
+            }
+            catch (ClassNotFoundException e) {
+                throw new RuntimeException("Unable to bootstrap using archaius. Either add a dependency on 'com.netflix.karyon:karyon3-archaius2' or disable the feature KaryonFeatures.USE_ARCHAIUS");
+            } 
+            catch (InstantiationException | IllegalAccessException e) {
+                throw new RuntimeException("Unable to bootstrap using archaius");
+            }
+        }
+        
+        String karyonProfiles = getPropertySource().get(KARYON_PROFILES);
+        if (karyonProfiles != null) {
+             addProfiles(karyonProfiles);
+        }
+        
+        if (isFeatureEnabled(KaryonFeatures.USE_DEFAULT_KARYON_MODULE)) 
+            apply(new DefaultKaryonModule());
+        
+        return LifecycleInjectorCreator.createInjector(new KaryonConfiguration() {
+            @Override
+            public List<Module> getModules() {
+                return modules;
+            }
+
+            @Override
+            public List<Module> getOverrideModules() {
+                return overrideModules;
+            }
+
+            @Override
+            public List<ModuleListProvider> getAutoModuleListProviders() {
+                return moduleProviders;
+            }
+
+            @Override
+            public Set<String> getProfiles() {
+                return profiles;
+            }
+
+            @Override
+            public PropertySource getPropertySource() {
+                return propertySource;
+            }
+
+            @Override
+            public Stage getStage() {
+                return stage;
+            }
+
+            @Override
+            public boolean isFeatureEnabled(KaryonFeature feature) {
+                return Karyon.this.isFeatureEnabled(feature);
+            }
+        });
+    }
+
+    private boolean isFeatureEnabled(KaryonFeature feature) {
+        if (propertySource != null) {
+            Boolean value = propertySource.get(feature.getKey(), Boolean.class);
+            if (value != null && value == true) {
+                return true;
+            }
+        }
+        Boolean value = features.get(feature);
+        return value == null
+                ? feature.isEnabledByDefault()
+                : value;
+    }
+    
+    public static Karyon create() {
+        return new Karyon();
+    }
+    
+    public static Karyon create(Module ... modules) {
+        return new Karyon().addModules(modules);
+    }
+    
+    public static Karyon from(KaryonModule ... modules) {
+        Karyon karyon = new Karyon();
+        if (modules != null) {
+            for (KaryonModule module : modules) {
+                karyon.apply(module);
+            }
+        }
+        return karyon;
     }
 }

@@ -1,6 +1,7 @@
 package com.netflix.karyon;
 
 import java.util.List;
+import java.util.Set;
 
 import com.google.inject.spi.Element;
 
@@ -35,4 +36,6 @@ public interface KaryonAutoContext {
      * @return
      */
     List<Element> getElements();
+
+    Set<String> getProfiles();
 }

@@ -52,8 +52,39 @@ class LifecycleInjectorCreator {
         
         // Construct the injector using our override structure
         try {
+            final List<Element> elements    = Elements.getElements(Stage.DEVELOPMENT, config.getModules());
+            final Set<Key<?>>   keys        = ElementsEx.getAllInjectionKeys(elements);
+            final List<String>  moduleNames = ElementsEx.getAllSourceModules(elements);
+            
+            final KaryonAutoContext context = new KaryonAutoContext() {
+                @Override
+                public boolean hasModule(String className) {
+                    return moduleNames.contains(className);
+                }
+
+                @Override
+                public boolean hasProfile(String profile) {
+                    return config.getProfiles().contains(profile);
+                }
+
+                @Override
+                public <T> boolean hasBinding(Class<T> type) {
+                    return keys.contains(Key.get(type));
+                }
+                
+                @Override
+                public List<Element> getElements() {
+                    return elements;
+                }
+
+                @Override
+                public Set<String> getProfiles() {
+                    return config.getProfiles();
+                }
+            };
+            
             Module coreModule = Modules.override(
-                    createAutoModule(LOG, config, candidateModules, config.getModules()))
+                    createAutoModule(LOG, context, config, candidateModules, config.getModules()))
                    .with(config.getOverrideModules());
             
             for (Element binding : Elements.getElements(coreModule)) {
@@ -71,6 +102,7 @@ class LifecycleInjectorCreator {
                             bind(LifecycleManager.class).toInstance(manager);
                             bind(KaryonConfiguration.class).toInstance(config);
                             bind(PropertySource.class).toInstance(config.getPropertySource());
+                            bind(KaryonAutoContext.class).toInstance(context);
                         }
                     },
                     coreModule
@@ -93,34 +125,9 @@ class LifecycleInjectorCreator {
         }
     }
     
-    private static Module createAutoModule(final Logger LOG, final KaryonConfiguration config, final Set<Module> candidateModules, final List<Module> coreModules) throws Exception {
+    private static Module createAutoModule(final Logger LOG, final KaryonAutoContext context, final KaryonConfiguration config, final Set<Module> candidateModules, final List<Module> coreModules) throws Exception {
         LOG.info("Creating {} injector");
-        final List<Element> elements    = Elements.getElements(Stage.DEVELOPMENT, coreModules);
-        final Set<Key<?>>   keys        = ElementsEx.getAllInjectionKeys(elements);
-        final List<String>  moduleNames = ElementsEx.getAllSourceModules(elements);
-        
-        final KaryonAutoContext context = new KaryonAutoContext() {
-            @Override
-            public boolean hasModule(String className) {
-                return moduleNames.contains(className);
-            }
 
-            @Override
-            public boolean hasProfile(String profile) {
-                return config.getProfiles().contains(profile);
-            }
-
-            @Override
-            public <T> boolean hasBinding(Class<T> type) {
-                return keys.contains(Key.get(type));
-            }
-            
-            @Override
-            public List<Element> getElements() {
-                return elements;
-            }
-        };
-        
         // Temporary injector to used to construct the condition checks
         final Injector injector = Guice.createInjector(config.getStage(), 
             new AbstractModule() {
