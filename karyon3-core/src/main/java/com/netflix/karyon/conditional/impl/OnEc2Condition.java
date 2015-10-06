@@ -1,19 +1,20 @@
-package com.netflix.karyon.conditional;
+package com.netflix.karyon.conditional.impl;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import com.netflix.governator.GovernatorConfiguration;
-import com.netflix.governator.auto.Condition;
-import com.netflix.governator.auto.PropertySource;
+import com.netflix.karyon.KaryonConfiguration;
+import com.netflix.karyon.PropertySource;
+import com.netflix.karyon.conditional.Condition;
+import com.netflix.karyon.conditional.ConditionalOnEc2;
 
 @Singleton
 public class OnEc2Condition implements Condition<ConditionalOnEc2> {
     private final PropertySource source;
-    private final GovernatorConfiguration config;
+    private final KaryonConfiguration config;
 
     @Inject
-    public OnEc2Condition(PropertySource source, GovernatorConfiguration config) {
+    public OnEc2Condition(PropertySource source, KaryonConfiguration config) {
         this.source = source;
         this.config = config;
     }

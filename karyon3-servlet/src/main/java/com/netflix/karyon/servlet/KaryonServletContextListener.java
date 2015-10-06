@@ -22,17 +22,20 @@ public class StartServer extends KaryonServletContextListener
 {
     {@literal @}Override
     protected LifecycleInjector createInjector() {
-        return Governator.createInjector(
-            new JerseyServletModule() {
-                {@literal @}Override
-                protected void configureServlets() {
-                    serve("/REST/*").with(GuiceContainer.class);
-                    binder().bind(GuiceContainer.class).asEagerSingleton();
-                    
-                    bind(MyResource.class).asEagerSingleton();
+        Karyon
+            .bootstrap()
+            .addModules(
+                new JerseyServletModule() {
+                    {@literal @}Override
+                    protected void configureServlets() {
+                        serve("/REST/*").with(GuiceContainer.class);
+                        binder().bind(GuiceContainer.class).asEagerSingleton();
+                        
+                        bind(MyResource.class).asEagerSingleton();
+                    }
                 }
-            }
-        );
+            )
+            .start();
     }
 }
  * </code>

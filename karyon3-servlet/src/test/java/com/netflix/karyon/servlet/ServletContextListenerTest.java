@@ -40,7 +40,8 @@ public class ServletContextListenerTest {
     public static class TestServletContextListener extends KaryonServletContextListener {
         @Override
         protected LifecycleInjector createInjector() throws Exception {
-            return Karyon.builder()
+            return Karyon
+                .bootstrap()
                 .addModules(
                         new ServletModule() {
                             @Override

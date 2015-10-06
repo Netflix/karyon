@@ -3,11 +3,9 @@ package com.netflix.karyon.example.rxnetty;
 import javax.inject.Singleton;
 
 import com.google.inject.AbstractModule;
-import com.netflix.archaius.guice.ArchaiusModule;
-import com.netflix.karyon.Karyon;
 import com.netflix.karyon.admin.rest.AdminServerModule;
 import com.netflix.karyon.admin.ui.AdminUIServerModule;
-import com.netflix.karyon.archaius.ArchaiusKaryonSuite;
+import com.netflix.karyon.archaius.ArchaiusKaryon;
 import com.netflix.karyon.example.jetty.FooServiceHealthIndicator;
 import com.netflix.karyon.health.HealthIndicator;
 import com.netflix.karyon.rxnetty.server.RxNettyServerModule;
@@ -16,14 +14,11 @@ import com.netflix.karyon.rxnetty.shutdown.ShutdownServerModule;
 @Singleton
 public class RxNettyHelloWorldApp {
     public static void main(String[] args) throws Exception {
-        Karyon.builder()
-            .using(ArchaiusKaryonSuite.builder()
-                .withConfigName("rxnetty-helloworld")
-                .build()
-            )
+        ArchaiusKaryon
+            .bootstrap()
+            .withConfigName("rxnetty-helloworld")
             .addProfile("local")
             .addModules(
-                new ArchaiusModule(),
                 new AdminServerModule(),
                 new AdminUIServerModule(),
                 // These bindings will go on the 'default' server
@@ -49,7 +44,8 @@ public class RxNettyHelloWorldApp {
                     }
                 }
             )
-            .startAndAwaitTermination();
+            .start()
+            .awaitTermination();
         
     }
 }

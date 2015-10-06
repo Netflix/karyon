@@ -9,13 +9,12 @@ import org.slf4j.LoggerFactory;
 import com.netflix.archaius.config.MapConfig;
 import com.netflix.archaius.guice.ArchaiusModule;
 import com.netflix.governator.DefaultLifecycleListener;
-import com.netflix.governator.GovernatorFeatures;
 import com.netflix.governator.ProvisionDebugModule;
 import com.netflix.governator.guice.jetty.JettyModule;
-import com.netflix.karyon.Karyon;
+import com.netflix.karyon.KaryonFeatures;
 import com.netflix.karyon.admin.rest.AdminServerModule;
 import com.netflix.karyon.admin.ui.AdminUIServerModule;
-import com.netflix.karyon.archaius.ArchaiusKaryonSuite;
+import com.netflix.karyon.archaius.ArchaiusKaryon;
 import com.netflix.karyon.health.HealthIndicator;
 import com.netflix.karyon.log4j.ArchaiusLog4J2ConfigurationModule;
 import com.netflix.karyon.rxnetty.shutdown.ShutdownServerModule;
@@ -27,15 +26,12 @@ public class HelloWorldApp extends DefaultLifecycleListener {
     private static final Logger LOG = LoggerFactory.getLogger(HelloWorldApp.class);
     
     public static void main(String[] args) throws Exception {
-        Karyon.builder()
-            .using(ArchaiusKaryonSuite.builder()
-                .withConfigName("helloworld")
-                .withApplicationOverrides(MapConfig.builder()
-                    .put("@appId", "Hello World!")
-                    .build()
-                    )
+        ArchaiusKaryon.bootstrap()
+            .withConfigName("helloworld")
+            .withApplicationOverrides(MapConfig.builder()
+                .put("@appId", "Hello World!")
                 .build()
-            )
+                )
             .addProfile("local")
             .addModules(
                 new ArchaiusLog4J2ConfigurationModule(),
@@ -48,7 +44,7 @@ public class HelloWorldApp extends DefaultLifecycleListener {
                 new JerseyServletModule() {
                     @Override
                     protected void configureServlets() {
-                        serve("/*").with(GuiceContainer.class);
+                        serve("/REST/*").with(GuiceContainer.class);
                         bind(GuiceContainer.class).asEagerSingleton();
                         bind(ArchaiusEndpoint.class).asEagerSingleton();
                         bind(HelloWorldApp.class).asEagerSingleton();
@@ -61,9 +57,11 @@ public class HelloWorldApp extends DefaultLifecycleListener {
                     public String toString() {
                         return "JerseyServletModule";
                     }
-                })
-            .disable(GovernatorFeatures.SHUTDOWN_ON_ERROR)
-            .startAndAwaitTermination();
+                }
+            )
+            .disableFeature(KaryonFeatures.SHUTDOWN_ON_ERROR)
+            .start()
+            .awaitTermination();
     }
     
     @GET

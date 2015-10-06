@@ -6,7 +6,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import com.netflix.governator.auto.annotations.Conditional;
+import com.netflix.karyon.conditional.impl.OnEc2Condition;
 
 @Target({ ElementType.TYPE })
 @Retention(RetentionPolicy.RUNTIME)

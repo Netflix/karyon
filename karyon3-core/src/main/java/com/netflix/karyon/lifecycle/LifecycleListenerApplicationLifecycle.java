@@ -45,8 +45,8 @@ public class LifecycleListenerApplicationLifecycle extends ManualApplicationLife
         if (injectorState.equals(LifecycleState.Stopped) || baseState.equals(LifecycleState.Stopped)) {
             return LifecycleState.Stopped;
         }
-        if (injectorState.equals(LifecycleState.Stopped) || baseState.equals(LifecycleState.Stopped)) {
-            return LifecycleState.Stopped;
+        if (injectorState.equals(LifecycleState.Stopping) || baseState.equals(LifecycleState.Stopping)) {
+            return LifecycleState.Stopping;
         }
         if (injectorState.equals(LifecycleState.Starting) || baseState.equals(LifecycleState.Starting)) {
             return LifecycleState.Starting;
