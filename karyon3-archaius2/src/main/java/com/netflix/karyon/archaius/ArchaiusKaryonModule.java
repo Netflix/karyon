@@ -37,10 +37,6 @@ import com.netflix.karyon.ServerContext;
  * Entry point for applications using Archaius as the configuration mechanism.  This
  * DSL provided here extends the core Karyon.Dsl with method specific to customizing
  * archaius
- * 
- * @author elandau
- *
- * @param <ArchaiusKaryonModule>
  */
 public class ArchaiusKaryonModule extends AbstractKaryonModule {
     private static final String DEFAULT_CONFIG_NAME     = "application";

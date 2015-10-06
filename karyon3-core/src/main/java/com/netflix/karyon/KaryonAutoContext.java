@@ -5,12 +5,8 @@ import java.util.Set;
 
 import com.google.inject.spi.Element;
 
-
 /**
  * Context for the auto module to provide context to any Condition
- * 
- * @author elandau
- *
  */
 public interface KaryonAutoContext {  
     /**
@@ -26,7 +22,7 @@ public interface KaryonAutoContext {
     boolean hasProfile(String profile);
      
     /**
-     * @param key
+     * @param type
      * @return Return true if a binding exists for a key
      */
     <T> boolean hasBinding(Class<T> type);

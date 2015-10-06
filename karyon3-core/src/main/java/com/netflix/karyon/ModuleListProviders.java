@@ -8,9 +8,6 @@ import com.google.inject.Module;
 /**
  * Utility class with convenience methods for creating various standard
  * {@link ModuleListProvider} implementations.
- * 
- * @author elandau
- *
  */
 public class ModuleListProviders {
     /**
@@ -40,7 +37,7 @@ public class ModuleListProviders {
      * Provider that will use Guava's ClassPath scanner to scan the provided 
      * packages.
      * 
-     * @param modules
+     * @param packages
      * @return
      */
     public static ModuleListProvider forPackages(final String... packages) {
@@ -55,7 +52,7 @@ public class ModuleListProviders {
      * Provider that will use Guava's ClassPath scanner to scan the provided 
      * packages.
      * 
-     * @param modules
+     * @param packages
      * @return
      */
     public static ModuleListProvider forPackages(final List<String> packages) {
@@ -69,7 +66,6 @@ public class ModuleListProviders {
     /**
      * Provider using the ServiceLoader for class Module
      * 
-     * @param modules
      * @return
      */
     public static ModuleListProvider forServiceLoader() {
@@ -79,7 +75,7 @@ public class ModuleListProviders {
     /**
      * Provider using the ServiceLoader for class Module
      * 
-     * @param modules
+     * @param type
      * @return
      */
     public static ModuleListProvider forServiceLoader(Class<? extends Module> type) {

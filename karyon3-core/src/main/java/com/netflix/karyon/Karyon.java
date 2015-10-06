@@ -30,16 +30,15 @@ import com.netflix.karyon.conditional.ConditionalOnProfile;
  * Guice modules should be installed based on processing of conditional annotations.  The final
  * list of auto discovered modules is appended to the main list of modules and installed on the
  * main injector.  Application level override modules may be applied to this final list from the
- * list of modules returned from {@link KaryonConfiguration.getOverrideModules()}.
+ * list of modules returned from {@link KaryonConfiguration#getOverrideModules()}.
  * 
- * <pre>
- * {@code
+ * <code>
      Karyon
         .create()
         .addModules(
              new JettyModule(),
              new JerseyServletModule() {
-                @Override
+                {@literal @}@Override
                 protected void configureServlets() {
                     serve("/*").with(GuiceContainer.class);
                     bind(GuiceContainer.class).asEagerSingleton();
@@ -50,11 +49,7 @@ import com.netflix.karyon.conditional.ConditionalOnProfile;
         )
         .start()
         .awaitTermination();
- * }
- * </pre>
- * 
- * @param config
- * @param modules
+ * </code>
  * 
  *      +-------------------+
  *      |      Override     |
@@ -65,12 +60,6 @@ import com.netflix.karyon.conditional.ConditionalOnProfile;
  *      +-------------------+
  *      | Bootstrap Exposed |
  *      +-------------------+
- *      
- * @see ArchaiusKaryon
- * 
- * @author elandau
- *
- * @param <T>
  */
 public class Karyon {
     private static final String KARYON_PROFILES = "karyon.profiles";
@@ -183,7 +172,7 @@ public class Karyon {
     /**
      * Add a runtime profiles.  @see {@link ConditionalOnProfile}
      * 
-     * @param profile
+     * @param profiles
      */
     public Karyon addProfiles(String... profiles) {
         if (profiles != null) {
@@ -195,7 +184,7 @@ public class Karyon {
     /**
      * Add a runtime profiles.  @see {@link ConditionalOnProfile}
      * 
-     * @param profile
+     * @param profiles
      */
     public Karyon addProfiles(Collection<String> profiles) {
         if (profiles != null) {
@@ -246,7 +235,6 @@ public class Karyon {
      * 
      * @param module
      * @return The builder
-     * @throws Exception
      */
     public Karyon apply(KaryonModule module) {
         module.configure(this);
@@ -263,7 +251,6 @@ public class Karyon {
     /**
      * Shortcut to creating the injector
      * @return The builder
-     * @throws Exception
      */
     public LifecycleInjector start(String[] args) {
         if (this.getPropertySource().equals(DefaultPropertySource.INSTANCE) && isFeatureEnabled(KaryonFeatures.USE_ARCHAIUS)) { 

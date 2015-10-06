@@ -9,9 +9,6 @@ import com.netflix.governator.GovernatorFeatures;
 
 /**
  * Configuration contract needed to bootstrap a Governator based application.
- * 
- * @author elandau
- *
  */
 public interface KaryonConfiguration {
     /**
@@ -49,7 +46,7 @@ public interface KaryonConfiguration {
     
     /**
      * Return the Guice injector stage.  The recommended default is Stage.DEVELOPMENT
-     * otherwise all singletons are eager, including lazy injection using Provider<T> 
+     * otherwise all singletons are eager, including lazy injection using Provider
      */
     Stage getStage();
     
