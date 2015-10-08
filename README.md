@@ -1,6 +1,6 @@
 Karyon3
 ---------
-Karyon3 is a integration framework focused on bootstrapping JVM application using netflix OSS such as Governator, Archaius, Eureka and RxNetty.  Karyon3 makes use of dependency injection (specifically using Google Guice) with Goveranator's context based conditional module loading to transparently load bindings and configurations for the environment in which the application is running.  Karyon3 is broken up into sub-projects on functional and dependency boundaries to reduce pulling in excessive dependencies.  
+Karyon3 is a integration framework focused on bootstrapping JVM application using netflix OSS such as Governator, Archaius, Eureka and RxNetty.  Karyon3 makes use of dependency injection (specifically using Google Guice) with additional support for context based conditional module loading to transparently load bindings and configurations for the environment in which the application is running.  Karyon3 is broken up into sub-projects on functional and dependency boundaries to reduce pulling in excessive dependencies.  
 
 Core features
 - Minimize dependencies
@@ -14,14 +14,14 @@ Note that Karyon3 is meant to be container agnostic and can run inside Tomcat, s
 ----------
 Getting Started
 -------------------
-Karyon is currently available as a snapshot via jfrog.
+Karyon is currently available as a release candidate
 
 ```java
-repositories {
-    maven { url 'http://oss.jfrog.org/oss-snapshot-local' }
-}
-compile "com.netflix.karyon:karyon3-core:3.0.1-SNAPSHOT'
+compile "com.netflix.karyon:karyon3-core:{karyon-version}'
 ```
+
+Please set karyon-version to the latest 3.0.1-rc.+ available on maven central
+
 
 ----------
 Main
@@ -31,48 +31,44 @@ A Karyon3 based main should normally consist of a simple block of code to create
 ```java
 public class HelloWorld {
     public static void main(String[] args) {
-        Karyon.createInjector(
-            // Default archaius based karyon configuration
-            ArchaiusKaryonConfiguration.builder()
-                .addModules(
-	                // Add any guice module
-	                new ApplicationModule())
-                )
-                .build())
-	        // Block until the application terminates
-           .awaitTermination();
+        Karyon.create()
+              .addModules(
+	          // Add any guice module
+	           new ApplicationModule())
+              )
+              .start())
+	      // Block until the application terminates
+              .awaitTermination();
     }
 }
 ```
 ----------
 Running in Tomcat
 -----------------------
-To run in tomcat simply extend Governator's GovernatorServletContextListener and create the injector just as you would a standalone application.
+To run in tomcat simply extend Karyon's KaryonServletContextListener and create the injector just as you would a standalone application.
 
-First, add a dependency on governator-servlet (TODO: Make this a karyon sub-project)
+First, add a dependency on karyon-servlet
 
 ```gradle
-compile "com.netflix.governator:governator-servlet:1.10.0"
+compile "com.netflix.karyon:karyon3-servlet:{karyon-version}"
 ```
 
 Next, write your ContextListener
 ```java
 package com.example;
 
-public class MyContextListener extends GovernatorServletContextListener {
+public class MyContextListener extends KaryonServletContextListener {
     @Override
     protected Injector createInjector() {
-        return Karyon.createInjector(
-                ArchaiusKaryonConfiguration.builder()
+        return Karyon
+                .create()
                 .addModules(
-                    new EurekaModule(),
-                    new ArchaiusModule(),
                     new ServletModule() {
                         ...
                     }
                     // ... more modules
                 )
-                .build()
+                .start()
         ));
     }
 ```
@@ -104,16 +100,13 @@ Running with Jetty
 ```java
 public class HelloWorld {
     public static void main(String[] args) {
-        Karyon.createInjector(
-            // Default archaius based karyon configuration
-            ArchaiusKaryonConfiguration.builder()
-            .addModules(
-                // Add any guice module
-                new ApplicationModule(),
-                new JettyModule()
-            )
-            .build()
-            )
+        Karyon.create()
+           .addModules(
+               // Add any guice module
+               new ApplicationModule(),
+               new JettyModule()
+           )
+            .start()
            // Block until the application terminates
            .awaitTermination();
     }
@@ -123,17 +116,15 @@ public class HelloWorld {
 ----------
 Conditional module loading
 ----------------------------------
-Karyon makes use of Governator's conditional module loading to auto install Guice modules based on the application runtime environment.  Conditionals can depend on property values, modules having been installed, bindings, etc.  An example use case would be to set the appropriate bindings for running Eureka locally as opposed to running in the cloud without requiring the developer to know which specific bindings to override.  For conditional bindings to work all the jars must be in the classpath and the modules made known to Karyon/Governator via a ModuleListProvider (such as ClassPathModuleListProvider, ServiceLoaderModuleListProvider, etc...).  By default karyon will include any modules under the 'com.netflix.karyon' package.
+Karyon supports conditional module loading to auto install Guice modules based on the application runtime environment.  Conditionals can depend on property values, modules having been installed, bindings, etc.  An example use case would be to set the appropriate bindings for running Eureka locally as opposed to running in the cloud without requiring the developer to know which specific bindings to override.  For conditional bindings to work all the jars must be in the classpath and the modules made known to Karyonvia a ModuleListProvider (such as ClassPathModuleListProvider, ServiceLoaderModuleListProvider, etc...).  By default karyon will include any modules under the 'com.netflix.karyon' package.
 
 ```java
-Karyon.createInjector(
-    ArchaiusKaryonConfiguration.builder()
-        .addModuleListProvider(ModuleListProvides.forPackage("org.example")
-        .build()
-    );
+Karyon.create()
+      .addModuleListProvider(ModuleListProvides.forPackage("org.example")
+      .start()
 ```
 
-In addition to the conditionals built in to Governator Karyon offers two key conditionals, ConditionalOnLocalDev and ConditionalOnEc2 that can be used to load specific modules (i.e. bindings) for local development and unit tests or when running in an EC2 environment.  
+In addition to the conditionals built in to Karyon offers two key conditionals, ConditionalOnLocalDev and ConditionalOnEc2 that can be used to load specific modules (i.e. bindings) for local development and unit tests or when running in an EC2 environment.  
 
 For example,
 ```java
@@ -290,7 +281,7 @@ Health check
 Instance health is an important aspect of any cloud ready application.  It is used for service discovery as well as bad instance termination.  Through Karyon's HealthCheck API an application can expose a REST endpoint for external monitoring to ping for health status or integrate with Eureka for service discovery registration based on instance health state.  An instance can be in one of 4 lifecycle states: Starting, Running, Stopping and Stopped.  HealthCheck state varies slightly in that it combines these application lifecycle states with the instance health to provide the following states: Starting, Healthy, Unhealthy or OutOfService.   
 
 * Starting - the application is healthy but not done bootstrapping
-* Healthy - the application finished boostrapping and is functioning propertly
+* Healthy - the application finished bootstrapping and is functioning properly
 * Unhealthy - the application either failed bootstrapping or is not functioning properly
 * OutOfService - the application has been shut down
 
@@ -358,18 +349,17 @@ Eureka Integration
 First, add the following dependency 
 
 ```gradle
-compile 'com.netflix.karyon:karyon3-eureka:3.0.1-SNAPSHOT'
+compile 'com.netflix.karyon:karyon3-eureka:{karyon_version}'
 ```
 
 Next add the EurekaModule from OSS eureka-client
 
 ```gradle
-Karyon.createInjector(
-    ArchaiusKaryonConfiguration.builder()
-       .addModule(
-          new EurekaModule()
-       )
-       .build()
+Karyon.create()
+      .addModule(
+         new EurekaModule()
+      )
+      .start()
        ...
 ```
 
@@ -384,24 +374,22 @@ Karyon3 doesn't offer any specific Jersey integration other the then existing Je
 
 First, add the following dependency 
 ```gradle
-compile 'com.sun.jersey.contribs:jersey-guice:1.18.1'
+compile 'com.sun.jersey.contribs:jersey-guice:1.19'
 ```
 
 Then simply add a JerseyServletModule implementation to the list of modules passed to Karyon
 ```java
-Karyon.createInjector(
-    ArchaiusKaryonConfiguration.builder()
-        .addModules(
-		    new JerseyServletModule() {
-		        @Override
-		        protected void configureServlets() {
-		            serve("/*").with(GuiceContainer.class);
-		            bind(GuiceContainer.class).asEagerSingleton();
-		            bind(SomeJerseyClass.class).asEagerSingleton();
-		        }
-		    })
-		.build()
-	 );
+Karyon.create()
+      .addModules(
+          new JerseyServletModule() {
+              @Override
+              protected void configureServlets() {
+                  serve("/*").with(GuiceContainer.class);
+                  bind(GuiceContainer.class).asEagerSingleton();
+                  bind(SomeJerseyClass.class).asEagerSingleton();
+              }
+          })
+      .start();
 ```
 
 ----------
@@ -413,23 +401,20 @@ Karyon provides a mechanism to define and configure multiple RxNetty servers wit
 
 To add RxNetty support
 ```gradle
-compile 'com.netflix.karyon:karyon3-rxnetty:3.0.1-SNAPSHOT'
+compile 'com.netflix.karyon:karyon3-rxnetty:{karyon_version}'
 ```
 
 To specify basic URL routes for an RxNetty Server
 ```gradle
-Karyon.createInjector(
-    ArchaiusKaryonConfiguration.builder()
+Karyon.create()
     .addModules(
-	    new RxNettyServerModule() {
-	        @Override
-	        protected void configureEndpoints() {
-	            serve("/hello").with(HelloWorldRequestHandler.class);
-	        }
-	    }
-	)
-	.build()
-    ...
+        new RxNettyServerModule() {
+            @Override
+            protected void configureEndpoints() {
+                serve("/hello").with(HelloWorldRequestHandler.class);
+            }
+        }
+     ).start()
 ```
 
 HelloWorldRequestHandler is a standard RxNetty request handler
@@ -456,15 +441,15 @@ karyon.httpserver.serverPort=7001
 Qualified RxNetty servers makes it possible to expose services (such as admin) over other ports.
 
 ```gradle
-Karyon.createInjector(
-    ArchaiusKaryonConfiguration.builder()
+Karyon
+    .create()
     .addModules(
-	    new RxNettyServerModule() {
-	        @Override
-	        protected void configureEndpoints() {
-	            serve(FooServer.class, "/foo").with(FooRequestHandler.class);
-	        }
-	    },
+         new RxNettyServerModule() {
+             @Override
+                 protected void configureEndpoints() {
+                 serve(FooServer.class, "/foo").with(FooRequestHandler.class);
+             }
+         },
     ...
 ```
 
@@ -496,4 +481,30 @@ TODO
 
 Testing
 ----------
-TODO
+
+To add JUnit support
+```gradle
+compile 'com.netflix.karyon:karyon3-junit:{karyon_version}'
+```
+
+Use KaryonRule to simplify testing and provide auto injector shutdown after the unit test completes.  For example,
+
+```java
+public class MyUnitTest {
+    {@literal @}Rule
+    public KaryonRule karyon = new KaryonRule(this);
+     
+    {@literal @}Inject
+    SomeClassBeingTested obj;
+     
+    {@literal @}Test
+    public void someTest() {
+        // Configuration the KaryonRule just like you would Karyon
+        karyon.addModules(someModules).start();
+        
+        // Once start is called field's of MyUnitTest will have been injected
+        Assert.assertTrue(obj.someTestCondition());
+    }
+}
+```
+
