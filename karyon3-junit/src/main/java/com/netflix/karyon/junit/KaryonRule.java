@@ -17,17 +17,17 @@ import com.netflix.karyon.KaryonModule;
  * that is created and ensure that it is shut down at the end of the test.  Also, any
  * fields of the unit test class passed to KaryonRule are injectable.  
  * 
- * <h3> Usage
+ * <h3>Usage</h3>
  * 
  * <code>
  public class MyUnitTest {
-     @Rule
+     {@literal @}Rule
      public KaryonRule karyon = new KaryonRule(this);
      
-     @Test
+     {@literal @}Test
      public void someTest() {
          // Configuration the KaryonRule just like you would Karyon
-         Injector injector = karyon.addModules(...).start();
+         Injector injector = karyon.addModules(someModules).start();
          
          // Get classes from the injector and assert on conditions
          SomeClassBeingTested obj = injector.getInstance(SomeClassBeingTested.class);
@@ -37,20 +37,20 @@ import com.netflix.karyon.KaryonModule;
  
  * </code>
  * 
- * <h3> Injecting into the test class
+ * <h3>Injecting into the test class</h3>
  * 
  * <code>
  public class MyUnitTest {
-     @Rule
+     {@literal @}Rule
      public KaryonRule karyon = new KaryonRule(this);
      
-     @Inject
+     {@literal @}Inject
      SomeClassBeingTested obj;
      
-     @Test
+     {@literal @}Test
      public void someTest() {
          // Configuration the KaryonRule just like you would Karyon
-         Injector injector = karyon.addModules(...).start();
+         Injector injector = karyon.addModules(someModules).start();
          
          // Once start is called field's of MyUnitTest will have been injected
          Assert.assertTrue(obj.someTestCondition());
