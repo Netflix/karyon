@@ -258,7 +258,7 @@ public class Karyon {
                 apply((KaryonModule) Class.forName("com.netflix.karyon.archaius.ArchaiusKaryonModule").newInstance());
             }
             catch (ClassNotFoundException e) {
-                throw new RuntimeException("Unable to bootstrap using archaius. Either add a dependency on 'com.netflix.karyon:karyon3-archaius2' or disable the feature KaryonFeatures.USE_ARCHAIUS");
+                System.err.println("Unable to bootstrap using archaius. Either add a dependency on 'com.netflix.karyon:karyon3-archaius2' or disable the feature KaryonFeatures.USE_ARCHAIUS");
             } 
             catch (InstantiationException | IllegalAccessException e) {
                 throw new RuntimeException("Unable to bootstrap using archaius");
