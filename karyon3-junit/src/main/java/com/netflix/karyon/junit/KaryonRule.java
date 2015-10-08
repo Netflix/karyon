@@ -125,6 +125,7 @@ public class KaryonRule extends Karyon implements TestRule {
                         TrackingLifecycleListener listener = new TrackingLifecycleListener();
                         injector.addListener(listener);
                         injector.shutdown();
+                        injector.awaitTermination();
                         
                         Assert.assertTrue(listener.stopped);
                     }
