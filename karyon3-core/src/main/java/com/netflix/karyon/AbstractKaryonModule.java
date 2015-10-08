@@ -13,8 +13,12 @@ public abstract class AbstractKaryonModule implements KaryonModule {
     @Override
     final public void configure(Karyon karyon) {
         this.karyon = karyon;
-        configure();
-        this.karyon = null;
+        try {
+            configure();
+        }
+        finally {
+            this.karyon = null;
+        }
     }
     
     protected abstract void configure();

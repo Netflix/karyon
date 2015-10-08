@@ -5,8 +5,8 @@ import java.util.Map;
 import javax.inject.Singleton;
 
 import com.google.inject.Provides;
-import com.netflix.karyon.admin.rest.ResourceContainer;
 import com.netflix.karyon.admin.rest.DefaultResourceContainer;
+import com.netflix.karyon.admin.rest.ResourceContainer;
 
 /**
  * Adding AdminModule to the main injector will enable the admin endpoint

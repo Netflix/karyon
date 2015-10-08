@@ -6,27 +6,71 @@ import org.junit.rules.TestRule;
 import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
 
+import com.netflix.governator.DefaultLifecycleListener;
 import com.netflix.governator.LifecycleInjector;
-import com.netflix.governator.LifecycleListener;
 import com.netflix.karyon.Karyon;
 import com.netflix.karyon.KaryonModule;
 
+/**
+ * JUnit rule to simplify testing with Karyon.  KaryonRule extends Karyon and as such
+ * supports all it's methods.  Once start() is called KaryonRule will track the injector
+ * that is created and ensure that it is shut down at the end of the test.  Also, any
+ * fields of the unit test class passed to KaryonRule are injectable.  
+ * 
+ * <h3> Usage
+ * 
+ * <code>
+ public class MyUnitTest {
+     @Rule
+     public KaryonRule karyon = new KaryonRule(this);
+     
+     @Test
+     public void someTest() {
+         // Configuration the KaryonRule just like you would Karyon
+         Injector injector = karyon.addModules(...).start();
+         
+         // Get classes from the injector and assert on conditions
+         SomeClassBeingTested obj = injector.getInstance(SomeClassBeingTested.class);
+         Assert.assertTrue(obj.someTestCondition());
+     }
+ }
+ 
+ * </code>
+ * 
+ * <h3> Injecting into the test class
+ * 
+ * <code>
+ public class MyUnitTest {
+     @Rule
+     public KaryonRule karyon = new KaryonRule(this);
+     
+     @Inject
+     SomeClassBeingTested obj;
+     
+     @Test
+     public void someTest() {
+         // Configuration the KaryonRule just like you would Karyon
+         Injector injector = karyon.addModules(...).start();
+         
+         // Once start is called field's of MyUnitTest will have been injected
+         Assert.assertTrue(obj.someTestCondition());
+     }
+ }
+ * </code>
+ * 
+ * Karyon 
+ * 
+ * @author elandau
+ *
+ */
 public class KaryonRule extends Karyon implements TestRule {
     
     private LifecycleInjector injector;
-    private String name;
     private Object obj;
     
-    static class TrackingLifecycleListener implements LifecycleListener {
-        private boolean started = false;
+    static class TrackingLifecycleListener extends DefaultLifecycleListener {
         private boolean stopped = false;
-        private boolean failed = false;
         
-        @Override
-        public void onStarted() {
-            this.started = true;
-        }
-
         @Override
         public void onStopped() {
             this.stopped = true;
@@ -35,7 +79,6 @@ public class KaryonRule extends Karyon implements TestRule {
         @Override
         public void onStartFailed(Throwable t) {
             this.stopped = true;
-            this.failed = true;
         }
     }
     
@@ -55,6 +98,10 @@ public class KaryonRule extends Karyon implements TestRule {
         return start();
     }
     
+    /**
+     * start() the Injector and cache internally so it can be shutdown
+     * at the end of the test
+     */
     public LifecycleInjector start() {
         if (this.injector == null) {
             injector = super.start();
@@ -66,33 +113,21 @@ public class KaryonRule extends Karyon implements TestRule {
         return injector;
     }
     
-    protected void after() {
-        System.out.println("Stopping test " + name);
-        if (this.injector != null) {
-            TrackingLifecycleListener listener = new TrackingLifecycleListener();
-            this.injector.addListener(listener);
-            injector.shutdown();
-            
-            Assert.assertTrue(listener.stopped);
-        }
-    }
-    
-    protected void before() {
-        System.out.println("Starting test " + name);
-    }
-
     @Override
     public Statement apply(Statement base, Description description) {
-        this.name = description.getMethodName();
-        
         return new Statement() {
             @Override
             public void evaluate() throws Throwable {
-                before();
                 try {
                     base.evaluate();
                 } finally {
-                    after();
+                    if (injector != null) {
+                        TrackingLifecycleListener listener = new TrackingLifecycleListener();
+                        injector.addListener(listener);
+                        injector.shutdown();
+                        
+                        Assert.assertTrue(listener.stopped);
+                    }
                 }
             }
         };
