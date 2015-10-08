@@ -32,6 +32,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
+import javax.servlet.Filter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -113,6 +114,7 @@ public class AdminResourcesContainer {
                 }
 
                 server = new Server(adminContainerConfig.listenPort());
+                final List<Filter> additionaFilters = adminContainerConfig.additionalFilters();
 
                 // redirect filter based on configurable RedirectRules
                 final Context rootHandler = new Context();
@@ -129,6 +131,7 @@ public class AdminResourcesContainer {
                 adminTemplatesResHandler.setSessionHandler(new SessionHandler());
                 adminTemplatesResHandler.addFilter(LoggingFilter.class, "/*", Handler.DEFAULT);
                 adminTemplatesResHandler.addFilter(new FilterHolder(adminResourceInjector.getInstance(RedirectFilter.class)), "/*", Handler.DEFAULT);
+                applyAdditionalFilters(adminTemplatesResHandler, additionaFilters);
                 adminTemplatesResHandler.addFilter(new FilterHolder(arfTemplatesResources), "/*", Handler.DEFAULT);
                 adminTemplatesResHandler.addServlet(new ServletHolder(new DefaultServlet()), "/*");
 
@@ -140,6 +143,7 @@ public class AdminResourcesContainer {
                 final Context adminDataResHandler = new Context();
                 adminDataResHandler.setContextPath(adminContainerConfig.ajaxDataResourceContext());
                 adminDataResHandler.addFilter(new FilterHolder(adminResourceInjector.getInstance(RedirectFilter.class)), "/*", Handler.DEFAULT);
+                applyAdditionalFilters(adminDataResHandler, additionaFilters);
                 adminDataResHandler.addFilter(new FilterHolder(arfDataResources), "/*", Handler.DEFAULT);
                 adminDataResHandler.addServlet(new ServletHolder(new DefaultServlet()), "/*");
 
@@ -220,6 +224,14 @@ public class AdminResourcesContainer {
 
     private boolean shouldShareResourcesWithParentInjector() {
         return appInjector != null && ! adminContainerConfig.shouldIsolateResources();
+    }
+
+    private void applyAdditionalFilters(final Context contextHandler, List<Filter> additionalFilters) {
+        if (additionalFilters != null && !additionalFilters.isEmpty()) {
+            for(Filter f : additionalFilters) {
+                contextHandler.addFilter(new FilterHolder(f), "/*", Handler.DEFAULT);
+            }
+        }
     }
 
     @PreDestroy

@@ -28,7 +28,6 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.junit.After;
-import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -91,10 +90,61 @@ public class AdminResourceTest {
     public void checkPing() throws Exception {
         final int port = startServerAndGetListeningPort();
         HttpClient client = new DefaultHttpClient();
-        HttpGet healthGet =
-                new HttpGet(String.format("http://localhost:%d/jr/ping", port));
+        HttpGet healthGet = new HttpGet(String.format("http://localhost:%d/jr/ping", port));
         HttpResponse response = client.execute(healthGet);
         assertEquals("admin resource ping resource failed.", 200, response.getStatusLine().getStatusCode());
+    }
+
+    @Test
+    public void checkAuthFilter() throws Exception {
+        setConfig(AdminConfigImpl.NETFLIX_ADMIN_CTX_FILTERS, "netflix.adminresources.AuthFilter");
+        final AdminResourcesContainer adminResourcesContainer = adminResourcesContainerWithCustomRedirect();
+
+        try {
+            adminResourcesContainer.init();
+
+            final int port = adminResourcesContainer.getServerPort();
+            HttpClient client = new DefaultHttpClient();
+
+            HttpGet healthGet = new HttpGet(String.format("http://localhost:%d/jr/ping", port));
+            HttpResponse response = client.execute(healthGet);
+            assertEquals("admin resource ping resource failed.", 200, response.getStatusLine().getStatusCode());
+            consumeResponse(response);
+
+            healthGet = new HttpGet(String.format("http://localhost:%d/main/get-user-id", port));
+            response = client.execute(healthGet);
+            assertEquals("admin resource ping resource failed.", 403, response.getStatusLine().getStatusCode());
+            consumeResponse(response);
+
+            healthGet = new HttpGet(String.format("http://localhost:%d/auth/no-page", port));
+            response = client.execute(healthGet);
+            assertEquals("admin resource ping resource failed.", 404, response.getStatusLine().getStatusCode());
+            consumeResponse(response);
+
+            healthGet = new HttpGet(String.format("http://localhost:%d/foo/ping", port));
+            response = client.execute(healthGet);
+            assertEquals("admin resource ping resource failed.", 404, response.getStatusLine().getStatusCode());
+            consumeResponse(response);
+
+            // verify redirect filter gets applied
+            healthGet = new HttpGet(String.format("http://localhost:%d/check-me", port));
+            response = client.execute(healthGet);
+            assertEquals("admin resource did not pick a custom redirect routing", 200, response.getStatusLine().getStatusCode());
+            BufferedReader br = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
+            assertEquals("ping resource did not return pong", br.readLine(), "pong");
+
+            // verify auth filter not applied to a potential redirect path
+            healthGet = new HttpGet(String.format("http://localhost:%d/auth/ping", port));
+            response = client.execute(healthGet);
+            assertEquals("admin resource did not pick a custom redirect routing", 200, response.getStatusLine().getStatusCode());
+            br = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
+            assertEquals("ping resource did not return pong", br.readLine(), "pong");
+
+        } finally {
+            final AbstractConfiguration configInst = ConfigurationManager.getConfigInstance();
+            configInst.clearProperty(AdminConfigImpl.NETFLIX_ADMIN_CTX_FILTERS);
+            adminResourcesContainer.shutdown();
+        }
     }
 
     @Test
@@ -161,6 +211,7 @@ public class AdminResourceTest {
                         Map<String, String> routes = new HashMap<>();
                         routes.put("/", "/bad-route");
                         routes.put("/check-me", "/jr/ping");
+                        routes.put("/auth/ping", "/jr/ping");
                         return routes;
                     }
 
@@ -182,7 +233,9 @@ public class AdminResourceTest {
     }
 
     private void consumeResponse(HttpResponse response) throws IOException {
-        final BufferedReader br = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
-        while (br.readLine() != null) ;
+        if (response.getEntity() != null && response.getEntity().getContent() != null) {
+            final BufferedReader br = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
+            while (br.readLine() != null) ;
+        }
     }
 }
