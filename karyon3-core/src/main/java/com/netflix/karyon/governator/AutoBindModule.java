@@ -25,11 +25,24 @@ import com.netflix.karyon.KaryonModule;
  * Karyon.create()
  *       .apply(new AutoBindModule()
  *          .includePackages("com.example")
- *          .ignorePackages("com.example.ignore")
  *       )
  *       .start();
  * </code>
  * 
+ * Note that classpath scanning can be dangerous as it may pick up unwanted classes.  It is possible
+ * to ignore specific classes and packages from the classpath scanning result.  Ignore always takes
+ * Precedence over any classes under the included packages.  Package ignore is done using a prefix
+ * match so all subpackages will also be ignored.
+ * 
+ * <code>
+ * Karyon.create()
+ *       .apply(new AutoBindModule()
+ *          .includePackages("com.example")
+ *          .ignoreClasses("com.example.ignore.SomeClassToIgnore")
+ *          .ignorePackages("com.example.ignore")
+ *       )
+ *       .start();
+ * <code>
  * @author elandau
  *
  */
@@ -52,7 +65,7 @@ public class AutoBindModule extends AbstractKaryonModule {
     
     /**
      * Specify the class loader to use.  By default, Thread.currentThread().getContextClassLoader()
-     * will be sued.
+     * will be used.
      * 
      * @param loader
      */
@@ -62,7 +75,7 @@ public class AutoBindModule extends AbstractKaryonModule {
     }
     
     /**
-     * Specify class names to ignore
+     * Specify class names to ignore.  
      * @param classes
      */
     public KaryonModule ignoreClassNames(String ... classes) {
@@ -110,7 +123,7 @@ public class AutoBindModule extends AbstractKaryonModule {
     }
 
     /**
-     * Specify packages to ignore
+     * Specify packages to ignore.  Note that all sub-packages will be ignored as well.
      * @param packages
      */
     public KaryonModule ignorePackages(String ... packages) {
@@ -121,7 +134,7 @@ public class AutoBindModule extends AbstractKaryonModule {
     }
     
     /**
-     * Specify packages to ignore
+     * Specify packages to ignore.  Note that all sub-packages will be ignored as well.
      * @param packages
      */
     public KaryonModule ignorePackages(Collection<String> packages) {
