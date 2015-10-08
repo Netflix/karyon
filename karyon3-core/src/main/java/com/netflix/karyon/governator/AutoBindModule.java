@@ -42,7 +42,7 @@ import com.netflix.karyon.KaryonModule;
  *          .ignorePackages("com.example.ignore")
  *       )
  *       .start();
- * <code>
+ * </code>
  * @author elandau
  *
  */
