@@ -120,7 +120,6 @@ public class AdminResourcesContainer {
                 final Context rootHandler = new Context();
                 rootHandler.setContextPath("/");
                 rootHandler.addFilter(new FilterHolder(adminResourceInjector.getInstance(RedirectFilter.class)), "/*", Handler.DEFAULT);
-                applyAdditionalFilters(rootHandler, additionaFilters);
                 rootHandler.addServlet(new ServletHolder(new DefaultServlet()), "/*");
 
                 // admin page template resources

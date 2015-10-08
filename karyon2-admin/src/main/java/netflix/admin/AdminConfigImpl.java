@@ -7,11 +7,12 @@ import org.slf4j.LoggerFactory;
 import javax.inject.Singleton;
 import javax.servlet.Filter;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 @Singleton
 public class AdminConfigImpl implements AdminContainerConfig {
-    private Logger logger = LoggerFactory.getLogger(this.getClass());
+    private static final Logger logger = LoggerFactory.getLogger(AdminConfigImpl.class);
 
     public static final String NETFLIX_ADMIN_TEMPLATE_CONTEXT = "netflix.admin.template.context";
     public static final String TEMPLATE_CONTEXT_DEFAULT = "/admin";
@@ -101,14 +102,15 @@ public class AdminConfigImpl implements AdminContainerConfig {
     @Override
     public List<Filter> additionalFilters() {
         if (rootContextFilters.isEmpty()) {
-            new ArrayList<>();
+            return Collections.emptyList();
         }
 
         List<Filter> filters = new ArrayList<>();
         final String[] filterClasses = rootContextFilters.split(",");
         for (String filterClass : filterClasses) {
             try {
-                final Class<?> filterCls = Class.forName(filterClass);
+                getClass().getClassLoader();
+                final Class<?> filterCls = Class.forName(filterClass, false, getClass().getClassLoader());
                 if (Filter.class.isAssignableFrom(filterCls)) {
                     Filter filter = (Filter) filterCls.newInstance();
                     filters.add(filter);

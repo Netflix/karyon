@@ -13,7 +13,7 @@ public class AuthFilter implements Filter {
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
         if (request instanceof HttpServletRequest) {
             String url = ((HttpServletRequest)request).getRequestURI();
-            if (url.startsWith("/main")) {
+            if (url.startsWith("/main") || url.startsWith("/auth")) {
                 ((HttpServletResponse) response).sendError(HttpServletResponse.SC_FORBIDDEN);
             }
             chain.doFilter(request, response);
