@@ -1,11 +1,20 @@
 package com.netflix.karyon.junit;
 
+import java.util.Set;
+import java.util.concurrent.CopyOnWriteArraySet;
+
 import junit.framework.Assert;
 
 import org.junit.rules.TestRule;
 import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
 
+import com.google.inject.AbstractModule;
+import com.google.inject.TypeLiteral;
+import com.google.inject.matcher.Matchers;
+import com.google.inject.spi.InjectionListener;
+import com.google.inject.spi.TypeEncounter;
+import com.google.inject.spi.TypeListener;
 import com.netflix.governator.DefaultLifecycleListener;
 import com.netflix.governator.LifecycleInjector;
 import com.netflix.karyon.Karyon;
@@ -50,7 +59,7 @@ import com.netflix.karyon.KaryonModule;
      {@literal @}Test
      public void someTest() {
          // Configuration the KaryonRule just like you would Karyon
-         Injector injector = karyon.addModules(someModules).start();
+         karyon.addModules(someModules).start();
          
          // Once start is called field's of MyUnitTest will have been injected
          Assert.assertTrue(obj.someTestCondition());
@@ -58,7 +67,25 @@ import com.netflix.karyon.KaryonModule;
  }
  * </code>
  * 
- * Karyon 
+ * <h3>Test injection</h3>
+ * 
+ * To test that a type was created and injected (including eager singletons)
+ * 
+ * <code>
+ public class MyUnitTest {
+     {@literal @}Rule
+     public KaryonRule karyon = new KaryonRule(this);
+     
+     {@literal @}Test
+     public void someTest() {
+         // Configuration the KaryonRule just like you would Karyon
+         karyon.addModules(someModules).start();
+         
+         // This assertion will pass iff SomeType was instantiated
+         Assert.assertTrue(karyon.didInject(SomeType.class));
+     }
+ }
+ * </code>
  * 
  * @author elandau
  *
@@ -67,7 +94,7 @@ public class KaryonRule extends Karyon implements TestRule {
     
     private LifecycleInjector injector;
     private Object obj;
-    
+    private Set<TypeLiteral<?>> injectedTypes = new CopyOnWriteArraySet<>();
     static class TrackingLifecycleListener extends DefaultLifecycleListener {
         private boolean stopped = false;
         
@@ -104,6 +131,22 @@ public class KaryonRule extends Karyon implements TestRule {
      */
     public LifecycleInjector start() {
         if (this.injector == null) {
+            addModules(new AbstractModule() {
+                @Override
+                protected void configure() {
+                    this.bindListener(Matchers.any(), new TypeListener() {
+                        @Override
+                        public <I> void hear(TypeLiteral<I> typeLiteral, TypeEncounter<I> encounter) {
+                            encounter.register(new InjectionListener<I>() {
+                                @Override
+                                public void afterInjection(I injectee) {
+                                    injectedTypes.add(typeLiteral);
+                                }
+                            });
+                        }
+                    });
+                }
+            });
             injector = super.start();
             injector.injectMembers(obj);
         }
@@ -132,6 +175,14 @@ public class KaryonRule extends Karyon implements TestRule {
                 }
             }
         };
+    }
+    
+    public boolean didInject(Class<?> type) {
+        return didInject(TypeLiteral.get(type));
+    }
+
+    public boolean didInject(TypeLiteral<?> type) {
+        return injectedTypes.contains(type);
     }
 
 }
