@@ -33,5 +33,15 @@ public interface KaryonAutoContext {
      */
     List<Element> getElements();
 
+    /**
+     * Return a complete list of configured profiles
+     * @return
+     */
     Set<String> getProfiles();
+
+    /**
+     * Return a complete list of modules, including installed modules
+     * @return
+     */
+    Set<String> getModules();
 }

@@ -3,6 +3,7 @@ package com.netflix.karyon;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -13,6 +14,7 @@ import com.google.inject.Module;
 import com.google.inject.Stage;
 import com.netflix.governator.LifecycleInjector;
 import com.netflix.karyon.conditional.ConditionalOnProfile;
+import com.netflix.karyon.spi.ModuleListTransformer;
 
 /**
  * Base entry point for creating a LifecycleInjector with module auto-loading capabilities.  
@@ -71,6 +73,7 @@ public class Karyon {
     protected Stage                       stage             = Stage.DEVELOPMENT;
     protected List<Module>                modules           = new ArrayList<>();
     protected List<Module>                overrideModules   = new ArrayList<>();
+    protected List<ModuleListTransformer>       transformers        = new ArrayList<>();
 
     // This is a hack to make sure that if archaius is used at some point we make use
     // of the bridge so any access to the legacy Archaius1 API is actually backed by 
@@ -230,6 +233,20 @@ public class Karyon {
     }
     
     /**
+     * Add a ModuleListTransformer that will be invoked on the final list of modules
+     * prior to creating the injectors.  Multiple transformers may be added with each
+     * transforming the result of the previous one.
+     * 
+     * @param transformer
+     */
+    public Karyon addModuleListTransformer(ModuleListTransformer transformer) {
+        if (transformer != null) {
+            this.transformers.add(transformer);
+        }
+        return this;
+    }
+    
+    /**
      * Call this anywhere in the process of manipulating the builder to apply a reusable
      * sequence of calls to the builder 
      * 
@@ -272,6 +289,10 @@ public class Karyon {
         
         if (isFeatureEnabled(KaryonFeatures.USE_DEFAULT_KARYON_MODULE)) 
             apply(new DefaultKaryonModule());
+        
+        for (ModuleListTransformer transformer : transformers) {
+            modules = transformer.transform(Collections.unmodifiableList(modules));
+        }
         
         return LifecycleInjectorCreator.createInjector(new KaryonConfiguration() {
             @Override

@@ -2,6 +2,8 @@ package com.netflix.karyon.log4j;
 
 import java.io.Serializable;
 
+import javax.inject.Singleton;
+
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.core.Appender;
 import org.apache.logging.log4j.core.Layout;
@@ -12,6 +14,7 @@ import org.apache.logging.log4j.core.layout.PatternLayout;
 
 import com.google.common.base.Charsets;
 
+@Singleton
 public class ConsoleAppenderConfigurator implements Log4jConfigurator {
 
     @Override

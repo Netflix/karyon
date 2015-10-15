@@ -44,11 +44,12 @@ public class SimpleHttpServer {
             server.start();
         }
         
-        LOG.info("Started admin server on port {}", config.port());
+        LOG.info("Started server on port {}", config.port());
     }
     
     @PreDestroy 
     public void shutdown() {
+        LOG.info("Shutting server on port {}", config.port());
         server.stop(config.shutdownDelay());
     }
 
