@@ -23,7 +23,6 @@ import com.google.inject.util.Modules;
 import com.netflix.governator.ElementsEx;
 import com.netflix.governator.LifecycleInjector;
 import com.netflix.governator.LifecycleManager;
-import com.netflix.governator.LifecycleModule;
 import com.netflix.karyon.conditional.Condition;
 import com.netflix.karyon.conditional.Conditional;
 import com.netflix.karyon.conditional.OverrideModule;
@@ -52,9 +51,9 @@ class LifecycleInjectorCreator {
         
         // Construct the injector using our override structure
         try {
-            final List<Element> elements    = Elements.getElements(Stage.DEVELOPMENT, config.getModules());
-            final Set<Key<?>>   keys        = ElementsEx.getAllInjectionKeys(elements);
-            final List<String>  moduleNames = ElementsEx.getAllSourceModules(elements);
+            final List<Element> elements   = Elements.getElements(Stage.DEVELOPMENT, config.getModules());
+            final Set<Key<?>>   keys       = ElementsEx.getAllInjectionKeys(elements);
+            final Set<String>  moduleNames = new HashSet<>(ElementsEx.getAllSourceModules(elements));
             
             final KaryonAutoContext context = new KaryonAutoContext() {
                 @Override
@@ -80,6 +79,11 @@ class LifecycleInjectorCreator {
                 @Override
                 public Set<String> getProfiles() {
                     return config.getProfiles();
+                }
+
+                @Override
+                public Set<String> getModules() {
+                    return moduleNames;
                 }
             };
             
@@ -168,7 +172,7 @@ class LifecycleInjectorCreator {
             }
         }
         
-        LOG.info("Core Modules     : " + coreModules);
+        LOG.info("Core Modules     : " + context.getModules());
         LOG.info("Auto Modules     : " + autoModules);
         LOG.info("Override Modules : " + overrideModules);
         
