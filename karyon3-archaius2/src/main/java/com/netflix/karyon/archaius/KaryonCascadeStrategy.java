@@ -27,9 +27,9 @@ public class KaryonCascadeStrategy extends InterpolatingCascadeStrategy {
             permuatations.add("%s-" + profile);
         }
         permuatations.addAll(Arrays.asList(
-                "%s-${@environment}",
-                "${@datacenter}-%s",
-                "${@datacenter}-%s-${@environment}"
+                "%s-${karyon.environment}",
+                "${karyon.datacenter}-%s",
+                "${karyon.datacenter}-%s-${karyon.environment}"
                 ));
         return permuatations;
     }

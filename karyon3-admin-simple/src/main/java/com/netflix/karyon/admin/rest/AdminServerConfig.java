@@ -18,10 +18,10 @@ public interface AdminServerConfig extends HttpServerConfig {
     /**
      * Admin specific settings
      */
-    @DefaultValue("http://${@publicHostname}:8078/index.html#/${@publicHostname}:8077/appinfo")
+    @DefaultValue("http://${karyon.publicHostname}:8078/index.html#/${karyon.publicHostname}:8077/appinfo")
     String remoteServer();
     
-    @DefaultValue("${@hostname}")
+    @DefaultValue("${karyon.hostname}")
     String localServer();
 
     @DefaultValue("*")
