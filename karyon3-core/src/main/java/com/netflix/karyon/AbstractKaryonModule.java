@@ -76,5 +76,9 @@ public abstract class AbstractKaryonModule implements KaryonModule {
     protected PropertySource getPropertySource() {
         return karyon.getPropertySource();
     }
+    
+    protected Karyon getKaryon() {
+        return karyon;
+    }
 
 }

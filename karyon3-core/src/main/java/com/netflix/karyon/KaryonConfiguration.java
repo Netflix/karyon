@@ -5,7 +5,6 @@ import java.util.Set;
 
 import com.google.inject.Module;
 import com.google.inject.Stage;
-import com.netflix.governator.GovernatorFeatures;
 
 /**
  * Configuration contract needed to bootstrap a Governator based application.
@@ -51,7 +50,7 @@ public interface KaryonConfiguration {
     Stage getStage();
     
     /**
-     * Determine if a core governator feature has been enabled.  See {@link GovernatorFeatures}
+     * Determine if a core karyon feature has been enabled.  See {@link KaryonFeatures}
      * for available features.
      */
     boolean isFeatureEnabled(KaryonFeature feature);

@@ -35,8 +35,7 @@ import com.netflix.karyon.spi.ModuleListTransformer;
  * list of modules returned from {@link KaryonConfiguration#getOverrideModules()}.
  * 
  * <code>
-     Karyon
-        .create()
+     Karyon.forApplication("foo")
         .addModules(
              new JettyModule(),
              new JerseyServletModule() {
@@ -66,6 +65,9 @@ import com.netflix.karyon.spi.ModuleListTransformer;
 public class Karyon {
     private static final String KARYON_PROFILES = "karyon.profiles";
     
+    private static final String DEFAULT_APPLICATION_NAME = "KaryonApplication";
+    
+    protected final String                applicationName;
     protected PropertySource              propertySource    = DefaultPropertySource.INSTANCE;
     protected Set<String>                 profiles          = new LinkedHashSet<>();
     protected List<ModuleListProvider>    moduleProviders   = new ArrayList<>();
@@ -73,7 +75,7 @@ public class Karyon {
     protected Stage                       stage             = Stage.DEVELOPMENT;
     protected List<Module>                modules           = new ArrayList<>();
     protected List<Module>                overrideModules   = new ArrayList<>();
-    protected List<ModuleListTransformer>       transformers        = new ArrayList<>();
+    protected List<ModuleListTransformer> transformers      = new ArrayList<>();
 
     // This is a hack to make sure that if archaius is used at some point we make use
     // of the bridge so any access to the legacy Archaius1 API is actually backed by 
@@ -81,6 +83,10 @@ public class Karyon {
     static {
         System.setProperty("archaius.default.configuration.class",      "com.netflix.archaius.bridge.StaticAbstractConfiguration");
         System.setProperty("archaius.default.deploymentContext.class",  "com.netflix.archaius.bridge.StaticDeploymentContext");
+    }
+    
+    protected Karyon(String applicationName) {
+        this.applicationName = applicationName;
     }
     
     /**
@@ -232,6 +238,10 @@ public class Karyon {
         return this.propertySource;
     }
     
+    public String getApplicationName() {
+        return applicationName;
+    }
+    
     /**
      * Add a ModuleListTransformer that will be invoked on the final list of modules
      * prior to creating the injectors.  Multiple transformers may be added with each
@@ -250,11 +260,15 @@ public class Karyon {
      * Call this anywhere in the process of manipulating the builder to apply a reusable
      * sequence of calls to the builder 
      * 
-     * @param module
+     * @param modules
      * @return The builder
      */
-    public Karyon apply(KaryonModule module) {
-        module.configure(this);
+    public Karyon apply(KaryonModule ... modules) {
+        if (modules != null) {
+            for (KaryonModule module : modules) {   
+                module.configure(this);
+            }
+        }
         return this;
     }
     
@@ -345,16 +359,38 @@ public class Karyon {
                 : value;
     }
     
+    /**
+     * Starting point for creating a Karyon application.
+     * 
+     * @param applicationName
+     * @return
+     */
+    public static Karyon forApplication(String applicationName) {
+        return new Karyon(applicationName);
+    }
+    
+    /**
+     * @deprecated Call Karyon.forApplication("foo")
+     */
+    @Deprecated
     public static Karyon create() {
-        return new Karyon();
+        return new Karyon(DEFAULT_APPLICATION_NAME);
     }
     
+    /**
+     * @deprecated Call Karyon.forApplication("foo").addModules(modules)
+     */
+    @Deprecated
     public static Karyon create(Module ... modules) {
-        return new Karyon().addModules(modules);
+        return new Karyon(DEFAULT_APPLICATION_NAME).addModules(modules);
     }
     
+    /**
+     * @deprecated Call Karyon.forApplication("foo").apply(modules)
+     */
+    @Deprecated
     public static Karyon from(KaryonModule ... modules) {
-        Karyon karyon = new Karyon();
+        Karyon karyon = new Karyon(DEFAULT_APPLICATION_NAME);
         if (modules != null) {
             for (KaryonModule module : modules) {
                 karyon.apply(module);

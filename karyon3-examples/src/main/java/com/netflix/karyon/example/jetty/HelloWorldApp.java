@@ -6,7 +6,6 @@ import javax.ws.rs.Path;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.netflix.archaius.config.MapConfig;
 import com.netflix.governator.DefaultLifecycleListener;
 import com.netflix.governator.ProvisionDebugModule;
 import com.netflix.governator.guice.jetty.JettyModule;
@@ -26,13 +25,9 @@ public class HelloWorldApp extends DefaultLifecycleListener {
     private static final Logger LOG = LoggerFactory.getLogger(HelloWorldApp.class);
     
     public static void main(String[] args) throws Exception {
-        Karyon
-            .from(new ArchaiusKaryonModule()
+        Karyon.forApplication("helloworld")
+            .apply(new ArchaiusKaryonModule()
                 .withConfigName("helloworld")
-                .withApplicationOverrides(MapConfig.builder()
-                    .put("@appId", "Hello World!")
-                    .build()
-                    )
                 )
             .addProfile("local")
             .addModules(

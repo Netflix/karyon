@@ -15,8 +15,8 @@ import com.netflix.karyon.rxnetty.shutdown.ShutdownServerModule;
 @Singleton
 public class RxNettyHelloWorldApp {
     public static void main(String[] args) throws Exception {
-        Karyon
-            .from(new ArchaiusKaryonModule()
+        Karyon.forApplication("rxnetty-helloworld")
+            .apply(new ArchaiusKaryonModule()
                 .withConfigName("rxnetty-helloworld")
             )
             .addProfile("local")
