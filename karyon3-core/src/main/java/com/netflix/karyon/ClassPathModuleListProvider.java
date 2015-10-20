@@ -25,6 +25,7 @@ public class ClassPathModuleListProvider implements ModuleListProvider {
         this.packages = packages;
     }
     
+    @SuppressWarnings("unchecked")
     @Override
     public List<Module> get() {
         List<Module> modules = new ArrayList<>();

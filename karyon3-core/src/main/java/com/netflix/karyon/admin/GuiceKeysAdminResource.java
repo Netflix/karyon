@@ -10,16 +10,13 @@ import javax.inject.Singleton;
 import com.google.inject.Binding;
 import com.google.inject.Injector;
 import com.google.inject.Key;
-import com.netflix.governator.ProvisionMetrics;
 
 @Singleton
 public class GuiceKeysAdminResource {
-    private final ProvisionMetrics metrics;
     private final Injector injector;
 
     @Inject
-    public GuiceKeysAdminResource(ProvisionMetrics metrics, Injector injector) {
-        this.metrics = metrics;
+    public GuiceKeysAdminResource(Injector injector) {
         this.injector = injector;
     }
     

@@ -25,7 +25,7 @@ public class LocalServerContextConfigSeeder implements ConfigSeeder {
             // Amazon specific metadata
             .put(ServerContext.DOMAIN,          "")
             .put(ServerContext.HOSTNAME,        "localhost")
-            .put(ServerContext.PUBLIC_HOSTNAME, "localhost") // IP.getHostName())
+            .put(ServerContext.PUBLIC_HOSTNAME, IP.getHostName())
             .put(ServerContext.PUBLIC_IPV4,     IP.getHostAddress())
             .put(ServerContext.LOCAL_HOSTNAME,  IP.getHostName())
             .put(ServerContext.LOCAL_IPV4,      IP.getHostAddress())

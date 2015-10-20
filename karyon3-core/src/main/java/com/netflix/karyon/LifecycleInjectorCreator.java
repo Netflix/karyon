@@ -197,11 +197,11 @@ class LifecycleInjectorCreator {
             Conditional conditional = annot.annotationType().getAnnotation(Conditional.class);
             if (conditional != null) {
                 // A Conditional may have a list of multiple Conditions
-                for (Class<? extends Condition> condition : conditional.value()) {
+                for (Class<? extends Condition<?>> condition : conditional.value()) {
                     try {
                         // Construct the condition using Guice so that anything may be injected into 
                         // the condition
-                        Condition c = injector.getInstance(condition);
+                        Condition<?> c = injector.getInstance(condition);
                         // Look for method signature : boolean check(T annot)
                         // where T is the annotation type.  Note that the same checker will be used 
                         // for all conditions of the same annotation type.

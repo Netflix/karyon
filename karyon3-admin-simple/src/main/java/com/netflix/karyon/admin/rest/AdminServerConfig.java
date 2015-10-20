@@ -18,7 +18,7 @@ public interface AdminServerConfig extends HttpServerConfig {
     /**
      * Admin specific settings
      */
-    @DefaultValue("http://${@publicHostname}:8078/index.html#/${@publicHostname}:8077/info")
+    @DefaultValue("http://${@localIpv4}:8078/index.html#/${@localIpv4}:8077/info")
     String remoteServer();
     
     @DefaultValue("${@hostname}")
