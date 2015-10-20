@@ -34,6 +34,28 @@ public class LocalServerContextConfigSeeder implements ConfigSeeder {
             .put(ServerContext.ZONE,            "us-west-2a")
             .put(ServerContext.SERVER_ID,       "${" + ServerContext.HOSTNAME + "}")
             .put(ServerContext.AMI,             "ami-dev")
+            .put(ServerContext.ENVIRONMENT,     "test")
+            .put(ServerContext.ASG,             "asg-dev")
+            .put(ServerContext.CLUSTER,         "cluster-dev")
+            .put(ServerContext.STACK,           "")
+                
+            .put("@domain",             "${" + ServerContext.DOMAIN + "}")
+            .put("@hostname",           "${" + ServerContext.HOSTNAME + "}")
+            .put("@publicHostname",     "${" + ServerContext.PUBLIC_HOSTNAME + "}")
+            .put("@publicIpv4",         "${" + ServerContext.PUBLIC_IPV4 + "}")
+            .put("@localHostname",      "${" + ServerContext.LOCAL_HOSTNAME + "}")
+            .put("@localIpv4",          "${" + ServerContext.LOCAL_IPV4 + "}")
+            .put("@datacenter",         "${" + ServerContext.DATACENTER + "}")
+            .put("@region",             "${" + ServerContext.REGION + "}")
+            .put("@zoneId",             "${" + ServerContext.ZONE + "}")
+            .put("@cluster",            "${" + ServerContext.CLUSTER + "}")
+            .put("@ami",                "${" + ServerContext.AMI + "}")
+            .put("@asg",                "${" + ServerContext.ASG + "}")    
+            .put("@serverId",           "${" + ServerContext.SERVER_ID + "}")       // i-
+            .put("@stack",              "${" + ServerContext.STACK + "}")
+            .put("@environment",        "${" + ServerContext.ENVIRONMENT + "}")    // test, prod, ..
+            .put("@appId",              "${" + ServerContext.APP_ID + "}")
+            .put("@countries",          "${" + ServerContext.COUNTRIES + "}")
             
             .put("EC2_DOMAIN",              "${" + ServerContext.DOMAIN + "}")
             .put("EC2_HOSTNAME",            "${" + ServerContext.HOSTNAME + "}")

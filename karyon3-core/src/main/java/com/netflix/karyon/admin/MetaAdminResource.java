@@ -19,8 +19,8 @@ public class MetaAdminResource {
         
         while (iter.hasNext()) {
             String key = iter.next();
-            if (key.startsWith("@")) {
-                prop.put(key.substring(1), config.getString(key));
+            if (key.startsWith("karyon.")) {
+                prop.put(key, config.getString(key));
             }
         }
     }
