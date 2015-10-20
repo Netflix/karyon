@@ -11,7 +11,7 @@ import com.netflix.karyon.Karyon;
 public class ArchaiusKaryonModuleTest {
     @Test
     public void test() {
-        Injector injector = Karyon.create().addProfile("test").start();
+        Injector injector = Karyon.forApplication("test").addProfile("test").start();
         Config config = injector.getInstance(Config.class);
         
         Assert.assertTrue(config.getBoolean("application_loaded", false));

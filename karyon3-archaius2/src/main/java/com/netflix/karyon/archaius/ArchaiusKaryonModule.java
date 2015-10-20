@@ -62,6 +62,8 @@ public class ArchaiusKaryonModule extends AbstractKaryonModule {
     private Properties              props = new Properties();
 
     private Class<? extends CascadeStrategy> cascadeStrategy = KaryonCascadeStrategy.class;
+
+    private String appName;
     
     /**
      * Configuration name to use for property loading.  Default configuration
@@ -76,9 +78,15 @@ public class ArchaiusKaryonModule extends AbstractKaryonModule {
         this.configName = value;
         return this;
     }
-    
+
+    /**
+     * @deprecated  Call Karyon.forApplication('appname') instead
+     * @param value
+     * @return
+     */
+    @Deprecated
     public ArchaiusKaryonModule withApplicationName(String value) {
-        props.put(ServerContext.APP_ID, value);
+        this.appName = value;
         return this;
     }
     
@@ -126,6 +134,13 @@ public class ArchaiusKaryonModule extends AbstractKaryonModule {
     @Override
     protected void configure() {
         try {
+            if (appName != null) {
+                props.put(ServerContext.APP_ID, appName);
+            }
+            else {
+                props.put(ServerContext.APP_ID, getKaryon().getApplicationName());
+            }
+            
             addModules(new ArchaiusModule());
             
             if (!props.isEmpty()) {

@@ -87,6 +87,12 @@ public class KaryonRule extends Karyon implements TestRule {
     }
 
     public KaryonRule(Object obj, KaryonModule module) {
+        this(obj, "unittest", module);
+    }
+    
+    public KaryonRule(Object obj, String applicationName, KaryonModule module) {
+        super(applicationName);
+        
         this.obj = obj;
         this.injector = null;
         
