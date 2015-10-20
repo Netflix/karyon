@@ -22,14 +22,15 @@ public class KaryonCascadeStrategy extends InterpolatingCascadeStrategy {
     @Override
     protected List<String> getPermuations() {
         List<String> permuatations = new ArrayList<>();
+        permuatations.add("%s");
         for (String profile : context.getProfiles()) {
             permuatations.add("%s-" + profile);
         }
         permuatations.addAll(Arrays.asList(
-                "${@datacenter}-%s-${@environment}",
-                "${@datacenter}-%s",
                 "%s-${@environment}",
-                "%s"));
+                "${@datacenter}-%s",
+                "${@datacenter}-%s-${@environment}"
+                ));
         return permuatations;
     }
 

@@ -84,30 +84,37 @@ public class JarsAdminResource {
             specificationVersion = valueOf(mainAttributes, SPECIFICATION_VERSION);
         }
 
+        @SuppressWarnings("unused")
         public String getStatus() {
             return status;
         }
 
+        @SuppressWarnings("unused")
         public String getLibraryOwner() {
             return libraryOwner;
         }
 
+        @SuppressWarnings("unused")
         public String getBuildDate() {
             return buildDate;
         }
 
+        @SuppressWarnings("unused")
         public String getName() {
             return name;
         }
 
+        @SuppressWarnings("unused")
         public String getImplementationVersion() {
             return implementationVersion;
         }
 
+        @SuppressWarnings("unused")
         public String getImplementationTitle() {
             return implementationTitle;
         }
 
+        @SuppressWarnings("unused")
         public String getSpecificationVersion() {
             return specificationVersion;
         }

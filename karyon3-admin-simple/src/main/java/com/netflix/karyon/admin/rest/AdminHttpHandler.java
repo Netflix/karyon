@@ -18,12 +18,14 @@ import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.netflix.archaius.Config;
+import com.netflix.archaius.annotations.ConfigurationSource;
 import com.netflix.karyon.admin.AdminServer;
 import com.netflix.karyon.admin.rest.exception.NotFoundException;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 
 @Singleton
+@ConfigurationSource("karyon_admin")
 public class AdminHttpHandler implements HttpHandler {
     private static final Logger LOG = LoggerFactory.getLogger(AdminHttpHandler.class);
 
@@ -58,6 +60,7 @@ public class AdminHttpHandler implements HttpHandler {
             //  
             if (path.equals("/")) {
                 String addr = new Interpolator(cfg).interpolate(config.remoteServer());
+                LOG.info("Redirecting to '{}'", addr);
                 exchange.getResponseHeaders().set("Location", addr);
                 exchange.sendResponseHeaders(302, 0);
                 exchange.close();

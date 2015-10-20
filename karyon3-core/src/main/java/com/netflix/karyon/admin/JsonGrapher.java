@@ -22,15 +22,13 @@ import com.google.inject.grapher.InterfaceNode;
 import com.google.inject.grapher.KaryonAbstractInjectorGrapher;
 import com.google.inject.grapher.NameFactory;
 import com.google.inject.grapher.Node;
-import com.google.inject.grapher.graphviz.PortIdFactory;
 import com.netflix.governator.ProvisionMetrics;
 import com.netflix.governator.ProvisionMetrics.Element;
 import com.netflix.governator.ProvisionMetrics.Visitor;
 
 class JsonGrapher extends KaryonAbstractInjectorGrapher {
-    private final Map<Key, GraphNode> nodes = Maps.newHashMap();
+    private final Map<Key<?>, GraphNode> nodes = Maps.newHashMap();
     private final NameFactory nameFactory;
-    private final PortIdFactory portIdFactory;
     private PrintWriter out;
     private ProvisionMetrics metrics;
 
@@ -120,9 +118,8 @@ class JsonGrapher extends KaryonAbstractInjectorGrapher {
     
     
     @Inject
-    JsonGrapher(NameFactory nameFactory, PortIdFactory portIdFactory, ProvisionMetrics metrics) {
+    JsonGrapher(NameFactory nameFactory, ProvisionMetrics metrics) {
         this.nameFactory = nameFactory;
-        this.portIdFactory = portIdFactory;
         this.metrics = metrics;
     }
 
