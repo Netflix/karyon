@@ -16,6 +16,6 @@ public class ArchaiusKaryonModuleTest {
         
         Assert.assertTrue(config.getBoolean("application_loaded", false));
         Assert.assertTrue(config.getBoolean("application_test_loaded", false));
-        Assert.assertEquals("application", config.getString("application_override"));
+        Assert.assertEquals("application_test", config.getString("application_override"));
     }
 }
