@@ -10,7 +10,7 @@ import javax.inject.Qualifier;
 /**
  * Qualifier for all admin resources.
  * 
- * Admin resources and meant to be very lightweight with no dependencies.
+ * Admin resources are meant to be very lightweight with no dependencies.
  * Resource endpoints are derived via naming convention from the method names
  * using REST semantics.
  * 
