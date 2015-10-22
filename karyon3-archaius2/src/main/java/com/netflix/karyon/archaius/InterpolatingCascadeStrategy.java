@@ -7,7 +7,7 @@ import com.netflix.archaius.CascadeStrategy;
 import com.netflix.archaius.StrInterpolator;
 import com.netflix.archaius.StrInterpolator.Lookup;
 
-abstract class InterpolatingCascadeStrategy implements CascadeStrategy {
+public abstract class InterpolatingCascadeStrategy implements CascadeStrategy {
     @Override
     public final List<String> generate(String resource, StrInterpolator interpolator, Lookup lookup) {
         List<String> result = new ArrayList<>();

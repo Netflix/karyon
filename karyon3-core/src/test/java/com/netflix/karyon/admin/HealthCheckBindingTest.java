@@ -22,7 +22,6 @@ import com.netflix.karyon.health.HealthIndicator;
 import com.netflix.karyon.health.HealthIndicatorRegistry;
 import com.netflix.karyon.health.HealthIndicators;
 import com.netflix.karyon.health.HealthState;
-import com.netflix.karyon.lifecycle.LifecycleState;
 
 public class HealthCheckBindingTest {
     @Test
