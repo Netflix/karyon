@@ -20,7 +20,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.netflix.archaius.Config;
 import com.netflix.archaius.annotations.ConfigurationSource;
 import com.netflix.karyon.admin.AdminServer;
+import com.netflix.karyon.admin.CachingStaticResourceProvider;
+import com.netflix.karyon.admin.FileSystemResourceProvider;
+import com.netflix.karyon.admin.StaticResource;
+import com.netflix.karyon.admin.StaticResourceProvider;
 import com.netflix.karyon.admin.rest.exception.NotFoundException;
+import com.netflix.karyon.admin.ui.AdminUIServerConfig;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 
@@ -29,9 +34,10 @@ import com.sun.net.httpserver.HttpHandler;
 public class AdminHttpHandler implements HttpHandler {
     private static final Logger LOG = LoggerFactory.getLogger(AdminHttpHandler.class);
 
-    private final Provider<ResourceContainer> resources;
-    private final ObjectMapper mapper;
-    private final AdminServerConfig config;
+    private final StaticResourceProvider        provider;
+    private final Provider<ResourceContainer>   resources;
+    private final ObjectMapper                  mapper;
+    private final AdminServerConfig             config;
 
     private Config cfg;
 
@@ -40,56 +46,63 @@ public class AdminHttpHandler implements HttpHandler {
             @AdminServer ObjectMapper mapper,
             @AdminServer Provider<ResourceContainer> controllers, 
             AdminServerConfig config,
+            AdminUIServerConfig uiConfig,
             Config cfg) {
         this.resources = controllers;
         this.mapper = mapper;
         this.config = config;
         this.cfg = cfg;
+        this.provider = 
+                new CachingStaticResourceProvider(
+                    new FileSystemResourceProvider(
+                        uiConfig.resourcePath(),
+                        uiConfig.mimeTypesResourceName()));
     }
     
     @Override
     public void handle(HttpExchange exchange) throws IOException {
-        LOG.info("'{}'", exchange.getRequestURI());
+        LOG.debug("'{}'", exchange.getRequestURI());
 
         final String path = exchange.getRequestURI().getPath();
         
-        exchange.getResponseHeaders().set("Server", "KaryonAdmin");
-        
         try {
-            // Redirect the server root to the configured remote server using the naming convension
-            //  
-            if (path.equals("/")) {
-                String addr = new Interpolator(cfg).interpolate(config.remoteServer());
-                LOG.info("Redirecting to '{}'", addr);
-                exchange.getResponseHeaders().set("Location", addr);
-                exchange.sendResponseHeaders(302, 0);
-                exchange.close();
-            }
-            else if (path.equals("/favicon.ico")) {
-                exchange.sendResponseHeaders(404, 0);
-                exchange.close();
-            }
-            else {
-                String parts[] = path.substring(1).split("/");
-                String controller = parts[0];
-                List<String> p = new ArrayList<>();
-                for (int i = 1; i < parts.length; i++) {
-                    p.add(parts[i]);
+            try {
+                // Redirect the server root to the configured remote server using the naming convension
+                //  
+                if (path.equals("/")) {
+                    String addr = new Interpolator(cfg).interpolate(config.remoteServer());
+                    LOG.debug("Redirecting to '{}'", addr);
+                    writeRedirectResponse(exchange, addr);
                 }
-                exchange.getResponseHeaders().set("Access-Control-Allow-Origin", config.accessControlAllowOrigin());
-                
-                Object response = resources.get().invoke(controller, p);
-                writeResponse(exchange, 200, response);
+                // Try to serve a resource
+                else {
+                    String parts[] = path.substring(1).split("/");
+                    String controller = parts[0];
+                    List<String> p = new ArrayList<>();
+                    for (int i = 1; i < parts.length; i++) {
+                        p.add(parts[i]);
+                    }
+                    
+                    Object response = resources.get().invoke(controller, p);
+                    exchange.getResponseHeaders().set("Access-Control-Allow-Origin", config.accessControlAllowOrigin());
+                    writeJsonResponse(exchange, 200, response);
+                }
             }
-        }
-        catch (NotFoundException e) {
-            writeResponse(exchange, 404, e.getMessage());
+            // If no resource found then try to serve static content
+            catch (NotFoundException e) {
+                StaticResource resource = provider.getResource(path).get();
+                if (resource.isValid()) {
+                    writeFileResponse(exchange, 200, resource.getData(), resource.getMimeType());
+                }
+                else {
+                    LOG.debug("'{}' Not Found", path);
+                    writeFileResponse(exchange, 404, "not found".getBytes(), null);
+                }
+            }
         }
         catch (Exception e) {
             LOG.error("Error processing request '" + path + "'", e);
-            StringWriter sw = new StringWriter();
-            e.printStackTrace(new PrintWriter(sw));
-            writeResponse(exchange, 500, sw.toString());
+            writeErrorResponse(exchange, e);
         }
     }
 
@@ -104,7 +117,31 @@ public class AdminHttpHandler implements HttpHandler {
             : exchange.getResponseBody();
     }
 
-    private void writeResponse(HttpExchange exchange, int code, Object payload) throws IOException {
+    /**
+     * Common headers written for each response
+     */
+    private void writeCommon(HttpExchange exchange) {
+        exchange.getResponseHeaders().set("Server", "KaryonAdmin");
+    }
+    
+    /**
+     * Redirect the response to a different location
+     */
+    private void writeRedirectResponse(HttpExchange exchange, String addr) throws IOException {
+        writeCommon(exchange);
+        
+        exchange.getResponseHeaders().set("Location", addr);
+        exchange.sendResponseHeaders(302, 0);
+        exchange.close();
+    }
+    
+    /**
+     * Write a JSON response
+     */
+    private void writeJsonResponse(HttpExchange exchange, int code, Object payload) throws IOException {
+        writeCommon(exchange);
+        
+        exchange.getResponseHeaders().set("Access-Control-Allow-Origin", config.accessControlAllowOrigin());
         final boolean useGzip = shouldUseGzip(exchange);
         exchange.getResponseHeaders().set("Content-Type", "application/json");
         if (useGzip) {
@@ -119,5 +156,32 @@ public class AdminHttpHandler implements HttpHandler {
                 mapper.writeValue(os, payload);
             }
         }
+    }
+    
+    /**
+     * Write a static File response
+     */
+    private void writeFileResponse(HttpExchange exchange, int code, byte[] content, String mimeType) throws IOException {
+        writeCommon(exchange);
+        
+        if (mimeType != null) {
+            exchange.getResponseHeaders().set("Content-Type", mimeType);
+        }
+        exchange.sendResponseHeaders(code, content.length);
+        
+        OutputStream os = exchange.getResponseBody();
+        os.write(content);
+        os.close();
+    }
+    
+    /**
+     * Write an error response containing the stack trace.
+     */
+    private void writeErrorResponse(HttpExchange exchange, Exception e) throws IOException {
+        writeCommon(exchange);
+        
+        StringWriter sw = new StringWriter();
+        e.printStackTrace(new PrintWriter(sw));
+        writeJsonResponse(exchange, 500, sw.toString());
     }
 }
