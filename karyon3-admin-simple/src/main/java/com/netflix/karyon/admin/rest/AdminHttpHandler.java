@@ -7,6 +7,7 @@ import java.io.StringWriter;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.zip.GZIPOutputStream;
 
 import javax.inject.Inject;
@@ -38,16 +39,24 @@ public class AdminHttpHandler implements HttpHandler {
     private final Provider<ResourceContainer>   resources;
     private final ObjectMapper                  mapper;
     private final AdminServerConfig             config;
+    private final HttpHandler                   fallback;
 
     private Config cfg;
 
+    private static class OptionalArgs {
+        @com.google.inject.Inject(optional=true)
+        @AdminServerFallback
+        HttpHandler fallbackHandler;
+    }
+    
     @Inject
     public AdminHttpHandler(
             @AdminServer ObjectMapper mapper,
             @AdminServer Provider<ResourceContainer> controllers, 
             AdminServerConfig config,
             AdminUIServerConfig uiConfig,
-            Config cfg) {
+            Config cfg, 
+            OptionalArgs optional) {
         this.resources = controllers;
         this.mapper = mapper;
         this.config = config;
@@ -57,18 +66,21 @@ public class AdminHttpHandler implements HttpHandler {
                     new FileSystemResourceProvider(
                         uiConfig.resourcePath(),
                         uiConfig.mimeTypesResourceName()));
+        this.fallback = optional.fallbackHandler != null ? optional.fallbackHandler : new NotFoundHttpHandler();
     }
     
     @Override
     public void handle(HttpExchange exchange) throws IOException {
         LOG.debug("'{}'", exchange.getRequestURI());
 
+        exchange.getResponseHeaders().set("Server", "KaryonAdmin");
+        exchange.getResponseHeaders().set("Access-Control-Allow-Origin", config.accessControlAllowOrigin());
+        
         final String path = exchange.getRequestURI().getPath();
         
         try {
             try {
-                // Redirect the server root to the configured remote server using the naming convension
-                //  
+                // Redirect the server root to the configured remote server
                 if (path.equals("/")) {
                     String addr = new Interpolator(cfg).interpolate(config.remoteServer());
                     LOG.debug("Redirecting to '{}'", addr);
@@ -90,13 +102,12 @@ public class AdminHttpHandler implements HttpHandler {
             }
             // If no resource found then try to serve static content
             catch (NotFoundException e) {
-                StaticResource resource = provider.getResource(path).get();
-                if (resource.isValid()) {
-                    writeFileResponse(exchange, 200, resource.getData(), resource.getMimeType());
+                Optional<StaticResource> resource = provider.getResource(path).get();
+                if (resource.isPresent()) {
+                    writeFileResponse(exchange, 200, resource.get().getData(), resource.get().getMimeType());
                 }
                 else {
-                    LOG.debug("'{}' Not Found", path);
-                    writeFileResponse(exchange, 404, "not found".getBytes(), null);
+                    fallback.handle(exchange);
                 }
             }
         }
@@ -116,20 +127,11 @@ public class AdminHttpHandler implements HttpHandler {
             ? new GZIPOutputStream(exchange.getResponseBody())
             : exchange.getResponseBody();
     }
-
-    /**
-     * Common headers written for each response
-     */
-    private void writeCommon(HttpExchange exchange) {
-        exchange.getResponseHeaders().set("Server", "KaryonAdmin");
-    }
     
     /**
      * Redirect the response to a different location
      */
     private void writeRedirectResponse(HttpExchange exchange, String addr) throws IOException {
-        writeCommon(exchange);
-        
         exchange.getResponseHeaders().set("Location", addr);
         exchange.sendResponseHeaders(302, 0);
         exchange.close();
@@ -139,7 +141,6 @@ public class AdminHttpHandler implements HttpHandler {
      * Write a JSON response
      */
     private void writeJsonResponse(HttpExchange exchange, int code, Object payload) throws IOException {
-        writeCommon(exchange);
         
         exchange.getResponseHeaders().set("Access-Control-Allow-Origin", config.accessControlAllowOrigin());
         final boolean useGzip = shouldUseGzip(exchange);
@@ -162,8 +163,6 @@ public class AdminHttpHandler implements HttpHandler {
      * Write a static File response
      */
     private void writeFileResponse(HttpExchange exchange, int code, byte[] content, String mimeType) throws IOException {
-        writeCommon(exchange);
-        
         if (mimeType != null) {
             exchange.getResponseHeaders().set("Content-Type", mimeType);
         }
@@ -178,8 +177,6 @@ public class AdminHttpHandler implements HttpHandler {
      * Write an error response containing the stack trace.
      */
     private void writeErrorResponse(HttpExchange exchange, Exception e) throws IOException {
-        writeCommon(exchange);
-        
         StringWriter sw = new StringWriter();
         e.printStackTrace(new PrintWriter(sw));
         writeJsonResponse(exchange, 500, sw.toString());

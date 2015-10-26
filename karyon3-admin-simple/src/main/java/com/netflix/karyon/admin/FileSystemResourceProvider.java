@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 import javax.activation.MimetypesFileTypeMap;
@@ -17,8 +18,6 @@ import com.google.common.net.MediaType;
 
 /**
  * Load resources from a path in the file system
- * 
- * @author elandau
  */
 public class FileSystemResourceProvider implements StaticResourceProvider {
     private static final Logger LOG = LoggerFactory.getLogger(FileSystemResourceProvider.class);
@@ -27,6 +26,12 @@ public class FileSystemResourceProvider implements StaticResourceProvider {
     private final MimetypesFileTypeMap mimeTypes;
     
     public FileSystemResourceProvider(String rootPath, String mimeTypesResourceName) {
+        if (rootPath == null) {
+            throw new IllegalArgumentException("rootPath cannot be null");
+        }
+        if (mimeTypesResourceName == null) {
+            throw new IllegalArgumentException("mimeTypesResourceName cannot be null");
+        }
         this.rootPath = rootPath;
         
         try (InputStream is = this.getClass().getResourceAsStream(mimeTypesResourceName)) {
@@ -38,7 +43,7 @@ public class FileSystemResourceProvider implements StaticResourceProvider {
     }
     
     @Override
-    public CompletableFuture<StaticResource> getResource(String name) {
+    public CompletableFuture<Optional<StaticResource>> getResource(String name) {
         String filename = getSanitizedResourcePath(name);
         try {
             try (final InputStream is = this.getClass().getResourceAsStream(filename)) {
@@ -49,13 +54,13 @@ public class FileSystemResourceProvider implements StaticResourceProvider {
                         mimeType = MediaType.HTML_UTF_8.toString();
                     }
     
-                    return CompletableFuture.completedFuture(new StaticResource(IOUtils.readFully(is, -1, true), mimeType));
+                    return CompletableFuture.completedFuture(Optional.of(new StaticResource(IOUtils.readFully(is, -1, true), mimeType)));
                 }
             }
         }
         catch (NullPointerException | IOException e) {
             LOG.debug("Unable to load resource {}", filename, e);
-            return CompletableFuture.completedFuture(StaticResource.INVALID);
+            return CompletableFuture.completedFuture(Optional.empty());
         }
     }
 

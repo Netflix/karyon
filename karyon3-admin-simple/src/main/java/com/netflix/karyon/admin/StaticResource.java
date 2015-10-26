@@ -9,9 +9,13 @@ public class StaticResource {
     private final String mimeType;
     private final byte[] data;
 
-    public static final StaticResource INVALID = new StaticResource(null, null);
-    
     public StaticResource(byte[] data, String mimeType) {
+        if (data == null) {
+            throw new IllegalArgumentException("Data cannot be null");
+        }
+        if (mimeType == null) {
+            throw new IllegalArgumentException("MimeType cannot be null");
+        }
         this.mimeType = mimeType;
         this.data = data;
     }
@@ -23,9 +27,4 @@ public class StaticResource {
     public byte[] getData() {
         return data;
     }
-
-    public boolean isValid() {
-        return data != null;
-    }
-
 }

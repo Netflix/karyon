@@ -2,6 +2,7 @@ package com.netflix.karyon.admin.ui;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.Optional;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -38,11 +39,11 @@ public class AdminUIHttpHandler implements HttpHandler {
         String path = arg0.getRequestURI().getPath();
         LOG.debug("'{}'", path);
         
-        StaticResource resource;
+        Optional<StaticResource> resource;
         try {
             resource = provider.getResource(path).get();
-            if (resource.isValid()) {
-                writeResponse(arg0, 200, resource.getData(), resource.getMimeType());
+            if (resource.isPresent()) {
+                writeResponse(arg0, 200, resource.get().getData(), resource.get().getMimeType());
                 return;
             }
             else {

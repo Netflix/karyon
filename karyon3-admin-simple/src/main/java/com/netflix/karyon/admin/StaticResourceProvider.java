@@ -1,5 +1,6 @@
 package com.netflix.karyon.admin;
 
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 /**
@@ -8,5 +9,5 @@ import java.util.concurrent.CompletableFuture;
  * @author elandau
  */
 public interface StaticResourceProvider {
-    CompletableFuture<StaticResource> getResource(String name);
+    CompletableFuture<Optional<StaticResource>> getResource(String name);
 }
