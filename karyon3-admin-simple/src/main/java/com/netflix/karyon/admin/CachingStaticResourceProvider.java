@@ -26,7 +26,7 @@ public class CachingStaticResourceProvider implements StaticResourceProvider {
         
         return delegate
                 .getResource(name)
-                .exceptionally((th)   -> { templates.put(name, Optional.empty()); return Optional.empty(); } )
+                .exceptionally((th)   -> { return Optional.empty(); } )
                 .thenApply(    (file) -> { templates.put(name, file); return file; });
     }
 
