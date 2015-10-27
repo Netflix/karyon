@@ -1,23 +1,19 @@
 package com.netflix.karyon.admin.ui;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.io.PrintWriter;
-import java.io.Reader;
-import java.io.StringWriter;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
+import java.util.Optional;
 
-import javax.activation.MimetypesFileTypeMap;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.io.CharStreams;
+import com.netflix.karyon.admin.CachingStaticResourceProvider;
+import com.netflix.karyon.admin.FileSystemResourceProvider;
+import com.netflix.karyon.admin.StaticResource;
+import com.netflix.karyon.admin.StaticResourceProvider;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 
@@ -25,58 +21,38 @@ import com.sun.net.httpserver.HttpHandler;
 public class AdminUIHttpHandler implements HttpHandler {
     private static final Logger LOG = LoggerFactory.getLogger(AdminUIHttpHandler.class);
 
-    private final ConcurrentMap<String, String> templates = new ConcurrentHashMap<>();
     private final AdminUIServerConfig config;
-    private final MimetypesFileTypeMap mimeTypes;
+    private final StaticResourceProvider provider;
     
     @Inject
     public AdminUIHttpHandler(AdminUIServerConfig config) {
         this.config = config;
-        InputStream is = null;
-        try {
-            is = this.getClass().getResourceAsStream(config.mimeTypesResourceName());
-            if (is != null) {
-                mimeTypes  = new MimetypesFileTypeMap(is);
-            }
-            else {
-                throw new RuntimeException("Unable to load mime.types file");
-            }
-        }
-        finally { 
-            if (is != null) {
-                try {
-                    is.close();
-                } catch (IOException e) {
-                    LOG.debug("Unable to close mime type file");
-                }
-            }
-        }
+        this.provider = 
+            new CachingStaticResourceProvider(
+                new FileSystemResourceProvider(
+                    config.resourcePath(),
+                    config.mimeTypesResourceName()));
     }
     
     @Override
     public void handle(HttpExchange arg0) throws IOException {
         String path = arg0.getRequestURI().getPath();
-        LOG.info("'{}'", path);
+        LOG.debug("'{}'", path);
         
+        Optional<StaticResource> resource;
         try {
-            String resource = String.format("/%s%s", config.resourcePath(), path);
-            String content = getResource(resource);
-            if (content != null) {
-                String mimeType  = mimeTypes.getContentType(resource);
-                writeResponse(arg0, 200, content, mimeType);
+            resource = provider.getResource(path).get();
+            if (resource.isPresent()) {
+                writeResponse(arg0, 200, resource.get().getData(), resource.get().getMimeType());
                 return;
             }
-            
-            LOG.info("'{}' Not Found", path);
-            writeResponse(arg0, 404, "not found", null);
-            return;
-        }
-        catch (Exception e) {
-            LOG.error("'{}' Internal error", path, e);
-            StringWriter sw = new StringWriter();
-            e.printStackTrace(new PrintWriter(sw));
-            writeResponse(arg0, 500, sw.toString(), null);
-            return;
+            else {
+                LOG.debug("'{}' Not Found", path);
+                writeResponse(arg0, 404, "not found".getBytes(), null);
+            }
+        } catch (Exception e) {
+            LOG.debug("'{}' Not Found", path);
+            writeResponse(arg0, 404, "not found".getBytes(), null);
         }
     }
     
@@ -89,45 +65,16 @@ public class AdminUIHttpHandler implements HttpHandler {
      * @param mimeType
      * @throws IOException
      */
-    private void writeResponse(HttpExchange arg0, int code, String content, String mimeType) throws IOException {
+    private void writeResponse(HttpExchange arg0, int code, byte[] content, String mimeType) throws IOException {
         arg0.getResponseHeaders().set("Server:", config.getServerName());
         
         if (mimeType != null) {
             arg0.getResponseHeaders().set("Content-Type", mimeType);
         }
-        arg0.sendResponseHeaders(code, content.length());
+        arg0.sendResponseHeaders(code, content.length);
         
         OutputStream os = arg0.getResponseBody();
-        os.write(content.getBytes());
+        os.write(content);
         os.close();
-    }
-    
-    /**
-     * Load a resource from the class path with optional caching of loaded resources
-     * 
-     * @param name
-     * @return
-     * @throws IOException
-     */
-    private String getResource(String name) throws IOException {
-        String template = templates.get(name);
-        if (template != null) {
-            return template;
-        }
-        
-        try (final InputStream is = this.getClass().getResourceAsStream(name)) {
-            if (is != null) {
-                try (final Reader reader = new InputStreamReader(is)) {
-                    template = CharStreams.toString(reader);
-                    if (config.cacheResources()) {
-                        templates.putIfAbsent(name, template);
-                    }
-                    return template;
-                }
-            }
-            else {
-                return null;
-            }
-        }
     }
 }
