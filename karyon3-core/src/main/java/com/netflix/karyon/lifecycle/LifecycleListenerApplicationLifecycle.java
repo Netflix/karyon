@@ -4,6 +4,7 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import com.netflix.governator.LifecycleListener;
+import com.netflix.karyon.api.lifecycle.LifecycleState;
 
 @Singleton
 public class LifecycleListenerApplicationLifecycle extends ManualApplicationLifecycleState implements LifecycleListener {

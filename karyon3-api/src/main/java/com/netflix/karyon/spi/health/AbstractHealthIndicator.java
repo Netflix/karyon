@@ -1,7 +1,10 @@
-package com.netflix.karyon.health;
+package com.netflix.karyon.spi.health;
 
 import java.util.Collections;
 import java.util.Map;
+
+import com.netflix.karyon.api.health.HealthIndicator;
+import com.netflix.karyon.api.health.HealthIndicatorStatus;
 
 public abstract class AbstractHealthIndicator implements HealthIndicator {
     private final String name;
@@ -37,7 +40,7 @@ public abstract class AbstractHealthIndicator implements HealthIndicator {
      */
 
     protected final HealthIndicatorStatus healthy() {
-        return HealthIndicatorStatuses.create(getName(), true, Collections.<String, Object> emptyMap(), null);
+        return HealthIndicatorStatus.create(getName(), true, Collections.<String, Object> emptyMap(), null);
     }
 
     /**
@@ -48,7 +51,7 @@ public abstract class AbstractHealthIndicator implements HealthIndicator {
      * @return a healthy status
      */
     protected final HealthIndicatorStatus healthy(Map<String, Object> attr) {
-        return HealthIndicatorStatuses.create(getName(), true, attr, null);
+        return HealthIndicatorStatus.create(getName(), true, attr, null);
     }
 
     /**
@@ -58,7 +61,7 @@ public abstract class AbstractHealthIndicator implements HealthIndicator {
      * @return a unhealthy status
      */
     protected final HealthIndicatorStatus unhealthy() {
-        return HealthIndicatorStatuses.create(getName(), false, Collections.<String, Object> emptyMap(), null);
+        return HealthIndicatorStatus.create(getName(), false, Collections.<String, Object> emptyMap(), null);
     }
 
     /**
@@ -68,7 +71,7 @@ public abstract class AbstractHealthIndicator implements HealthIndicator {
      * @return a unhealthy status
      */
     protected final HealthIndicatorStatus unhealthy(Map<String, Object> attr) {
-        return HealthIndicatorStatuses.create(getName(), false, attr, null);
+        return HealthIndicatorStatus.create(getName(), false, attr, null);
     }
 
     /**
@@ -78,7 +81,7 @@ public abstract class AbstractHealthIndicator implements HealthIndicator {
      * @return a unhealthy status
      */
     protected final HealthIndicatorStatus unhealthy(Throwable t) {
-        return HealthIndicatorStatuses.create(getName(), false, Collections.<String, Object> emptyMap(), t);
+        return HealthIndicatorStatus.create(getName(), false, Collections.<String, Object> emptyMap(), t);
     }
 
     /**
@@ -88,7 +91,7 @@ public abstract class AbstractHealthIndicator implements HealthIndicator {
      * @return a unhealthy status
      */
     protected final HealthIndicatorStatus unhealthy(Map<String, Object> attr, Throwable t) {
-        return HealthIndicatorStatuses.create(getName(), false, attr, t);
+        return HealthIndicatorStatus.create(getName(), false, attr, t);
     }
 
 }

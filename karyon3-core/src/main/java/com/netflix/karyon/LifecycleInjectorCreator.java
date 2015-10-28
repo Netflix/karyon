@@ -23,6 +23,8 @@ import com.google.inject.util.Modules;
 import com.netflix.governator.ElementsEx;
 import com.netflix.governator.LifecycleInjector;
 import com.netflix.governator.LifecycleManager;
+import com.netflix.karyon.api.KaryonFeatures;
+import com.netflix.karyon.api.PropertySource;
 import com.netflix.karyon.conditional.Condition;
 import com.netflix.karyon.conditional.Conditional;
 import com.netflix.karyon.conditional.OverrideModule;
@@ -35,7 +37,7 @@ import com.netflix.karyon.conditional.OverrideModule;
  * @author elandau
  *
  */
-class LifecycleInjectorCreator {
+final class LifecycleInjectorCreator {
     public static LifecycleInjector createInjector(final KaryonConfiguration config) {
         Logger LOG = LoggerFactory.getLogger(LifecycleInjectorCreator.class);
         LOG.info("Using profiles : " + config.getProfiles());
@@ -99,17 +101,19 @@ class LifecycleInjectorCreator {
             
             Injector injector = Guice.createInjector(
                     config.getStage(),
-                    new LifecycleModule(),
-                    new AbstractModule() {
-                        @Override
-                        protected void configure() {
-                            bind(LifecycleManager.class).toInstance(manager);
-                            bind(KaryonConfiguration.class).toInstance(config);
-                            bind(PropertySource.class).toInstance(config.getPropertySource());
-                            bind(KaryonAutoContext.class).toInstance(context);
-                        }
-                    },
-                    coreModule
+                    Modules.override(config.getDefaultModules()).with(
+                        new LifecycleModule(),
+                        new AbstractModule() {
+                            @Override
+                            protected void configure() {
+                                bind(LifecycleManager.class).toInstance(manager);
+                                bind(KaryonConfiguration.class).toInstance(config);
+                                bind(PropertySource.class).toInstance(config.getPropertySource());
+                                bind(KaryonAutoContext.class).toInstance(context);
+                            }
+                        },
+                        coreModule
+                        )
                     );
             manager.notifyStarted();
             return new LifecycleInjector(injector, manager);

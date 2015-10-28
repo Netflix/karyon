@@ -1,7 +1,8 @@
-package com.netflix.karyon;
+package com.netflix.karyon.api;
+
 
 /**
- * Core karyon features.  Features are configured/enabled on {@link KaryonConfiguration}
+ * Core karyon features 
  * 
  * @author elandau
  */

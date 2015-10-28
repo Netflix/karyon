@@ -6,9 +6,9 @@ import com.google.inject.AbstractModule;
 import com.netflix.karyon.Karyon;
 import com.netflix.karyon.admin.rest.AdminServerModule;
 import com.netflix.karyon.admin.ui.AdminUIServerModule;
+import com.netflix.karyon.api.health.HealthIndicator;
 import com.netflix.karyon.archaius.ArchaiusKaryonModule;
 import com.netflix.karyon.example.jetty.FooServiceHealthIndicator;
-import com.netflix.karyon.health.HealthIndicator;
 import com.netflix.karyon.rxnetty.server.RxNettyServerModule;
 import com.netflix.karyon.rxnetty.shutdown.ShutdownServerModule;
 

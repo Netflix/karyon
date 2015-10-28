@@ -7,7 +7,7 @@ import javax.inject.Singleton;
 import com.netflix.archaius.Config;
 import com.netflix.archaius.config.MapConfig;
 import com.netflix.archaius.guice.ConfigSeeder;
-import com.netflix.karyon.ServerContext;
+import com.netflix.karyon.api.ServerContext;
 
 /**
  * Used to seed a configuration layer for ServerContext keys with local server

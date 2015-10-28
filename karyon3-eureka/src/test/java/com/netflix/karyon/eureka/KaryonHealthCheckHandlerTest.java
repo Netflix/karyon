@@ -9,14 +9,16 @@ import org.junit.Test;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
+import com.google.inject.util.Modules;
 import com.netflix.appinfo.HealthCheckHandler;
 import com.netflix.appinfo.InstanceInfo.InstanceStatus;
 import com.netflix.archaius.guice.ArchaiusModule;
 import com.netflix.governator.Governator;
-import com.netflix.karyon.health.HealthCheck;
-import com.netflix.karyon.health.HealthState;
-import com.netflix.karyon.lifecycle.ApplicationLifecycle;
-import com.netflix.karyon.lifecycle.LifecycleState;
+import com.netflix.karyon.KaryonDefaultsModule;
+import com.netflix.karyon.api.health.HealthCheck;
+import com.netflix.karyon.api.health.HealthState;
+import com.netflix.karyon.api.lifecycle.ApplicationLifecycle;
+import com.netflix.karyon.api.lifecycle.LifecycleState;
 import com.netflix.karyon.lifecycle.ManualApplicationLifecycleState;
 
 public class KaryonHealthCheckHandlerTest {
@@ -43,7 +45,7 @@ public class KaryonHealthCheckHandlerTest {
 	@Test
 	public void testSuccessful() {
 		final Tracker tracker = new Tracker();
-		Injector injector = Governator.createInjector(new ArchaiusModule(), new EurekaHealthCheckModule(), new AbstractModule() {
+		Injector injector = Governator.createInjector(new KaryonDefaultsModule(), new ArchaiusModule(), new EurekaHealthCheckModule(), new AbstractModule() {
 			@Override
 			protected void configure() {
 		        bind(HealthCheckHandler.class).to(KaryonHealthCheckHandler.class);
@@ -61,7 +63,7 @@ public class KaryonHealthCheckHandlerTest {
 		final Tracker tracker = new Tracker();
 		Injector injector = null;
 		try {
-			injector = Governator.createInjector(new ArchaiusModule(), new EurekaHealthCheckModule(), new AbstractModule() {
+			injector = Governator.createInjector(new KaryonDefaultsModule(), new ArchaiusModule(), new EurekaHealthCheckModule(), new AbstractModule() {
 				@Override
 				protected void configure() {
 					bind(Tracker.class).toInstance(tracker);
@@ -80,14 +82,14 @@ public class KaryonHealthCheckHandlerTest {
 	@Test
 	public void testManualStart() {
 	    final Tracker tracker = new Tracker();
-        Injector injector = Governator.createInjector(new ArchaiusModule(), new EurekaHealthCheckModule(), new AbstractModule() {
+        Injector injector = Governator.createInjector(Modules.override(new KaryonDefaultsModule()).with(new ArchaiusModule(), new EurekaHealthCheckModule(), new AbstractModule() {
             @Override
             protected void configure() {
                 bind(ApplicationLifecycle.class).to(ManualApplicationLifecycleState.class);
                 bind(Tracker.class).toInstance(tracker);
                 requestInjection(tracker);
             }
-        });
+        }));
         
         Assert.assertEquals(InstanceStatus.STARTING, tracker.initialStatus);
         Assert.assertEquals(InstanceStatus.STARTING, tracker.handler.getStatus(InstanceStatus.STARTING));

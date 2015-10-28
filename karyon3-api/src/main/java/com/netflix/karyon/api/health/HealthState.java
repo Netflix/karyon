@@ -1,5 +1,8 @@
-package com.netflix.karyon.health;
+package com.netflix.karyon.api.health;
 
+/**
+ * Health state of an application
+ */
 public enum HealthState {
     Starting,
     Healthy,

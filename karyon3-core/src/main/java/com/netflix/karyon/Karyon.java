@@ -13,6 +13,9 @@ import java.util.Set;
 import com.google.inject.Module;
 import com.google.inject.Stage;
 import com.netflix.governator.LifecycleInjector;
+import com.netflix.karyon.api.KaryonFeature;
+import com.netflix.karyon.api.KaryonFeatures;
+import com.netflix.karyon.api.PropertySource;
 import com.netflix.karyon.conditional.ConditionalOnProfile;
 import com.netflix.karyon.spi.ModuleListTransformer;
 
@@ -61,6 +64,8 @@ import com.netflix.karyon.spi.ModuleListTransformer;
  *      +-------------------+
  *      | Bootstrap Exposed |
  *      +-------------------+
+ *      |  Default Modules  |
+ *      +-------------------+
  */
 public class Karyon {
     private static final String KARYON_PROFILES = "karyon.profiles";
@@ -73,6 +78,7 @@ public class Karyon {
     protected List<ModuleListProvider>    moduleProviders   = new ArrayList<>();
     protected Map<KaryonFeature, Boolean> features          = new HashMap<>();
     protected Stage                       stage             = Stage.DEVELOPMENT;
+    protected List<Module>                defaultModules    = new ArrayList<>();
     protected List<Module>                modules           = new ArrayList<>();
     protected List<Module>                overrideModules   = new ArrayList<>();
     protected List<ModuleListTransformer> transformers      = new ArrayList<>();
@@ -142,12 +148,41 @@ public class Karyon {
         }
         return this;
     }
+    
+    /**
+     * Add a module with default bindings that may be overridden by the core 
+     * list of modules.  This is an alternative to using Guice's ImplementedBy
+     * defaults as it makes it couples the interface definition with the default
+     * implementation and all of its dependencies.
+     * 
+     * @param modules
+     */
+    public Karyon addDefaultModules(List<Module> modules) {
+        if (modules != null) {
+            this.defaultModules.addAll(modules);
+        }
+        return this;
+    }
+    
+    /**
+     * Add a module with default bindings that may be overridden by the core 
+     * list of modules.  This is an alternative to using Guice's ImplementedBy
+     * defaults as it makes it couples the interface definition with the default
+     * implementation and all of its dependencies.
+     * 
+     * @param modules
+     */
+    public Karyon addDefaultModules(Module ... modules) {
+        if (modules != null) {
+            this.defaultModules.addAll(Arrays.asList(modules));
+        }
+        return this;
+    }
 
     /**
      * Specify the Guice stage in which the application is running.  By default Karyon
      * runs in Stage.DEVELOPMENT to achieve default lazy singleton behavior. 
      * @param stage
-     * @return
      */
     public Karyon inStage(Stage stage) {
         this.stage = stage;
@@ -157,7 +192,6 @@ public class Karyon {
     /**
      * Add a module finder such as a ServiceLoaderModuleFinder or ClassPathScannerModuleFinder
      * @param provider
-     * @return
      */
     public Karyon addAutoModuleListProvider(ModuleListProvider provider) {
         if (provider != null) {
@@ -261,7 +295,6 @@ public class Karyon {
      * sequence of calls to the builder 
      * 
      * @param modules
-     * @return The builder
      */
     public Karyon apply(KaryonModule ... modules) {
         if (modules != null) {
@@ -284,6 +317,8 @@ public class Karyon {
      * @return The builder
      */
     public LifecycleInjector start(String[] args) {
+        this.addDefaultModules(new KaryonDefaultsModule());
+        
         if (this.getPropertySource().equals(DefaultPropertySource.INSTANCE) && isFeatureEnabled(KaryonFeatures.USE_ARCHAIUS)) { 
             try {
                 apply((KaryonModule) Class.forName("com.netflix.karyon.archaius.ArchaiusKaryonModule").newInstance());
@@ -324,6 +359,11 @@ public class Karyon {
                 return moduleProviders;
             }
 
+            @Override
+            public List<Module> getDefaultModules() {
+                return defaultModules;
+            }
+            
             @Override
             public Set<String> getProfiles() {
                 return profiles;

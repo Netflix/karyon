@@ -6,6 +6,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.BiConsumer;
 
+import com.netflix.karyon.api.health.HealthIndicator;
+import com.netflix.karyon.api.health.HealthIndicatorStatus;
+
 /**
  * Health check implementation that caches the response
  *
@@ -41,10 +44,10 @@ public class CachingHealthIndicator implements HealthIndicator {
                                     status = t;
                                 }
                                 else if (u != null) {
-                                    status = HealthIndicatorStatuses.unhealthy(getName(), u);
+                                    status = HealthIndicatorStatus.unhealthy(getName(), u);
                                 }
                                 else {
-                                    status = HealthIndicatorStatuses.unhealthy(getName(), new Exception("Unknown"));
+                                    status = HealthIndicatorStatus.unhealthy(getName(), new Exception("Unknown"));
                                 }
                             }
                             finally {

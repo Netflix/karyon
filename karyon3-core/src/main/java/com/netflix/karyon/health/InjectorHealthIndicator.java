@@ -5,17 +5,19 @@ import java.util.concurrent.CompletableFuture;
 import javax.inject.Singleton;
 
 import com.netflix.governator.DefaultLifecycleListener;
+import com.netflix.karyon.api.health.HealthIndicator;
+import com.netflix.karyon.api.health.HealthIndicatorStatus;
 
 @Singleton
-public class InjectorHealthIndicator extends DefaultLifecycleListener implements HealthIndicator {
+final public class InjectorHealthIndicator extends DefaultLifecycleListener implements HealthIndicator {
 
     private volatile Throwable error;
     
     @Override
     public CompletableFuture<HealthIndicatorStatus> check() {
         return (error != null) 
-            ? CompletableFuture.completedFuture(HealthIndicatorStatuses.unhealthy(getName(), error))
-            : CompletableFuture.completedFuture(HealthIndicatorStatuses.healthy(getName()));
+            ? CompletableFuture.completedFuture(HealthIndicatorStatus.unhealthy(getName(), error))
+            : CompletableFuture.completedFuture(HealthIndicatorStatus.healthy(getName()));
     }
 
     @Override

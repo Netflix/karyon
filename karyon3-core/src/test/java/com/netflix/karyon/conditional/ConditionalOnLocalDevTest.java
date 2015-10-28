@@ -6,7 +6,7 @@ import org.junit.Test;
 
 import com.google.inject.Injector;
 import com.netflix.karyon.Karyon;
-import com.netflix.karyon.KaryonFeatures;
+import com.netflix.karyon.api.KaryonFeatures;
 import com.netflix.karyon.conditional.impl.OnLocalDevCondition;
 
 public class ConditionalOnLocalDevTest {

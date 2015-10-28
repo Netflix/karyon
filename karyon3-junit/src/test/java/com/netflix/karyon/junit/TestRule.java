@@ -4,7 +4,7 @@ import org.junit.Rule;
 import org.junit.Test;
 
 import com.netflix.governator.LifecycleInjector;
-import com.netflix.karyon.KaryonFeatures;
+import com.netflix.karyon.api.KaryonFeatures;
 
 public class TestRule {
     @Rule

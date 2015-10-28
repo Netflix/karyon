@@ -3,7 +3,7 @@ package com.netflix.karyon.conditional.impl;
 import javax.inject.Inject;
 
 import com.google.inject.Singleton;
-import com.netflix.karyon.PropertySource;
+import com.netflix.karyon.api.PropertySource;
 import com.netflix.karyon.conditional.Condition;
 import com.netflix.karyon.conditional.ConditionalOnProperty;
 
