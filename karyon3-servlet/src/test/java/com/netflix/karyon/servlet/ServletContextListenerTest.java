@@ -27,6 +27,7 @@ import com.netflix.karyon.Karyon;
 public class ServletContextListenerTest {
     private static String RESPONSE = "Hello World!";
     
+    @SuppressWarnings("serial")
     @Singleton
     public static class MyServlet extends HttpServlet {
         protected void doGet(HttpServletRequest req, HttpServletResponse resp)
@@ -40,8 +41,7 @@ public class ServletContextListenerTest {
     public static class TestServletContextListener extends KaryonServletContextListener {
         @Override
         protected LifecycleInjector createInjector() throws Exception {
-            return Karyon
-                .from()
+            return Karyon.forApplication("test")
                 .addModules(
                         new ServletModule() {
                             @Override
