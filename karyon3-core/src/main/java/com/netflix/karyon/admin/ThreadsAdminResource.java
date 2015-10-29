@@ -42,7 +42,7 @@ public class ThreadsAdminResource {
                     .stream().map(
                         (e) ->         e.getClassName() 
                                + "#" + e.getMethodName() 
-                               + ":" + e.getLineNumber())
+                               + "(" + e.getFileName() + ":" + e.getLineNumber() + ")")
                    .collect(Collectors.toList());
         }
     }
