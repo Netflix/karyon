@@ -137,7 +137,7 @@ public class ArchaiusKaryonModule extends AbstractKaryonModule {
             if (appName != null) {
                 props.put(ServerContext.APP_ID, appName);
             }
-            else {
+            else if (getKaryon().getApplicationName() != null) {
                 props.put(ServerContext.APP_ID, getKaryon().getApplicationName());
             }
             

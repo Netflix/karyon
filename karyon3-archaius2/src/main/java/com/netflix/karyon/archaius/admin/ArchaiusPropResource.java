@@ -37,7 +37,12 @@ public class ArchaiusPropResource {
         while (iter.hasNext()) {
             String key = iter.next();
             if (regex == null || key.matches(regex)) {
-                props.put(key, (String) config.getString(key, "****"));
+                try {
+                    props.put(key, (String) config.getString(key, "****"));
+                }
+                catch (Exception e) {
+                    props.put(key, "*** ERROR PARSING PROPERTY : " + e.getMessage());
+                }
             }
         }
         return new PropsModel(props);
