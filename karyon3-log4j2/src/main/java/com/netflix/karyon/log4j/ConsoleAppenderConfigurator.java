@@ -18,7 +18,7 @@ import com.netflix.archaius.Config;
 
 @Singleton
 public class ConsoleAppenderConfigurator implements Log4jConfigurator {
-    private static final String PROP_LOG4J_PATTERN = "karyon.log4j.pattern";
+    private static final String PROP_LOG4J_PATTERN = "karyon.log4j.appender.Console.pattern";
     
     private static final String DEFAULT_PATTERN = "%d{HH:mm:ss,SSS} [%t] %-5p %c %x %m %n";
 
