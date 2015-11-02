@@ -38,6 +38,16 @@ public class ConsoleAppenderConfigurator implements Log4jConfigurator {
         
         @Nullable
         String getFooter();
+        
+        @DefaultValue("INFO")
+        String getLevel();
+        
+        @DefaultValue("false")
+        Boolean getFollow();
+        
+        @DefaultValue("true")
+        Boolean getIgnore();
+
     }
     
     private final AppenderConfig _config;
@@ -62,9 +72,9 @@ public class ConsoleAppenderConfigurator implements Log4jConfigurator {
 
         // Add the Console appender
         Appender appender;
-        appender = ConsoleAppender.createAppender(layout, null, null, "Console", null, null);
+        appender = ConsoleAppender.createAppender(layout, null, null, "Console", _config.getFollow().toString(), _config.getIgnore().toString());
         appender.start();
-        config.getRootLogger().addAppender(appender, Level.INFO, null);
+        config.getRootLogger().addAppender(appender, Level.valueOf(_config.getLevel()), null);
     }
 
 }
