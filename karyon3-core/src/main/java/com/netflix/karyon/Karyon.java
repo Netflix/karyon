@@ -65,8 +65,6 @@ import com.netflix.karyon.spi.ModuleListTransformer;
 public class Karyon {
     private static final String KARYON_PROFILES = "karyon.profiles";
     
-    private static final String DEFAULT_APPLICATION_NAME = "KaryonApplication";
-    
     protected final String                applicationName;
     protected PropertySource              propertySource    = DefaultPropertySource.INSTANCE;
     protected Set<String>                 profiles          = new LinkedHashSet<>();
@@ -83,6 +81,11 @@ public class Karyon {
     static {
         System.setProperty("archaius.default.configuration.class",      "com.netflix.archaius.bridge.StaticAbstractConfiguration");
         System.setProperty("archaius.default.deploymentContext.class",  "com.netflix.archaius.bridge.StaticDeploymentContext");
+    }
+    
+    @Deprecated
+    private Karyon() {
+        this(null);
     }
     
     protected Karyon(String applicationName) {
@@ -374,7 +377,7 @@ public class Karyon {
      */
     @Deprecated
     public static Karyon create() {
-        return new Karyon(DEFAULT_APPLICATION_NAME);
+        return new Karyon();
     }
     
     /**
@@ -382,7 +385,7 @@ public class Karyon {
      */
     @Deprecated
     public static Karyon create(Module ... modules) {
-        return new Karyon(DEFAULT_APPLICATION_NAME).addModules(modules);
+        return new Karyon().addModules(modules);
     }
     
     /**
@@ -390,7 +393,7 @@ public class Karyon {
      */
     @Deprecated
     public static Karyon from(KaryonModule ... modules) {
-        Karyon karyon = new Karyon(DEFAULT_APPLICATION_NAME);
+        Karyon karyon = new Karyon();
         if (modules != null) {
             for (KaryonModule module : modules) {
                 karyon.apply(module);

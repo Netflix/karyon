@@ -1,6 +1,5 @@
 package org.apache.logging.log4j.core;
 
-import java.util.Iterator;
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -14,6 +13,7 @@ import org.apache.logging.log4j.core.config.LoggerConfig;
 import org.apache.logging.log4j.core.config.Order;
 import org.apache.logging.log4j.core.config.plugins.Plugin;
 import org.apache.logging.log4j.core.config.xml.XmlConfiguration;
+import org.apache.logging.log4j.core.util.NameUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,7 +42,6 @@ import com.netflix.archaius.Config;
 @Order(10)
 public class ArchaiusLog4J2ConfigurationFactory extends ConfigurationFactory {
 	
-    
     public static final String[] SUFFIXES = new String[] {".xml", "*"};
     
     private static Config config;
@@ -53,7 +52,7 @@ public class ArchaiusLog4J2ConfigurationFactory extends ConfigurationFactory {
     @Inject
     public static void initialize(Config _config, Set<Log4jConfigurator> _configurators) {
         config = _config;
-        configurators=_configurators;
+        configurators = _configurators;
         LoggerContext ctx = (LoggerContext) LogManager.getContext(false);
         ctx.reconfigure();
     }
@@ -87,26 +86,35 @@ public class ArchaiusLog4J2ConfigurationFactory extends ConfigurationFactory {
         }
 
         @Override
+        public LoggerConfig getLoggerConfig(String name) {
+            LoggerConfig loggerConfig = super.getLoggerConfig(name);
+            String substr = name;
+            while ((substr = NameUtil.getSubName(substr)) != null) {
+                String value = config.getString("log4j.logger." + substr, null);
+                if (value != null) {
+                    loggerConfig.setLevel(Level.getLevel(value));
+                }
+            }
+            return loggerConfig;
+        }
+        
+        @Override
         protected void doConfigure() {
             super.doConfigure();
  
+            // Call all injected Configurators to apply their configuration
             if (configurators != null) {
                 for (Log4jConfigurator configurator : configurators) {
                     configurator.doConfigure(this);
                 }
             }
-
-            // TOD: Get materialized view
-
-            // Set up all the log level overrides
-            Config loggerProps = config.getPrefixedView("log4j.logger");
-            Iterator<String> iter = loggerProps.getKeys();
-            while (iter.hasNext()) {
-                String name = iter.next();
-                String value = loggerProps.getString(name); // TODO: Full log4j.logger value parsing
-                LOG.debug("Setting logger " + name + " => " + value);
-                this.addLogger(name, new LoggerConfig(name, Level.getLevel(value), true));
-            }
+            
+            // On any change to the root configuration trigger a reconfigure of this log4j configuration
+            // This will result in getLoggerConfig(name) getting called for each instance of Logger
+            config.addListener(ConfigListeners.any((config) -> {
+                LoggerContext ctx = (LoggerContext)LogManager.getContext(false);
+                ctx.updateLoggers(); 
+            }));
         }
     }
 }
