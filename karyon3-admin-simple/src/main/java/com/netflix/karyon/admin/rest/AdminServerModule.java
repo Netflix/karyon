@@ -1,13 +1,7 @@
 package com.netflix.karyon.admin.rest;
 
-import java.io.IOException;
-import java.util.LinkedHashMap;
-import java.util.Map;
-
 import javax.inject.Singleton;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
 import com.google.inject.Provides;
 import com.google.inject.multibindings.MapBinder;
 import com.netflix.archaius.ConfigProxyFactory;
@@ -25,6 +19,8 @@ public final class AdminServerModule extends DefaultModule {
         install(new AdminModule());
         install(new HttpServerModule());
         
+        bind(SimpleHttpServer.class).annotatedWith(AdminServer.class).to(AdminRestHttpServer.class).asEagerSingleton();
+
         MapBinder.newMapBinder(binder(), String.class, HttpHandler.class, AdminServer.class);
     }
     
@@ -43,28 +39,6 @@ public final class AdminServerModule extends DefaultModule {
         return factory.newProxy(AdminServerConfig.class);
     }
     
-    @Provides
-    @Singleton
-    @AdminServer
-    protected SimpleHttpServer getAdminServer(@AdminServer HttpServerConfig config, @AdminServer Map<String, HttpHandler> otherHandlers, AdminHttpHandler adminHandler) throws IOException {
-        LinkedHashMap<String, HttpHandler> handlers = new LinkedHashMap<>();
-        handlers.putAll(otherHandlers);
-        handlers.put("/", adminHandler);
-        return new SimpleHttpServer(config, handlers);
-    }
-    
-    @Provides
-    @Singleton
-    @AdminServer
-    protected ObjectMapper getMapper(AdminServerConfig config) {
-        ObjectMapper mapper = new ObjectMapper();
-        mapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
-        if (config.prettyPrint()) {
-            mapper.enable(SerializationFeature.INDENT_OUTPUT);
-        }
-        return mapper;
-    }
-
     @Override
     public boolean equals(Object obj) {
         return AdminServerModule.class.equals(obj.getClass());

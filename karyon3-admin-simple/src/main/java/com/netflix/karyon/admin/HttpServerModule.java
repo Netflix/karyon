@@ -4,7 +4,6 @@ package com.netflix.karyon.admin;
 public final class HttpServerModule extends AbstractAdminModule {
     @Override
     protected void configure() {
-        bind(SimpleHttpServerStarter.class).asEagerSingleton();
         bind(HttpServerRegistry.class).to(GuiceHttpServerRegistry.class);
         bindAdminResource("http").to(HttpServerAdminResource.class);
     }
