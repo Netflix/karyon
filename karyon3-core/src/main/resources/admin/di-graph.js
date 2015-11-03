@@ -4,8 +4,6 @@ $(document).ready(function(){
     var tab = hash[2];
         
     $.get("http://" + host + "/di-graph", function(graph) {
-        console.log(graph);
-        
         var nodes = {};
         var links = [];
         

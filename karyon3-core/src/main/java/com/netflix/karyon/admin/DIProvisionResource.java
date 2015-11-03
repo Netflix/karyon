@@ -1,5 +1,8 @@
 package com.netflix.karyon.admin;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Stack;
 import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
@@ -18,25 +21,47 @@ public class DIProvisionResource {
         this.metrics = metrics;
     }
     
-    public String get() {
-        final StringBuilder sb = new StringBuilder();
+    public static class Node {
+        private final String name;
+        private final List<Node> children;
+        private final long value;
+        
+        public Node(String name, List<Node> children, long value) {
+            this.name = name;
+            this.children = children;
+            this.value = value < 0 ? 0 : value;
+        }
+        public String getName() {
+            return name;
+        }
+        public List<Node> getChildren() {
+            return children;
+        }
+        public long getValue() {
+            return value;
+        }
+    }
+    
+    public Node get() {
+        final List<Node> result = new ArrayList<>();
+        final Stack<List<Node>> stack = new Stack<>();
+        stack.push(result);
+        
         metrics.accept(new Visitor() {
-            int level = 1;
-            
             @Override
             public void visit(Element entry) {
-                sb.append(String.format("%" + (level * 3 - 2) + "s%s%s : %d ms (%d ms)\n", 
-                        "",
-                        entry.getKey().getTypeLiteral().toString(), 
-                        entry.getKey().getAnnotation() == null ? "" : " [" + entry.getKey().getAnnotation() + "]",
-                        entry.getTotalDuration(TimeUnit.MILLISECONDS),
-                        entry.getDuration(TimeUnit.MILLISECONDS)
-                        ));
-                level++;
+                final List<Node> children = new ArrayList<Node>();
+                stack.peek().add(new Node(entry.getKey().toString(), children, entry.getTotalDuration(TimeUnit.MILLISECONDS)));
+               
+                stack.push(children);
                 entry.accept(this);
-                level--;
+                stack.pop();
             }
         });
-        return sb.toString();
+        long duration = 0;
+        for (Node node : result) {
+            duration += node.getValue();
+        }
+        return new Node("app", result, duration);
     }
 }

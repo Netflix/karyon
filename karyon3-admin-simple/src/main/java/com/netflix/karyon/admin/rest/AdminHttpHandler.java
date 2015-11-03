@@ -27,7 +27,6 @@ import com.netflix.karyon.admin.FileSystemResourceProvider;
 import com.netflix.karyon.admin.StaticResource;
 import com.netflix.karyon.admin.StaticResourceProvider;
 import com.netflix.karyon.admin.rest.exception.NotFoundException;
-import com.netflix.karyon.admin.ui.AdminUIServerConfig;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 
@@ -54,7 +53,6 @@ public class AdminHttpHandler implements HttpHandler {
     public AdminHttpHandler(
             @AdminServer Provider<ResourceContainer> controllers, 
             AdminServerConfig config,
-            AdminUIServerConfig uiConfig,
             Config cfg, 
             OptionalArgs optional) {
         this.resources = controllers;
@@ -65,11 +63,12 @@ public class AdminHttpHandler implements HttpHandler {
         }
         this.config = config;
         this.cfg = cfg;
-        this.provider = 
-                new CachingStaticResourceProvider(
-                    new FileSystemResourceProvider(
-                        uiConfig.resourcePath(),
-                        uiConfig.mimeTypesResourceName()));
+        
+        FileSystemResourceProvider resourceProvider = new FileSystemResourceProvider(
+                config.resourcePath(),
+                config.mimeTypesResourceName());
+        
+        this.provider = config.cacheResources() ? new CachingStaticResourceProvider(resourceProvider) : resourceProvider;
         this.fallback = optional.fallbackHandler != null ? optional.fallbackHandler : new NotFoundHttpHandler();
     }
     

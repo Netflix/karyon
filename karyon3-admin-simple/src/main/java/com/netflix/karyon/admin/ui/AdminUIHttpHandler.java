@@ -27,11 +27,12 @@ public class AdminUIHttpHandler implements HttpHandler {
     @Inject
     public AdminUIHttpHandler(AdminUIServerConfig config) {
         this.config = config;
-        this.provider = 
-            new CachingStaticResourceProvider(
-                new FileSystemResourceProvider(
-                    config.resourcePath(),
-                    config.mimeTypesResourceName()));
+        
+        FileSystemResourceProvider resourceProvider = new FileSystemResourceProvider(
+                config.resourcePath(),
+                config.mimeTypesResourceName());
+        
+        this.provider = config.cacheResources() ? new CachingStaticResourceProvider(resourceProvider) : resourceProvider;
     }
     
     @Override
