@@ -18,6 +18,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import com.netflix.archaius.Config;
 import com.netflix.archaius.annotations.ConfigurationSource;
 import com.netflix.karyon.admin.AdminServer;
@@ -51,14 +52,17 @@ public class AdminHttpHandler implements HttpHandler {
     
     @Inject
     public AdminHttpHandler(
-            @AdminServer ObjectMapper mapper,
             @AdminServer Provider<ResourceContainer> controllers, 
             AdminServerConfig config,
             AdminUIServerConfig uiConfig,
             Config cfg, 
             OptionalArgs optional) {
         this.resources = controllers;
-        this.mapper = mapper;
+        this.mapper = new ObjectMapper();
+        mapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
+        if (config.prettyPrint()) {
+            mapper.enable(SerializationFeature.INDENT_OUTPUT);
+        }
         this.config = config;
         this.cfg = cfg;
         this.provider = 

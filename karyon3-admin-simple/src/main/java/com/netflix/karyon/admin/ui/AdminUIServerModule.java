@@ -1,8 +1,5 @@
 package com.netflix.karyon.admin.ui;
 
-import java.io.IOException;
-import java.util.Collections;
-
 import javax.inject.Singleton;
 
 import com.google.inject.Provides;
@@ -12,12 +9,13 @@ import com.netflix.karyon.admin.AdminUIServer;
 import com.netflix.karyon.admin.HttpServerConfig;
 import com.netflix.karyon.admin.HttpServerModule;
 import com.netflix.karyon.admin.SimpleHttpServer;
-import com.sun.net.httpserver.HttpHandler;
 
 public final class AdminUIServerModule extends DefaultModule {
     @Override
     protected void configure() {
         install(new HttpServerModule());
+        
+        bind(SimpleHttpServer.class).annotatedWith(AdminUIServer.class).to(AdminUIHttpServer.class).asEagerSingleton();
     }
     
     // This binds our admin server to Archaius configuration using the prefix
@@ -25,21 +23,14 @@ public final class AdminUIServerModule extends DefaultModule {
     @Provides
     @Singleton
     @AdminUIServer
-    protected HttpServerConfig getAdminSUIerverConfig(AdminUIServerConfig config) {
+    protected HttpServerConfig getAdminUIServerConfig(AdminUIServerConfig config) {
         return config;
     }
     
     @Provides
     @Singleton
-    protected AdminUIServerConfig getAdminSUIerverConfig(ConfigProxyFactory factory) {
+    protected AdminUIServerConfig getAdminUIServerConfig(ConfigProxyFactory factory) {
         return factory.newProxy(AdminUIServerConfig.class);
-    }
-    
-    @Provides
-    @Singleton
-    @AdminUIServer
-    protected SimpleHttpServer getAdminUIServer(@AdminUIServer HttpServerConfig config, AdminUIHttpHandler handler) throws IOException {
-        return new SimpleHttpServer(config, Collections.<String, HttpHandler>singletonMap("/", handler));
     }
     
     @Override

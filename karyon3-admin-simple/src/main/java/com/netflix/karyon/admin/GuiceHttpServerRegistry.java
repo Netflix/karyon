@@ -10,6 +10,7 @@ import javax.inject.Singleton;
 
 import com.google.inject.Binding;
 import com.google.inject.Injector;
+import com.google.inject.Key;
 import com.google.inject.TypeLiteral;
 
 @Singleton
@@ -22,22 +23,29 @@ public class GuiceHttpServerRegistry implements HttpServerRegistry {
         {
             List<Binding<SimpleHttpServer>> bindings = injector.findBindingsByType(TypeLiteral.get(SimpleHttpServer.class));
             for (Binding<SimpleHttpServer> binding : bindings) {
-                servers.put(
-                        binding.getKey().getAnnotation() != null ? binding.getKey().getAnnotation().toString() : "default", 
-                        binding.getProvider());
+                servers.put(getAnnotationDescription(binding.getKey()), binding.getProvider());
             }
         }
         
         {
             List<Binding<HttpServerConfig>> bindings = injector.findBindingsByType(TypeLiteral.get(HttpServerConfig.class));
             for (Binding<HttpServerConfig> binding : bindings) {
-                configs.put(
-                        binding.getKey().getAnnotation() != null ? binding.getKey().getAnnotation().toString() : "default", 
-                        binding.getProvider().get());
+                configs.put(getAnnotationDescription(binding.getKey()), binding.getProvider().get());
             }
         }
     }
     
+    private static String getAnnotationDescription(Key<?> key) {
+        if (key.getAnnotation() != null) {
+            return key.getAnnotation().toString();
+        }
+        else if (key.getAnnotationType() != null) {
+            return key.getAnnotationType().getSimpleName();
+        }
+        else {
+            return "default";
+        }
+    }
     @Override
     public Map<String, Provider<SimpleHttpServer>> getServers() {
         return servers;
