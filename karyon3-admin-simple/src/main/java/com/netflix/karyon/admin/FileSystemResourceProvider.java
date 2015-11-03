@@ -50,7 +50,7 @@ public class FileSystemResourceProvider implements StaticResourceProvider {
                 try (final Reader reader = new InputStreamReader(is)) {
                     String mimeType  = mimeTypes.getContentType(filename);
                     // Instead of using the default application/octet-stream use text/html
-                    if (MediaType.OCTET_STREAM.equals(mimeType)) {
+                    if (MediaType.OCTET_STREAM.equals(MediaType.parse(mimeType))) {
                         mimeType = MediaType.HTML_UTF_8.toString();
                     }
     

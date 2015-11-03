@@ -2,6 +2,7 @@ package com.netflix.karyon.admin;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Stack;
 import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
@@ -20,47 +21,47 @@ public class DIProvisionResource {
         this.metrics = metrics;
     }
     
-    public static interface Node {
-        String getKey();
-        int getIndent();
-        long getTotalDuration();
-        long getDuration();
+    public static class Node {
+        private final String name;
+        private final List<Node> children;
+        private final long value;
+        
+        public Node(String name, List<Node> children, long value) {
+            this.name = name;
+            this.children = children;
+            this.value = value < 0 ? 0 : value;
+        }
+        public String getName() {
+            return name;
+        }
+        public List<Node> getChildren() {
+            return children;
+        }
+        public long getValue() {
+            return value;
+        }
     }
     
-    public List<Node> get() {
-        List<Node> result = new ArrayList<>();
+    public Node get() {
+        final List<Node> result = new ArrayList<>();
+        final Stack<List<Node>> stack = new Stack<>();
+        stack.push(result);
+        
         metrics.accept(new Visitor() {
-            int level = 1;
-            
             @Override
             public void visit(Element entry) {
-                result.add(new Node() {
-                    @Override
-                    public String getKey() {
-                        return entry.getKey().toString();
-                    }
-
-                    @Override
-                    public int getIndent() {
-                        return level;
-                    }
-
-                    @Override
-                    public long getTotalDuration() {
-                        return entry.getTotalDuration(TimeUnit.MILLISECONDS);
-                    }
-
-                    @Override
-                    public long getDuration() {
-                        return entry.getDuration(TimeUnit.MILLISECONDS);
-                    }
-                    
-                });
-                level++;
+                final List<Node> children = new ArrayList<Node>();
+                stack.peek().add(new Node(entry.getKey().toString(), children, entry.getTotalDuration(TimeUnit.MILLISECONDS)));
+               
+                stack.push(children);
                 entry.accept(this);
-                level--;
+                stack.pop();
             }
         });
-        return result;
+        long duration = 0;
+        for (Node node : result) {
+            duration += node.getValue();
+        }
+        return new Node("app", result, duration);
     }
 }

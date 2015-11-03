@@ -18,7 +18,7 @@ public interface AdminServerConfig extends HttpServerConfig {
     /**
      * Admin specific settings
      */
-    @DefaultValue("http://${karyon.publicHostname}:8078/index.html#/${karyon.publicHostname}:8077/appinfo")
+    @DefaultValue("http://${karyon.publicHostname}:8078/index.html#/${karyon.publicHostname}:8077/meta")
     String remoteServer();
     
     @DefaultValue("${karyon.hostname}")
@@ -29,4 +29,14 @@ public interface AdminServerConfig extends HttpServerConfig {
     
     @DefaultValue("true")
     Boolean prettyPrint();
+    
+    @DefaultValue("false")
+    boolean cacheResources();
+    
+    @DefaultValue("admin")
+    String resourcePath();
+    
+    @DefaultValue("/mime.types")
+    String mimeTypesResourceName();
+
 }
