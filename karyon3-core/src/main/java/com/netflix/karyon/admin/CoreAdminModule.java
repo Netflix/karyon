@@ -19,6 +19,7 @@ public final class CoreAdminModule extends AbstractAdminModule {
         bindAdminResource("guice-lifecycle").to(GuiceLifecycleResource.class);
         bindAdminResource("di-provision").to(DIProvisionResource.class);
         bindAdminResource("threads").to(ThreadsAdminResource.class);
+        bindAdminResource("system-mbean").to(SystemInfoResource.class);
         
         // These are needed in DIGraphResource
         bind(NameFactory.class).to(ShortNameFactory.class);
