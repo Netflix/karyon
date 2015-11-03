@@ -1,5 +1,6 @@
 package com.netflix.karyon;
 
+import java.lang.annotation.Annotation;
 import java.util.List;
 import java.util.Set;
 
@@ -26,6 +27,27 @@ public interface KaryonAutoContext {
      * @return Return true if a binding exists for a key
      */
     <T> boolean hasBinding(Class<T> type);
+
+    /**
+     * 
+     * @param type
+     * @param qualifier
+     * @return Return true if a binding exists for a type and qualifier
+     */
+    <T> boolean hasBinding(Class<T> type, Class<? extends Annotation> qualifier);
+
+    /**
+     * @param type
+     * @return Return true if there exists an injection point for the specified type
+     */
+    <T> boolean hasInjectionPoint(Class<T> type);
+
+    /**
+     * @param type
+     * @param qualifier
+     * @return Return true if there exists an injection point for the specified type and qualifier
+     */
+    <T> boolean hasInjectionPoint(Class<T> type, Class<? extends Annotation> qualifier);
 
     /**
      * Get all elements that are part of the core modules

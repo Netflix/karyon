@@ -13,5 +13,6 @@ import com.netflix.karyon.conditional.impl.OnMissingBindingCondition;
 @Documented
 @Conditional(OnMissingBindingCondition.class)
 public @interface ConditionalOnMissingBinding {
-    String[] value();
+    String value();
+    String qualifier() default "";
 }

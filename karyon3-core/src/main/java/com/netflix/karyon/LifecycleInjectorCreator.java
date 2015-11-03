@@ -2,6 +2,7 @@ package com.netflix.karyon;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -51,9 +52,10 @@ class LifecycleInjectorCreator {
         
         // Construct the injector using our override structure
         try {
-            final List<Element> elements   = Elements.getElements(Stage.DEVELOPMENT, config.getModules());
-            final Set<Key<?>>   keys       = ElementsEx.getAllInjectionKeys(elements);
-            final Set<String>  moduleNames = new HashSet<>(ElementsEx.getAllSourceModules(elements));
+            final List<Element> elements      = Elements.getElements(Stage.DEVELOPMENT, config.getModules());
+            final Set<Key<?>>   injectionKeys = ElementsEx.getAllInjectionKeys(elements);
+            final Set<Key<?>>   boundKeys     = ElementsEx.getAllBoundKeys(elements);
+            final Set<String>   moduleNames   = new HashSet<>(ElementsEx.getAllSourceModules(elements));
             
             final KaryonAutoContext context = new KaryonAutoContext() {
                 @Override
@@ -68,7 +70,20 @@ class LifecycleInjectorCreator {
 
                 @Override
                 public <T> boolean hasBinding(Class<T> type) {
-                    return keys.contains(Key.get(type));
+                    return boundKeys.contains(Key.get(type));
+                }
+                
+                @Override
+                public <T> boolean hasBinding(Class<T> type, Class<? extends Annotation> qualifier) {
+                    if (qualifier != null) {
+                        return boundKeys.contains(Key.get(type, qualifier));
+                    }
+                    else {
+                        if (Modifier.isAbstract( type.getModifiers() ) || type.isInterface()) {
+                            return boundKeys.contains(Key.get(type));
+                        }
+                        return true;
+                    }
                 }
                 
                 @Override
@@ -84,6 +99,21 @@ class LifecycleInjectorCreator {
                 @Override
                 public Set<String> getModules() {
                     return moduleNames;
+                }
+
+                @Override
+                public <T> boolean hasInjectionPoint(Class<T> type) {
+                    return hasInjectionPoint(type);
+                }
+
+                @Override
+                public <T> boolean hasInjectionPoint(Class<T> type, Class<? extends Annotation> qualifier) {
+                    if (qualifier != null) {
+                        return injectionKeys.contains(Key.get(type, qualifier));
+                    }
+                    else {
+                        return injectionKeys.contains(Key.get(type));
+                    }
                 }
             };
             
