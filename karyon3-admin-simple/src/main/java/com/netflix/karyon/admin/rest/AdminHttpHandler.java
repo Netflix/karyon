@@ -79,41 +79,48 @@ public class AdminHttpHandler implements HttpHandler {
         final String path = exchange.getRequestURI().getPath();
         
         try {
-            try {
-                // Redirect the server root to the configured remote server
-                if (path.equals("/")) {
-                    String addr = new Interpolator(cfg).interpolate(config.remoteServer());
-                    LOG.debug("Redirecting to '{}'", addr);
-                    writeRedirectResponse(exchange, addr);
-                }
-                // Try to serve a resource
-                else {
-                    String parts[] = path.substring(1).split("/");
-                    String controller = parts[0];
-                    List<String> p = new ArrayList<>();
-                    for (int i = 1; i < parts.length; i++) {
-                        p.add(parts[i]);
-                    }
-                    
-                    Object response = resources.get().invoke(controller, p);
-                    exchange.getResponseHeaders().set("Access-Control-Allow-Origin", config.accessControlAllowOrigin());
-                    writeJsonResponse(exchange, 200, response);
-                }
+            // Redirect the server root to the configured remote server
+            if (path.equals("/")) {
+                String addr = new Interpolator(cfg).interpolate(config.remoteServer());
+                LOG.debug("Redirecting to '{}'", addr);
+                writeRedirectResponse(exchange, addr);
             }
-            // If no resource found then try to serve static content
-            catch (NotFoundException e) {
-                Optional<StaticResource> resource = provider.getResource(path).get();
+            // Try to serve a resource
+            else {
+                String parts[] = path.substring(1).split("/");
+                String controller = parts[0];
+                List<String> p = new ArrayList<>();
+                for (int i = 1; i < parts.length; i++) {
+                    p.add(parts[i]);
+                }
+                
+                Object response = resources.get().invoke(controller, p);
+                exchange.getResponseHeaders().set("Access-Control-Allow-Origin", config.accessControlAllowOrigin());
+                writeJsonResponse(exchange, 200, response);
+            }
+        }
+        // If no resource found then try to serve static content
+        catch (NotFoundException e) {
+            Optional<StaticResource> resource;
+            try {
+                resource = provider.getResource(path).get();
                 if (resource.isPresent()) {
                     writeFileResponse(exchange, 200, resource.get().getData(), resource.get().getMimeType());
                 }
                 else {
                     fallback.handle(exchange);
                 }
+            } catch (Exception e1) {
+                LOG.error("Error processing request '" + path + "'", e);
+                writeErrorResponse(exchange, e);
             }
         }
         catch (Exception e) {
             LOG.error("Error processing request '" + path + "'", e);
             writeErrorResponse(exchange, e);
+        }
+        finally {
+            exchange.close();
         }
     }
 
@@ -134,14 +141,12 @@ public class AdminHttpHandler implements HttpHandler {
     private void writeRedirectResponse(HttpExchange exchange, String addr) throws IOException {
         exchange.getResponseHeaders().set("Location", addr);
         exchange.sendResponseHeaders(302, 0);
-        exchange.close();
     }
     
     /**
      * Write a JSON response
      */
     private void writeJsonResponse(HttpExchange exchange, int code, Object payload) throws IOException {
-        
         exchange.getResponseHeaders().set("Access-Control-Allow-Origin", config.accessControlAllowOrigin());
         final boolean useGzip = shouldUseGzip(exchange);
         exchange.getResponseHeaders().set("Content-Type", "application/json");
@@ -170,7 +175,6 @@ public class AdminHttpHandler implements HttpHandler {
         
         OutputStream os = exchange.getResponseBody();
         os.write(content);
-        os.close();
     }
     
     /**

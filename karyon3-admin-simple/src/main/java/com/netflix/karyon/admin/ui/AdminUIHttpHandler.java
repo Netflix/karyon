@@ -50,9 +50,13 @@ public class AdminUIHttpHandler implements HttpHandler {
                 LOG.debug("'{}' Not Found", path);
                 writeResponse(arg0, 404, "not found".getBytes(), null);
             }
-        } catch (Exception e) {
+        } 
+        catch (Exception e) {
             LOG.debug("'{}' Not Found", path);
             writeResponse(arg0, 404, "not found".getBytes(), null);
+        }
+        finally {
+            arg0.close();
         }
     }
     
@@ -75,6 +79,5 @@ public class AdminUIHttpHandler implements HttpHandler {
         
         OutputStream os = arg0.getResponseBody();
         os.write(content);
-        os.close();
     }
 }
