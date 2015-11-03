@@ -67,9 +67,9 @@
          });
          
         $.get('http://' + host + '/meta', function (meta) { 
-            $('#header-appname').html(meta.appId);
-            $('#header-region').html(meta.region);
-            $('#header-serverId').html(meta.serverId);
+            $('#header-appname').html(meta['karyon.appId']);
+            $('#header-region').html(meta['karyon.region']);
+            $('#header-serverId').html(meta['karyon.serverId']);
          });
     }
 

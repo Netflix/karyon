@@ -1,5 +1,7 @@
 package com.netflix.karyon.admin;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
@@ -18,25 +20,47 @@ public class DIProvisionResource {
         this.metrics = metrics;
     }
     
-    public String get() {
-        final StringBuilder sb = new StringBuilder();
+    public static interface Node {
+        String getKey();
+        int getIndent();
+        long getTotalDuration();
+        long getDuration();
+    }
+    
+    public List<Node> get() {
+        List<Node> result = new ArrayList<>();
         metrics.accept(new Visitor() {
             int level = 1;
             
             @Override
             public void visit(Element entry) {
-                sb.append(String.format("%" + (level * 3 - 2) + "s%s%s : %d ms (%d ms)\n", 
-                        "",
-                        entry.getKey().getTypeLiteral().toString(), 
-                        entry.getKey().getAnnotation() == null ? "" : " [" + entry.getKey().getAnnotation() + "]",
-                        entry.getTotalDuration(TimeUnit.MILLISECONDS),
-                        entry.getDuration(TimeUnit.MILLISECONDS)
-                        ));
+                result.add(new Node() {
+                    @Override
+                    public String getKey() {
+                        return entry.getKey().toString();
+                    }
+
+                    @Override
+                    public int getIndent() {
+                        return level;
+                    }
+
+                    @Override
+                    public long getTotalDuration() {
+                        return entry.getTotalDuration(TimeUnit.MILLISECONDS);
+                    }
+
+                    @Override
+                    public long getDuration() {
+                        return entry.getDuration(TimeUnit.MILLISECONDS);
+                    }
+                    
+                });
                 level++;
                 entry.accept(this);
                 level--;
             }
         });
-        return sb.toString();
+        return result;
     }
 }
