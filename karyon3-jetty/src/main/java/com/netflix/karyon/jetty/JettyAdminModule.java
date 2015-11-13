@@ -1,7 +1,7 @@
 package com.netflix.karyon.jetty;
 
+import com.google.inject.AbstractModule;
 import com.netflix.governator.guice.jetty.JettyModule;
-import com.netflix.karyon.admin.AbstractAdminModule;
 import com.netflix.karyon.admin.AdminModule;
 import com.netflix.karyon.conditional.ConditionalOnModule;
 
@@ -12,10 +12,10 @@ import com.netflix.karyon.conditional.ConditionalOnModule;
  *
  */
 @ConditionalOnModule({AdminModule.class, JettyModule.class})
-public final class JettyAdminModule extends AbstractAdminModule {
+public final class JettyAdminModule extends AbstractModule {
     @Override
     protected void configure() {
-        bindAdminResource("jetty").to(JettyAdminResource.class);
+        bind(JettyAdminResource.class);
     }
     
     @Override

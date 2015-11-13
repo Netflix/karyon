@@ -13,6 +13,7 @@ import com.netflix.governator.ProvisionMetrics.Element;
 import com.netflix.governator.ProvisionMetrics.Visitor;
 
 @Singleton
+@AdminService(name="di-provision", index="list")
 public class DIProvisionResource {
     private final ProvisionMetrics metrics;
 
@@ -42,7 +43,7 @@ public class DIProvisionResource {
         }
     }
     
-    public Node get() {
+    public Node list() {
         final List<Node> result = new ArrayList<>();
         final Stack<List<Node>> stack = new Stack<>();
         stack.push(result);

@@ -9,6 +9,7 @@ import javax.inject.Singleton;
 import com.google.inject.Injector;
 
 @Singleton
+@AdminService(name="guice-keys", index="list")
 public class DIGraphResource {
     private final JsonGrapher grapher;
     private final Injector injector;
@@ -19,7 +20,7 @@ public class DIGraphResource {
         this.injector = injector;
     }
 
-    public String get() throws Exception {
+    public String list() throws Exception {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         PrintWriter out = new PrintWriter(baos);
         

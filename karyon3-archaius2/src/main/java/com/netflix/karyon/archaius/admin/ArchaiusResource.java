@@ -1,5 +1,6 @@
 package com.netflix.karyon.archaius.admin;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -9,27 +10,40 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import com.netflix.archaius.Config;
+import com.netflix.archaius.config.CompositeConfig;
 import com.netflix.archaius.visitor.PropertyOverrideVisitor;
+import com.netflix.karyon.admin.AdminService;
 
-// props
 @Singleton
-public class ArchaiusPropResource {
-    private final Config config;
+@AdminService(name="props", index="getAllProperties")
+public class ArchaiusResource {
+    private final CompositeConfig config;
 
     @Inject
-    public ArchaiusPropResource(Config config) {
-        this.config = config;
+    public ArchaiusResource(Config config) {
+        this.config = (CompositeConfig)config;
     }
 
-    // props/
-    public PropsModel get() {
+    public PropsModel getAllProperties() {
         return get(config, null);
     }
     
-    // props/:regex (MAP)
-    public PropsModel get(String regex) {
-        return get(config, regex);
+    public PropsModel findProperty(PropertyRequest request) {
+        return get(config, request.getRegex());
     }
+    
+    public Collection<String> getLayerNames() {
+        return this.config.getConfigNames();
+    }
+    
+    public PropsModel getLayerProperties(PropertyRequest request) {
+        return get(config.getConfig(request.getLayerName()), null);
+    }
+    
+    public LinkedHashMap<String, String> getPropertySources(PropertyRequest request) {
+        return config.accept(new PropertyOverrideVisitor(request.getKey()));
+    }
+    
     
     private PropsModel get(Config config, String regex) {
         Map<String, String> props = new HashMap<>();
@@ -48,8 +62,4 @@ public class ArchaiusPropResource {
         return new PropsModel(props);
     }
     
-    // props/:id/sources (MAP)
-    public LinkedHashMap<String, String> getSources(String key) {
-        return config.accept(new PropertyOverrideVisitor(key));
-    }
 }

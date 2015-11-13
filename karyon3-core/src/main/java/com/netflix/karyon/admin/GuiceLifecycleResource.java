@@ -7,6 +7,7 @@ import com.netflix.governator.LifecycleManager;
 import com.netflix.governator.LifecycleManager.State;
 
 @Singleton
+@AdminService(name="guice-lifecycle", index="current")
 public class GuiceLifecycleResource {
     private LifecycleManager manager;
 
@@ -20,7 +21,7 @@ public class GuiceLifecycleResource {
         this.manager = manager;
     }
     
-    public Response get() {
+    public Response current() {
         return new Response() {
             @Override
             public State getState() {

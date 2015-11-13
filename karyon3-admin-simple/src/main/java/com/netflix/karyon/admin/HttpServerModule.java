@@ -1,11 +1,13 @@
 package com.netflix.karyon.admin;
 
+import com.google.inject.AbstractModule;
 
-public final class HttpServerModule extends AbstractAdminModule {
+
+public final class HttpServerModule extends AbstractModule {
     @Override
     protected void configure() {
         bind(HttpServerRegistry.class).to(GuiceHttpServerRegistry.class);
-        bindAdminResource("http").to(HttpServerAdminResource.class);
+        bind(HttpServerAdminResource.class);
     }
     
     @Override

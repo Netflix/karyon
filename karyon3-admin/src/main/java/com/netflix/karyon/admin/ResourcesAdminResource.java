@@ -1,22 +1,22 @@
 package com.netflix.karyon.admin;
 
 import java.util.Set;
+import java.util.TreeSet;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import com.netflix.karyon.admin.rest.ResourceContainer;
-
 @Singleton
+@AdminService(name="resources", index="list")
 public class ResourcesAdminResource {
-    private ResourceContainer registry;
+    private final AdminServiceRegistry services;
 
     @Inject
-    public ResourcesAdminResource(@AdminServer ResourceContainer registry) {
-        this.registry = registry;
+    public ResourcesAdminResource(AdminServiceRegistry services) {
+        this.services = services;
     }
     
-    public Set<String> get() {
-        return registry.getNames();
+    public Set<String> list() {
+        return new TreeSet<>(services.getServiceNames());
     }
 }

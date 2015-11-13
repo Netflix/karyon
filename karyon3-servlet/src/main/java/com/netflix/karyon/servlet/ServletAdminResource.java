@@ -6,8 +6,10 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import com.google.inject.servlet.ServletInfo;
+import com.netflix.karyon.admin.AdminService;
 
 @Singleton
+@AdminService(name="servlet", index="get")
 public class ServletAdminResource {
     private ServletInfo info;
 

@@ -16,6 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Singleton
+@AdminService(name="jars", index="list")
 public class JarsAdminResource {
     private static final Logger LOG = LoggerFactory.getLogger(JarsAdminResource.class);
     
@@ -24,7 +25,7 @@ public class JarsAdminResource {
     private static volatile List<JarInfo> jars;
     
     // Return entire list of jars
-    public List<JarInfo> get() {
+    public List<JarInfo> list() {
         if (jars == null) {
             List<JarInfo> jarInfos = new ArrayList<>();
     

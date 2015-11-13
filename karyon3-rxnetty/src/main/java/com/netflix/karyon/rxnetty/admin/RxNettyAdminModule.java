@@ -1,15 +1,15 @@
 package com.netflix.karyon.rxnetty.admin;
 
-import com.netflix.karyon.admin.AbstractAdminModule;
+import com.google.inject.AbstractModule;
 import com.netflix.karyon.admin.AdminModule;
 import com.netflix.karyon.conditional.ConditionalOnModule;
 import com.netflix.karyon.rxnetty.server.RxNettyModule;
 
 @ConditionalOnModule(value = {AdminModule.class, RxNettyModule.class})
-public final class RxNettyAdminModule extends AbstractAdminModule {
+public final class RxNettyAdminModule extends AbstractModule {
     @Override
     protected void configure() {
-        this.bindAdminResource("rxnetty").to(RxNettyAdminResource.class);
+        bind(RxNettyAdminResource.class);
     }
     
     @Override
