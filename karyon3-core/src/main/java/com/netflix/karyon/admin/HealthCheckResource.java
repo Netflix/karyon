@@ -14,6 +14,7 @@ import com.netflix.karyon.health.HealthCheckStatus;
  *
  */
 @Singleton
+@AdminService(name="health", index="current")
 public class HealthCheckResource {
     private final HealthCheck healthCheck;
 
@@ -22,7 +23,7 @@ public class HealthCheckResource {
         this.healthCheck = healthCheck;
     }
 
-    public HealthCheckStatus get() {
+    public HealthCheckStatus current() {
         return healthCheck.check().join();
     }
 

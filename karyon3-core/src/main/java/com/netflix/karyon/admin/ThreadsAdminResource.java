@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 import javax.inject.Singleton;
 
 @Singleton
+@AdminService(name="threads", index="list")
 public class ThreadsAdminResource {
     static class Details {
         private Thread thread;
@@ -47,7 +48,7 @@ public class ThreadsAdminResource {
         }
     }
     
-    public List<Details> get() {
+    public List<Details> list() {
         return Thread
                 .getAllStackTraces()
                 .keySet()

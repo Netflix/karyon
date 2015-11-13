@@ -35,10 +35,9 @@
         }
 
         if (changed) {
-            sammy.load('http://' + host + '/resources')
+            sammy.load('http://' + host + '/resources/list')
                  .then(function (json) {
                      var items = JSON.parse(json);
-                     items.push('appinfo');
                      items.sort();
                      var tabs = items.map(function (name) {
                      return {
@@ -56,17 +55,17 @@
     }
     
     function updateHeader(sammy, context, h, t) {
-        $.get('http://' + host + '/guice-lifecycle', function (lifecycle) { 
+        $.get('http://' + host + '/guice-lifecycle/current', function (lifecycle) { 
              $('#header-lifecycle-state').html(lifecycle.state);
              $('#header-lifecycle-state').removeClass().addClass("label " + lifecycleStateLabel[lifecycle.state]);
          });
              
-        $.get('http://' + host + '/health', function (health) { 
+        $.get('http://' + host + '/health/current', function (health) { 
              $('#header-health-state').html(health.state);
              $('#header-health-state').removeClass().addClass("label " + healthStateLabel[health.state]);
          });
          
-        $.get('http://' + host + '/meta', function (meta) { 
+        $.get('http://' + host + '/meta/list', function (meta) { 
             $('#header-appname').html(meta['karyon.appId']);
             $('#header-region').html(meta['karyon.region']);
             $('#header-serverId').html(meta['karyon.serverId']);
@@ -89,10 +88,6 @@
         return props;
     }
 
-    function toPath(tab) {
-        return (tab === "appinfo") ? 'props' : tab;
-    }
-
     var app = $.sammy('#main-content', function() {
     
         this.post('#/', function(context) {
@@ -100,7 +95,7 @@
         });
     
         this.get('#/:host', function(context) {
-            window.location = '#/' + this.params['host'] + '/appinfo';
+            window.location = '#/' + this.params['host'] + '/health';
         });
     
         this.get('#/:host/:tab', function(context) {
@@ -111,7 +106,7 @@
                    params['tab'] + ".html", 
                    {
                        error : function(response) {
-                           $.get('http://' + params['host'] + '/' + toPath(params['tab']), function(json) { 
+                           $.get('http://' + params['host'] + '/' + params['tab'], function(json) { 
                                var code = JSON.stringify(json, null, 2);
                                $.get('code.template', function (template) {
                                    var rendered = Mustache.render(template, {'lang': 'json', 'code': code});

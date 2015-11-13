@@ -11,8 +11,10 @@ import javax.inject.Singleton;
 import com.netflix.appinfo.InstanceInfo;
 import com.netflix.discovery.DiscoveryClient;
 import com.netflix.discovery.shared.Application;
+import com.netflix.karyon.admin.AdminService;
 
 @Singleton
+@AdminService(name="eureka-apps", index="list")
 public class EurekaApplicationAdminResource {
     private DiscoveryClient client;
 
@@ -60,31 +62,43 @@ public class EurekaApplicationAdminResource {
         }
     }
     
-    public Map<String, Summary> get() {
+    public static class GetRequest {
+        String appName;
+        
+        public String getAppName() {
+            return appName;
+        }
+        
+        public void setAppName(String name) {
+            this.appName = name;
+        }
+    }
+
+    public Map<String, Summary> list() {
         return client.getApplications()
                 .getRegisteredApplications()
                 .stream()
                 .collect(Collectors.toMap((app) -> app.getName(), (app) -> new Summary(app)));
     }
     
-    public List<String> get(String appName) {
+    public List<String> get(GetRequest request) {
         return client.getApplications()
-                .getRegisteredApplications(appName)
+                .getRegisteredApplications(request.getAppName())
                 .getInstances()
                 .stream()
                 .map((inst) -> inst.getId()).collect(Collectors.toList());
     }
     
-    public List<InstanceInfo> getInstances(String appName) {
-        return client.getApplications().getRegisteredApplications(appName).getInstances();
+    public List<InstanceInfo> getInstances(GetRequest request) {
+        return client.getApplications().getRegisteredApplications(request.getAppName()).getInstances();
     }
     
-    public Map<String, Long> getAsgs(String appName) {
-        return new Summary(client.getApplications().getRegisteredApplications(appName)).getAsgs();
+    public Map<String, Long> getAsgs(GetRequest request) {
+        return new Summary(client.getApplications().getRegisteredApplications(request.getAppName())).getAsgs();
     }
 
-    public Map<String, Long> getVips(String appName) {
-        return new Summary(client.getApplications().getRegisteredApplications(appName)).getVips();
+    public Map<String, Long> getVips(GetRequest request) {
+        return new Summary(client.getApplications().getRegisteredApplications(request.getAppName())).getVips();
     }
     
     private static void increment(Map<String, Long> counts, String key) {

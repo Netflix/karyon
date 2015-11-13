@@ -12,6 +12,7 @@ import com.google.inject.Injector;
 import com.google.inject.Key;
 
 @Singleton
+@AdminService(name="guice-keys", index="list")
 public class GuiceKeysAdminResource {
     private final Injector injector;
 
@@ -20,8 +21,7 @@ public class GuiceKeysAdminResource {
         this.injector = injector;
     }
     
-    // /guice-keys/
-    public Set<String> get() {
+    public Set<String> list() {
         Set<String> modules = new HashSet<>();
         for (Entry<Key<?>, Binding<?>> binding : injector.getAllBindings().entrySet()) {
             modules.add(binding.getKey().toString());

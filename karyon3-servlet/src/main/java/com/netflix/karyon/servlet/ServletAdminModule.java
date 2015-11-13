@@ -1,6 +1,6 @@
 package com.netflix.karyon.servlet;
 
-import com.netflix.karyon.admin.AbstractAdminModule;
+import com.google.inject.AbstractModule;
 import com.netflix.karyon.admin.AdminModule;
 import com.netflix.karyon.conditional.ConditionalOnModule;
 
@@ -11,9 +11,9 @@ import com.netflix.karyon.conditional.ConditionalOnModule;
  *
  */
 @ConditionalOnModule({AdminModule.class})
-public final class ServletAdminModule extends AbstractAdminModule {
+public final class ServletAdminModule extends AbstractModule {
     @Override
     protected void configure() {
-        bindAdminResource("servlet").to(ServletAdminResource.class);
+        bind(ServletAdminResource.class);
     }
 }

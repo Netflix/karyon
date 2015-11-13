@@ -6,8 +6,10 @@ import javax.inject.Singleton;
 import com.netflix.appinfo.InstanceInfo;
 import com.netflix.appinfo.InstanceInfo.InstanceStatus;
 import com.netflix.discovery.DiscoveryClient;
+import com.netflix.karyon.admin.AdminService;
 
 @Singleton
+@AdminService(name="eureka-status", index="current")
 public class EurekaStatusAdminResource {
     private final DiscoveryClient client;
     private final InstanceInfo instanceInfo;
@@ -23,7 +25,7 @@ public class EurekaStatusAdminResource {
         public String getRegion();
     }
     
-    public DiscoveryStatus get() {
+    public DiscoveryStatus current() {
         return new DiscoveryStatus() {
             @Override
             public String getRegion() {

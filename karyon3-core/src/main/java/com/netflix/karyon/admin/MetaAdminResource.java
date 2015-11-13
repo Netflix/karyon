@@ -10,6 +10,7 @@ import javax.inject.Singleton;
 import com.netflix.archaius.Config;
 
 @Singleton
+@AdminService(name="meta", index="list")
 public class MetaAdminResource {
     private Map<String, String> prop = new HashMap<>();
     
@@ -25,7 +26,7 @@ public class MetaAdminResource {
         }
     }
     
-    public Map<String, String> get() {
+    public Map<String, String> list() {
         return prop;
     }
 }

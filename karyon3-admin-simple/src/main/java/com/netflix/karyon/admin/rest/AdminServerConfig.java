@@ -12,13 +12,13 @@ public interface AdminServerConfig extends HttpServerConfig {
     @DefaultValue("Admin")
     String name();
     
-    @DefaultValue("8077")
+    @DefaultValue("8076")
     int port();
     
     /**
      * Admin specific settings
      */
-    @DefaultValue("http://${karyon.publicHostname}:8078/index.html#/${karyon.publicHostname}:8077/meta")
+    @DefaultValue("http://${karyon.publicHostname}:8078/index.html#/${karyon.publicHostname}:8076/health")
     String remoteServer();
     
     @DefaultValue("${karyon.hostname}")

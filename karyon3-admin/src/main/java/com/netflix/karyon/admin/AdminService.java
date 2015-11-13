@@ -5,17 +5,9 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import javax.inject.Qualifier;
-
-/**
- * Qualifier to isolate Admin server bindings
- * 
- * @author elandau
- *
- */
-@Qualifier
-@Target({ElementType.FIELD, ElementType.PARAMETER, ElementType.METHOD})
+@Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
-public @interface AdminUIServer {
-
+public @interface AdminService {
+    String name();
+    String index();
 }

@@ -11,9 +11,11 @@ import javax.inject.Singleton;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Maps;
+import com.netflix.karyon.admin.AdminService;
 import com.netflix.karyon.rxnetty.server.RxNettyHttpServerRegistry;
 
 @Singleton
+@AdminService(name="netty", index="current")
 public class RxNettyAdminResource {
     private final RxNettyHttpServerRegistry registry;
     
@@ -26,8 +28,7 @@ public class RxNettyAdminResource {
         this.registry = registry;
     }
     
-    // rxnetty/
-    public Map<String, ServerInfo> get() {
+    public Map<String, ServerInfo> list() {
         return Maps.transformValues(registry.getServers(), new Function<Provider<HttpServer<ByteBuf, ByteBuf>>, ServerInfo>() {
             @Override
             public ServerInfo apply(final Provider<HttpServer<ByteBuf, ByteBuf>> provider) {
@@ -42,9 +43,21 @@ public class RxNettyAdminResource {
         });
     }
     
+    public static class GetRequest {
+        String name;
+        
+        public void setName(String name) {
+            this.name = name;
+        }
+        
+        public String getName() {
+            return name;
+        }
+    }
+    
     // rxnetty/:name
-    public ServerInfo get(String name) {
-        Provider<HttpServer<ByteBuf, ByteBuf>> provider = registry.getServers().get(name);
+    public ServerInfo get(GetRequest request) {
+        Provider<HttpServer<ByteBuf, ByteBuf>> provider = registry.getServers().get(request.getName());
         if (provider == null) {
             return null;
         }

@@ -1,12 +1,7 @@
 package com.netflix.karyon.admin;
 
-import java.util.Map;
+import com.google.inject.AbstractModule;
 
-import javax.inject.Singleton;
-
-import com.google.inject.Provides;
-import com.netflix.karyon.admin.rest.DefaultResourceContainer;
-import com.netflix.karyon.admin.rest.ResourceContainer;
 
 /**
  * Adding AdminModule to the main injector will enable the admin endpoint
@@ -14,17 +9,11 @@ import com.netflix.karyon.admin.rest.ResourceContainer;
  * @author elandau
  *
  */
-public class AdminModule extends AbstractAdminModule {
+public final class AdminModule extends AbstractModule {
     @Override
     protected void configure() {
-        this.bindAdminResource("resources").to(ResourcesAdminResource.class);
-    }
-    
-    @Singleton
-    @Provides
-    @AdminServer
-    public ResourceContainer getAdminControllerRegistry(@AdminResource Map<String, Object> resources) throws Exception {
-        return new DefaultResourceContainer(resources);
+        bind(AdminServiceRegistry.class).to(GuiceAdminServiceRegistry.class);
+        bind(ResourcesAdminResource.class);
     }
     
     @Override

@@ -11,7 +11,10 @@ import org.apache.logging.log4j.core.Appender;
 import org.apache.logging.log4j.core.Logger;
 import org.apache.logging.log4j.core.LoggerContext;
 
+import com.netflix.karyon.admin.AdminService;
+
 @Singleton
+@AdminService(name="log4j", index="current")
 public class Log4JResource {
 
     public static class Result {
@@ -27,8 +30,7 @@ public class Log4JResource {
         }
     }
     
-    // log4j/
-    public Result get() {
+    public Result current() {
         Result result = new Result();
         LoggerContext ctx = (LoggerContext)LogManager.getContext();
         for (Logger logger : ctx.getLoggers()) {

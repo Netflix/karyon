@@ -3,8 +3,8 @@ $(document).ready(function(){
     var host = hash[1];
     var tab = hash[2];
         
-    $.get("http://" + host + "/allprops", function(propMap) {
-        $.get('allprops.template', function (template) {
+    $.get("http://" + host + "/props", function(propMap) {
+        $.get('props.template', function (template) {
             var props = [];
             $.each(propMap.props, function(key, value) {
                props.push({ 'name' : key, 'value' : value });

@@ -1,17 +1,20 @@
 package com.netflix.karyon.admin.rest;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.net.URI;
 import java.nio.charset.Charset;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 import java.util.zip.GZIPOutputStream;
 
 import javax.inject.Inject;
-import javax.inject.Provider;
 import javax.inject.Singleton;
 
 import org.slf4j.Logger;
@@ -21,7 +24,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.netflix.archaius.Config;
 import com.netflix.archaius.annotations.ConfigurationSource;
-import com.netflix.karyon.admin.AdminServer;
+import com.netflix.karyon.admin.AdminService;
+import com.netflix.karyon.admin.AdminServiceRegistry;
 import com.netflix.karyon.admin.CachingStaticResourceProvider;
 import com.netflix.karyon.admin.FileSystemResourceProvider;
 import com.netflix.karyon.admin.StaticResource;
@@ -35,27 +39,40 @@ import com.sun.net.httpserver.HttpHandler;
 public class AdminHttpHandler implements HttpHandler {
     private static final Logger LOG = LoggerFactory.getLogger(AdminHttpHandler.class);
 
-    private final StaticResourceProvider        provider;
-    private final Provider<ResourceContainer>   resources;
-    private final ObjectMapper                  mapper;
-    private final AdminServerConfig             config;
-    private final HttpHandler                   fallback;
-
-    private Config cfg;
-
-    private static class OptionalArgs {
+    static class ServiceDefinition {
+        ServiceDefinition(Map<String, MethodInvoker> invokers, MethodInvoker indexInvoker) {
+            this.invokers = invokers;
+            this.indexInvoker = indexInvoker;
+        }
+        
+        final Map<String, MethodInvoker> invokers;
+        final MethodInvoker indexInvoker;
+    }
+    
+    static interface MethodInvoker {
+        Object invoke(InputStream stream, Map<String, String> queryParameters) throws Exception;
+    }
+    
+    static class OptionalArgs {
         @com.google.inject.Inject(optional=true)
         @AdminServerFallback
         HttpHandler fallbackHandler;
     }
     
+    private final StaticResourceProvider        provider;
+    private final ObjectMapper                  mapper;
+    private final AdminServerConfig             config;
+    private final HttpHandler                   fallback;
+    private final Map<String, ServiceDefinition> services = new HashMap<>();
+
+    private Config cfg;
+
     @Inject
     public AdminHttpHandler(
-            @AdminServer Provider<ResourceContainer> controllers, 
+            AdminServiceRegistry services, 
             AdminServerConfig config,
             Config cfg, 
             OptionalArgs optional) {
-        this.resources = controllers;
         this.mapper = new ObjectMapper();
         mapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
         if (config.prettyPrint()) {
@@ -70,6 +87,91 @@ public class AdminHttpHandler implements HttpHandler {
         
         this.provider = config.cacheResources() ? new CachingStaticResourceProvider(resourceProvider) : resourceProvider;
         this.fallback = optional.fallbackHandler != null ? optional.fallbackHandler : new NotFoundHttpHandler();
+        
+        for (final String serviceName : services.getServiceNames()) {
+            Map<String, MethodInvoker> invokers = new HashMap<>();
+            
+            final Class<?> serviceClass = services.getServiceClass(serviceName);
+            AdminService annot = serviceClass.getAnnotation(AdminService.class);
+            
+            for (final Method method : serviceClass.getDeclaredMethods()) {
+                if (!Modifier.isPublic(method.getModifiers())) {
+                    continue;
+                }
+                
+                if (invokers.containsKey(method.getName())) {
+                    LOG.warn("Method '{}' already exists", method.toGenericString());
+                    continue;
+                }
+                
+                MethodInvoker invoker = null;
+                if (method.getParameterCount() == 0) {
+                    invoker = new MethodInvoker() {
+                        @Override
+                        public Object invoke(InputStream stream, Map<String, String> queryParameters) throws Exception {
+                            // TODO: Parse stream and queryParameters into request object
+                            if (stream.available() > 0 || !queryParameters.isEmpty()) {
+                                throw new UnsupportedOperationException("Query parameters or request object not supported yet");
+                            }
+                            return method.invoke(services.getService(serviceName));
+                        }
+                    };
+                }
+                else if (method.getParameterCount() == 1) {
+                    final Class<?> requestType = method.getParameterTypes()[0];
+                    invoker = new MethodInvoker() {
+                        @Override
+                        public Object invoke(InputStream stream, Map<String, String> queryParameters) throws Exception {
+                            // TODO: Parse stream and queryParameters into request object
+                            if (stream.available() > 0 || !queryParameters.isEmpty()) {
+                                throw new UnsupportedOperationException("Query parameters or request object not supported yet");
+                            }
+                            return method.invoke(services.getService(serviceName), mapper.readValue(stream, requestType));
+                        }
+                    };
+                }
+                else {
+                    LOG.warn("Method '{}' can only have one argument", method.toGenericString());
+                    continue;
+                }
+                
+                invokers.put(method.getName(), invoker);
+            }
+            
+            LOG.info("Found service : {} : {}", serviceName, invokers.keySet());
+            
+            this.services.put(serviceName, new ServiceDefinition(invokers, invokers.get(annot.index())));
+        }
+    }
+    
+    private Object invoke(String serviceName, String methodName, InputStream is, Map<String, String> queryParameters) throws NotFoundException, Exception {
+        ServiceDefinition def = services.get(serviceName);
+        if (def == null) {
+            throw new NotFoundException("Service " + serviceName + " not found");
+        }
+        
+        MethodInvoker invoker = methodName == null ? def.indexInvoker : def.invokers.get(methodName);
+        if (invoker == null) {
+            throw new NotFoundException("Method " + methodName + " for service " + serviceName + " not found");
+        }
+        return invoker.invoke(is, queryParameters);
+    }
+    
+    private Map<String, String> extractQueryParameters(URI uri) {
+        Map<String, String> query = new HashMap<String, String>();
+        String queryString = uri.getQuery();
+        if (queryString != null) {
+            for (String param : queryString.split("&")) {
+                String pair[] = param.split("=");
+                if (pair.length > 1) {
+                    query.put(pair[0], pair[1]);
+                }
+                else{
+                    query.put(pair[0], "");
+                }
+            }
+        }
+        return query;
     }
     
     @Override
@@ -82,22 +184,32 @@ public class AdminHttpHandler implements HttpHandler {
         final String path = exchange.getRequestURI().getPath();
         
         try {
+            String parts[] = path.substring(1).split("/");
             // Redirect the server root to the configured remote server
             if (path.equals("/")) {
                 String addr = new Interpolator(cfg).interpolate(config.remoteServer());
                 LOG.debug("Redirecting to '{}'", addr);
                 writeRedirectResponse(exchange, addr);
             }
-            // Try to serve a resource
             else {
-                String parts[] = path.substring(1).split("/");
-                String controller = parts[0];
-                List<String> p = new ArrayList<>();
-                for (int i = 1; i < parts.length; i++) {
-                    p.add(parts[i]);
+                String serviceName;
+                String methodName;
+                
+                if (parts.length == 1) {
+                    serviceName = parts[0];
+                    methodName = null;
+                }
+                else if (parts.length == 2) {
+                    serviceName = parts[0];
+                    methodName = parts[1];
+                }
+                else {
+                    throw new NotFoundException("");
                 }
                 
-                Object response = resources.get().invoke(controller, p);
+                Map<String, String> query = extractQueryParameters(exchange.getRequestURI());
+
+                Object response = invoke(serviceName, methodName, exchange.getRequestBody(), query);
                 exchange.getResponseHeaders().set("Access-Control-Allow-Origin", config.accessControlAllowOrigin());
                 writeJsonResponse(exchange, 200, response);
             }

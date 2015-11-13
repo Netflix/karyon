@@ -10,6 +10,7 @@ import com.google.common.base.Function;
 import com.google.common.collect.Maps;
 
 @Singleton
+@AdminService(name="http", index="list")
 public class HttpServerAdminResource {
     private final HttpServerRegistry registry;
     
@@ -18,7 +19,7 @@ public class HttpServerAdminResource {
         this.registry = registry;
     }
     
-    public Map<String, SimpleHttpServer> get() {
+    public Map<String, SimpleHttpServer> list() {
         return Maps.transformValues(registry.getServers(), new Function<Provider<SimpleHttpServer>, SimpleHttpServer>() {
             @Override
             public SimpleHttpServer apply(final Provider<SimpleHttpServer> provider) {

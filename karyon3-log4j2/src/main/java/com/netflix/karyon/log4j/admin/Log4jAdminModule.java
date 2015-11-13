@@ -1,14 +1,14 @@
 package com.netflix.karyon.log4j.admin;
 
-import com.netflix.karyon.admin.AbstractAdminModule;
+import com.google.inject.AbstractModule;
 import com.netflix.karyon.admin.AdminModule;
 import com.netflix.karyon.conditional.ConditionalOnModule;
 
 @ConditionalOnModule(AdminModule.class)
-public final class Log4jAdminModule extends AbstractAdminModule {
+public final class Log4jAdminModule extends AbstractModule {
     @Override
     protected void configure() {
-        bindAdminResource("log4j").to(Log4JResource.class);
+        bind(Log4JResource.class);
     }
     
     @Override
