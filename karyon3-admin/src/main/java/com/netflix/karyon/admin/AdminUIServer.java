@@ -10,7 +10,6 @@ import javax.inject.Qualifier;
 /**
  * Qualifier to isolate Admin server bindings
  * 
- * @see AbstractAdminModule
  * @author elandau
  *
  */
