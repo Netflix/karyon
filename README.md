@@ -1,10 +1,11 @@
 Karyon3
 ---------
-Karyon3 is a integration framework focused on bootstrapping JVM application using netflix OSS such as Governator, Archaius, Eureka and RxNetty.  Karyon3 makes use of dependency injection (specifically using Google Guice) with additional support for context based conditional module loading to transparently load bindings and configurations for the environment in which the application is running.  Karyon3 is broken up into sub-projects on functional and dependency boundaries to reduce pulling in excessive dependencies.  
+Karyon3 is a integration framework for writting services using netflix OSS, Archaius, Eureka and RxNetty.  Karyon3 makes use of dependency injection (specifically using Google Guice) with additional support for context based conditional module loading to transparently load contextual bindings and configurations for the environment in which the service is running.  Karyon3 is broken up into sub-projects on functional and dependency boundaries to reduce pulling in excessive dependencies.  
 
 Core features
 - Minimize dependencies
-- Context based auto-configuration
+- Context based auto-binding
+- Dynamic configuration
 - Health check
 - Admin console
 - Integration with core Netflix OSS
@@ -17,11 +18,10 @@ Getting Started
 Karyon is currently available as a release candidate
 
 ```java
-compile "com.netflix.karyon:karyon3-core:{karyon-version}'
+compile "com.netflix.karyon:karyon3-core:${karyon-version}'
 ```
 
-Please set karyon-version to the latest 3.0.1-rc.+ available on maven central
-
+Set karyon-version to the latest 3.0.1-rc.+ available on maven central
 
 ----------
 Main
@@ -31,7 +31,7 @@ A Karyon3 based main should normally consist of a simple block of code to create
 ```java
 public class HelloWorld {
     public static void main(String[] args) {
-        Karyon.create()
+        Karyon.forApplication("MyService")
               .addModules(
 	          // Add any guice module
 	           new ApplicationModule())
@@ -50,7 +50,7 @@ To run in tomcat simply extend Karyon's KaryonServletContextListener and create 
 First, add a dependency on karyon-servlet
 
 ```gradle
-compile "com.netflix.karyon:karyon3-servlet:{karyon-version}"
+compile "com.netflix.karyon:karyon3-servlet:${karyon-version}"
 ```
 
 Next, write your ContextListener
@@ -100,10 +100,11 @@ Running with Jetty
 ```java
 public class HelloWorld {
     public static void main(String[] args) {
-        Karyon.create()
+        Karyon.forApplication("MyService")
            .addModules(
                // Add any guice module
                new ApplicationModule(),
+               // To enable embedded Jetty (no need for web.xml)
                new JettyModule()
            )
             .start()
@@ -213,67 +214,55 @@ Application Lifecycle
 --------------------------
 TODO
 
-----------
+-------------------
 Admin Console
 -------------------
-The admin console provides invaluable insight into the internal state of a running instance.  To minimize dependencies needed to run the admin console Karyon uses convention based routing to expose Pojo's as REST endpoints using the Oracle JDK built in web server.  
+The admin console provides invaluable insight into the internal state of a running instance.  For simplicity and to avoid requiring additional dependencies to write and run the admin pages Karyon admin resources are written as simple Pojos with method names corresponding to service actions.  Method should have the following signature
 
-To enable the Admin Console REST server (default port 8077)
+```java
+ResponseType methodName(RequestType request);
+```
+
+A default HTTP server implementation is provided using the JDK built in web server as well as Jackson for serialization.  (Note that in the future this default implementation may be changes to use gRPC).
+
+To enable the Admin Console REST server (default port 8076)
 ```java
 import com.netflix.karyon.admin.rest.AdminServerModule;
 ...
-new AdminServerModule()
+install(new AdminServerModule());
 ```
 
 To enable the simple UI server (default port 8078)
 ```java
 import com.netflix.karyon.admin.ui.AdminUIServerModule;
 ...
-AdminUIServerModule
+install(new AdminUIServerModule());
 ```
 
-The REST and Admin ports are completely decoupled so that the UI may be hosted (and modified) remotely.  
+The REST and Admin ports are completely decoupled so that the UI may be hosted (and independently modified) remotely.  By default, browsing the root path of port 8076 will redirect to the internal port 8078.  Set 'karyon.server.admin.remoteServer' to re-direct browsers to a remotely hosted server.  For example,
 
 ```properties
-karyon.server.admin.remoteServer=http://org.example.adminserver:80/index.html#/${@publicHostname}:8077/")
+karyon.server.admin.remoteServer=http://org.example.adminserver:80/index.html#/${@publicHostname}:8076/")
 ```
 
 ### Writing a custom REST endpoint
-```java
-@Singleton
-public class MyAdminResource {
-   @Inject
-   public MyAdminResource() {
-   }
+For now we ask that only the internally provided Admin endpoints be used as the API may change in the future.
 
-   // maps to '/'
-   List<SomeEntity> get() {
-   }
+### Using the legacy v2 admin pages
+Use of v2 admin pages is discouraged as they requires a large number of depdendencies and use the outdated mode of server side templating using FreekMarker.  However, for existing applications it may be necessary to enable these pages for backwards compatibility.  
 
-   // maps to '/:key'
-   SomeEntity get(String key) {
-   }
-
-   // maps to '/:key/sub'
-   List<SomeSubEntity> getSub(String key, String sub) {
-   }
+```gradle
+dependencies {
+    compile     'com.netflix.karyon:karyon2-admin:2.7.4'
+    compile     'com.netflix.karyon:karyon2-admin-web:2.7.4'
+    compile     'com.netflix.karyon:karyon2-admin-eureka-plugin:2.7.4'
 }
 ```
 
-Note that this scheme is very limited and will likely be modified in the future to support a subset of JAX-RS annotations.
-
+In a guice module, or Karyon.addModule()
 ```java
-@ConditionalOnModule(AdminModule.class)
-public MyAdminModule extends AbstractAdminModule {
-   @Override
-   public void configure() {
-       // Will map the root path of the above MyAdminResource to '/my-admin'
-       bindAdminResource("my-admin").to(MyAdminResource.class);
-   }
-}
+install(new KaryonAdminModule());
 ```
-### Writing a custom UI page
-By default Karyon3 will display the raw JSON data returned by an admin endpoint.  A custom UI may be added by include a file '/admin/my-admin.html' with your admin jar.  
 
 ----------
 Health check
