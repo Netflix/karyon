@@ -38,7 +38,9 @@ public class OnLocalDevCondition implements Condition<ConditionalOnLocalDev> {
     
     @Override
     public boolean check(ConditionalOnLocalDev condition) {
-        return config.getProfiles().contains("local") || inTest;
+        return config.getProfiles().contains("localDev")
+                || inTest
+                || config.getProfiles().contains("local");  // @deprecated maintain "local" for backward compatibility
     }
     
     @Override

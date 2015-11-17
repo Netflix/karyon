@@ -20,7 +20,7 @@ public class KaryonCascadeStrategy extends InterpolatingCascadeStrategy {
     }
     
     @Override
-    protected List<String> getPermuations() {
+    protected List<String> getPermutations() {
         List<String> permuatations = new ArrayList<>();
         permuatations.add("%s");
         for (String profile : context.getProfiles()) {
