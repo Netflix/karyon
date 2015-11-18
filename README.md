@@ -133,18 +133,19 @@ For example,
 public class Module extends AbstractModule {
     @Override
     protected void configure() {
-        bind(Foo.class).to(FooImpl1.class);
+        bind(Foo.class).to(FooLocalDevImpl.class);
     }
 }
 
-@ConditionalOnLocalDev
+@ConditionalOnEc2
 public class Module extends AbstractModule {
     @Override
     protected void configure() {
-        bind(Foo.class).to(FooImpl2.class);
+        bind(Foo.class).to(FooEc2Impl.class);
     }
 }
 ```
+You can run in either configuration via setting the properties karyon.profiles=localDev or karyon.profiles=ec2
 
 ----------
 Archaius Configuration
