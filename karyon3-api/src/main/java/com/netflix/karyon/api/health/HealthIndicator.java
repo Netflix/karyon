@@ -1,4 +1,4 @@
-package com.netflix.karyon.health;
+package com.netflix.karyon.api.health;
 
 import java.util.concurrent.CompletableFuture;
 
@@ -50,4 +50,26 @@ public interface HealthIndicator {
      * Return the name of the health indicator.  Note that health indicators with duplicate names are allowed.
      */
     String getName();
+    
+    public static HealthIndicator alwaysHealthy(String name) {
+        return memoize(name, HealthIndicatorStatus.healthy(name));
+    }
+    
+    public static HealthIndicator alwaysUnhealthy(String name) {
+        return memoize(name, HealthIndicatorStatus.unhealthy(name, new Exception("Unhealthy")));
+    }
+    
+    public static HealthIndicator memoize(final String name, final HealthIndicatorStatus status) {
+        return new HealthIndicator() {
+            @Override
+            public CompletableFuture<HealthIndicatorStatus> check() {
+                return CompletableFuture.completedFuture(status);
+            }
+
+            @Override
+            public String getName() {
+                return name;
+            }
+        };
+    }
 }

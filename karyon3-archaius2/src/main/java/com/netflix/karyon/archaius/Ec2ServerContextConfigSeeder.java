@@ -5,7 +5,7 @@ import javax.inject.Singleton;
 import com.netflix.archaius.Config;
 import com.netflix.archaius.config.MapConfig;
 import com.netflix.archaius.guice.ConfigSeeder;
-import com.netflix.karyon.ServerContext;
+import com.netflix.karyon.api.ServerContext;
 
 @Singleton
 public class Ec2ServerContextConfigSeeder implements ConfigSeeder {

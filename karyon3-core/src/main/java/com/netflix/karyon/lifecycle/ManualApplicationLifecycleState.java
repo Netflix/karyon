@@ -6,6 +6,9 @@ import java.util.List;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import com.netflix.karyon.api.lifecycle.ApplicationLifecycle;
+import com.netflix.karyon.api.lifecycle.LifecycleState;
+
 /**
  * 
  * @author elandau

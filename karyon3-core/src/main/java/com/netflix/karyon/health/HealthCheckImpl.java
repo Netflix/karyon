@@ -8,7 +8,13 @@ import java.util.concurrent.atomic.AtomicInteger;
 import javax.inject.Singleton;
 
 import com.google.inject.Inject;
-import com.netflix.karyon.lifecycle.ApplicationLifecycle;
+import com.netflix.karyon.api.health.HealthCheck;
+import com.netflix.karyon.api.health.HealthCheckStatus;
+import com.netflix.karyon.api.health.HealthIndicator;
+import com.netflix.karyon.api.health.HealthIndicatorRegistry;
+import com.netflix.karyon.api.health.HealthIndicatorStatus;
+import com.netflix.karyon.api.health.HealthState;
+import com.netflix.karyon.api.lifecycle.ApplicationLifecycle;
 
 /**
  * Determine the health of an application by combining the ApplicationLifecycle state
@@ -17,16 +23,17 @@ import com.netflix.karyon.lifecycle.ApplicationLifecycle;
  * @author elandau
  */
 @Singleton
-public class HealthCheck {
+final public class HealthCheckImpl implements HealthCheck {
     private final HealthIndicatorRegistry registry;
     private final ApplicationLifecycle lifecycle;
     
     @Inject
-    public HealthCheck(ApplicationLifecycle lifecycle, HealthIndicatorRegistry registry) {
+    public HealthCheckImpl(ApplicationLifecycle lifecycle, HealthIndicatorRegistry registry) {
         this.registry = registry;
         this.lifecycle = lifecycle;
     }
     
+    @Override
     public CompletableFuture<HealthCheckStatus> check() {
         final CompletableFuture<List<HealthIndicatorStatus>> future = new CompletableFuture<>();
         
@@ -73,7 +80,7 @@ public class HealthCheck {
                     break;
                 }
             }
-            return new HealthCheckStatus(state, t);
+            return HealthCheckStatus.create(state, t);
         });
     }
     

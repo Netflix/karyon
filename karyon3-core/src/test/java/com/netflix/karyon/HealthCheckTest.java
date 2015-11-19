@@ -12,15 +12,14 @@ import org.junit.Test;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
+import com.google.inject.util.Modules;
 import com.netflix.governator.Governator;
-import com.netflix.karyon.health.HealthCheck;
-import com.netflix.karyon.health.HealthCheckStatus;
-import com.netflix.karyon.health.HealthIndicator;
-import com.netflix.karyon.health.HealthIndicatorRegistry;
-import com.netflix.karyon.health.HealthIndicatorStatus;
-import com.netflix.karyon.health.HealthIndicatorStatuses;
-import com.netflix.karyon.health.HealthIndicators;
-import com.netflix.karyon.health.HealthState;
+import com.netflix.karyon.api.health.HealthCheckStatus;
+import com.netflix.karyon.api.health.HealthIndicator;
+import com.netflix.karyon.api.health.HealthIndicatorRegistry;
+import com.netflix.karyon.api.health.HealthIndicatorStatus;
+import com.netflix.karyon.api.health.HealthState;
+import com.netflix.karyon.health.HealthCheckImpl;
 
 public class HealthCheckTest {
     
@@ -45,7 +44,7 @@ public class HealthCheckTest {
 
     @Test
     public void testAsyncStatus() throws InterruptedException, ExecutionException {
-        HealthIndicator check = delayed(100, TimeUnit.MILLISECONDS, HealthIndicatorStatuses.healthy("foo"));
+        HealthIndicator check = delayed(100, TimeUnit.MILLISECONDS, HealthIndicatorStatus.healthy("foo"));
         TimeUnit.MILLISECONDS.sleep(200);
         check.check().whenComplete((result, error) -> System.out.println("Completed"));
         TimeUnit.MILLISECONDS.sleep(200);
@@ -53,8 +52,8 @@ public class HealthCheckTest {
     
     @Test
     public void testNoHealthStatuses() {
-        Injector injector = Governator.createInjector();
-        HealthCheck hc = injector.getInstance(HealthCheck.class);
+        Injector injector = Governator.createInjector(new KaryonDefaultsModule());
+        HealthCheckImpl hc = injector.getInstance(HealthCheckImpl.class);
         
         HealthCheckStatus status = hc.check().join();
         Assert.assertEquals(HealthState.Healthy, status.getState());
@@ -63,23 +62,25 @@ public class HealthCheckTest {
     @Test
     public void testOneHealthStatus() {
         List<HealthIndicator> indicators = new ArrayList<>();
-        Injector injector = Governator.createInjector(new AbstractModule() {
-            @Override
-            protected void configure() {
-                bind(HealthIndicatorRegistry.class).toInstance(HealthIndicatorRegistry.from(indicators));
-            }
-        });
+        Injector injector = Governator.createInjector(
+            Modules.override(new KaryonDefaultsModule())
+                   .with(new AbstractModule() {
+                        @Override
+                        protected void configure() {
+                            bind(HealthIndicatorRegistry.class).toInstance(HealthIndicatorRegistry.from(indicators));
+                        }
+                    }));
         
-        HealthCheck manager = injector.getInstance(HealthCheck.class);
+        HealthCheckImpl manager = injector.getInstance(HealthCheckImpl.class);
         
         HealthCheckStatus status = manager.check().join();
         Assert.assertEquals(HealthState.Healthy, status.getState());
         
-        indicators.add(HealthIndicators.alwaysHealthy("foo"));
+        indicators.add(HealthIndicator.alwaysHealthy("foo"));
         status = manager.check().join();
         Assert.assertEquals(HealthState.Healthy, status.getState());
         
-        indicators.add(HealthIndicators.alwaysUnhealthy("foo"));
+        indicators.add(HealthIndicator.alwaysUnhealthy("foo"));
         status = manager.check().join();
         Assert.assertEquals(HealthState.Unhealthy, status.getState());
     }
@@ -87,27 +88,27 @@ public class HealthCheckTest {
     @Test
     public void testMultipleHealthStatuses() {
         List<HealthIndicator> indicators = new ArrayList<>();
-        Injector injector = Governator.createInjector(new AbstractModule() {
+        Injector injector = Governator.createInjector(Modules.override(new KaryonDefaultsModule()).with(new AbstractModule() {
             @Override
             protected void configure() {
                 bind(HealthIndicatorRegistry.class).toInstance(HealthIndicatorRegistry.from(indicators));
             }
-        });
+        }));
         
-        HealthCheck manager = injector.getInstance(HealthCheck.class);
+        HealthCheckImpl manager = injector.getInstance(HealthCheckImpl.class);
         HealthIndicatorRegistry registry = injector.getInstance(HealthIndicatorRegistry.class);
         
         HealthCheckStatus status = manager.check().join();
         Assert.assertEquals(HealthState.Healthy, status.getState());
         Assert.assertEquals(0, status.getIndicators().size());
         
-        indicators.add(HealthIndicators.alwaysHealthy("foo"));
-        indicators.add(HealthIndicators.alwaysHealthy("bar"));
+        indicators.add(HealthIndicator.alwaysHealthy("foo"));
+        indicators.add(HealthIndicator.alwaysHealthy("bar"));
         status = manager.check().join();
         Assert.assertEquals(HealthState.Healthy, status.getState());
         Assert.assertEquals(2, status.getIndicators().size());
         
-        indicators.add(HealthIndicators.alwaysUnhealthy("foo"));
+        indicators.add(HealthIndicator.alwaysUnhealthy("foo"));
         status = manager.check().join();
         Assert.assertEquals(HealthState.Unhealthy, status.getState());
         Assert.assertEquals(3, status.getIndicators().size());

@@ -1,11 +1,10 @@
-package com.netflix.karyon;
+package com.netflix.karyon.api;
 
 /**
- * Base interface for all {@link Karyon} features to be implemented by an 
+ * Base interface for all Karyon features to be implemented by an 
  * enum, such as {@link KaryonFeatures}.  Each feature has an implicit
  * default value. 
  * 
- * @see Karyon
  * @author elandau
  */
 public interface KaryonFeature {

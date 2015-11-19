@@ -8,8 +8,8 @@ import java.util.function.Supplier;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import com.netflix.karyon.health.AbstractHealthIndicator;
-import com.netflix.karyon.health.HealthIndicatorStatus;
+import com.netflix.karyon.api.health.HealthIndicatorStatus;
+import com.netflix.karyon.spi.health.AbstractHealthIndicator;
 
 @Singleton
 public class FooServiceHealthIndicator extends AbstractHealthIndicator {

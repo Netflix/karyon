@@ -13,12 +13,13 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.netflix.karyon.health.HealthCheck;
-import com.netflix.karyon.health.HealthCheckStatus;
+import com.netflix.karyon.api.health.HealthCheck;
+import com.netflix.karyon.api.health.HealthCheckStatus;
 
 @Singleton
 public class HealthCheckServlet extends HttpServlet {
-
+    private static final long serialVersionUID = -1509796284643921723L;
+    
     private final HealthCheck healthCheck;
     private final ObjectMapper mapper;
 

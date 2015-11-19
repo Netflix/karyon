@@ -8,7 +8,7 @@ import org.junit.Test;
 
 import com.google.inject.AbstractModule;
 import com.netflix.governator.LifecycleInjector;
-import com.netflix.karyon.KaryonFeatures;
+import com.netflix.karyon.api.KaryonFeatures;
 
 public class TestInjection {
     @Rule

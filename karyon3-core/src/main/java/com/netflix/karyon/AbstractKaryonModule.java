@@ -6,6 +6,8 @@ import java.util.List;
 
 import com.google.inject.Module;
 import com.google.inject.Stage;
+import com.netflix.karyon.api.KaryonFeature;
+import com.netflix.karyon.api.PropertySource;
 
 public abstract class AbstractKaryonModule implements KaryonModule {
     private Karyon karyon;

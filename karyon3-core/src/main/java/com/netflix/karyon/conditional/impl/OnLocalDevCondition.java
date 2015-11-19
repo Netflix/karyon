@@ -4,7 +4,7 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import com.netflix.karyon.KaryonConfiguration;
-import com.netflix.karyon.PropertySource;
+import com.netflix.karyon.api.PropertySource;
 import com.netflix.karyon.conditional.Condition;
 import com.netflix.karyon.conditional.ConditionalOnLocalDev;
 

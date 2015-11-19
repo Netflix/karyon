@@ -10,6 +10,8 @@ import com.google.inject.Binding;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.TypeLiteral;
+import com.netflix.karyon.api.health.HealthIndicator;
+import com.netflix.karyon.api.health.HealthIndicatorRegistry;
 
 /**
  * Registry of {@link HealthIndicator}s that derives all active {@link HealthIndicator}s from Guice bindings.  

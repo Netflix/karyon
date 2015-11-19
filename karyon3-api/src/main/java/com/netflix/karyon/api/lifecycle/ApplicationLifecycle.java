@@ -1,6 +1,4 @@
-package com.netflix.karyon.lifecycle;
-
-import com.google.inject.ImplementedBy;
+package com.netflix.karyon.api.lifecycle;
 
 /**
  * Contract for tracking the application LifecycleState.  The application LifecycleState
@@ -64,7 +62,6 @@ import com.google.inject.ImplementedBy;
  * @author elandau
  *
  */
-@ImplementedBy(LifecycleListenerApplicationLifecycle.class)
 public interface ApplicationLifecycle {
     public interface Listener {
         void onStateChanged(LifecycleState state);

@@ -30,8 +30,8 @@ import com.netflix.archaius.inject.RemoteLayer;
 import com.netflix.archaius.inject.RuntimeLayer;
 import com.netflix.karyon.AbstractKaryonModule;
 import com.netflix.karyon.AbstractPropertySource;
-import com.netflix.karyon.PropertySource;
-import com.netflix.karyon.ServerContext;
+import com.netflix.karyon.api.PropertySource;
+import com.netflix.karyon.api.ServerContext;
 
 /**
  * Entry point for applications using Archaius as the configuration mechanism.  This

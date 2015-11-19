@@ -5,6 +5,9 @@ import java.util.Set;
 
 import com.google.inject.Module;
 import com.google.inject.Stage;
+import com.netflix.karyon.api.KaryonFeature;
+import com.netflix.karyon.api.KaryonFeatures;
+import com.netflix.karyon.api.PropertySource;
 
 /**
  * Configuration contract needed to bootstrap a Governator based application.
@@ -54,4 +57,9 @@ public interface KaryonConfiguration {
      * for available features.
      */
     boolean isFeatureEnabled(KaryonFeature feature);
+
+    /**
+     * Return list of modules with default implementations.
+     */
+    List<Module> getDefaultModules();
 }
