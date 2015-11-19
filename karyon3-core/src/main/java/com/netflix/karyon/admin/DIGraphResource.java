@@ -9,7 +9,7 @@ import javax.inject.Singleton;
 import com.google.inject.Injector;
 
 @Singleton
-@AdminService(name="guice-keys", index="list")
+@AdminService(name="di-graph", index="list")
 public class DIGraphResource {
     private final JsonGrapher grapher;
     private final Injector injector;
