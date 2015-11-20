@@ -1,3 +1,8 @@
+=====
+Karyon 2.0 is no longer supported.  Please use https://github.com/Netflix/karyon/tree/3.x
+=====
+
+
 karyon
 ======
 
