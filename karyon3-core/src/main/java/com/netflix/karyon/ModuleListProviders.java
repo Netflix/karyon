@@ -44,10 +44,6 @@ public class ModuleListProviders {
         return new ClassPathModuleListProvider(packages);
     }
     
-    public static ModuleListProvider forPackagesConditional(final String... packages) {
-        return new ClassPathConditionalModuleListProvider(packages);
-    }
-        
     /**
      * Provider that will use Guava's ClassPath scanner to scan the provided 
      * packages.
@@ -59,10 +55,6 @@ public class ModuleListProviders {
         return new ClassPathModuleListProvider(packages);
     }
     
-    public static ModuleListProvider forPackagesConditional(List<String> packages) {
-        return new ClassPathConditionalModuleListProvider(packages);
-    }
-        
     /**
      * Provider using the ServiceLoader for class Module
      * 

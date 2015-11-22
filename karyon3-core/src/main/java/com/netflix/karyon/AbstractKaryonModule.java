@@ -6,6 +6,8 @@ import java.util.List;
 
 import com.google.inject.Module;
 import com.google.inject.Stage;
+import com.google.inject.TypeLiteral;
+import com.google.inject.matcher.Matcher;
 
 public abstract class AbstractKaryonModule implements KaryonModule {
     private Karyon karyon;
@@ -69,14 +71,10 @@ public abstract class AbstractKaryonModule implements KaryonModule {
         karyon.disableFeature(feature);
     }
     
-    protected void setPropertySource(PropertySource propertySource) {
-        karyon.setPropertySource(propertySource);
+    protected <T extends TypeLiteral<?>> Karyon addTypeAutoBinder(Matcher<T> matcher, AutoBinder factory) {
+        return karyon.addAutoBinder(matcher, factory);
     }
 
-    protected PropertySource getPropertySource() {
-        return karyon.getPropertySource();
-    }
-    
     protected Karyon getKaryon() {
         return karyon;
     }

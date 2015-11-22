@@ -67,12 +67,12 @@ public class TestDynamicLogLevels {
     
     @Test
     public void testDynamicConfigurationChange() throws ConfigException, InterruptedException {
-        Injector injector = Karyon.forApplication("test")
-            .apply(new ArchaiusKaryonModule()
-                .withRuntimeOverrides(MapConfig.builder()
-                    .put("log4j.logger.com.netflix.karyon", "WARN")
-                    .build()))
+        Injector injector = Karyon.newBuilder()
             .addModules(
+                new ArchaiusKaryonModule()
+                    .withRuntimeOverrides(MapConfig.builder()
+                        .put("log4j.logger.com.netflix.karyon", "WARN")
+                        .build()),
                 new ArchaiusLog4J2ConfigurationModule(),
                 new AbstractModule() {
                     @Override

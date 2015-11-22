@@ -5,6 +5,7 @@ import org.apache.logging.log4j.core.Log4jConfigurator;
 
 import com.google.inject.multibindings.Multibinder;
 import com.netflix.governator.DefaultModule;
+import com.netflix.karyon.log4j.admin.Log4j2AdminModule;
 
 /**
  * Add this to the list of Guice modules to enable reconfiguration of log4j2
@@ -23,5 +24,6 @@ public class ArchaiusLog4J2ConfigurationModule extends DefaultModule {
         Multibinder<Log4jConfigurator> appenderBinder = Multibinder.newSetBinder(binder(), Log4jConfigurator.class);
         appenderBinder.addBinding().to(ConsoleAppenderConfigurator.class);
 
+        install(new Log4j2AdminModule());
     }
 }

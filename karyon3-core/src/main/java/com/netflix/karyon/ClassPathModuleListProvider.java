@@ -13,7 +13,7 @@ import com.google.inject.Module;
  * 
  * @author elandau
  */
-public class ClassPathModuleListProvider implements ModuleListProvider {
+class ClassPathModuleListProvider implements ModuleListProvider {
 
     private List<String> packages;
 
@@ -38,7 +38,10 @@ public class ClassPathModuleListProvider implements ModuleListProvider {
                     try {
                         // Include Modules that have at least on Conditional
                         Class<?> cls = Class.forName(classInfo.getName(), false, loader);
-                        if (!cls.isInterface() && !Modifier.isAbstract( cls.getModifiers() ) && Module.class.isAssignableFrom(cls)) {
+                        if (   Modifier.isPublic(cls.getModifiers())
+                            && !cls.isInterface() 
+                            && !Modifier.isAbstract( cls.getModifiers() ) 
+                            && Module.class.isAssignableFrom(cls)) {
                             if (isAllowed((Class<? extends Module>) cls)) {
                                 modules.add((Module) cls.newInstance());
                             }

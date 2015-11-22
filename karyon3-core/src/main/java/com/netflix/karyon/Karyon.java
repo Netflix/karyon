@@ -4,16 +4,35 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
+import java.util.IdentityHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.google.common.collect.ImmutableList;
+import com.google.inject.AbstractModule;
+import com.google.inject.Guice;
+import com.google.inject.Injector;
+import com.google.inject.Key;
 import com.google.inject.Module;
 import com.google.inject.Stage;
+import com.google.inject.TypeLiteral;
+import com.google.inject.matcher.Matcher;
+import com.google.inject.multibindings.Multibinder;
+import com.google.inject.spi.Element;
+import com.google.inject.spi.Elements;
+import com.google.inject.util.Modules;
+import com.netflix.governator.ElementsEx;
 import com.netflix.governator.LifecycleInjector;
-import com.netflix.karyon.conditional.ConditionalOnProfile;
+import com.netflix.governator.LifecycleManager;
+import com.netflix.karyon.annotations.Profiles;
+import com.netflix.karyon.conditional.ConditionalSupportModule;
 import com.netflix.karyon.spi.ModuleListTransformer;
 
 /**
@@ -51,30 +70,17 @@ import com.netflix.karyon.spi.ModuleListTransformer;
         .start()
         .awaitTermination();
  * </code>
- * 
- *      +-------------------+
- *      |      Override     |
- *      +-------------------+
- *      |   Auto Override   |
- *      +-------------------+
- *      |    Core + Auto    |
- *      +-------------------+
- *      | Bootstrap Exposed |
- *      +-------------------+
  */
 public class Karyon {
-    private static final String KARYON_PROFILES = "karyon.profiles";
-    
-    protected final String                applicationName;
-    protected PropertySource              propertySource    = DefaultPropertySource.INSTANCE;
     protected Set<String>                 profiles          = new LinkedHashSet<>();
     protected List<ModuleListProvider>    moduleProviders   = new ArrayList<>();
-    protected Map<KaryonFeature, Boolean> features          = new HashMap<>();
     protected Stage                       stage             = Stage.DEVELOPMENT;
     protected List<Module>                modules           = new ArrayList<>();
     protected List<Module>                overrideModules   = new ArrayList<>();
     protected List<ModuleListTransformer> transformers      = new ArrayList<>();
-
+    protected List<MatchingAutoBinder>    autoBinders       = new ArrayList<>();
+    protected IdentityHashMap<KaryonFeature<?>, Object>  features  = new IdentityHashMap<>();
+    
     // This is a hack to make sure that if archaius is used at some point we make use
     // of the bridge so any access to the legacy Archaius1 API is actually backed by 
     // the Archaius2 implementation
@@ -83,13 +89,34 @@ public class Karyon {
         System.setProperty("archaius.default.deploymentContext.class",  "com.netflix.archaius.bridge.StaticDeploymentContext");
     }
     
-    @Deprecated
+    @Singleton
+    class KaryonFeatureConfigImpl implements KaryonFeatureSet {
+        private final IdentityHashMap<KaryonFeature<?>, Object> features;
+        
+        @Inject
+        private PropertySource properties;
+        
+        @Inject
+        public KaryonFeatureConfigImpl(IdentityHashMap<KaryonFeature<?>, Object> features) {
+            this.features = features;
+        }
+        
+        @SuppressWarnings("unchecked")
+        @Override
+        public <T> T get(KaryonFeature<T> feature) {
+            if (features.containsKey(feature)) {
+                return (T) features.get(feature);
+            }
+            return (T) properties.get(feature.getKey(), feature.getType());
+        }
+    }
+
     private Karyon() {
         this(null);
     }
     
+    @Deprecated
     protected Karyon(String applicationName) {
-        this.applicationName = applicationName;
     }
     
     /**
@@ -170,7 +197,7 @@ public class Karyon {
     }
     
     /**
-     * Add a runtime profile.  @see {@link ConditionalOnProfile}
+     * Add a runtime profile
      * 
      * @param profile
      */
@@ -182,7 +209,7 @@ public class Karyon {
     }
 
     /**
-     * Add a runtime profiles.  @see {@link ConditionalOnProfile}
+     * Add a runtime profiles
      * 
      * @param profiles
      */
@@ -194,7 +221,7 @@ public class Karyon {
     }
     
     /**
-     * Add a runtime profiles.  @see {@link ConditionalOnProfile}
+     * Add a runtime profiles
      * 
      * @param profiles
      */
@@ -209,40 +236,33 @@ public class Karyon {
      * Enable the specified feature
      * @param feature
      */
-    public Karyon enableFeature(KaryonFeature feature) {
-        return enableFeature(feature, true);
+    public Karyon enableFeature(KaryonFeature<Boolean> feature) {
+        return setFeature(feature, true);
     }
     
     /**
      * Enable or disable the specified feature
      * @param feature
      */
-    public Karyon enableFeature(KaryonFeature feature, boolean enabled) {
-        if (feature != null) {
-            this.features.put(feature, enabled);
-        }
-        return this;
+    public Karyon enableFeature(KaryonFeature<Boolean> feature, boolean enabled) {
+        return setFeature(feature, enabled);
     }
 
     /**
      * Disable the specified feature
      * @param feature
      */
-    public Karyon disableFeature(KaryonFeature feature) {
-        return enableFeature(feature, false);
+    public Karyon disableFeature(KaryonFeature<Boolean> feature) {
+        return setFeature(feature, false);
     }
     
-    public Karyon setPropertySource(PropertySource propertySource) {
-        this.propertySource = propertySource;
+    /**
+     * Disable the specified feature
+     * @param feature
+     */
+    public <T> Karyon setFeature(KaryonFeature<T> feature, T value) {
+        this.features.put(feature, value);
         return this;
-    }
-
-    public PropertySource getPropertySource() {
-        return this.propertySource;
-    }
-    
-    public String getApplicationName() {
-        return applicationName;
     }
     
     /**
@@ -260,11 +280,22 @@ public class Karyon {
     }
     
     /**
+     * Add an AutoBinder that will be called for any missing bindings.
+     * 
+     * @param matcher    Matcher to restrict the types for which the AutoBinder can be used.  See {@link TypeLiteralMatchers} for
+     *                   specifying common matchers.
+     * @param autoBinder The auto binder
+     */
+    public <T extends TypeLiteral<?>> Karyon addAutoBinder(Matcher<T> matcher, AutoBinder autoBinder) {
+        this.autoBinders.add(new MatchingAutoBinder<T>(matcher, autoBinder));
+        return this;
+    }
+    
+    /**
      * Call this anywhere in the process of manipulating the builder to apply a reusable
      * sequence of calls to the builder 
      * 
      * @param modules
-     * @return The builder
      */
     public Karyon apply(KaryonModule ... modules) {
         if (modules != null) {
@@ -283,83 +314,81 @@ public class Karyon {
     }
     
     /**
-     * Shortcut to creating the injector
-     * @return The builder
      */
     public LifecycleInjector start(String[] args) {
-        if (this.getPropertySource().equals(DefaultPropertySource.INSTANCE) && isFeatureEnabled(KaryonFeatures.USE_ARCHAIUS)) { 
-            try {
-                apply((KaryonModule) Class.forName("com.netflix.karyon.archaius.ArchaiusKaryonModule").newInstance());
-            }
-            catch (ClassNotFoundException e) {
-                throw new RuntimeException("Unable to bootstrap using archaius. Either add a dependency on 'com.netflix.karyon:karyon3-archaius2' or disable the feature KaryonFeatures.USE_ARCHAIUS");
-            } 
-            catch (InstantiationException | IllegalAccessException e) {
-                throw new RuntimeException("Unable to bootstrap using archaius");
-            }
-        }
-        
-        String karyonProfiles = getPropertySource().get(KARYON_PROFILES);
-        if (karyonProfiles != null) {
-             addProfiles(karyonProfiles);
-        }
-        
-        if (isFeatureEnabled(KaryonFeatures.USE_DEFAULT_KARYON_MODULE)) 
-            apply(new DefaultKaryonModule());
-        
         for (ModuleListTransformer transformer : transformers) {
             modules = transformer.transform(Collections.unmodifiableList(modules));
         }
         
-        return LifecycleInjectorCreator.createInjector(new KaryonConfiguration() {
-            @Override
-            public List<Module> getModules() {
-                return modules;
+        final Logger LOG = LoggerFactory.getLogger(Karyon.class);
+        
+        // Create the main LifecycleManager to be used by all levels
+        final LifecycleManager manager = new LifecycleManager();
+        
+        // Construct the injector using our override structure
+        try {
+            final Module coreModule = Modules.override(
+                    ImmutableList.<Module>builder()
+                        .addAll(modules)
+                        .add(new LifecycleModule())
+                        .add(new ConditionalSupportModule())
+                        .add(new AbstractModule() {
+                                @Override
+                                protected void configure() {
+                                    bind(KaryonFeatureSet.class).toInstance(new KaryonFeatureConfigImpl(new IdentityHashMap<>(features)));
+                                    bind(LifecycleManager.class).toInstance(manager);
+                                    
+                                    Multibinder<String> profiles = Multibinder.newSetBinder(binder(), String.class, Profiles.class);
+                                    for (String profile : Karyon.this.profiles) {
+                                        profiles.addBinding().toInstance(profile);
+                                    }
+                                }
+                            })
+                        .build())
+                    .with(overrideModules);
+            
+            for (Element binding : Elements.getElements(coreModule)) {
+                LOG.debug("Binding : {}", binding);
             }
-
-            @Override
-            public List<Module> getOverrideModules() {
-                return overrideModules;
+            
+            Injector injector = Guice.createInjector(
+                    stage,
+                    coreModule,
+                    new AbstractModule() {
+                        @Override
+                        protected void configure() {
+                            Set<Key<?>> boundKeys = ElementsEx.getAllBoundKeys(Elements.getElements(coreModule));
+                            Set<Key<?>> injectionKeys = ElementsEx.getAllInjectionKeys(Elements.getElements(coreModule));
+                            injectionKeys.removeAll(boundKeys);
+                            
+                            for (Key<?> key : injectionKeys) {
+                                for (MatchingAutoBinder factory : Karyon.this.autoBinders) {
+                                    if (factory.configure(binder(), key)) {
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    );
+            manager.notifyStarted();
+            return new LifecycleInjector(injector, manager);
+        }
+        catch (Throwable e) {
+            e.printStackTrace(System.err);
+            try {
+                manager.notifyStartFailed(e);
             }
-
-            @Override
-            public List<ModuleListProvider> getAutoModuleListProviders() {
-                return moduleProviders;
+            catch (Exception e2) {
+                System.err.println("Failed to notify injector creation failure!");
+                e2.printStackTrace(System.err);
             }
-
-            @Override
-            public Set<String> getProfiles() {
-                return profiles;
-            }
-
-            @Override
-            public PropertySource getPropertySource() {
-                return propertySource;
-            }
-
-            @Override
-            public Stage getStage() {
-                return stage;
-            }
-
-            @Override
-            public boolean isFeatureEnabled(KaryonFeature feature) {
-                return Karyon.this.isFeatureEnabled(feature);
-            }
-        });
+            return new LifecycleInjector(null, manager);
+        }
     }
 
-    private boolean isFeatureEnabled(KaryonFeature feature) {
-        if (propertySource != null) {
-            Boolean value = propertySource.get(feature.getKey(), Boolean.class);
-            if (value != null && value == true) {
-                return true;
-            }
-        }
-        Boolean value = features.get(feature);
-        return value == null
-                ? feature.isEnabledByDefault()
-                : value;
+    public static Karyon newBuilder() {
+        return new Karyon();
     }
     
     /**
@@ -368,29 +397,21 @@ public class Karyon {
      * @param applicationName
      * @return
      */
+    @Deprecated
     public static Karyon forApplication(String applicationName) {
         return new Karyon(applicationName);
     }
     
-    /**
-     * @deprecated Call Karyon.forApplication("foo")
-     */
     @Deprecated
     public static Karyon create() {
         return new Karyon();
     }
     
-    /**
-     * @deprecated Call Karyon.forApplication("foo").addModules(modules)
-     */
     @Deprecated
     public static Karyon create(Module ... modules) {
         return new Karyon().addModules(modules);
     }
     
-    /**
-     * @deprecated Call Karyon.forApplication("foo").apply(modules)
-     */
     @Deprecated
     public static Karyon from(KaryonModule ... modules) {
         Karyon karyon = new Karyon();

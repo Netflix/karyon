@@ -11,10 +11,11 @@ import javax.inject.Singleton;
 import com.netflix.governator.ProvisionMetrics;
 import com.netflix.governator.ProvisionMetrics.Element;
 import com.netflix.governator.ProvisionMetrics.Visitor;
+import com.netflix.karyon.admin.AdminService;
 
 @Singleton
 @AdminService(name="di-provision", index="list")
-public class DIProvisionResource {
+final class DIProvisionResource {
     private final ProvisionMetrics metrics;
 
     @Inject

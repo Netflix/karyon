@@ -4,13 +4,10 @@ import org.junit.Rule;
 import org.junit.Test;
 
 import com.netflix.governator.LifecycleInjector;
-import com.netflix.karyon.KaryonFeatures;
 
 public class TestRule {
     @Rule
-    public KaryonRule rule = new KaryonRule(this, (karyon) -> {
-        karyon.disableFeature(KaryonFeatures.USE_ARCHAIUS);
-    });
+    public KaryonRule rule = new KaryonRule(this);
     
     @Test
     public void testWithStart() throws Exception {

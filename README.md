@@ -115,37 +115,39 @@ public class HelloWorld {
 ```
 
 ----------
-Conditional module loading
+Conditional bindings
 ----------------------------------
-Karyon supports conditional module loading to auto install Guice modules based on the application runtime environment.  Conditionals can depend on property values, modules having been installed, bindings, etc.  An example use case would be to set the appropriate bindings for running Eureka locally as opposed to running in the cloud without requiring the developer to know which specific bindings to override.  For conditional bindings to work all the jars must be in the classpath and the modules made known to Karyonvia a ModuleListProvider (such as ClassPathModuleListProvider, ServiceLoaderModuleListProvider, etc...).  By default karyon will include any modules under the 'com.netflix.karyon' package.
+Applications and libraries frequently need different bindings based on the context in which the application is running.
+Conditional bindings may be specified in a Guice module using @ProvidesConditionally.  This features is syntactic sugar
+instead of having to write a complex Provider, put conditional logic in a Guice module or write complex conditional code
+when determining which Guice modules to install. 
 
 ```java
 Karyon.create()
-      .addModuleListProvider(ModuleListProvides.forPackage("org.example")
+      .addModules(new AbstractModule() {
+           @Override
+           protected void configure() {
+           }
+           
+           @ProvidesConditionally(isDefault=true)
+           @ConditionalOnProfile("local")
+           protected Foo getFooWhenRunningLocally() {
+                return new FooForLocalDevelopment();
+           }
+           
+           @ProvidesConditionally
+           @ConditionalOnEc2
+           protected Foo getFooWhenRunningInEc2() {
+                return new FooForEc2();
+           }
+      })
       .start()
 ```
 
-In addition to the conditionals built in to Karyon offers two key conditionals, ConditionalOnLocalDev and ConditionalOnEc2 that can be used to load specific modules (i.e. bindings) for local development and unit tests or when running in an EC2 environment.  
-
-For example,
-```java
-@ConditionalOnLocalDev
-public class Module extends AbstractModule {
-    @Override
-    protected void configure() {
-        bind(Foo.class).to(FooLocalDevImpl.class);
-    }
-}
-
-@ConditionalOnEc2
-public class Module extends AbstractModule {
-    @Override
-    protected void configure() {
-        bind(Foo.class).to(FooEc2Impl.class);
-    }
-}
-```
-You can run in either configuration via setting the properties karyon.profiles=localDev or karyon.profiles=ec2
+Note the following restrictions when using conditional bindings
+* ALL bindings for the type must be conditional otherwise Guice will fail with duplicate bindings errors
+* No more than 1 conditional may be true otherwise Guice will fail with duplicate bindings errors
+* If no conditions are met the @ProvidesConditionally with isDefault=true will be used.  Only one @ProvidesConditional may be default.
 
 ----------
 Archaius Configuration

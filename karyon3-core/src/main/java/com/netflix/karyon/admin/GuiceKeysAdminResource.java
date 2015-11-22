@@ -10,10 +10,11 @@ import javax.inject.Singleton;
 import com.google.inject.Binding;
 import com.google.inject.Injector;
 import com.google.inject.Key;
+import com.netflix.karyon.admin.AdminService;
 
 @Singleton
 @AdminService(name="guice-keys", index="list")
-public class GuiceKeysAdminResource {
+final class GuiceKeysAdminResource {
     private final Injector injector;
 
     @Inject

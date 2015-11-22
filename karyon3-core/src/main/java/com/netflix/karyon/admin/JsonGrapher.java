@@ -26,7 +26,7 @@ import com.netflix.governator.ProvisionMetrics;
 import com.netflix.governator.ProvisionMetrics.Element;
 import com.netflix.governator.ProvisionMetrics.Visitor;
 
-class JsonGrapher extends KaryonAbstractInjectorGrapher {
+final class JsonGrapher extends KaryonAbstractInjectorGrapher {
     private final Map<Key<?>, GraphNode> nodes = Maps.newHashMap();
     private final NameFactory nameFactory;
     private PrintWriter out;
