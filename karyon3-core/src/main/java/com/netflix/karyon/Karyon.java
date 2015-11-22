@@ -291,6 +291,12 @@ public class Karyon {
         return this;
     }
     
+    @Deprecated
+    public Karyon apply(AbstractModule ... modules) {
+        addModules(modules);
+        return this;
+    }
+    
     /**
      * Call this anywhere in the process of manipulating the builder to apply a reusable
      * sequence of calls to the builder 
