@@ -18,7 +18,7 @@ Getting Started
 Karyon is currently available as a release candidate
 
 ```java
-compile "com.netflix.karyon:karyon3-core:${karyon-version}'
+compile "com.netflix.karyon:karyon3-core:${karyon-version}"
 ```
 
 Set karyon-version to the latest 3.0.1-rc.+ available on maven central
