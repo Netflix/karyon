@@ -23,7 +23,7 @@ import rx.Observable;
  *
  */
 public class HttpRoutingRequestHandler implements RequestHandler<ByteBuf, ByteBuf> {
-    private final static Logger LOG = LoggerFactory.getLogger(HttpRoutingRequestHandler.class);
+    private static final Logger LOG = LoggerFactory.getLogger(HttpRoutingRequestHandler.class);
     
     private final List<HttpEndpointDefinition> defs = new ArrayList<>();
     
@@ -33,7 +33,7 @@ public class HttpRoutingRequestHandler implements RequestHandler<ByteBuf, ByteBu
     
     @Override
     public Observable<Void> handle(HttpServerRequest<ByteBuf> request, HttpServerResponse<ByteBuf> response) {
-        LOG.info("Access: " + request.getHttpMethod() + " " + request.getPath());
+        LOG.debug("Access: {} {}", request.getHttpMethod(), request.getPath());
         String uri = request.getPath();
         
         for (HttpEndpointDefinition def : defs) {
