@@ -65,21 +65,21 @@ import com.netflix.karyon.archaius.admin.ArchaiusAdminModule;
  * 
  * Runtime properties may be set in code by injecting and calling one of the
  * setters for,
- *  @RuntimeLayer SettableConfig config
+ *  {@literal @}RuntimeLayer SettableConfig config
  *  
- * A remote configuration may be specified by binding to @RemoteLayer Config
+ * A remote configuration may be specified by binding to {@literal @}RemoteLayer Config
  * <code>
  * public class FooRemoteModule extends AbstractModule {
- *     @Override
+ *     {@literal @}Override
  *     protected void configure() {}
  *     
- *     @Provides
- *     @RemoteLayer
+ *     {@literal @}Provides
+ *     {@literal @}RemoteLayer
  *     // When setting up a remote configuration that need access to archaius's Config
- *     // make sure to inject the qualifier @Raw otherwise the injector will fail
+ *     // make sure to inject the qualifier {@literal @}Raw otherwise the injector will fail
  *     // with a circular dependency error.  Note that the injected config will have 
  *     // system, environment and application properties loaded into it.
- *     Config getRemoteConfig(@Raw Config config) {
+ *     Config getRemoteConfig({@literal @}Raw Config config) {
  *         return new FooRemoteConfigImplementaiton(config);
  *     }
  * }

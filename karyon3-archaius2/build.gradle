@@ -26,6 +26,8 @@ dependencies {
     compile group: "com.netflix.archaius", name: "archaius2-archaius1-bridge", version: "${archaius_version}", changing: true
 
     testCompile project(':karyon3-junit')
+    testCompile "org.hamcrest:hamcrest-core:${hamcrest_version}"
+    testCompile "org.hamcrest:hamcrest-library:${hamcrest_version}"
 }
 
 eclipse {

@@ -11,25 +11,25 @@ import java.lang.annotation.Target;
  * with each binding being conditional on things like profiles, properties, etc. 
  * 
  * To enable, install ConditionalSupportModule in Guice to enable conditional binding.
- * Note that {@link Karyon} auto-installs this module.
+ * Note that Karyon auto-installs this module.
  * <code>
  * install(new ConditionalSupportModule())
  * </code>
  * 
  * <code>
  * public static class MyModule extends AbstractModule {
- *     @Override
+ *     {@literal @}Override
  *     protected void configure() {
  *     }
  *     
- *     @ProvidesConditionally(isDefault=true)
- *     @ConditionalOnProfile("test")
+ *     {@literal @}ProvidesConditionally(isDefault=true)
+ *     {@literal @}ConditionalOnProfile("test")
  *     public Foo getFooForTest() {
  *         return new FooForTest();
  *     }
  *     
- *     @ProvidesConditionally
- *     @ConditionalOnProfile("prod") 
+ *     {@literal @}ProvidesConditionally
+ *     {@literal @}ConditionalOnProfile("prod") 
  *     public Foo getFooForProd() {
  *         return new FooForProd();
  *     }
@@ -39,7 +39,7 @@ import java.lang.annotation.Target;
  * Foo can now be injected directly with the 
  * 
  * <code>
- * @Inject
+ * {@literal @}Inject
  * public Bar(Foo foo) {
  * }
  * </code>

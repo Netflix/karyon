@@ -88,12 +88,13 @@ public final class LifecycleModule extends AbstractModule {
                 Set<LifecycleFeature> features, 
                 ProvisionMetrics metrics,
                 PropertySource property) {
-            LOG.debug("LifecycleProvisionListener initialized {}", features);
             listener.metrics = metrics;
             listener.manager = manager;
             listener.manager.addListener(listener);
             listener.features = features;
             listener.shutdownOnFailure = karyonFeatures.get(KaryonFeatures.SHUTDOWN_ON_ERROR);
+            
+            LOG.debug("LifecycleProvisionListener initialized {}", features);
             
             LifecycleListener l;
             while (null != (l = listener.pendingLifecycleListeners.poll())) {

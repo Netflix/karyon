@@ -17,10 +17,13 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.ImmutableList;
 import com.google.inject.AbstractModule;
+import com.google.inject.ConfigurationException;
+import com.google.inject.CreationException;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.Module;
+import com.google.inject.ProvisionException;
 import com.google.inject.Stage;
 import com.google.inject.TypeLiteral;
 import com.google.inject.matcher.Matcher;
@@ -36,28 +39,20 @@ import com.netflix.karyon.conditional.ConditionalSupportModule;
 import com.netflix.karyon.spi.ModuleListTransformer;
 
 /**
- * Base entry point for creating a LifecycleInjector with module auto-loading capabilities.  
- * Module auto-loading makes it possible to load bindings that are contextual to the 
- * environment in which the application is running based on things like profiles,
- * properties and existing bindings.  
- * 
- * The LifecycleInjector created here uses a layered approach to construct the Guice Injector
- * so that bindings can be overridden at a high level based on the runtime environment
- * as opposed to sprinkling Modules.overrides and conditionals throughout the modules themselves
- * since using Modules.overrides directly looses the original module's context and can easily result
- * in difficult to debug duplicate binding errors.
+ * Main entry point for creating a LifecycleInjector with guice extensions such as 
+ * conditional bindings.  
  * 
  * This injector is constructed in two phases.  The first bootstrap phase determines which core
  * Guice modules should be installed based on processing of conditional annotations.  The final
  * list of auto discovered modules is appended to the main list of modules and installed on the
- * main injector.  Application level override modules may be applied to this final list from the
- * list of modules returned from {@link KaryonConfiguration#getOverrideModules()}.
+ * main injector.  
  * 
  * <code>
-     Karyon.forApplication("foo")
+     Karyon.newBuilder()
         .addModules(
-             new JettyModule(),
-             new JerseyServletModule() {
+            new ArchaiusKaryonModule(),
+            new JettyModule(),
+            new JerseyServletModule() {
                 {@literal @}@Override
                 protected void configureServlets() {
                     serve("/*").with(GuiceContainer.class);
@@ -90,14 +85,14 @@ public class Karyon {
     }
     
     @Singleton
-    class KaryonFeatureConfigImpl implements KaryonFeatureSet {
+    class KaryonFeatureSetImpl implements KaryonFeatureSet {
         private final IdentityHashMap<KaryonFeature<?>, Object> features;
         
         @Inject
         private PropertySource properties;
         
         @Inject
-        public KaryonFeatureConfigImpl(IdentityHashMap<KaryonFeature<?>, Object> features) {
+        public KaryonFeatureSetImpl(IdentityHashMap<KaryonFeature<?>, Object> features) {
             this.features = features;
         }
         
@@ -107,7 +102,12 @@ public class Karyon {
             if (features.containsKey(feature)) {
                 return (T) features.get(feature);
             }
-            return (T) properties.get(feature.getKey(), feature.getType());
+            else if (properties == null) {
+                return feature.getDefaultValue();
+            }
+            else {
+                return (T) properties.get(feature.getKey(), feature.getType(), feature.getDefaultValue());
+            }
         }
     }
 
@@ -326,61 +326,65 @@ public class Karyon {
             modules = transformer.transform(Collections.unmodifiableList(modules));
         }
         
+        this.addAutoBinder(TypeLiteralMatchers.subclassOf(PropertySource.class), new PropertySourceAutoBinder());
+        
         final Logger LOG = LoggerFactory.getLogger(Karyon.class);
         
         // Create the main LifecycleManager to be used by all levels
         final LifecycleManager manager = new LifecycleManager();
         
+        final KaryonFeatureSetImpl featureSet = new KaryonFeatureSetImpl(new IdentityHashMap<>(features));
+        
         // Construct the injector using our override structure
         try {
             final Module coreModule = Modules.override(
-                    ImmutableList.<Module>builder()
-                        .addAll(modules)
-                        .add(new LifecycleModule())
-                        .add(new ConditionalSupportModule())
-                        .add(new AbstractModule() {
-                                @Override
-                                protected void configure() {
-                                    bind(KaryonFeatureSet.class).toInstance(new KaryonFeatureConfigImpl(new IdentityHashMap<>(features)));
-                                    bind(LifecycleManager.class).toInstance(manager);
-                                    
-                                    Multibinder<String> profiles = Multibinder.newSetBinder(binder(), String.class, Profiles.class);
-                                    for (String profile : Karyon.this.profiles) {
-                                        profiles.addBinding().toInstance(profile);
-                                    }
-                                }
-                            })
-                        .build())
-                    .with(overrideModules);
+                ImmutableList.<Module>builder()
+                    .addAll(modules)
+                    .add(new LifecycleModule())
+                    .add(new ConditionalSupportModule())
+                    .add(new AbstractModule() {
+                        @Override
+                        protected void configure() {
+                            bind(KaryonFeatureSet.class).toInstance(featureSet);
+                            bind(LifecycleManager.class).toInstance(manager);
+                            
+                            Multibinder<String> profiles = Multibinder.newSetBinder(binder(), String.class, Profiles.class);
+                            for (String profile : Karyon.this.profiles) {
+                                profiles.addBinding().toInstance(profile);
+                            }
+                        }
+                    })
+                    .build())
+                .with(overrideModules);
             
             for (Element binding : Elements.getElements(coreModule)) {
                 LOG.debug("Binding : {}", binding);
             }
             
             Injector injector = Guice.createInjector(
-                    stage,
-                    coreModule,
-                    new AbstractModule() {
-                        @Override
-                        protected void configure() {
-                            Set<Key<?>> boundKeys = ElementsEx.getAllBoundKeys(Elements.getElements(coreModule));
-                            Set<Key<?>> injectionKeys = ElementsEx.getAllInjectionKeys(Elements.getElements(coreModule));
-                            injectionKeys.removeAll(boundKeys);
-                            
-                            for (Key<?> key : injectionKeys) {
-                                for (MatchingAutoBinder factory : Karyon.this.autoBinders) {
-                                    if (factory.configure(binder(), key)) {
-                                        break;
-                                    }
+                stage,
+                coreModule,
+                new AbstractModule() {
+                    @Override
+                    protected void configure() {
+                        Set<Key<?>> boundKeys = ElementsEx.getAllBoundKeys(Elements.getElements(coreModule));
+                        Set<Key<?>> injectionKeys = ElementsEx.getAllInjectionKeys(Elements.getElements(coreModule));
+                        injectionKeys.removeAll(boundKeys);
+                        
+                        for (Key<?> key : injectionKeys) {
+                            for (MatchingAutoBinder factory : Karyon.this.autoBinders) {
+                                if (factory.configure(binder(), key)) {
+                                    break;
                                 }
                             }
                         }
                     }
-                    );
+                }
+                );
             manager.notifyStarted();
             return new LifecycleInjector(injector, manager);
         }
-        catch (Throwable e) {
+        catch (ProvisionException|CreationException|ConfigurationException e) {
             e.printStackTrace(System.err);
             try {
                 manager.notifyStartFailed(e);
@@ -389,7 +393,12 @@ public class Karyon {
                 System.err.println("Failed to notify injector creation failure!");
                 e2.printStackTrace(System.err);
             }
-            return new LifecycleInjector(null, manager);
+            if (!featureSet.get(KaryonFeatures.SHUTDOWN_ON_ERROR)) {
+                return new LifecycleInjector(null, manager);
+            }
+            else {
+                throw e;
+            }
         }
     }
 

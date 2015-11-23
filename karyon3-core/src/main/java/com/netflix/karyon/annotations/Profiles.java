@@ -9,7 +9,7 @@ import java.lang.annotation.Target;
 import javax.inject.Qualifier;
 
 /**
- * Qualifier associated with Set<String> of active profiles
+ * Qualifier associated with Set{@literal <}String{@literal >} of active profiles
  */
 @Target({ ElementType.FIELD, ElementType.PARAMETER, ElementType.METHOD })
 @Retention(RetentionPolicy.RUNTIME)

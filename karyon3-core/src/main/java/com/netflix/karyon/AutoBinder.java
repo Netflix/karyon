@@ -9,12 +9,12 @@ import com.google.inject.Key;
  * 
  * For example, the following code will fail with a missing binding error for Foo
  * 
- * ```java
+ * <code>
   public interface Foo {
   }
   
   public class Bar {
-      @Inject
+      {@literal @}Inject
       public Bar(Foo foo) {
       }
   }
@@ -28,11 +28,11 @@ import com.google.inject.Key;
             }
             .start();
    }
- * ```
+ * </code>
  * 
  * A catch-all binder for Foo can can added as follows
  * 
- * ```java
+ * <code>
    public static void main() {
        Karyon.create()
             .addModule(new AbstractModule() {
@@ -43,8 +43,8 @@ import com.google.inject.Key;
             .addTypeBindingFactory(
                 TypeLiteralMatchers.subclassOf(Bar.class),
                 new KeyAutoBinder() {
-                    @Override
-                    public <T> boolean bind(Binder binder, final Key<T> key) {
+                    {@literal @}Override
+                    public {@literal <}T{@literal >} boolean bind(Binder binder, final Key{@literal <}T{@literal >} key) {
                         binder.bind(key).toInstance((T)new Foo() {});
                         return true;
                     }
@@ -52,7 +52,7 @@ import com.google.inject.Key;
             )
  *          .start();
  * }
- * ```
+ * </code>
  * 
  * This functionality is useful to reduce boiler plate code.
  * 
@@ -61,8 +61,8 @@ public interface AutoBinder {
     /**
      * Create a bindings for the specified type literal.  
      * 
-     * @param key  
      * @param binder
+     * @param key  
      * 
      * @return True if bindings was created or false if not.
      */

@@ -1,7 +1,7 @@
 package com.netflix.karyon;
 
 /**
- * Core karyon features.  Features are configured/enabled on {@link KaryonConfiguration}
+ * Core karyon features.  Features are configured/enabled on {@link Karyon}
  * 
  * @author elandau
  */

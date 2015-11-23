@@ -10,6 +10,7 @@ import org.junit.Test;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Binder;
+import com.google.inject.CreationException;
 import com.google.inject.Injector;
 import com.google.inject.Key;
 
@@ -35,7 +36,7 @@ public class KaryonTypeBindingFactoryTest {
         }
     }
     
-    @Test(expected=RuntimeException.class)
+    @Test(expected=CreationException.class)
     public void confirmCreateFailsWithMissingBinding() {
         Karyon.create()
             .addModules(new AbstractModule() {
