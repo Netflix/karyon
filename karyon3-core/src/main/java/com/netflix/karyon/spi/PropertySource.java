@@ -1,6 +1,7 @@
-package com.netflix.karyon;
+package com.netflix.karyon.spi;
 
-import com.google.inject.ImplementedBy;
+import com.netflix.karyon.PropertiesPropertySource;
+
 
 /**
  * Very simple config interface to be used by Conditions to gain access
@@ -12,7 +13,6 @@ import com.google.inject.ImplementedBy;
  * @author elandau
  * 
  */
-@ImplementedBy(DefaultPropertySource.class)
 public interface PropertySource {
     /**
      * Get the value of a property or null if not found

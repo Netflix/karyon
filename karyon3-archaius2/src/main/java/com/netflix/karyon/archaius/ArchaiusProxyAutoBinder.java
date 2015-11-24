@@ -6,7 +6,7 @@ import javax.inject.Provider;
 import com.google.inject.Binder;
 import com.google.inject.Key;
 import com.netflix.archaius.ConfigProxyFactory;
-import com.netflix.karyon.AutoBinder;
+import com.netflix.karyon.spi.AutoBinder;
 
 /**
  * Autobinder to create proxies for any interface containing the archaius

@@ -1,7 +1,8 @@
-package com.netflix.karyon;
+package com.netflix.karyon.spi;
 
 import com.google.inject.TypeLiteral;
 import com.google.inject.matcher.Matcher;
+import com.netflix.karyon.TypeLiteralMatchers;
 
 /**
  * @see KaryonModule

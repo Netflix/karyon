@@ -37,7 +37,11 @@ import com.netflix.governator.LifecycleManager;
 import com.netflix.karyon.annotations.Arguments;
 import com.netflix.karyon.annotations.Profiles;
 import com.netflix.karyon.conditional.ConditionalSupportModule;
+import com.netflix.karyon.spi.AutoBinder;
+import com.netflix.karyon.spi.KaryonBinder;
+import com.netflix.karyon.spi.KaryonModule;
 import com.netflix.karyon.spi.ModuleListTransformer;
+import com.netflix.karyon.spi.PropertySource;
 
 /**
  * Main entry point for creating a LifecycleInjector with guice extensions such as 

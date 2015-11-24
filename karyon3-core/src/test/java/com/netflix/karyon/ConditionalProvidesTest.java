@@ -24,6 +24,7 @@ import com.netflix.karyon.conditional.ConditionalSupportModule;
 import com.netflix.karyon.conditional.annotations.ConditionalOnProfile;
 import com.netflix.karyon.conditional.annotations.ConditionalOnProperty;
 import com.netflix.karyon.conditional.annotations.ProvidesConditionally;
+import com.netflix.karyon.spi.PropertySource;
 
 public class ConditionalProvidesTest {
     public static interface Foo {
@@ -126,7 +127,7 @@ public class ConditionalProvidesTest {
         Foo foo = injector.getInstance(Foo.class);
         assertThat(foo.getName(), equalTo("test"));
     }
-
+    
     @Test
     public void succeedMatchNoneWithConditional() {
         Injector injector = Karyon.newBuilder().addModules(new TestModule() {

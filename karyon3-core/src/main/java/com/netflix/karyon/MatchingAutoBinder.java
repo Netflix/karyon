@@ -4,6 +4,7 @@ import com.google.inject.Binder;
 import com.google.inject.Key;
 import com.google.inject.TypeLiteral;
 import com.google.inject.matcher.Matcher;
+import com.netflix.karyon.spi.AutoBinder;
 
 class MatchingAutoBinder<T extends TypeLiteral<?>> implements AutoBinder {
     final Matcher<T> matcher;

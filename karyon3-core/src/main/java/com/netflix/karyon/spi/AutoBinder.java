@@ -1,4 +1,4 @@
-package com.netflix.karyon;
+package com.netflix.karyon.spi;
 
 import com.google.inject.Binder;
 import com.google.inject.Key;

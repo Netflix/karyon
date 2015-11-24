@@ -45,12 +45,12 @@ import com.netflix.archaius.inject.RuntimeLayer;
 import com.netflix.archaius.interpolate.ConfigStrLookup;
 import com.netflix.archaius.readers.PropertiesConfigReader;
 import com.netflix.karyon.AbstractPropertySource;
-import com.netflix.karyon.KaryonBinder;
-import com.netflix.karyon.KaryonModule;
-import com.netflix.karyon.PropertySource;
 import com.netflix.karyon.TypeLiteralMatchers;
 import com.netflix.karyon.annotations.Profiles;
 import com.netflix.karyon.archaius.admin.ArchaiusAdminModule;
+import com.netflix.karyon.spi.KaryonBinder;
+import com.netflix.karyon.spi.KaryonModule;
+import com.netflix.karyon.spi.PropertySource;
 
 /**
  * Module to set up archaius in a Karyon3 application. 

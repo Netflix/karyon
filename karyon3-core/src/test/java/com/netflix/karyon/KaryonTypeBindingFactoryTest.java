@@ -13,6 +13,7 @@ import com.google.inject.Binder;
 import com.google.inject.CreationException;
 import com.google.inject.Injector;
 import com.google.inject.Key;
+import com.netflix.karyon.spi.AutoBinder;
 
 public class KaryonTypeBindingFactoryTest {
     public static interface Baz {
@@ -38,7 +39,7 @@ public class KaryonTypeBindingFactoryTest {
     
     @Test(expected=CreationException.class)
     public void confirmCreateFailsWithMissingBinding() {
-        Karyon.create()
+        Karyon.newBuilder()
             .addModules(new AbstractModule() {
                 @Override
                 protected void configure() {
@@ -50,7 +51,7 @@ public class KaryonTypeBindingFactoryTest {
     
     @Test
     public void testAddBinding() {
-        Injector injector = Karyon.create()
+        Injector injector = Karyon.newBuilder()
             .addModules(new AbstractModule() {
                 @Override
                 protected void configure() {
@@ -58,36 +59,10 @@ public class KaryonTypeBindingFactoryTest {
                 }
             })
             .addAutoBinder(
-                TypeLiteralMatchers.subclassOf(Bar.class),
-                new AutoBinder() {
-                    @SuppressWarnings("unchecked")
-                    @Override
-                    public <T> boolean configure(Binder binder, final Key<T> key) {
-                        binder.bind(key).toInstance((T)new Bar() {
-                            @Override
-                            public String getName() {
-                                return null == key.getAnnotation() ? "" : key.getAnnotation().toString();
-                            } 
-                        });
-                        return true;
-                    }
-                }
+                TypeLiteralMatchers.subclassOf(Bar.class), new BarAutoBinder()
             )
             .addAutoBinder(
-                TypeLiteralMatchers.subclassOf(Baz.class),
-                new AutoBinder() {
-                    @SuppressWarnings("unchecked")
-                    @Override
-                    public <T> boolean configure(Binder binder, Key<T> key) {
-                        binder.bind(key).toInstance((T)new Baz() {
-                            @Override
-                            public String getName() {
-                                return null == key.getAnnotation() ? "" : key.getAnnotation().toString();
-                            }
-                        });
-                        return true;
-                    }
-                }
+                TypeLiteralMatchers.subclassOf(Baz.class), new BazAutoBinder()
             )
             .start();
             
@@ -96,5 +71,33 @@ public class KaryonTypeBindingFactoryTest {
         assertThat(foo.bar.getName(),       equalTo(""));
         assertThat(foo.baz.getName(),       equalTo(""));
         assertThat(foo.namedBar.getName(),  equalTo("@com.google.inject.name.Named(value=bar)"));
+    }
+    
+    static class BarAutoBinder implements AutoBinder {
+        @SuppressWarnings("unchecked")
+        @Override
+        public <T> boolean configure(Binder binder, final Key<T> key) {
+            binder.bind(key).toInstance((T)new Bar() {
+                @Override
+                public String getName() {
+                    return null == key.getAnnotation() ? "" : key.getAnnotation().toString();
+                } 
+            });
+            return true;
+        }
+    }
+    
+    static class BazAutoBinder implements AutoBinder {
+        @SuppressWarnings("unchecked")
+        @Override
+        public <T> boolean configure(Binder binder, Key<T> key) {
+            binder.bind(key).toInstance((T)new Baz() {
+                @Override
+                public String getName() {
+                    return null == key.getAnnotation() ? "" : key.getAnnotation().toString();
+                }
+            });
+            return true;
+        }
     }
 }   

@@ -33,6 +33,7 @@ import com.netflix.governator.guice.lazy.FineGrainedLazySingleton;
 import com.netflix.governator.guice.lazy.FineGrainedLazySingletonScope;
 import com.netflix.governator.guice.lazy.LazySingleton;
 import com.netflix.governator.guice.lazy.LazySingletonScope;
+import com.netflix.karyon.spi.PropertySource;
 
 /**
  * Adds support for standard lifecycle annotations @PostConstruct and @PreDestroy to Guice.

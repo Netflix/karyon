@@ -1,4 +1,6 @@
-package com.netflix.karyon;
+package com.netflix.karyon.spi;
+
+import com.netflix.karyon.Karyon;
 
 /**
  * Contract for adding functionality to Karyon as part of adding a Guice module.  This interface

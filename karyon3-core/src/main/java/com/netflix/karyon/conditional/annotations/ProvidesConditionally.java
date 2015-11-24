@@ -54,9 +54,8 @@ import java.lang.annotation.Target;
 @Documented
 public @interface ProvidesConditionally {
     /**
-     * If set to true this bindings will be used if not other condition is met (even if this bindings
+     * @return If set to true this bindings will be used if not other condition is met (even if this bindings
      * condition is not met).  Only one ProvidesConditionally for a type may hav isDefault set to true
-     * @return
      */
     boolean isDefault() default false;
 }

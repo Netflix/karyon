@@ -20,7 +20,6 @@ import com.netflix.archaius.config.MapConfig;
 import com.netflix.archaius.config.SettableConfig;
 import com.netflix.archaius.exceptions.ConfigException;
 import com.netflix.archaius.inject.RemoteLayer;
-import com.netflix.archaius.visitor.PrintStreamVisitor;
 import com.netflix.karyon.Karyon;
 
 public class ArchaiusKaryonModuleTest {
@@ -88,7 +87,6 @@ public class ArchaiusKaryonModuleTest {
         Foo foo = injector.getInstance(Foo.class);
         Config config = injector.getInstance(Config.class);
         
-        config.accept(new PrintStreamVisitor());
         System.out.println("Value: " + config.getString("foo_override"));
         assertThat(config.getString("foo_override"), equalTo("code"));
     }
@@ -96,6 +94,7 @@ public class ArchaiusKaryonModuleTest {
     @Test
     public void testLibrariesOverrideProperties() throws ConfigException {
         Injector injector = Karyon.newBuilder()
+                .addProfile("local")
                 .addModules(new ArchaiusKaryonModule()
                     .withLibraryOverrides("foo", singletonProperties("foo_override", "code"))
                 )
