@@ -5,9 +5,7 @@ import com.google.inject.grapher.NameFactory;
 import com.google.inject.grapher.ShortNameFactory;
 import com.google.inject.grapher.graphviz.PortIdFactory;
 import com.google.inject.grapher.graphviz.PortIdFactoryImpl;
-import com.netflix.karyon.conditional.ConditionalOnModule;
 
-@ConditionalOnModule(AdminModule.class)
 public final class CoreAdminModule extends AbstractModule {
     @Override
     protected void configure() {
@@ -15,7 +13,6 @@ public final class CoreAdminModule extends AbstractModule {
         bind(DIGraphResource.class);
         bind(EnvAdminResource.class);
         bind(JarsAdminResource.class);
-        bind(MetaAdminResource.class);
         bind(HealthCheckResource.class);
         bind(GuiceLifecycleResource.class);
         bind(DIProvisionResource.class);

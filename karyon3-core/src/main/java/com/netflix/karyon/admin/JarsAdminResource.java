@@ -15,9 +15,11 @@ import javax.inject.Singleton;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.netflix.karyon.admin.AdminService;
+
 @Singleton
 @AdminService(name="jars", index="list")
-public class JarsAdminResource {
+final class JarsAdminResource {
     private static final Logger LOG = LoggerFactory.getLogger(JarsAdminResource.class);
     
     private static final String JAR_PATTERN = "^jar:file:(.+)!/META-INF/MANIFEST.MF$";

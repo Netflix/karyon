@@ -4,6 +4,7 @@ import javax.inject.Singleton;
 
 import com.google.inject.AbstractModule;
 import com.netflix.karyon.Karyon;
+import com.netflix.karyon.admin.CoreAdminModule;
 import com.netflix.karyon.admin.rest.AdminServerModule;
 import com.netflix.karyon.admin.ui.AdminUIServerModule;
 import com.netflix.karyon.archaius.ArchaiusKaryonModule;
@@ -15,12 +16,12 @@ import com.netflix.karyon.rxnetty.shutdown.ShutdownServerModule;
 @Singleton
 public class RxNettyHelloWorldApp {
     public static void main(String[] args) throws Exception {
-        Karyon.forApplication("rxnetty-helloworld")
-            .apply(new ArchaiusKaryonModule()
-                .withConfigName("rxnetty-helloworld")
-            )
-            .addProfile("local")
+        Karyon.newBuilder()
+            .addProfile("local")    // Setting the profile should normally done using system/env property: karyon.profiles=local
             .addModules(
+                new ArchaiusKaryonModule()
+                    .withConfigName("rxnetty-helloworld"),
+                new CoreAdminModule(),
                 new AdminServerModule(),
                 new AdminUIServerModule(),
                 // These bindings will go on the 'default' server

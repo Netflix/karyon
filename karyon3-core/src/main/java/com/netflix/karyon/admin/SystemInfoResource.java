@@ -5,9 +5,11 @@ import java.lang.management.OperatingSystemMXBean;
 
 import javax.inject.Singleton;
 
+import com.netflix.karyon.admin.AdminService;
+
 @Singleton
 @AdminService(name="system-info", index="get")
-public class SystemInfoResource {
+final class SystemInfoResource {
     public OperatingSystemMXBean get() {
         return ManagementFactory.getOperatingSystemMXBean();
     }

@@ -16,7 +16,7 @@ import com.netflix.karyon.rxnetty.server.RxNettyHttpServerRegistry;
 
 @Singleton
 @AdminService(name="netty", index="current")
-public class RxNettyAdminResource {
+class RxNettyAdminResource {
     private final RxNettyHttpServerRegistry registry;
     
     public static interface ServerInfo {

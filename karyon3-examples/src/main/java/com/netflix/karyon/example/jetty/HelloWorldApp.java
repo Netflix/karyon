@@ -11,6 +11,7 @@ import com.netflix.governator.ProvisionDebugModule;
 import com.netflix.governator.guice.jetty.JettyModule;
 import com.netflix.karyon.Karyon;
 import com.netflix.karyon.KaryonFeatures;
+import com.netflix.karyon.admin.CoreAdminModule;
 import com.netflix.karyon.admin.rest.AdminServerModule;
 import com.netflix.karyon.admin.ui.AdminUIServerModule;
 import com.netflix.karyon.archaius.ArchaiusKaryonModule;
@@ -25,13 +26,13 @@ public class HelloWorldApp extends DefaultLifecycleListener {
     private static final Logger LOG = LoggerFactory.getLogger(HelloWorldApp.class);
     
     public static void main(String[] args) throws Exception {
-        Karyon.forApplication("helloworld")
-            .apply(new ArchaiusKaryonModule()
-                .withConfigName("helloworld")
-                )
-            .addProfile("local")
+        Karyon.newBuilder()
+            .addProfile("local")    // Setting the profile should normally done using system/env property: karyon.profiles=local
             .addModules(
+                new ArchaiusKaryonModule()
+                    .withConfigName("helloworld"),
                 new ArchaiusLog4J2ConfigurationModule(),
+                new CoreAdminModule(),
                 new ProvisionDebugModule(),
                 new JettyModule(),
                 new AdminServerModule(),

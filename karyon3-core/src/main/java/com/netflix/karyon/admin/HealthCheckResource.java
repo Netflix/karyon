@@ -3,6 +3,7 @@ package com.netflix.karyon.admin;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import com.netflix.karyon.admin.AdminService;
 import com.netflix.karyon.health.HealthCheck;
 import com.netflix.karyon.health.HealthCheckStatus;
 
@@ -15,7 +16,7 @@ import com.netflix.karyon.health.HealthCheckStatus;
  */
 @Singleton
 @AdminService(name="health", index="current")
-public class HealthCheckResource {
+final class HealthCheckResource {
     private final HealthCheck healthCheck;
 
     @Inject

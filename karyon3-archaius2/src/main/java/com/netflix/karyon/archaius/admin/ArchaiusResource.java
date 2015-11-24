@@ -16,7 +16,7 @@ import com.netflix.karyon.admin.AdminService;
 
 @Singleton
 @AdminService(name="props", index="getAllProperties")
-public class ArchaiusResource {
+final class ArchaiusResource {
     private final CompositeConfig config;
 
     @Inject

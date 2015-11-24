@@ -1,5 +1,6 @@
 package com.netflix.karyon.archaius;
 
+import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import org.slf4j.Logger;
@@ -17,15 +18,24 @@ import com.netflix.governator.DefaultLifecycleListener;
 public class ConfigLifecycleListener extends DefaultLifecycleListener {
     private static final Logger LOG = LoggerFactory.getLogger(ConfigLifecycleListener.class);
     
-    private Config config;
-
-    public void setConfig(Config config) {
+    private final Config config;
+    
+    @Inject
+    public ConfigLifecycleListener(Config config) {
         this.config = config;
+    }
+
+    @Override
+    public void onStarted() {
+        LOG.debug("Injector created with final configuration ");
+        LOG.debug("========================================= ");
+        config.accept(new SLF4JConfigVisitor());
     }
     
     @Override
     public void onStartFailed(Throwable t) {
         LOG.debug("Injector failed with final configuration ");
+        LOG.debug("======================================== ");
         config.accept(new SLF4JConfigVisitor());
     }
 }

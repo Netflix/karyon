@@ -9,7 +9,6 @@ import org.junit.runners.model.Statement;
 import com.netflix.governator.DefaultLifecycleListener;
 import com.netflix.governator.LifecycleInjector;
 import com.netflix.karyon.Karyon;
-import com.netflix.karyon.KaryonModule;
 
 /**
  * JUnit rule to simplify testing with Karyon.  KaryonRule extends Karyon and as such
@@ -83,21 +82,14 @@ public class KaryonRule extends Karyon implements TestRule {
     }
     
     public KaryonRule(Object obj) {
-        this(obj, null);
-    }
-
-    public KaryonRule(Object obj, KaryonModule module) {
-        this(obj, "unittest", module);
+        this(obj, "unittest");
     }
     
-    public KaryonRule(Object obj, String applicationName, KaryonModule module) {
+    public KaryonRule(Object obj, String applicationName) {
         super(applicationName);
         
         this.obj = obj;
-        this.injector = null;
-        
-        if (module != null) 
-            this.apply(module);
+        this.injector = null;        
     }
 
     public LifecycleInjector getInjector() {

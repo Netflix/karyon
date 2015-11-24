@@ -8,13 +8,10 @@ import org.junit.Test;
 
 import com.google.inject.AbstractModule;
 import com.netflix.governator.LifecycleInjector;
-import com.netflix.karyon.KaryonFeatures;
 
 public class TestInjection {
     @Rule
-    public KaryonRule karyon = new KaryonRule(this, (karyon) -> {
-        karyon.disableFeature(KaryonFeatures.USE_ARCHAIUS);
-    });
+    public KaryonRule karyon = new KaryonRule(this);
     
     @Inject
     public String foo;

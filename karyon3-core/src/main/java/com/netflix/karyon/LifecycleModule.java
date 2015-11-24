@@ -16,6 +16,7 @@ import javax.inject.Singleton;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.inject.AbstractModule;
 import com.google.inject.Key;
 import com.google.inject.ProvisionException;
 import com.google.inject.matcher.Matchers;
@@ -28,11 +29,11 @@ import com.netflix.governator.LifecycleInjector;
 import com.netflix.governator.LifecycleListener;
 import com.netflix.governator.LifecycleManager;
 import com.netflix.governator.ProvisionMetrics;
-import com.netflix.governator.SingletonModule;
 import com.netflix.governator.guice.lazy.FineGrainedLazySingleton;
 import com.netflix.governator.guice.lazy.FineGrainedLazySingletonScope;
 import com.netflix.governator.guice.lazy.LazySingleton;
 import com.netflix.governator.guice.lazy.LazySingletonScope;
+import com.netflix.karyon.spi.PropertySource;
 
 /**
  * Adds support for standard lifecycle annotations @PostConstruct and @PreDestroy to Guice.
@@ -56,7 +57,7 @@ import com.netflix.governator.guice.lazy.LazySingletonScope;
  * @author elandau
  *
  */
-public final class LifecycleModule extends SingletonModule {
+public final class LifecycleModule extends AbstractModule {
     private static final Logger LOG = LoggerFactory.getLogger(LifecycleModule.class);
 
     /**
@@ -82,17 +83,19 @@ public final class LifecycleModule extends SingletonModule {
         
         @Inject
         public static void initialize(
+                KaryonFeatureSet karyonFeatures,
                 LifecycleManager manager, 
                 LifecycleProvisionListener listener, 
                 Set<LifecycleFeature> features, 
-                ProvisionMetrics metrics, 
-                KaryonConfiguration config) {
-            LOG.debug("LifecycleProvisionListener initialized {}", features);
+                ProvisionMetrics metrics,
+                PropertySource property) {
             listener.metrics = metrics;
             listener.manager = manager;
             listener.manager.addListener(listener);
             listener.features = features;
-            listener.shutdownOnFailure = config.isFeatureEnabled(KaryonFeatures.SHUTDOWN_ON_ERROR);
+            listener.shutdownOnFailure = karyonFeatures.get(KaryonFeatures.SHUTDOWN_ON_ERROR);
+            
+            LOG.debug("LifecycleProvisionListener initialized {}", features);
             
             LifecycleListener l;
             while (null != (l = listener.pendingLifecycleListeners.poll())) {
@@ -223,5 +226,20 @@ public final class LifecycleModule extends SingletonModule {
         // and DEVELOPMENT mode makes everything lazy.
         bindScope(FineGrainedLazySingleton.class, FineGrainedLazySingletonScope.get());
         bindScope(LazySingleton.class, LazySingletonScope.get());
-   }
+    }
+    
+    @Override
+    public boolean equals(Object obj) {
+        return getClass().equals(obj.getClass());
+    }
+
+    @Override
+    public int hashCode() {
+        return getClass().hashCode();
+    }
+
+    @Override
+    public String toString() {
+        return "LifecycleModule";
+    }
 }

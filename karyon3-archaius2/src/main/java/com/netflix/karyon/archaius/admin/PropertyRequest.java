@@ -1,6 +1,6 @@
 package com.netflix.karyon.archaius.admin;
 
-public class PropertyRequest {
+final class PropertyRequest {
     String layerName;
     String key;
     String regex;

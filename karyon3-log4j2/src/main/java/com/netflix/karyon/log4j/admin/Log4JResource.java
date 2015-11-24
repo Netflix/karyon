@@ -15,7 +15,7 @@ import com.netflix.karyon.admin.AdminService;
 
 @Singleton
 @AdminService(name="log4j", index="current")
-public class Log4JResource {
+final class Log4JResource {
 
     public static class Result {
         Map<String, String> loggers = new TreeMap<>();

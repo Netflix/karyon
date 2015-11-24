@@ -5,13 +5,10 @@ import org.junit.Test;
 
 import com.google.inject.AbstractModule;
 import com.netflix.governator.LifecycleInjector;
-import com.netflix.karyon.KaryonFeatures;
 
 public class TestDefaultRule {
     @Rule
-    public KaryonRule rule = new KaryonRule(this, (karyon) -> {
-        karyon.disableFeature(KaryonFeatures.USE_ARCHAIUS);
-    });    
+    public KaryonRule rule = new KaryonRule(this);    
     
     @Test
     public void testWithStart() {

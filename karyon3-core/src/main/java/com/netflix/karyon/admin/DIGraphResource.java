@@ -7,10 +7,11 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import com.google.inject.Injector;
+import com.netflix.karyon.admin.AdminService;
 
 @Singleton
 @AdminService(name="di-graph", index="list")
-public class DIGraphResource {
+final class DIGraphResource {
     private final JsonGrapher grapher;
     private final Injector injector;
 

@@ -7,9 +7,11 @@ import java.util.stream.Collectors;
 
 import javax.inject.Singleton;
 
+import com.netflix.karyon.admin.AdminService;
+
 @Singleton
 @AdminService(name="threads", index="list")
-public class ThreadsAdminResource {
+final class ThreadsAdminResource {
     static class Details {
         private Thread thread;
 

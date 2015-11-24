@@ -26,8 +26,7 @@ import com.google.inject.ImplementedBy;
 @ImplementedBy(AllHealthIndicatorRegistry.class)
 public interface HealthIndicatorRegistry {
     /**
-     * Return a list of all active health checks
-     * @return
+     * @return Return a list of all active health checks
      */
     List<HealthIndicator> getHealthIndicators();
     

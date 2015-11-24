@@ -113,6 +113,7 @@ public class AdminHttpHandler implements HttpHandler {
                             if (stream.available() > 0 || !queryParameters.isEmpty()) {
                                 throw new UnsupportedOperationException("Query parameters or request object not supported yet");
                             }
+                            method.setAccessible(true);
                             return method.invoke(services.getService(serviceName));
                         }
                     };

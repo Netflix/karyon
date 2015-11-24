@@ -43,11 +43,12 @@ import java.util.concurrent.CompletableFuture;
 public interface HealthIndicator {
     /**
      * Perform the health check asynchronously.
+     * @return Future of health status result
      */
     CompletableFuture<HealthIndicatorStatus> check();
     
     /**
-     * Return the name of the health indicator.  Note that health indicators with duplicate names are allowed.
+     * @return Return the name of the health indicator.  Note that health indicators with duplicate names are allowed.
      */
     String getName();
 }

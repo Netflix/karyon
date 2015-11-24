@@ -1,14 +1,27 @@
 package com.netflix.karyon;
 
-/**
- * Base interface for all {@link Karyon} features to be implemented by an 
- * enum, such as {@link KaryonFeatures}.  Each feature has an implicit
- * default value. 
- * 
- * @see Karyon
- * @author elandau
- */
-public interface KaryonFeature {
-    boolean isEnabledByDefault();
-    String getKey();
+public class KaryonFeature<T> {
+    private final String key;
+    private final T defaultValue;
+    
+    public static <T> KaryonFeature<T> create(String key, T defaultValue) {
+        return new KaryonFeature<T>(key, defaultValue);
+    }
+    
+    public KaryonFeature(String key, T defaultValue) {
+        this.key = key;
+        this.defaultValue = defaultValue;
+    }
+    
+    public String getKey() {
+        return key;
+    }
+    
+    public Class<T> getType() {
+        return (Class<T>) defaultValue.getClass();
+    }
+    
+    public T getDefaultValue() {
+        return defaultValue;
+    }
 }

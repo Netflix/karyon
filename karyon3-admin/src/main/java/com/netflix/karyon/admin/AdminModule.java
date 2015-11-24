@@ -18,12 +18,12 @@ public final class AdminModule extends AbstractModule {
     
     @Override
     public boolean equals(Object obj) {
-        return AdminModule.class.equals(obj.getClass());
+        return getClass().equals(obj.getClass());
     }
 
     @Override
     public int hashCode() {
-        return AdminModule.class.hashCode();
+        return getClass().hashCode();
     }
 
 }

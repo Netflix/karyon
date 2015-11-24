@@ -25,14 +25,14 @@ public final class EurekaHealthCheckModule extends DefaultModule {
     public HealthCheckConfiguration getConfiguration(ConfigProxyFactory factory) {
         return factory.newProxy(HealthCheckConfiguration.class);
     }
-    
+
     @Override
     public boolean equals(Object obj) {
-        return EurekaHealthCheckModule.class.equals(obj.getClass());
+        return getClass().equals(obj.getClass());
     }
 
     @Override
     public int hashCode() {
-        return EurekaHealthCheckModule.class.hashCode();
+        return getClass().hashCode();
     }
 }

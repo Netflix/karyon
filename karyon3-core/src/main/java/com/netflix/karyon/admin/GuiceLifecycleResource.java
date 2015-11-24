@@ -5,10 +5,11 @@ import javax.inject.Singleton;
 
 import com.netflix.governator.LifecycleManager;
 import com.netflix.governator.LifecycleManager.State;
+import com.netflix.karyon.admin.AdminService;
 
 @Singleton
 @AdminService(name="guice-lifecycle", index="current")
-public class GuiceLifecycleResource {
+final class GuiceLifecycleResource {
     private LifecycleManager manager;
 
     public static interface Response {

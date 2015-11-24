@@ -16,6 +16,7 @@ import com.google.inject.Provides;
 import com.google.inject.multibindings.Multibinder;
 import com.netflix.governator.Governator;
 import com.netflix.governator.LifecycleInjector;
+import com.netflix.karyon.admin.HealthCheckResource;
 import com.netflix.karyon.health.HealthCheck;
 import com.netflix.karyon.health.HealthCheckStatus;
 import com.netflix.karyon.health.HealthIndicator;

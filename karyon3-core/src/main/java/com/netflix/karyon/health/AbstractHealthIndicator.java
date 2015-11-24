@@ -7,10 +7,9 @@ public abstract class AbstractHealthIndicator implements HealthIndicator {
     private final String name;
 
     /**
-     *  Creates an AbstractHealthIndicator with the specified name
+     * Creates an AbstractHealthIndicator with the specified name
      * 
-     * @param name name     Name of this Health Indicator
-     * 
+     * @param name  Name of this Health Indicator
      */
     public AbstractHealthIndicator(String name) {
         this.name = name;
@@ -18,7 +17,6 @@ public abstract class AbstractHealthIndicator implements HealthIndicator {
     
     /** 
      * Creates an AbstractHealthIndicator with a default name
-     * 
      */
     public AbstractHealthIndicator() {
         this.name = getClass().getSimpleName();
@@ -30,20 +28,16 @@ public abstract class AbstractHealthIndicator implements HealthIndicator {
     }
     
     /**
-     * 
      * Create a healthy status
      * 
      * @return a healthy status
      */
-
     protected final HealthIndicatorStatus healthy() {
         return HealthIndicatorStatuses.create(getName(), true, Collections.<String, Object> emptyMap(), null);
     }
 
     /**
-     * 
      * Create a healthy status
-     *
      * @param attr  Map of the attributes describing status
      * @return a healthy status
      */
@@ -52,9 +46,7 @@ public abstract class AbstractHealthIndicator implements HealthIndicator {
     }
 
     /**
-     * 
      * Create an unhealthy status
-     * 
      * @return a unhealthy status
      */
     protected final HealthIndicatorStatus unhealthy() {
@@ -62,9 +54,8 @@ public abstract class AbstractHealthIndicator implements HealthIndicator {
     }
 
     /**
-     * 
      * Create an unhealthy status
-     * 
+     * @param attr  Map of the attributes describing status
      * @return a unhealthy status
      */
     protected final HealthIndicatorStatus unhealthy(Map<String, Object> attr) {
@@ -72,9 +63,8 @@ public abstract class AbstractHealthIndicator implements HealthIndicator {
     }
 
     /**
-     * 
      * Create an unhealthy status
-     * 
+     * @param t Error that caused the unhealthy status
      * @return a unhealthy status
      */
     protected final HealthIndicatorStatus unhealthy(Throwable t) {
@@ -82,13 +72,12 @@ public abstract class AbstractHealthIndicator implements HealthIndicator {
     }
 
     /**
-     * 
      * Create an unhealthy status
-     * 
+     * @param attr  Map of the attributes describing status
+     * @param t Error that caused the unhealthy status
      * @return a unhealthy status
      */
     protected final HealthIndicatorStatus unhealthy(Map<String, Object> attr, Throwable t) {
         return HealthIndicatorStatuses.create(getName(), false, attr, t);
     }
-
 }
