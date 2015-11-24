@@ -6,6 +6,9 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.Properties;
 
+import javax.inject.Inject;
+import javax.inject.Provider;
+
 import junit.framework.Assert;
 
 import org.junit.Test;
@@ -107,14 +110,22 @@ public class ArchaiusKaryonModuleTest {
     
     @Test
     public void testMockRemoteConfig() throws ConfigException {
-        final SettableConfig remote = new DefaultSettableConfig();
-        remote.setProperty("foo", "set");
-        
         Injector injector = Karyon.newBuilder()
                 .addModules(new ArchaiusKaryonModule(), new AbstractModule() {
                     @Override
                     protected void configure() {
-                        bind(Key.get(Config.class, RemoteLayer.class)).toInstance(remote);
+                        bind(Key.get(Config.class, RemoteLayer.class)).toProvider(new Provider<Config>() {
+                            @Inject
+                            @Raw
+                            Config rawConfig;
+                            
+                            @Override
+                            public Config get() {
+                                final SettableConfig remote = new DefaultSettableConfig();
+                                remote.setProperty("foo", "foo-" + rawConfig.getString("application_loaded"));
+                                return remote;
+                            }
+                        });
                     }
                 })
                 .start();
@@ -122,7 +133,7 @@ public class ArchaiusKaryonModuleTest {
         Foo foo = injector.getInstance(Foo.class);
         Config config = injector.getInstance(Config.class);
         
-        assertThat(config.getString("foo"), equalTo("set"));
+        assertThat(config.getString("foo"), equalTo("foo-true"));
     }
     
     Properties singletonProperties(String key, String value) {
