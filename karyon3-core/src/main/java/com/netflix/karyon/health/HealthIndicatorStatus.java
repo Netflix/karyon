@@ -10,7 +10,7 @@ import java.util.Map;
  */
 public interface HealthIndicatorStatus {
     /**
-     * Map of named attributes that provide additional information regarding the health.
+     * @return Map of named attributes that provide additional information regarding the health.
      * For example, a CPU health check may return Unhealthy with attribute "usage"="90%"
      */
     public Map<String, Object> getAttributes();
@@ -21,7 +21,7 @@ public interface HealthIndicatorStatus {
     public boolean isHealthy();
     
     /**
-     * Exception providing additional information regarding the failure state.  This could be
+     * @return Exception providing additional information regarding the failure state.  This could be
      * the last known exception. 
      */
     public String getError();

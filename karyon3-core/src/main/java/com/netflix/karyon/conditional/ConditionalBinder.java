@@ -25,7 +25,7 @@ public class ConditionalBinder<T> {
     /**
      * Used to generate unique bindings for conditional T keys that will not conflict
      * with annotated T
-     * @return
+     * @return Unique annotation
      */
     public static IdQualifier newIdQualifier() {
         final int id = counter.incrementAndGet();

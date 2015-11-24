@@ -34,6 +34,7 @@ import com.google.inject.util.Modules;
 import com.netflix.governator.ElementsEx;
 import com.netflix.governator.LifecycleInjector;
 import com.netflix.governator.LifecycleManager;
+import com.netflix.karyon.annotations.Arguments;
 import com.netflix.karyon.annotations.Profiles;
 import com.netflix.karyon.conditional.ConditionalSupportModule;
 import com.netflix.karyon.spi.ModuleListTransformer;
@@ -123,6 +124,7 @@ public class Karyon {
      * 
      * @param modules Guice modules to add.  These modules my also implement KaryonModule to further
      *        extend Karyon.
+     * @return this
      */
     public Karyon addModules(Module ... modules) {
         if (modules != null) {
@@ -136,6 +138,7 @@ public class Karyon {
      * 
      * @param modules Guice modules to add.  These modules my also implement KaryonModule to further
      *        extend Karyon.
+     * @return this
      */
     public Karyon addModules(List<Module> modules) {
         if (modules != null) {
@@ -149,7 +152,9 @@ public class Karyon {
      * conditionally loaded.  This is useful for testing or when an application
      * absolutely needs to override a binding to fix a binding problem in the
      * code modules
-     * @param modules
+     * @param modules Modules that will be applied as overrides to modules add
+     *  or installed via {@link Karyon#addModules(Module...)}
+     * @return this
      */
     public Karyon addOverrideModules(Module ... modules) {
         if (modules != null) {
@@ -163,7 +168,9 @@ public class Karyon {
      * conditionally loaded.  This is useful for testing or when an application
      * absolutely needs to override a binding to fix a binding problem in the
      * code modules
-     * @param modules
+     * @param modules Modules that will be applied as overrides to modules add
+     *  or installed via {@link Karyon#addModules(Module...)}
+     * @return this
      */
     public Karyon addOverrideModules(List<Module> modules) {
         if (modules != null) {
@@ -175,7 +182,8 @@ public class Karyon {
     /**
      * Specify the Guice stage in which the application is running.  By default Karyon
      * runs in Stage.DEVELOPMENT to achieve default lazy singleton behavior. 
-     * @param stage
+     * @param stage Guice stage
+     * @return this
      */
     public Karyon inStage(Stage stage) {
         this.stage = stage;
@@ -187,6 +195,7 @@ public class Karyon {
      * @param provider
      * 
      * @deprecated Module auto loading no longer supported.  Install modules directly and use {@literal @}ProvidesConditionally
+     * @return this
      */
     @Deprecated
     public Karyon addAutoModuleListProvider(ModuleListProvider provider) {
@@ -194,9 +203,11 @@ public class Karyon {
     }
     
     /**
-     * Add a runtime profile
+     * Add a runtime profile.  Profiles are processed by the conditional binding {@literal @}ConditionalOnProfile and
+     * are injectable as {@literal @}Profiles Set{@literal <}String{@literal >}.
      * 
-     * @param profile
+     * @param profile A profile
+     * @return this
      */
     public Karyon addProfile(String profile) {
         if (profile != null) {
@@ -206,11 +217,14 @@ public class Karyon {
     }
 
     /**
-     * Add a runtime profiles
+     * Add a runtime profiles.  Profiles are processed by the conditional binding {@literal @}ConditionalOnProfile and
+     * are injectable as {@literal @}Profiles Set{@literal <}String{@literal >}.
      * 
-     * @param profiles
+     * @param profiles Set of profiles
+     * @return this
      */
-    public Karyon addProfiles(String... profiles) {
+    public Karyon addProfiles(String profile, String... profiles) {
+        this.profiles.add(profile);
         if (profiles != null) {
             this.profiles.addAll(Arrays.asList(profiles));
         }
@@ -218,9 +232,11 @@ public class Karyon {
     }
     
     /**
-     * Add a runtime profiles
+     * Add a runtime profiles.  Profiles are processed by the conditional binding {@literal @}ConditionalOnProfile and
+     * are injectable as {@literal @}Profiles Set{@literal <}String{@literal >}.
      * 
-     * @param profiles
+     * @param profiles Set of profiles
+     * @return this
      */
     public Karyon addProfiles(Collection<String> profiles) {
         if (profiles != null) {
@@ -231,7 +247,8 @@ public class Karyon {
     
     /**
      * Enable the specified feature
-     * @param feature
+     * @param feature Boolean feature to enable
+     * @return this
      */
     public Karyon enableFeature(KaryonFeature<Boolean> feature) {
         return setFeature(feature, true);
@@ -239,7 +256,8 @@ public class Karyon {
     
     /**
      * Enable or disable the specified feature
-     * @param feature
+     * @param feature Boolean feature to disable
+     * @return this
      */
     public Karyon enableFeature(KaryonFeature<Boolean> feature, boolean enabled) {
         return setFeature(feature, enabled);
@@ -247,15 +265,17 @@ public class Karyon {
 
     /**
      * Disable the specified feature
-     * @param feature
+     * @param feature Boolean feature to enable/disable
+     * @return this
      */
     public Karyon disableFeature(KaryonFeature<Boolean> feature) {
         return setFeature(feature, false);
     }
     
     /**
-     * Disable the specified feature
-     * @param feature
+     * Set a feature
+     * @param feature Feature to set
+     * @return this
      */
     public <T> Karyon setFeature(KaryonFeature<T> feature, T value) {
         this.features.put(feature, value);
@@ -267,7 +287,8 @@ public class Karyon {
      * prior to creating the injectors.  Multiple transformers may be added with each
      * transforming the result of the previous one.
      * 
-     * @param transformer
+     * @param transformer A transformer
+     * @return this
      */
     public Karyon addModuleListTransformer(ModuleListTransformer transformer) {
         if (transformer != null) {
@@ -282,6 +303,7 @@ public class Karyon {
      * @param matcher    Matcher to restrict the types for which the AutoBinder can be used.  See {@link TypeLiteralMatchers} for
      *                   specifying common matchers.
      * @param autoBinder The auto binder
+     * @return this
      */
     public <T extends TypeLiteral<?>> Karyon addAutoBinder(Matcher<T> matcher, AutoBinder autoBinder) {
         this.autoBinders.add(new MatchingAutoBinder<T>(matcher, autoBinder));
@@ -295,15 +317,19 @@ public class Karyon {
     }
     
     /**
-     * 
+     * Create the injector and call any LifecycleListeners
+     * @return the LifecycleInjector for this run
      */
     public LifecycleInjector start() {
         return start(null);
     }
     
     /**
+     * Create the injector and call any LifecycleListeners
+     * @param args - Runtime parameter (from main) injectable as {@literal @}Arguments String[]
+     * @return the LifecycleInjector for this run
      */
-    public LifecycleInjector start(String[] args) {
+    public LifecycleInjector start(final String[] args) {
         for (Module module : modules) {
             if (module instanceof KaryonModule) {
                 ((KaryonModule)module).configure(new KaryonBinder() {
@@ -344,6 +370,13 @@ public class Karyon {
                             Multibinder<String> profiles = Multibinder.newSetBinder(binder(), String.class, Profiles.class);
                             for (String profile : Karyon.this.profiles) {
                                 profiles.addBinding().toInstance(profile);
+                            }
+                            
+                            if (args != null) {
+                                bind(String[].class).annotatedWith(Arguments.class).toInstance(args);
+                            }
+                            else {
+                                bind(String[].class).annotatedWith(Arguments.class).toInstance(new String[]{});
                             }
                         }
                     })
@@ -394,15 +427,14 @@ public class Karyon {
         }
     }
 
+    /**
+     * Construct a new Karyon instance
+     * @return Karyon instance
+     */
     public static Karyon newBuilder() {
         return new Karyon();
     }
     
-    /**
-     * Starting point for creating a Karyon application.
-     * 
-     * @param applicationName
-     */
     @Deprecated
     public static Karyon forApplication(String applicationName) {
         return new Karyon(applicationName);

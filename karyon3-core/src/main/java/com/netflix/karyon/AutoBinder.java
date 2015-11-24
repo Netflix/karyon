@@ -61,8 +61,8 @@ public interface AutoBinder {
     /**
      * Create a bindings for the specified type literal.  
      * 
-     * @param binder
-     * @param key  
+     * @param binder Binder on which bindings may be created
+     * @param key Key for which no binding was found
      * 
      * @return True if bindings was created or false if not.
      */
