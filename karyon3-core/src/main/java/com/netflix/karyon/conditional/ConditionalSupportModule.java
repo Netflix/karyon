@@ -15,6 +15,7 @@ import com.google.inject.spi.InjectionPoint;
 import com.google.inject.spi.ModuleAnnotatedMethodScanner;
 import com.netflix.karyon.conditional.annotations.Conditional;
 import com.netflix.karyon.conditional.annotations.ConditionalOnProfile;
+import com.netflix.karyon.conditional.annotations.ConditionalOnProperty;
 import com.netflix.karyon.conditional.annotations.ProvidesConditionally;
 
 /**
@@ -46,7 +47,7 @@ public class ConditionalSupportModule extends AbstractModule {
                 }
                 
                 if (annotations.isEmpty()) {
-                    binder.addError("Method " + m.toString() + " must have at least one Conditional annotation.");
+                    binder.addError("Method " + m.toString() + " must have at least one @Conditional annotated annotation.");
                 }
 
                 binder.install(new ConditionalResolvingProvider<T>(key));
@@ -57,6 +58,8 @@ public class ConditionalSupportModule extends AbstractModule {
         // Add one of these to register the evaluator for each Conditional 
         bind(new TypeLiteral<ConditionalMatcher<ConditionalOnProfile>>() {})
             .to(ConditionalOnProfileMatcher.class);
+        bind(new TypeLiteral<ConditionalMatcher<ConditionalOnProperty>>() {})
+            .to(ConditionalOnPropertyMatcher.class);
     }
     
     @Override

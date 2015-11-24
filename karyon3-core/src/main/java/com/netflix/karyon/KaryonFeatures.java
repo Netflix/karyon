@@ -11,8 +11,8 @@ public final class KaryonFeatures  {
      * startup failure.  This allows the admin page to stay up so that the process may be 
      * debugged more easily. 
      */
-    public final static KaryonFeature<Boolean> SHUTDOWN_ON_ERROR = KaryonFeature.create("karyon.features.shutdownOnError", Boolean.class, true);
+    public final static KaryonFeature<Boolean> SHUTDOWN_ON_ERROR = KaryonFeature.create("karyon.features.shutdownOnError", true);
     
     @Deprecated
-    public final static KaryonFeature<Boolean> USE_ARCHAIUS = KaryonFeature.create("karyon.features.archaius", Boolean.class, false);
+    public final static KaryonFeature<Boolean> USE_ARCHAIUS = KaryonFeature.create("karyon.features.archaius", false);
 }

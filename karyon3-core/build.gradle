@@ -26,6 +26,7 @@ dependencies {
 
     testCompile "org.hamcrest:hamcrest-core:${hamcrest_version}"
     testCompile "org.hamcrest:hamcrest-library:${hamcrest_version}"
+    testCompile "org.mockito:mockito-all:1.9.5"
 }
 
 eclipse {

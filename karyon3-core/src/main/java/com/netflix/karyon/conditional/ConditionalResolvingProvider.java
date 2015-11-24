@@ -33,10 +33,19 @@ final class ConditionalResolvingProvider<T> implements Module, Provider<T> {
     
     @Override
     public T get() {
+        return resolveProvider().get();
+    }
+    
+    @Override
+    public void configure(Binder binder) {
+        binder.bind(key).toProvider(this);
+    }
+    
+    public Provider<T> resolveProvider() {
         Type providerType = Types.newParameterizedType(
-                    ConditionalBinder.class, 
-                    key.getTypeLiteral().getRawType());
-
+                ConditionalBinder.class, 
+                key.getTypeLiteral().getRawType());
+        
         Set<ConditionalBinder<T>> providers = (Set<ConditionalBinder<T>>) injector.getInstance(key.ofType(Types.setOf(providerType)));
         ConditionalBinder<T> defaultProvider = null;
         
@@ -55,23 +64,18 @@ final class ConditionalResolvingProvider<T> implements Module, Provider<T> {
         
         if (matchedBindings.size() == 0) {
             if (defaultProvider != null) {
-                return defaultProvider.get();
+                return defaultProvider.getProvider();
             }
             else {
                 throw new ProvisionException("No binding found for " + key.getTypeLiteral());
             }
         }
         else if (matchedBindings.size() == 1) {
-            return matchedBindings.iterator().next().get();
+            return matchedBindings.get(0).getProvider();
         }
         else {
             throw new ProvisionException("Multiple (" + matchedBindings.size() + ") bindings found for " + key + "\n. " + matchedBindings);
         }
-    }
-    
-    @Override
-    public void configure(Binder binder) {
-        binder.bind(key).toProvider(this);
     }
     
     @Override

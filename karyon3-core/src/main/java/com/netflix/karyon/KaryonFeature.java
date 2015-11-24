@@ -2,17 +2,14 @@ package com.netflix.karyon;
 
 public class KaryonFeature<T> {
     private final String key;
-    private final Class<T> type;
     private final T defaultValue;
     
-    public static <T> KaryonFeature<T> create(String key, Class<T> type, T defaultValue) {
-        return new KaryonFeature<T>(key, type, defaultValue);
+    public static <T> KaryonFeature<T> create(String key, T defaultValue) {
+        return new KaryonFeature<T>(key, defaultValue);
     }
     
-    public KaryonFeature(String key, Class<T> type, T defaultValue) {
-        super();
+    public KaryonFeature(String key, T defaultValue) {
         this.key = key;
-        this.type = type;
         this.defaultValue = defaultValue;
     }
     
@@ -21,7 +18,7 @@ public class KaryonFeature<T> {
     }
     
     public Class<T> getType() {
-        return type;
+        return (Class<T>) defaultValue.getClass();
     }
     
     public T getDefaultValue() {

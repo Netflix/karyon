@@ -16,6 +16,11 @@ class ConditionalOnProfileMatcher implements ConditionalMatcher<ConditionalOnPro
     
     @Override
     public boolean evaluate(ConditionalOnProfile conditional) {
-        return profiles.contains(conditional.value());
+        for (String profile : conditional.value()) {
+            if (profiles.contains(profile)) {
+                return true;
+            }
+        }
+        return false;
     }
 }

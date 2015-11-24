@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.inject.Inject;
+import javax.inject.Provider;
 
 import com.google.inject.Binder;
 import com.google.inject.Injector;
@@ -85,6 +86,10 @@ public class ConditionalBinder<T> {
     
     public T get() {
         return injector.getInstance(idKey);
+    }
+    
+    public Provider<T> getProvider() {
+        return injector.getProvider(idKey);
     }
 
     public Key<T> getIdKey() {

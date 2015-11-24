@@ -68,7 +68,6 @@ import com.netflix.karyon.spi.ModuleListTransformer;
  */
 public class Karyon {
     protected Set<String>                 profiles          = new LinkedHashSet<>();
-    protected List<ModuleListProvider>    moduleProviders   = new ArrayList<>();
     protected Stage                       stage             = Stage.DEVELOPMENT;
     protected List<Module>                modules           = new ArrayList<>();
     protected List<Module>                overrideModules   = new ArrayList<>();
@@ -187,12 +186,11 @@ public class Karyon {
     /**
      * Add a module finder such as a ServiceLoaderModuleFinder or ClassPathScannerModuleFinder
      * @param provider
-     * @return
+     * 
+     * @deprecated Module auto loading no longer supported.  Install modules directly and use {@literal @}ProvidesConditionally
      */
+    @Deprecated
     public Karyon addAutoModuleListProvider(ModuleListProvider provider) {
-        if (provider != null) {
-            this.moduleProviders.add(provider);
-        }
         return this;
     }
     
@@ -385,13 +383,12 @@ public class Karyon {
             return new LifecycleInjector(injector, manager);
         }
         catch (ProvisionException|CreationException|ConfigurationException e) {
-            e.printStackTrace(System.err);
+            LOG.error("Failed to create injector", e);
             try {
                 manager.notifyStartFailed(e);
             }
             catch (Exception e2) {
-                System.err.println("Failed to notify injector creation failure!");
-                e2.printStackTrace(System.err);
+                LOG.error("Failed to notify injector creation failure", e2 );
             }
             if (!featureSet.get(KaryonFeatures.SHUTDOWN_ON_ERROR)) {
                 return new LifecycleInjector(null, manager);

@@ -148,6 +148,7 @@ Note the following restrictions when using conditional bindings
 * ALL bindings for the type must be conditional otherwise Guice will fail with duplicate bindings errors
 * No more than 1 conditional may be true otherwise Guice will fail with duplicate bindings errors
 * If no conditions are met the @ProvidesConditionally with isDefault=true will be used.  Only one @ProvidesConditional may be default.
+* If no conditions are met and no isDefault is set Guice will throw a ProvisionException 
 
 ----------
 Archaius Configuration
