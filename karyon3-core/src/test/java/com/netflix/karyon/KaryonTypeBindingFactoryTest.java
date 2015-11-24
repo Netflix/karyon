@@ -11,8 +11,13 @@ import org.junit.Test;
 import com.google.inject.AbstractModule;
 import com.google.inject.Binder;
 import com.google.inject.CreationException;
+import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Key;
+import com.google.inject.TypeLiteral;
+import com.google.inject.matcher.Matchers;
+import com.google.inject.spi.TypeEncounter;
+import com.google.inject.spi.TypeListener;
 
 public class KaryonTypeBindingFactoryTest {
     public static interface Baz {
@@ -34,6 +39,23 @@ public class KaryonTypeBindingFactoryTest {
             this.baz = baz;
             this.namedBar = namedBar;
         }
+    }
+    
+    @Test
+    public void test() {
+        Guice.createInjector(new AbstractModule() {
+            @Override
+            protected void configure() {
+                this.bind(Foo.class).asEagerSingleton();
+                this.bindListener(TypeLiteralMatchers.subclassOf(Bar.class), new TypeListener() {
+                    @Override
+                    public <I> void hear(TypeLiteral<I> type,
+                            TypeEncounter<I> encounter) {
+                        System.out.println(type);
+                    }
+                });
+            }
+        });
     }
     
     @Test(expected=CreationException.class)

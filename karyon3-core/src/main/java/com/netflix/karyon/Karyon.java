@@ -119,9 +119,10 @@ public class Karyon {
     }
     
     /**
-     * Add main Guice modules to your application
-     * @param modules
-     * @return
+     * Add Guice modules to karyon.  
+     * 
+     * @param modules Guice modules to add.  These modules my also implement KaryonModule to further
+     *        extend Karyon.
      */
     public Karyon addModules(Module ... modules) {
         if (modules != null) {
@@ -131,9 +132,10 @@ public class Karyon {
     }
     
     /**
-     * Add main Guice modules to your application
-     * @param modules
-     * @return
+     * Add Guice modules to karyon.  
+     * 
+     * @param modules Guice modules to add.  These modules my also implement KaryonModule to further
+     *        extend Karyon.
      */
     public Karyon addModules(List<Module> modules) {
         if (modules != null) {
@@ -148,7 +150,6 @@ public class Karyon {
      * absolutely needs to override a binding to fix a binding problem in the
      * code modules
      * @param modules
-     * @return
      */
     public Karyon addOverrideModules(Module ... modules) {
         if (modules != null) {
@@ -163,7 +164,6 @@ public class Karyon {
      * absolutely needs to override a binding to fix a binding problem in the
      * code modules
      * @param modules
-     * @return
      */
     public Karyon addOverrideModules(List<Module> modules) {
         if (modules != null) {
@@ -176,7 +176,6 @@ public class Karyon {
      * Specify the Guice stage in which the application is running.  By default Karyon
      * runs in Stage.DEVELOPMENT to achieve default lazy singleton behavior. 
      * @param stage
-     * @return
      */
     public Karyon inStage(Stage stage) {
         this.stage = stage;
@@ -290,23 +289,8 @@ public class Karyon {
     }
     
     @Deprecated
-    public Karyon apply(AbstractModule ... modules) {
+    public Karyon apply(Module ... modules) {
         addModules(modules);
-        return this;
-    }
-    
-    /**
-     * Call this anywhere in the process of manipulating the builder to apply a reusable
-     * sequence of calls to the builder 
-     * 
-     * @param modules
-     */
-    public Karyon apply(KaryonModule ... modules) {
-        if (modules != null) {
-            for (KaryonModule module : modules) {   
-                module.configure(this);
-            }
-        }
         return this;
     }
     
@@ -320,6 +304,17 @@ public class Karyon {
     /**
      */
     public LifecycleInjector start(String[] args) {
+        for (Module module : modules) {
+            if (module instanceof KaryonModule) {
+                ((KaryonModule)module).configure(new KaryonBinder() {
+                    @Override
+                    public <T extends TypeLiteral<?>> void bindAutoBinder(
+                            Matcher<T> matcher, AutoBinder autoBinder) {
+                        Karyon.this.addAutoBinder(matcher, autoBinder);
+                    }
+                });
+            }
+        }
         for (ModuleListTransformer transformer : transformers) {
             modules = transformer.transform(Collections.unmodifiableList(modules));
         }
@@ -407,7 +402,6 @@ public class Karyon {
      * Starting point for creating a Karyon application.
      * 
      * @param applicationName
-     * @return
      */
     @Deprecated
     public static Karyon forApplication(String applicationName) {
@@ -422,16 +416,5 @@ public class Karyon {
     @Deprecated
     public static Karyon create(Module ... modules) {
         return new Karyon().addModules(modules);
-    }
-    
-    @Deprecated
-    public static Karyon from(KaryonModule ... modules) {
-        Karyon karyon = new Karyon();
-        if (modules != null) {
-            for (KaryonModule module : modules) {
-                karyon.apply(module);
-            }
-        }
-        return karyon;
     }
 }

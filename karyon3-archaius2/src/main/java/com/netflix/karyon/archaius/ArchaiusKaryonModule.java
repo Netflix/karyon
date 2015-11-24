@@ -27,6 +27,7 @@ import com.netflix.archaius.DefaultConfigLoader;
 import com.netflix.archaius.DefaultDecoder;
 import com.netflix.archaius.DefaultPropertyFactory;
 import com.netflix.archaius.PropertyFactory;
+import com.netflix.archaius.annotations.Configuration;
 import com.netflix.archaius.config.CompositeConfig;
 import com.netflix.archaius.config.DefaultSettableConfig;
 import com.netflix.archaius.config.EnvironmentConfig;
@@ -44,7 +45,10 @@ import com.netflix.archaius.inject.RuntimeLayer;
 import com.netflix.archaius.interpolate.ConfigStrLookup;
 import com.netflix.archaius.readers.PropertiesConfigReader;
 import com.netflix.karyon.AbstractPropertySource;
+import com.netflix.karyon.KaryonBinder;
+import com.netflix.karyon.KaryonModule;
 import com.netflix.karyon.PropertySource;
+import com.netflix.karyon.TypeLiteralMatchers;
 import com.netflix.karyon.annotations.Profiles;
 import com.netflix.karyon.archaius.admin.ArchaiusAdminModule;
 
@@ -85,7 +89,7 @@ import com.netflix.karyon.archaius.admin.ArchaiusAdminModule;
  * }
  * </code>
  */
-public final class ArchaiusKaryonModule extends AbstractModule {
+public final class ArchaiusKaryonModule extends AbstractModule implements KaryonModule {
     private static final String KARYON_PROFILES         = "karyon.profiles";
     
     private static final String DEFAULT_CONFIG_NAME     = "application";
@@ -364,5 +368,10 @@ public final class ArchaiusKaryonModule extends AbstractModule {
                 return null;
             }
         };
+    }
+
+    @Override
+    public void configure(KaryonBinder binder) {
+        binder.bindAutoBinder(TypeLiteralMatchers.annotatedWith(Configuration.class), new ArchaiusProxyAutoBinder());
     }
 }
