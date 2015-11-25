@@ -5,9 +5,6 @@ import java.lang.reflect.Method;
 
 import javax.annotation.PreDestroy;
 
-import com.netflix.governator.AbstractLifecycleFeature;
-import com.netflix.governator.LifecycleAction;
-
 /**
  * Special AbstractLifecycleFeature to support @PreDestroy annotation processing.
  * Note that this feature is implicit in LifecycleModule and therefore does not need 

@@ -2,12 +2,8 @@ package com.netflix.karyon.admin;
 
 import com.google.inject.AbstractModule;
 
-
 /**
  * Adding AdminModule to the main injector will enable the admin endpoint
- * 
- * @author elandau
- *
  */
 public final class AdminModule extends AbstractModule {
     @Override
@@ -25,5 +21,4 @@ public final class AdminModule extends AbstractModule {
     public int hashCode() {
         return getClass().hashCode();
     }
-
 }

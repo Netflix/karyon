@@ -6,23 +6,23 @@ import javax.ws.rs.Path;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.netflix.governator.DefaultLifecycleListener;
-import com.netflix.governator.ProvisionDebugModule;
-import com.netflix.governator.guice.jetty.JettyModule;
 import com.netflix.karyon.Karyon;
 import com.netflix.karyon.KaryonFeatures;
+import com.netflix.karyon.ProvisionDebugModule;
 import com.netflix.karyon.admin.CoreAdminModule;
 import com.netflix.karyon.admin.rest.AdminServerModule;
 import com.netflix.karyon.admin.ui.AdminUIServerModule;
 import com.netflix.karyon.archaius.ArchaiusKaryonModule;
 import com.netflix.karyon.health.HealthIndicator;
+import com.netflix.karyon.jetty.JettyModule;
 import com.netflix.karyon.log4j.ArchaiusLog4J2ConfigurationModule;
 import com.netflix.karyon.rxnetty.shutdown.ShutdownServerModule;
+import com.netflix.karyon.spi.AbstractLifecycleListener;
 import com.sun.jersey.guice.JerseyServletModule;
 import com.sun.jersey.guice.spi.container.servlet.GuiceContainer;
 
 @Path("/hello")
-public class HelloWorldApp extends DefaultLifecycleListener {
+public class HelloWorldApp extends AbstractLifecycleListener {
     private static final Logger LOG = LoggerFactory.getLogger(HelloWorldApp.class);
     
     public static void main(String[] args) throws Exception {

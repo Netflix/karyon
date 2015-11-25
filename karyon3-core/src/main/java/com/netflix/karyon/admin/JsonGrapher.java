@@ -7,8 +7,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-import com.fasterxml.jackson.core.JsonGenerationException;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.google.common.collect.Maps;
@@ -22,9 +20,9 @@ import com.google.inject.grapher.InterfaceNode;
 import com.google.inject.grapher.KaryonAbstractInjectorGrapher;
 import com.google.inject.grapher.NameFactory;
 import com.google.inject.grapher.Node;
-import com.netflix.governator.ProvisionMetrics;
-import com.netflix.governator.ProvisionMetrics.Element;
-import com.netflix.governator.ProvisionMetrics.Visitor;
+import com.netflix.karyon.api.ProvisionMetrics;
+import com.netflix.karyon.api.ProvisionMetrics.Element;
+import com.netflix.karyon.api.ProvisionMetrics.Visitor;
 
 final class JsonGrapher extends KaryonAbstractInjectorGrapher {
     private final Map<Key<?>, GraphNode> nodes = Maps.newHashMap();
@@ -129,7 +127,7 @@ final class JsonGrapher extends KaryonAbstractInjectorGrapher {
     }
 
     @Override
-    protected void postProcess() throws JsonGenerationException, JsonMappingException, IOException {
+    protected void postProcess() throws IOException {
         metrics.accept(new Visitor() {
             private int counter = 0;
             @Override

@@ -3,9 +3,8 @@ package com.netflix.karyon.admin;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import com.netflix.governator.LifecycleManager;
-import com.netflix.governator.LifecycleManager.State;
-import com.netflix.karyon.admin.AdminService;
+import com.netflix.karyon.LifecycleManager;
+import com.netflix.karyon.LifecycleManager.State;
 
 @Singleton
 @AdminService(name="guice-lifecycle", index="current")

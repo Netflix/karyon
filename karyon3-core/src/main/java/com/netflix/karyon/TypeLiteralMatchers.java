@@ -18,6 +18,7 @@ public final class TypeLiteralMatchers {
         return new AbstractMatcher<T>() {
             @Override
             public boolean matches(T t) {
+                System.out.println("Testing : " + t);
                 return null != t.getRawType().getAnnotation(annot);
             }
         };

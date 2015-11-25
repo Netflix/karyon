@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import com.google.inject.Module;
+import com.netflix.karyon.spi.ModuleListProvider;
 
 /**
  * Utility class with convenience methods for creating various standard

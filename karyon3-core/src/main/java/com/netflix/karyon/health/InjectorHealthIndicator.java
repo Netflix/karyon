@@ -4,7 +4,7 @@ import java.util.concurrent.CompletableFuture;
 
 import javax.inject.Singleton;
 
-import com.netflix.governator.DefaultLifecycleListener;
+import com.netflix.karyon.DefaultLifecycleListener;
 
 @Singleton
 public class InjectorHealthIndicator extends DefaultLifecycleListener implements HealthIndicator {

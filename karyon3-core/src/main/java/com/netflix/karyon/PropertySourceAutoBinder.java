@@ -3,7 +3,6 @@ package com.netflix.karyon;
 import com.google.inject.Binder;
 import com.google.inject.Key;
 import com.netflix.karyon.spi.AutoBinder;
-import com.netflix.karyon.spi.PropertySource;
 
 public class PropertySourceAutoBinder implements AutoBinder {
     @Override

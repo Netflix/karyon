@@ -7,7 +7,6 @@ import javax.inject.Singleton;
 import com.google.inject.AbstractModule;
 import com.google.inject.Module;
 import com.google.inject.Provides;
-import com.netflix.karyon.spi.PropertySource;
 
 public class PropertiesPropertySource extends AbstractPropertySource {
     private Properties props;

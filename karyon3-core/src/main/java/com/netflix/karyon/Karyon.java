@@ -1,5 +1,6 @@
 package com.netflix.karyon;
 
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -31,17 +32,16 @@ import com.google.inject.multibindings.Multibinder;
 import com.google.inject.spi.Element;
 import com.google.inject.spi.Elements;
 import com.google.inject.util.Modules;
-import com.netflix.governator.ElementsEx;
-import com.netflix.governator.LifecycleInjector;
-import com.netflix.governator.LifecycleManager;
+import com.netflix.karyon.admin.CoreAdminModule;
 import com.netflix.karyon.annotations.Arguments;
 import com.netflix.karyon.annotations.Profiles;
+import com.netflix.karyon.api.KaryonFeatureSet;
 import com.netflix.karyon.conditional.ConditionalSupportModule;
 import com.netflix.karyon.spi.AutoBinder;
 import com.netflix.karyon.spi.KaryonBinder;
 import com.netflix.karyon.spi.KaryonModule;
+import com.netflix.karyon.spi.ModuleListProvider;
 import com.netflix.karyon.spi.ModuleListTransformer;
-import com.netflix.karyon.spi.PropertySource;
 
 /**
  * Main entry point for creating a LifecycleInjector with guice extensions such as 
@@ -334,6 +334,8 @@ public class Karyon {
      * @return the LifecycleInjector for this run
      */
     public LifecycleInjector start(final String[] args) {
+        final Logger LOG = LoggerFactory.getLogger(Karyon.class);
+        
         for (Module module : modules) {
             if (module instanceof KaryonModule) {
                 ((KaryonModule)module).configure(new KaryonBinder() {
@@ -351,8 +353,6 @@ public class Karyon {
         
         this.addAutoBinder(TypeLiteralMatchers.subclassOf(PropertySource.class), new PropertySourceAutoBinder());
         
-        final Logger LOG = LoggerFactory.getLogger(Karyon.class);
-        
         // Create the main LifecycleManager to be used by all levels
         final LifecycleManager manager = new LifecycleManager();
         
@@ -363,6 +363,8 @@ public class Karyon {
             final Module coreModule = Modules.override(
                 ImmutableList.<Module>builder()
                     .addAll(modules)
+                    .add(new CoreModule())
+                    .add(new CoreAdminModule())
                     .add(new LifecycleModule())
                     .add(new ConditionalSupportModule())
                     .add(new AbstractModule() {
@@ -397,11 +399,7 @@ public class Karyon {
                 new AbstractModule() {
                     @Override
                     protected void configure() {
-                        Set<Key<?>> boundKeys = ElementsEx.getAllBoundKeys(Elements.getElements(coreModule));
-                        Set<Key<?>> injectionKeys = ElementsEx.getAllInjectionKeys(Elements.getElements(coreModule));
-                        injectionKeys.removeAll(boundKeys);
-                        
-                        for (Key<?> key : injectionKeys) {
+                        for (Key<?> key : ElementsEx.getAllUnboundKeys(Elements.getElements(coreModule))) {
                             for (MatchingAutoBinder factory : Karyon.this.autoBinders) {
                                 if (factory.configure(binder(), key)) {
                                     break;

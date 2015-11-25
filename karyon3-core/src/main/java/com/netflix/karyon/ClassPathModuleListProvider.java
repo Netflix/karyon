@@ -7,13 +7,14 @@ import java.util.List;
 
 import com.google.common.reflect.ClassPath;
 import com.google.inject.Module;
+import com.netflix.karyon.spi.ModuleListProvider;
 
 /**
  * ClassPath scanner using Guava's ClassPath
  * 
  * @author elandau
  */
-class ClassPathModuleListProvider implements ModuleListProvider {
+final class ClassPathModuleListProvider implements ModuleListProvider {
 
     private List<String> packages;
 

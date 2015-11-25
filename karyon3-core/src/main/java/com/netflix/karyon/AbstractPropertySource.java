@@ -2,8 +2,6 @@ package com.netflix.karyon;
 
 import java.lang.reflect.Method;
 
-import com.netflix.karyon.spi.PropertySource;
-
 public abstract class AbstractPropertySource implements PropertySource {
     @Override
     public <T> T get(String key, Class<T> type) {

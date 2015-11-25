@@ -2,10 +2,10 @@ package com.netflix.karyon.admin.rest;
 
 import javax.inject.Singleton;
 
+import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 import com.google.inject.multibindings.MapBinder;
 import com.netflix.archaius.ConfigProxyFactory;
-import com.netflix.governator.DefaultModule;
 import com.netflix.karyon.admin.AdminModule;
 import com.netflix.karyon.admin.AdminServer;
 import com.netflix.karyon.admin.HttpServerConfig;
@@ -13,7 +13,7 @@ import com.netflix.karyon.admin.HttpServerModule;
 import com.netflix.karyon.admin.SimpleHttpServer;
 import com.sun.net.httpserver.HttpHandler;
 
-public final class AdminServerModule extends DefaultModule {
+public final class AdminServerModule extends AbstractModule {
     @Override
     protected void configure() {
         install(new AdminModule());
@@ -41,11 +41,16 @@ public final class AdminServerModule extends DefaultModule {
     
     @Override
     public boolean equals(Object obj) {
-        return AdminServerModule.class.equals(obj.getClass());
+        return getClass().equals(obj.getClass());
     }
 
     @Override
     public int hashCode() {
-        return AdminServerModule.class.hashCode();
+        return getClass().hashCode();
+    }
+
+    @Override
+    public String toString() {
+        return "AdminServerModule[]";
     }
 }

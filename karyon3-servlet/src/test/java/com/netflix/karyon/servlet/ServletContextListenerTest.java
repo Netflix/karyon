@@ -21,8 +21,8 @@ import org.junit.Test;
 
 import com.google.inject.servlet.GuiceFilter;
 import com.google.inject.servlet.ServletModule;
-import com.netflix.governator.LifecycleInjector;
 import com.netflix.karyon.Karyon;
+import com.netflix.karyon.LifecycleInjector;
 
 public class ServletContextListenerTest {
     private static String RESPONSE = "Hello World!";

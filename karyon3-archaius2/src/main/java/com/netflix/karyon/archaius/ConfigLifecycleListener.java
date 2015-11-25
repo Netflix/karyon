@@ -7,7 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.netflix.archaius.Config;
-import com.netflix.governator.DefaultLifecycleListener;
+import com.netflix.karyon.DefaultLifecycleListener;
 
 /**
  * Configuration listener that will print out the configuration if the injector failed to create

@@ -1,4 +1,4 @@
-package com.netflix.karyon;
+package com.netflix.karyon.spi;
 
 import java.util.List;
 

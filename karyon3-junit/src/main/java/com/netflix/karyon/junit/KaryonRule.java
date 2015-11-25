@@ -6,9 +6,9 @@ import org.junit.rules.TestRule;
 import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
 
-import com.netflix.governator.DefaultLifecycleListener;
-import com.netflix.governator.LifecycleInjector;
+import com.netflix.karyon.DefaultLifecycleListener;
 import com.netflix.karyon.Karyon;
+import com.netflix.karyon.LifecycleInjector;
 
 /**
  * JUnit rule to simplify testing with Karyon.  KaryonRule extends Karyon and as such
