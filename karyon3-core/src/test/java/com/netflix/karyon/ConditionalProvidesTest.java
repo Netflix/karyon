@@ -24,7 +24,6 @@ import com.netflix.karyon.conditional.ConditionalSupportModule;
 import com.netflix.karyon.conditional.annotations.ConditionalOnProfile;
 import com.netflix.karyon.conditional.annotations.ConditionalOnProperty;
 import com.netflix.karyon.conditional.annotations.ProvidesConditionally;
-import com.netflix.karyon.spi.PropertySource;
 
 public class ConditionalProvidesTest {
     public static interface Foo {

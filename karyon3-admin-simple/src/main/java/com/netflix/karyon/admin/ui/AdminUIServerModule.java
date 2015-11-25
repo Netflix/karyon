@@ -2,15 +2,15 @@ package com.netflix.karyon.admin.ui;
 
 import javax.inject.Singleton;
 
+import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 import com.netflix.archaius.ConfigProxyFactory;
-import com.netflix.governator.DefaultModule;
 import com.netflix.karyon.admin.AdminUIServer;
 import com.netflix.karyon.admin.HttpServerConfig;
 import com.netflix.karyon.admin.HttpServerModule;
 import com.netflix.karyon.admin.SimpleHttpServer;
 
-public final class AdminUIServerModule extends DefaultModule {
+public final class AdminUIServerModule extends AbstractModule {
     @Override
     protected void configure() {
         install(new HttpServerModule());
@@ -35,11 +35,11 @@ public final class AdminUIServerModule extends DefaultModule {
     
     @Override
     public boolean equals(Object obj) {
-        return AdminUIServerModule.class.equals(obj.getClass());
+        return getClass().equals(obj.getClass());
     }
 
     @Override
     public int hashCode() {
-        return AdminUIServerModule.class.hashCode();
+        return getClass().hashCode();
     }
 }

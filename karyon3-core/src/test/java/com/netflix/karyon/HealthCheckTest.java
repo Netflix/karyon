@@ -12,7 +12,6 @@ import org.junit.Test;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
-import com.netflix.governator.Governator;
 import com.netflix.karyon.health.HealthCheck;
 import com.netflix.karyon.health.HealthCheckStatus;
 import com.netflix.karyon.health.HealthIndicator;
@@ -53,7 +52,7 @@ public class HealthCheckTest {
     
     @Test
     public void testNoHealthStatuses() {
-        Injector injector = Governator.createInjector();
+        Injector injector = Karyon.newBuilder().start();
         HealthCheck hc = injector.getInstance(HealthCheck.class);
         
         HealthCheckStatus status = hc.check().join();
@@ -63,12 +62,12 @@ public class HealthCheckTest {
     @Test
     public void testOneHealthStatus() {
         List<HealthIndicator> indicators = new ArrayList<>();
-        Injector injector = Governator.createInjector(new AbstractModule() {
+        Injector injector = Karyon.newBuilder().addModules(new AbstractModule() {
             @Override
             protected void configure() {
                 bind(HealthIndicatorRegistry.class).toInstance(HealthIndicatorRegistry.from(indicators));
             }
-        });
+        }).start();
         
         HealthCheck manager = injector.getInstance(HealthCheck.class);
         
@@ -87,12 +86,12 @@ public class HealthCheckTest {
     @Test
     public void testMultipleHealthStatuses() {
         List<HealthIndicator> indicators = new ArrayList<>();
-        Injector injector = Governator.createInjector(new AbstractModule() {
+        Injector injector = Karyon.newBuilder().addModules(new AbstractModule() {
             @Override
             protected void configure() {
                 bind(HealthIndicatorRegistry.class).toInstance(HealthIndicatorRegistry.from(indicators));
             }
-        });
+        }).start();
         
         HealthCheck manager = injector.getInstance(HealthCheck.class);
         HealthIndicatorRegistry registry = injector.getInstance(HealthIndicatorRegistry.class);

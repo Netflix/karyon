@@ -1,6 +1,5 @@
-package com.netflix.karyon.spi;
+package com.netflix.karyon;
 
-import com.netflix.karyon.PropertiesPropertySource;
 
 
 /**

@@ -8,10 +8,9 @@ import java.util.concurrent.TimeUnit;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import com.netflix.governator.ProvisionMetrics;
-import com.netflix.governator.ProvisionMetrics.Element;
-import com.netflix.governator.ProvisionMetrics.Visitor;
-import com.netflix.karyon.admin.AdminService;
+import com.netflix.karyon.api.ProvisionMetrics;
+import com.netflix.karyon.api.ProvisionMetrics.Element;
+import com.netflix.karyon.api.ProvisionMetrics.Visitor;
 
 @Singleton
 @AdminService(name="di-provision", index="list")

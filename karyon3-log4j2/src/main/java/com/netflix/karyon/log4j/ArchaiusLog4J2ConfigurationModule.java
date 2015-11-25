@@ -3,8 +3,8 @@ package com.netflix.karyon.log4j;
 import org.apache.logging.log4j.core.ArchaiusLog4J2ConfigurationFactory;
 import org.apache.logging.log4j.core.Log4jConfigurator;
 
+import com.google.inject.AbstractModule;
 import com.google.inject.multibindings.Multibinder;
-import com.netflix.governator.DefaultModule;
 import com.netflix.karyon.log4j.admin.Log4j2AdminModule;
 
 /**
@@ -16,7 +16,7 @@ import com.netflix.karyon.log4j.admin.Log4j2AdminModule;
  * @author elandau
  *
  */
-public class ArchaiusLog4J2ConfigurationModule extends DefaultModule {
+public class ArchaiusLog4J2ConfigurationModule extends AbstractModule {
     @Override
     protected void configure() {
         this.requestStaticInjection(ArchaiusLog4J2ConfigurationFactory.class);

@@ -14,9 +14,8 @@ import com.google.inject.Binding;
 import com.google.inject.Key;
 import com.google.inject.Provides;
 import com.google.inject.multibindings.Multibinder;
-import com.netflix.governator.Governator;
-import com.netflix.governator.LifecycleInjector;
-import com.netflix.karyon.admin.HealthCheckResource;
+import com.netflix.karyon.Karyon;
+import com.netflix.karyon.LifecycleInjector;
 import com.netflix.karyon.health.HealthCheck;
 import com.netflix.karyon.health.HealthCheckStatus;
 import com.netflix.karyon.health.HealthIndicator;
@@ -27,7 +26,7 @@ import com.netflix.karyon.health.HealthState;
 public class HealthCheckBindingTest {
     @Test
     public void test() {
-        LifecycleInjector injector = Governator.createInjector(
+        LifecycleInjector injector = Karyon.newBuilder().addModules(
             new AbstractModule() {
                 @Provides
                 @Singleton
@@ -41,18 +40,19 @@ public class HealthCheckBindingTest {
                     Multibinder.newSetBinder(binder(), HealthIndicator.class).addBinding().toInstance(HealthIndicators.alwaysUnhealthy("hc2"));
                     
                 }
-            });
+            })
+            .start();
         
         for (Entry<Key<?>, Binding<?>> binding : injector.getAllBindings().entrySet()) {
             System.out.println(binding.getKey());
         }
         
         HealthIndicatorRegistry registry = injector.getInstance(HealthIndicatorRegistry.class);
-        Assert.assertEquals(2, registry.getHealthIndicators().size());
+        Assert.assertEquals(3, registry.getHealthIndicators().size());
         HealthCheckResource res = injector.getInstance(HealthCheckResource.class);
         
         HealthCheckStatus status = injector.getInstance(HealthCheck.class).check().join();
         Assert.assertEquals(HealthState.Unhealthy, status.getState());
-        Assert.assertEquals(2, status.getIndicators().size());
+        Assert.assertEquals(3, status.getIndicators().size());
     }
 }

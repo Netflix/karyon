@@ -11,15 +11,15 @@ import javax.inject.Singleton;
 
 import rx.Observable;
 
+import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 import com.netflix.archaius.Config;
 import com.netflix.archaius.ConfigProxyFactory;
 import com.netflix.archaius.visitor.PrintStreamVisitor;
-import com.netflix.governator.DefaultModule;
-import com.netflix.governator.LifecycleShutdownSignal;
+import com.netflix.karyon.api.LifecycleShutdownSignal;
 import com.netflix.karyon.http.ServerConfig;
 
-public final class ShutdownServerModule extends DefaultModule {
+public final class ShutdownServerModule extends AbstractModule {
 
     // Here we create a 2nd RxNetty server on a different port.  
     // This example demonstrates how to create shutdown port.  
@@ -54,11 +54,15 @@ public final class ShutdownServerModule extends DefaultModule {
 
     @Override
     public boolean equals(Object obj) {
-        return ShutdownServerModule.class.equals(obj.getClass());
+        return getClass().equals(obj.getClass());
     }
 
     @Override
     public int hashCode() {
-        return ShutdownServerModule.class.hashCode();
+        return getClass().hashCode();
+    }
+
+    @Override
+    protected void configure() {
     }
 }

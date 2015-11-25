@@ -1,4 +1,6 @@
-package com.netflix.karyon;
+package com.netflix.karyon.api;
+
+import com.netflix.karyon.KaryonFeature;
 
 /**
  * Container of karyon features.

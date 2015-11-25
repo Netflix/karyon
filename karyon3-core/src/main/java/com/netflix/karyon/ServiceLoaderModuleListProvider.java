@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.ServiceLoader;
 
 import com.google.inject.Module;
+import com.netflix.karyon.spi.ModuleListProvider;
 
 /**
  * Load Module.class modules from the ServerLoader but filter out any modules

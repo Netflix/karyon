@@ -3,7 +3,7 @@ package com.netflix.karyon.junit;
 import org.junit.Rule;
 import org.junit.Test;
 
-import com.netflix.governator.LifecycleInjector;
+import com.netflix.karyon.LifecycleInjector;
 
 public class TestActiveLifecycleListener {
     @Rule

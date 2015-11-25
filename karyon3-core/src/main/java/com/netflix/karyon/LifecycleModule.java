@@ -22,18 +22,9 @@ import com.google.inject.ProvisionException;
 import com.google.inject.matcher.Matchers;
 import com.google.inject.multibindings.Multibinder;
 import com.google.inject.spi.ProvisionListener;
-import com.netflix.governator.DefaultLifecycleListener;
-import com.netflix.governator.LifecycleAction;
-import com.netflix.governator.LifecycleFeature;
-import com.netflix.governator.LifecycleInjector;
-import com.netflix.governator.LifecycleListener;
-import com.netflix.governator.LifecycleManager;
-import com.netflix.governator.ProvisionMetrics;
-import com.netflix.governator.guice.lazy.FineGrainedLazySingleton;
-import com.netflix.governator.guice.lazy.FineGrainedLazySingletonScope;
-import com.netflix.governator.guice.lazy.LazySingleton;
-import com.netflix.governator.guice.lazy.LazySingletonScope;
-import com.netflix.karyon.spi.PropertySource;
+import com.netflix.karyon.api.KaryonFeatureSet;
+import com.netflix.karyon.api.ProvisionMetrics;
+import com.netflix.karyon.spi.LifecycleListener;
 
 /**
  * Adds support for standard lifecycle annotations @PostConstruct and @PreDestroy to Guice.
@@ -224,8 +215,8 @@ public final class LifecycleModule extends AbstractModule {
         
         // These are essentially obsolete since Guice4 fixes the global lock 
         // and DEVELOPMENT mode makes everything lazy.
-        bindScope(FineGrainedLazySingleton.class, FineGrainedLazySingletonScope.get());
-        bindScope(LazySingleton.class, LazySingletonScope.get());
+//        bindScope(FineGrainedLazySingleton.class, FineGrainedLazySingletonScope.get());
+//        bindScope(LazySingleton.class, LazySingletonScope.get());
     }
     
     @Override

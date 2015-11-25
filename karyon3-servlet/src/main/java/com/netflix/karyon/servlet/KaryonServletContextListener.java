@@ -8,14 +8,14 @@ import org.slf4j.LoggerFactory;
 import com.google.inject.Injector;
 import com.google.inject.ProvisionException;
 import com.google.inject.servlet.GuiceServletContextListener;
-import com.netflix.governator.LifecycleInjector;
+import com.netflix.karyon.LifecycleInjector;
 
 /**
- * An extension of {@link GuiceServletContextListener} which integrates with Karyon/Governator's
+ * An extension of {@link GuiceServletContextListener} which integrates with Karyon's
  * Injector.  This implementation drives shutdown of LifecycleManager through the 
  * ServletContextListener's contextDestroyed event.  
  * 
- * To use, subclass your main server class from GovernatorServletContextListener
+ * To use, subclass your main server class from KaryonServletContextListener
  * <code>
 package com.cloudservice.StartServer;
 public class StartServer extends KaryonServletContextListener
@@ -57,8 +57,6 @@ public class StartServer extends KaryonServletContextListener
          &lt;listener-class&gt;com.cloudservice.StartServer&lt;/listener-class&gt;
      &lt;/listener&gt;
  * </code>
- *
- * @author Eran Landau
  */
 public abstract class KaryonServletContextListener extends GuiceServletContextListener {
     protected static final Logger LOG = LoggerFactory.getLogger(KaryonServletContextListener.class);
