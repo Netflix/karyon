@@ -1,13 +1,23 @@
 package com.netflix.karyon;
 
-import com.google.inject.Binder;
+import com.google.inject.AbstractModule;
 import com.google.inject.Key;
-import com.netflix.karyon.spi.AutoBinder;
+import com.google.inject.Module;
+import com.netflix.karyon.spi.AbstractAutoBinder;
 
-public class PropertySourceAutoBinder implements AutoBinder {
+public class PropertySourceAutoBinder extends AbstractAutoBinder {
+    
+    public PropertySourceAutoBinder() {
+        super(TypeLiteralMatchers.subclassOf(PropertySource.class));
+    }
+
     @Override
-    public <T> boolean configure(Binder binder, Key<T> key) {
-        binder.bind(PropertySource.class).toInstance(DefaultPropertySource.INSTANCE);
-        return true;
+    public <T> Module getModuleForKey(Key<T> key) {
+        return new AbstractModule() {
+            @Override
+            protected void configure() {
+                bind(PropertySource.class).toInstance(DefaultPropertySource.INSTANCE);
+            }
+        };
     }
 }

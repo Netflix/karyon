@@ -1,11 +1,12 @@
 package com.netflix.karyon.spi;
 
-import com.google.inject.Binder;
 import com.google.inject.Key;
+import com.google.inject.Module;
+import com.google.inject.TypeLiteral;
 
 /**
- * Automatically create bindings when none exist.  This is an extension to Guice which does not 
- * provide a catch-all provider for missing bindings.  
+ * Automatically create bindings when none exist.  This is an extension to Guice as it
+ * does not provide a catch-all provider for missing bindings.  
  * 
  * For example, the following code will fail with a missing binding error for Foo
  * 
@@ -40,9 +41,8 @@ import com.google.inject.Key;
                     bind(Bar.class).asEagerSingleton();
                 }
             }
-            .addTypeBindingFactory(
-                TypeLiteralMatchers.subclassOf(Bar.class),
-                new KeyAutoBinder() {
+            .addAutoBinder(
+                new AbstractAutoBinder(TypeLiteralMatchers.subclassOf(Foo.class)) {
                     {@literal @}Override
                     public {@literal <}T{@literal >} boolean bind(Binder binder, final Key{@literal <}T{@literal >} key) {
                         binder.bind(key).toInstance((T)new Foo() {});
@@ -50,21 +50,32 @@ import com.google.inject.Key;
                     }
                 }
             )
- *          .start();
- * }
+            .start();
+  }
  * </code>
  * 
- * This functionality is useful to reduce boiler plate code.
+ * Note that for auto-binding to work all injection points must be known prior to creating
+ * the injector.  All classes that are directly used must have a defined binding, such as Bar above.
  * 
+ * This feature is useful where an application or library developer opts to completely decouple their
+ * code of any knowledge of how a type is constructed instead deferring this responsibility to the framework
+ * in which the application is running. 
  */
 public interface AutoBinder {
     /**
-     * Create a bindings for the specified type literal.  
+     * Create a binding for the specified type literal.  This may include intalling modules and specifying
+     * additional binds that may be neede.  
      * 
-     * @param binder Binder on which bindings may be created
      * @param key Key for which no binding was found
      * 
-     * @return True if bindings was created or false if not.
+     * @return Module for creating the bindings or null if this AutoBinder cannot create these bindings.
      */
-    <T> boolean configure(Binder binder, Key<T> key);
+    <T> Module getModuleForKey(Key<T> key);
+    
+    /**
+     * @param t The type
+     * @return Returns true if the AutoBinder can provide binding for this type
+     */
+    boolean matches(TypeLiteral<?> t);
+
 }

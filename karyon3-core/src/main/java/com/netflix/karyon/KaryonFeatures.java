@@ -13,6 +13,11 @@ public final class KaryonFeatures  {
      */
     public final static KaryonFeature<Boolean> SHUTDOWN_ON_ERROR = KaryonFeature.create("karyon.features.shutdownOnError", true);
     
+    /**
+     * Auto discover AutoBinders using the ServiceLoader
+     */
+    public static final KaryonFeature<Boolean> DISCOVER_AUTO_BINDERS = KaryonFeature.create("karyon.features.discoverAutoBinders", true);
+    
     @Deprecated
     public final static KaryonFeature<Boolean> USE_ARCHAIUS = KaryonFeature.create("karyon.features.archaius", false);
 }

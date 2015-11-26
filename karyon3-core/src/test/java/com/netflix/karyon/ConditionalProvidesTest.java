@@ -17,9 +17,7 @@ import com.google.inject.ConfigurationException;
 import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.ProvisionException;
-import com.google.inject.multibindings.Multibinder;
 import com.google.inject.name.Names;
-import com.netflix.karyon.annotations.Profiles;
 import com.netflix.karyon.conditional.ConditionalSupportModule;
 import com.netflix.karyon.conditional.annotations.ConditionalOnProfile;
 import com.netflix.karyon.conditional.annotations.ConditionalOnProperty;
@@ -43,21 +41,19 @@ public class ConditionalProvidesTest {
         @Override
         protected void configure() {
             install(new ConditionalSupportModule());
-            Multibinder.newSetBinder(binder(), String.class, Profiles.class).addBinding()
-                .toInstance("test");
         }
     }
     
     @Test(expected=ConfigurationException.class)
     public void failOnNoBindings() {
-        Injector injector = Karyon.newBuilder().addModules(new TestModule()).start();
+        Injector injector = Karyon.newBuilder().addProfile("test").addModules(new TestModule()).start();
         
         injector.getInstance(Foo.class);
     }
     
     @Test
     public void succeedOnSingleBinding() {
-        Injector injector = Karyon.newBuilder().addModules(new TestModule() {
+        Injector injector = Karyon.newBuilder().addProfile("test").addModules(new TestModule() {
             @Singleton
             @ProvidesConditionally
             @ConditionalOnProfile("test")
@@ -72,7 +68,7 @@ public class ConditionalProvidesTest {
     
     @Test(expected=ProvisionException.class)
     public void failOnNoMetConditionals() {
-        Injector injector = Karyon.newBuilder().addModules(new TestModule() {
+        Injector injector = Karyon.newBuilder().addProfile("test").addModules(new TestModule() {
             @Singleton
             @ProvidesConditionally
             @ConditionalOnProfile("prod")
@@ -86,7 +82,7 @@ public class ConditionalProvidesTest {
     
     @Test(expected=ProvisionException.class)
     public void failOnDuplicateMetConditionals() {
-        Injector injector = Karyon.newBuilder().addModules(new TestModule() {
+        Injector injector = Karyon.newBuilder().addProfile("test").addModules(new TestModule() {
             @Singleton
             @ProvidesConditionally
             @ConditionalOnProfile("test")
@@ -107,7 +103,7 @@ public class ConditionalProvidesTest {
 
     @Test
     public void succeedMatchOneConditional() {
-        Injector injector = Karyon.newBuilder().addModules(new TestModule() {
+        Injector injector = Karyon.newBuilder().addProfile("test").addModules(new TestModule() {
             @Singleton
             @ProvidesConditionally
             @ConditionalOnProfile("test")
@@ -129,7 +125,7 @@ public class ConditionalProvidesTest {
     
     @Test
     public void succeedMatchNoneWithConditional() {
-        Injector injector = Karyon.newBuilder().addModules(new TestModule() {
+        Injector injector = Karyon.newBuilder().addProfile("test").addModules(new TestModule() {
             @Singleton
             @ProvidesConditionally(isDefault=true)
             @ConditionalOnProfile("none1")
@@ -151,7 +147,7 @@ public class ConditionalProvidesTest {
 
     @Test(expected=ProvisionException.class)
     public void failOnMultipleDefaults() {
-        Injector injector = Karyon.newBuilder().addModules(new TestModule() {
+        Injector injector = Karyon.newBuilder().addProfile("test").addModules(new TestModule() {
             @Singleton
             @ProvidesConditionally(isDefault=true)
             @ConditionalOnProfile("none1")
@@ -173,7 +169,7 @@ public class ConditionalProvidesTest {
 
     @Test
     public void successOnMultipleQualifiedBindings() {
-        Injector injector = Karyon.newBuilder().addModules(new TestModule() {
+        Injector injector = Karyon.newBuilder().addProfile("test").addModules(new TestModule() {
             @Singleton
             @Named("foo")
             @ProvidesConditionally
@@ -252,7 +248,7 @@ public class ConditionalProvidesTest {
         when(property.get("foo.type", (String)null)).thenReturn("foo1");
         when(property.get("karyon.features.shutdownOnError", Boolean.class, true)).thenReturn(false);
         
-        Injector injector = Karyon.newBuilder().addModules(new TestModule(), new AbstractModule() {
+        Injector injector = Karyon.newBuilder().addProfile("test").addModules(new TestModule(), new AbstractModule() {
             @Singleton
             @ProvidesConditionally
             @ConditionalOnProperty(key="foo.type", value="foo1")
@@ -283,7 +279,7 @@ public class ConditionalProvidesTest {
         when(property.get("foo.type", (String)null)).thenReturn("foo1");
         when(property.get("karyon.features.shutdownOnError", Boolean.class, true)).thenReturn(false);
         
-        Injector injector = Karyon.newBuilder().addModules(new TestModule(), new AbstractModule() {
+        Injector injector = Karyon.newBuilder().addProfile("test").addModules(new TestModule(), new AbstractModule() {
             @Singleton
             @ProvidesConditionally
             @ConditionalOnProfile("prod")
