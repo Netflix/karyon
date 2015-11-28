@@ -8,7 +8,7 @@ import com.google.inject.Key;
 import com.google.inject.Module;
 import com.netflix.archaius.ConfigProxyFactory;
 import com.netflix.archaius.annotations.Configuration;
-import com.netflix.karyon.TypeLiteralMatchers;
+import com.netflix.karyon.KeyMatchers;
 import com.netflix.karyon.spi.AbstractAutoBinder;
 
 /**
@@ -17,7 +17,7 @@ import com.netflix.karyon.spi.AbstractAutoBinder;
  */
 final public class ArchaiusProxyAutoBinder extends AbstractAutoBinder {
     public ArchaiusProxyAutoBinder() {
-        super(TypeLiteralMatchers.annotatedWith(Configuration.class));
+        super(KeyMatchers.annotatedWith(Configuration.class));
     }
 
     @Override

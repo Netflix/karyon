@@ -56,11 +56,19 @@ import com.netflix.karyon.spi.LifecycleListener;
  * </code>
  * </pre>
  */
-public class LifecycleInjector extends DelegatingInjector {
+final public class LifecycleInjector extends DelegatingInjector {
     private final LifecycleManager manager;
     private final LifecycleShutdownSignal signal;
     
-    public LifecycleInjector(Injector injector, LifecycleManager manager) {
+    public static LifecycleInjector createFailedInjector(LifecycleManager manager) {
+        return new LifecycleInjector(null, manager);
+    }
+    
+    public static LifecycleInjector wrapInjector(Injector injector, LifecycleManager manager) {
+        return new LifecycleInjector(injector, manager);
+    }
+    
+    private LifecycleInjector(Injector injector, LifecycleManager manager) {
         super(injector);
         this.manager  = manager;
         if (injector != null) {

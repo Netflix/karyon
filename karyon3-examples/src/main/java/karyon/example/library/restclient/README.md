@@ -91,9 +91,8 @@ To use the library we only need to add the build dependency on the library and i
 @Singleton
 public class ApplicationUsingRestClient {
     public static void main(String args[]) throws ConfigException {
-        Karyon
-            .forClass(ApplicationUsingRestClient.class)
-            .start(args);
+        Karyon.newBuilder()
+            .startWithClass(ApplicationUsingRestClient.class, args);
     }
     
     @Inject

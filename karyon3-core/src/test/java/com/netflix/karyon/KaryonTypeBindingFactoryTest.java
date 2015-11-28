@@ -101,7 +101,7 @@ public class KaryonTypeBindingFactoryTest {
     @Priority(1)
     static class BarAutoBinder extends AbstractAutoBinder {
         public BarAutoBinder() {
-            super(TypeLiteralMatchers.subclassOf(Bar.class));
+            super(KeyMatchers.subclassOf(Bar.class));
         }
 
         @SuppressWarnings("unchecked")
@@ -124,7 +124,7 @@ public class KaryonTypeBindingFactoryTest {
     @Priority(2)
     static class BarAutoBinder2 extends AbstractAutoBinder {
         public BarAutoBinder2() {
-            super(TypeLiteralMatchers.subclassOf(Bar.class));
+            super(KeyMatchers.subclassOf(Bar.class));
         }
 
         @SuppressWarnings("unchecked")
@@ -146,7 +146,7 @@ public class KaryonTypeBindingFactoryTest {
     
     static class BazAutoBinder extends AbstractAutoBinder {
         public BazAutoBinder() {
-            super(TypeLiteralMatchers.subclassOf(Baz.class));
+            super(KeyMatchers.subclassOf(Baz.class));
         }
         
         @SuppressWarnings("unchecked")

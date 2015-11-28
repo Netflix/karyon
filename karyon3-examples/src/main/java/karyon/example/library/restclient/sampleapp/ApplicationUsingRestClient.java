@@ -23,22 +23,19 @@ public class ApplicationUsingRestClient {
     }
     
     public static void main(String args[]) throws ConfigException {
-        Karyon
-            // Makes 'ApplicationUsingRestClient' an eager singleton
-            .forClass(ApplicationUsingRestClient.class)
+        Karyon.newBuilder()
             // Enable Archaius2 configuration loading
             .addModules(new ArchaiusKaryonModule()
                     .withApplicationOverrides(MapConfig.builder()
                         .put("foo.requestPath", "home")
                         .build()))
-            .start(args);
+            .startWithClass(ApplicationUsingRestClient.class, args);
     }
     
     // @Named("ServiceA") RestClient client and AppConfig config will be auto-bound 
     @Inject
     public ApplicationUsingRestClient(@Named("ServiceA") RestClient client, AppConfig config) {
         String response = client.get(config.requestPath());
-        
         System.out.println(response);
     }
 }

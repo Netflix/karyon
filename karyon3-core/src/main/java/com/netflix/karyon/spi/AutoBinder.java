@@ -2,7 +2,6 @@ package com.netflix.karyon.spi;
 
 import com.google.inject.Key;
 import com.google.inject.Module;
-import com.google.inject.TypeLiteral;
 
 /**
  * Automatically create bindings when none exist.  This is an extension to Guice as it
@@ -68,7 +67,7 @@ public interface AutoBinder {
      * 
      * @param key Key for which no binding was found
      * 
-     * @return Module for creating the bindings or null if this AutoBinder cannot create these bindings.
+     * @return Module for creating the bindings
      */
     <T> Module getModuleForKey(Key<T> key);
     
@@ -76,6 +75,6 @@ public interface AutoBinder {
      * @param t The type
      * @return Returns true if the AutoBinder can provide binding for this type
      */
-    boolean matches(TypeLiteral<?> t);
+    boolean matches(Key<?> t);
 
 }

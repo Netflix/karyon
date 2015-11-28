@@ -8,7 +8,7 @@ import com.netflix.karyon.spi.AbstractAutoBinder;
 public class PropertySourceAutoBinder extends AbstractAutoBinder {
     
     public PropertySourceAutoBinder() {
-        super(TypeLiteralMatchers.subclassOf(PropertySource.class));
+        super(KeyMatchers.subclassOf(PropertySource.class));
     }
 
     @Override

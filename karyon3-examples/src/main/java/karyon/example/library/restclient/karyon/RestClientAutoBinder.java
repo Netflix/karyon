@@ -9,12 +9,12 @@ import karyon.example.library.restclient.api.RestClientFactory;
 import com.google.inject.AbstractModule;
 import com.google.inject.Key;
 import com.google.inject.Module;
-import com.netflix.karyon.TypeLiteralMatchers;
+import com.netflix.karyon.KeyMatchers;
 import com.netflix.karyon.spi.AbstractNamedAutoBinder;
 
 public class RestClientAutoBinder extends AbstractNamedAutoBinder<RestClient> {
     public RestClientAutoBinder() {
-        super(TypeLiteralMatchers.subclassOf(RestClient.class));
+        super(KeyMatchers.subclassOf(RestClient.class));
     }
     
     @Override
@@ -31,7 +31,6 @@ public class RestClientAutoBinder extends AbstractNamedAutoBinder<RestClient> {
                     
                     @Override
                     public RestClient get() {
-                        assert factory != null;
                         return factory.getClientForService(name);
                     }
                 });
