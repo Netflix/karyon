@@ -11,7 +11,6 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.ServiceLoader;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -24,13 +23,10 @@ import com.google.inject.ConfigurationException;
 import com.google.inject.CreationException;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
-import com.google.inject.Key;
 import com.google.inject.Module;
 import com.google.inject.ProvisionException;
 import com.google.inject.Stage;
 import com.google.inject.TypeLiteral;
-import com.google.inject.spi.Element;
-import com.google.inject.spi.Elements;
 import com.google.inject.util.Modules;
 import com.netflix.karyon.annotations.Arguments;
 import com.netflix.karyon.annotations.Priority;
@@ -361,35 +357,14 @@ public class Karyon {
                 }
             });
             
-            for (ModuleListTransformer transformer : transformers) {
+            List<ModuleListTransformer> localTransformers = new ArrayList<ModuleListTransformer>(transformers);
+            localTransformers.add(0, new AutoBindingModuleTransformer(autoBinders));
+            localTransformers.add(new BindingLoggingModuleTransformer());
+            
+            for (ModuleListTransformer transformer : localTransformers) {
                 coreModules = transformer.transform(Collections.unmodifiableList(coreModules));
             }
 
-            // Loop through all elements that have been bound and look for any missing bindings.  
-            // For missing bindings try to call the registered AutoBinders.  
-            // Since an AutoBinder may add additional bindings the processes is repeated until 
-            // no new auto bindings have been created
-            //
-            // TODO: This is probably not the most efficient way of doing this.  This code could be 
-            //       optimized by storing state and only evaluating newly added modules for bindings.
-            List<AutoBinder> prioritizedAutoBinders = autoBinders.stream().sorted(byPriority).collect(Collectors.toList());
-            boolean done = false;
-            while (!done) {
-                done = true;
-                for (Key<?> key : ElementsEx.getAllUnboundKeys(Elements.getElements(coreModules))) {
-                    for (AutoBinder factory : prioritizedAutoBinders) {
-                        if (factory.matches(key)) {
-                            coreModules.add(factory.getModuleForKey(key));
-                            break;
-                        }
-                    }
-                }
-            }
-
-            for (Element binding : Elements.getElements(coreModules)) {
-                LOG.debug("Binding : {}", binding);
-            }
-            
             Injector injector = Guice.createInjector(
                 LAZY_SINGLETONS_STAGE,
                 Modules.override(coreModules).with(overrideModules)

@@ -7,7 +7,7 @@ import com.google.inject.matcher.AbstractMatcher;
 import com.google.inject.matcher.Matcher;
 
 /**
- * Utility class for creating matchers for Key<?>
+ * Utility class for creating matchers for Key{@literal <}?{@literal >}
  */
 public final class KeyMatchers {
     /**
@@ -45,6 +45,15 @@ public final class KeyMatchers {
             @Override
             public boolean matches(T t) {
                 return t.getTypeLiteral().getRawType().isAssignableFrom(type);
+            }
+        };
+    }
+    
+    public static <T extends Key<?>> Matcher<T> ofType(Class<?> type) {
+        return new AbstractMatcher<T>() {
+            @Override
+            public boolean matches(T t) {
+                return t.getTypeLiteral().getRawType().equals(type);
             }
         };
     }
