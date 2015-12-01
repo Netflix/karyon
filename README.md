@@ -61,7 +61,7 @@ public class MyContextListener extends KaryonServletContextListener {
     @Override
     protected Injector createInjector() {
         return Karyon
-                .create()
+                .newBuilder()
                 .addModules(
                     new ServletModule() {
                         ...
