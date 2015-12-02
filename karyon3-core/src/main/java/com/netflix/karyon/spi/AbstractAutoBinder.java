@@ -11,7 +11,7 @@ public abstract class AbstractAutoBinder implements AutoBinder {
     }
     
     @Override
-    public boolean matches(Key<?> t) {
+    public final boolean matches(Key<?> t) {
         return matcher.matches(t);
     }
 }

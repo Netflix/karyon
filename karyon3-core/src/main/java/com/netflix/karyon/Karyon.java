@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashSet;
 import java.util.IdentityHashMap;
 import java.util.LinkedHashSet;
@@ -29,7 +28,6 @@ import com.google.inject.Stage;
 import com.google.inject.TypeLiteral;
 import com.google.inject.util.Modules;
 import com.netflix.karyon.annotations.Arguments;
-import com.netflix.karyon.annotations.Priority;
 import com.netflix.karyon.annotations.Profiles;
 import com.netflix.karyon.api.KaryonFeatureSet;
 import com.netflix.karyon.spi.AutoBinder;
@@ -102,15 +100,6 @@ public class Karyon {
         }
     }
 
-    final static Comparator<AutoBinder> byPriority = new Comparator<AutoBinder>() {
-        @Override
-        public int compare(AutoBinder o1, AutoBinder o2) {
-            int p1 = o1.getClass().isAnnotationPresent(Priority.class) ? o1.getClass().getAnnotation(Priority.class).value() : 0;
-            int p2 = o2.getClass().isAnnotationPresent(Priority.class) ? o2.getClass().getAnnotation(Priority.class).value() : 0;
-            return p2 - p1;
-        }
-    };
-    
     private Karyon() {
         this(null);
     }
@@ -325,7 +314,6 @@ public class Karyon {
             }
         }
         
-        // Create the main LifecycleManager to be used by all levels
         final LifecycleManager manager = new LifecycleManager();
         
         // Construct the injector using our override structure

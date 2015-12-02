@@ -62,8 +62,8 @@ import com.google.inject.Module;
  */
 public interface AutoBinder {
     /**
-     * Create a binding for the specified type literal.  This may include intalling modules and specifying
-     * additional binds that may be neede.  
+     * Create a binding for the specified type literal.  This may include installing modules and specifying
+     * additional binds that may be needed.  
      * 
      * @param key Key for which no binding was found
      * 
