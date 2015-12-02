@@ -38,7 +38,6 @@ public final class KeyMatchers {
 
     /**
      * Create a matcher that succeeds if the type is a or is a subclass of a specific type
-     * @param type 
      */
     public static <T extends Key<?>> Matcher<T> subclassOf(Class<?> type) {
         return new AbstractMatcher<T>() {

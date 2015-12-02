@@ -14,6 +14,9 @@ import com.netflix.karyon.annotations.Priority;
 import com.netflix.karyon.spi.AutoBinder;
 import com.netflix.karyon.spi.ModuleListTransformer;
 
+/**
+ * 
+ */
 public class AutoBindingModuleTransformer implements ModuleListTransformer {
     final static Comparator<AutoBinder> byPriority = new Comparator<AutoBinder>() {
         @Override
@@ -36,7 +39,8 @@ public class AutoBindingModuleTransformer implements ModuleListTransformer {
         List<Module> finalModules = new ArrayList<>();
         finalModules.addAll(modules);
         
-        Set<Key<?>> previousBindings, existingBindings = ElementsEx.getAllUnboundKeys(Elements.getElements(finalModules));
+        Set<Key<?>> existingBindings = ElementsEx.getAllUnboundKeys(Elements.getElements(finalModules));
+        Set<Key<?>> previousBindings;
         
         do {
             previousBindings = existingBindings;
@@ -49,7 +53,7 @@ public class AutoBindingModuleTransformer implements ModuleListTransformer {
                 }
             }
             existingBindings = ElementsEx.getAllUnboundKeys(Elements.getElements(finalModules));
-        } while (previousBindings.size() == existingBindings.size());   // Repeat until we have no more new bindings
+        } while (previousBindings.size() != existingBindings.size());   // Repeat until we have no more new bindings
         
         return finalModules;
     }

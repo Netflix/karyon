@@ -14,7 +14,7 @@ import com.netflix.karyon.spi.AbstractNamedAutoBinder;
 
 public class RestClientAutoBinder extends AbstractNamedAutoBinder<RestClient> {
     public RestClientAutoBinder() {
-        super(KeyMatchers.subclassOf(RestClient.class));
+        super(KeyMatchers.ofType(RestClient.class));
     }
     
     @Override

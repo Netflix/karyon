@@ -33,7 +33,6 @@ import com.netflix.karyon.annotations.Priority;
 import com.netflix.karyon.annotations.Profiles;
 import com.netflix.karyon.api.KaryonFeatureSet;
 import com.netflix.karyon.spi.AutoBinder;
-import com.netflix.karyon.spi.ModuleListProvider;
 import com.netflix.karyon.spi.ModuleListTransformer;
 
 /**
@@ -179,18 +178,6 @@ public class Karyon {
     }
 
     /**
-     * Add a module finder such as a ServiceLoaderModuleFinder or ClassPathScannerModuleFinder
-     * @param provider
-     * 
-     * @deprecated Module auto loading no longer supported.  Install modules directly and use {@literal @}ProvidesConditionally
-     * @return this
-     */
-    @Deprecated
-    public Karyon addAutoModuleListProvider(ModuleListProvider provider) {
-        return this;
-    }
-    
-    /**
      * Add a runtime profile.  Profiles are processed by the conditional binding {@literal @}ConditionalOnProfile and
      * are injectable as {@literal @}Profiles Set{@literal <}String{@literal >}.
      * 
@@ -313,7 +300,7 @@ public class Karyon {
         return start(ModulesEx.emptyModule(), args);
     }
     
-    public LifecycleInjector startAtClass(final Class<?> mainClass) {
+    public LifecycleInjector startWithClass(final Class<?> mainClass) {
         return startWithClass(mainClass, new String[]{});
     }
     

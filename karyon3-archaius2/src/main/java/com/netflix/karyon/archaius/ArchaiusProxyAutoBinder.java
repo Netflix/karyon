@@ -12,8 +12,9 @@ import com.netflix.karyon.KeyMatchers;
 import com.netflix.karyon.spi.AbstractAutoBinder;
 
 /**
- * Autobinder to create proxies for any interface containing the archaius
- * annotations
+ * Autobinder to create proxies for any unbound interface containing the archaius
+ * Configuration annotation.  Note that the auto-binder will not be called if a binding
+ * for the interface exists.
  */
 final public class ArchaiusProxyAutoBinder extends AbstractAutoBinder {
     public ArchaiusProxyAutoBinder() {

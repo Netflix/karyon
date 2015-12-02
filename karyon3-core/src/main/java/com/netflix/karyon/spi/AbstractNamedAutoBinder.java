@@ -12,6 +12,7 @@ public abstract class AbstractNamedAutoBinder<S> extends AbstractAutoBinder {
         super(matcher.and(KeyMatchers.qualifiedWith(Named.class)));
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     final public <T> Module getModuleForKey(Key<T> key) {
         String name = ((Named) key.getAnnotation()).value();

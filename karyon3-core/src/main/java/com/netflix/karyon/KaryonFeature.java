@@ -17,6 +17,7 @@ public class KaryonFeature<T> {
         return key;
     }
     
+    @SuppressWarnings("unchecked")
     public Class<T> getType() {
         return (Class<T>) defaultValue.getClass();
     }
