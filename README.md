@@ -7,7 +7,7 @@ After much discussion we have decided to backport the majority of DI related fun
 
 Karyon3
 ---------
-Karyon3 is a integration framework for writting services using netflix OSS, Archaius, Eureka and RxNetty.  Karyon3 makes use of dependency injection (specifically using Google Guice) with additional support for context based conditional module loading to transparently load contextual bindings and configurations for the environment in which the service is running.  Karyon3 is broken up into sub-projects on functional and dependency boundaries to reduce pulling in excessive dependencies.  
+Karyon3 is a integration framework for writing services using Netflix OSS, Archaius, Eureka and RxNetty. Karyon3 makes use of dependency injection (specifically using Google Guice) with additional support for context based conditional module loading to transparently load contextual bindings and configurations for the environment in which the service is running.  Karyon3 is broken up into sub-projects on functional and dependency boundaries to reduce pulling in excessive dependencies.  
 
 Core features
 - Minimize dependencies
