@@ -1,3 +1,10 @@
+=== IMPORTANT! Project Status Update ====
+----
+
+After much discussion we have decided to backport the majority of DI related functionality from Karyon back in to governator.  This was done to avoid confusion regarding already duplicated classes and simplify adoption since governator is already a dependency of all internal Netflix projects.  The sub-projects of karyon3 will be merged with their respective OSS projects (ex. eureka-governator).  Overall we expect the experience to stay the same but some class names and packages will end up being renamed.  We appologize for any inconvience they may cause early adopters of Karyon3.
+
+===========
+
 Karyon3
 ---------
 Karyon3 is a integration framework for writting services using netflix OSS, Archaius, Eureka and RxNetty.  Karyon3 makes use of dependency injection (specifically using Google Guice) with additional support for context based conditional module loading to transparently load contextual bindings and configurations for the environment in which the service is running.  Karyon3 is broken up into sub-projects on functional and dependency boundaries to reduce pulling in excessive dependencies.  
