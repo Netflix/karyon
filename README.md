@@ -1,7 +1,7 @@
 === IMPORTANT! Project Status Update ====
 ----
 
-After much discussion we have decided to backport the majority of DI related functionality from Karyon back in to governator.  This was done to avoid confusion regarding already duplicated classes and simplify adoption since governator is already a dependency of all internal Netflix projects.  The sub-projects of karyon3 will be merged with their respective OSS projects (ex. eureka-governator).  Overall we expect the experience to stay the same but some class name and packages will end up being renamed.  We appologize for any inconvience they may cause early adopters of Karyon3.
+After much discussion we have decided to backport the majority of DI related functionality from Karyon back in to governator.  This was done to avoid confusion regarding already duplicated classes and simplify adoption since governator is already a dependency of all internal Netflix projects.  The sub-projects of karyon3 will be merged with their respective OSS projects (ex. eureka-governator).  Overall we expect the experience to stay the same but some class names and packages will end up being renamed.  We appologize for any inconvience they may cause early adopters of Karyon3.
 
 ===========
 
