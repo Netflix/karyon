@@ -11,8 +11,13 @@ public final class KaryonFeatures  {
      * startup failure.  This allows the admin page to stay up so that the process may be 
      * debugged more easily. 
      */
-    public final static KaryonFeature<Boolean> SHUTDOWN_ON_ERROR = KaryonFeature.create("karyon.features.shutdownOnError", true);
+    public static final KaryonFeature<Boolean> SHUTDOWN_ON_ERROR = KaryonFeature.create("karyon.features.shutdownOnError", true);
+    
+    /**
+     * Auto discover AutoBinders using the ServiceLoader
+     */
+    public static final KaryonFeature<Boolean> DISCOVER_AUTO_BINDERS = KaryonFeature.create("karyon.features.discoverAutoBinders", true);
     
     @Deprecated
-    public final static KaryonFeature<Boolean> USE_ARCHAIUS = KaryonFeature.create("karyon.features.archaius", false);
+    public static final KaryonFeature<Boolean> USE_ARCHAIUS = KaryonFeature.create("karyon.features.archaius", false);
 }

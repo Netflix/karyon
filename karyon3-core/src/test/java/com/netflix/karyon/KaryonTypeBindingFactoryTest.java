@@ -9,11 +9,12 @@ import javax.inject.Named;
 import org.junit.Test;
 
 import com.google.inject.AbstractModule;
-import com.google.inject.Binder;
 import com.google.inject.CreationException;
 import com.google.inject.Injector;
 import com.google.inject.Key;
-import com.netflix.karyon.spi.AutoBinder;
+import com.google.inject.Module;
+import com.netflix.karyon.annotations.Priority;
+import com.netflix.karyon.spi.AbstractAutoBinder;
 
 public class KaryonTypeBindingFactoryTest {
     public static interface Baz {
@@ -34,6 +35,15 @@ public class KaryonTypeBindingFactoryTest {
             this.bar = bar;
             this.baz = baz;
             this.namedBar = namedBar;
+        }
+    }
+    
+    public static class Foo2 {
+        private Bar bar;
+
+        @Inject
+        public Foo2(Bar bar) {
+            this.bar = bar;
         }
     }
     
@@ -58,12 +68,8 @@ public class KaryonTypeBindingFactoryTest {
                     bind(Foo.class).asEagerSingleton();
                 }
             })
-            .addAutoBinder(
-                TypeLiteralMatchers.subclassOf(Bar.class), new BarAutoBinder()
-            )
-            .addAutoBinder(
-                TypeLiteralMatchers.subclassOf(Baz.class), new BazAutoBinder()
-            )
+            .addAutoBinder(new BarAutoBinder())
+            .addAutoBinder(new BazAutoBinder())
             .start();
             
         Foo foo = injector.getInstance(Foo.class);
@@ -73,31 +79,90 @@ public class KaryonTypeBindingFactoryTest {
         assertThat(foo.namedBar.getName(),  equalTo("@com.google.inject.name.Named(value=bar)"));
     }
     
-    static class BarAutoBinder implements AutoBinder {
+    @Test
+    public void testPriority() {
+        Injector injector = Karyon.newBuilder()
+            .addModules(new AbstractModule() {
+                @Override
+                protected void configure() {
+                    bind(Foo2.class).asEagerSingleton();
+                }
+            })
+            .addAutoBinder(new BarAutoBinder())
+            .addAutoBinder(new BarAutoBinder2())
+            .start();
+            
+        Foo2 foo = injector.getInstance(Foo2.class);
+        
+        System.out.println("Found: " + foo.bar.getName());
+        assertThat(foo.bar.getName(),       equalTo("-1"));
+    }
+    
+    @Priority(1)
+    static class BarAutoBinder extends AbstractAutoBinder {
+        public BarAutoBinder() {
+            super(KeyMatchers.subclassOf(Bar.class));
+        }
+
         @SuppressWarnings("unchecked")
         @Override
-        public <T> boolean configure(Binder binder, final Key<T> key) {
-            binder.bind(key).toInstance((T)new Bar() {
+        public <T> Module getModuleForKey(final Key<T> key) {
+            return new AbstractModule() {
                 @Override
-                public String getName() {
-                    return null == key.getAnnotation() ? "" : key.getAnnotation().toString();
-                } 
-            });
-            return true;
+                protected void configure() {
+                    bind(key).toInstance((T)new Bar() {
+                        @Override
+                        public String getName() {
+                            return null == key.getAnnotation() ? "" : key.getAnnotation().toString();
+                        } 
+                    });
+                }
+            };
         }
     }
     
-    static class BazAutoBinder implements AutoBinder {
+    @Priority(2)
+    static class BarAutoBinder2 extends AbstractAutoBinder {
+        public BarAutoBinder2() {
+            super(KeyMatchers.subclassOf(Bar.class));
+        }
+
         @SuppressWarnings("unchecked")
         @Override
-        public <T> boolean configure(Binder binder, Key<T> key) {
-            binder.bind(key).toInstance((T)new Baz() {
+        public <T> Module getModuleForKey(final Key<T> key) {
+            return new AbstractModule() {
                 @Override
-                public String getName() {
-                    return null == key.getAnnotation() ? "" : key.getAnnotation().toString();
+                protected void configure() {
+                    bind(key).toInstance((T)new Bar() {
+                        @Override
+                        public String getName() {
+                            return null == key.getAnnotation() ? "-1" : key.getAnnotation().toString() + "-1";
+                        } 
+                    });
                 }
-            });
-            return true;
+            };
+        }
+    }
+    
+    static class BazAutoBinder extends AbstractAutoBinder {
+        public BazAutoBinder() {
+            super(KeyMatchers.subclassOf(Baz.class));
+        }
+        
+        @SuppressWarnings("unchecked")
+        @Override
+        public <T> Module getModuleForKey(Key<T> key) {
+            return new AbstractModule() {
+                @Override
+                protected void configure() {
+                    bind(key).toInstance((T)new Baz() {
+                        @Override
+                        public String getName() {
+                            return null == key.getAnnotation() ? "" : key.getAnnotation().toString();
+                        }
+                    });
+                }
+            };
         }
     }
 }   

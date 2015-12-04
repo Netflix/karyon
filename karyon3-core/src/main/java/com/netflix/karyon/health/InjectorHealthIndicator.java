@@ -4,10 +4,10 @@ import java.util.concurrent.CompletableFuture;
 
 import javax.inject.Singleton;
 
-import com.netflix.karyon.DefaultLifecycleListener;
+import com.netflix.karyon.spi.AbstractLifecycleListener;
 
 @Singleton
-public class InjectorHealthIndicator extends DefaultLifecycleListener implements HealthIndicator {
+public class InjectorHealthIndicator extends AbstractLifecycleListener implements HealthIndicator {
 
     private volatile Throwable error;
     

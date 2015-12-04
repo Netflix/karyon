@@ -51,7 +51,7 @@ final class ConditionalResolvingProvider<T> implements Module, Provider<T> {
         
         List<ConditionalBinder<T>> matchedBindings = new ArrayList<>();
         for (ConditionalBinder<T> provider : providers) {
-            if (provider.matches()) {
+            if (provider.matches(injector)) {
                 matchedBindings.add(provider);
             }
             else if (provider.isDefault()) {
@@ -64,17 +64,17 @@ final class ConditionalResolvingProvider<T> implements Module, Provider<T> {
         
         if (matchedBindings.size() == 0) {
             if (defaultProvider != null) {
-                return defaultProvider.getProvider();
+                return defaultProvider.getProvider(injector);
             }
             else {
                 throw new ProvisionException("No binding found for " + key.getTypeLiteral());
             }
         }
         else if (matchedBindings.size() == 1) {
-            return matchedBindings.get(0).getProvider();
+            return matchedBindings.get(0).getProvider(injector);
         }
         else {
-            throw new ProvisionException("Multiple (" + matchedBindings.size() + ") bindings found for " + key + "\n. " + matchedBindings);
+            throw new ProvisionException("Multiple (" + matchedBindings.size() + ") bindings matched for " + key + "\n. " + matchedBindings);
         }
     }
     

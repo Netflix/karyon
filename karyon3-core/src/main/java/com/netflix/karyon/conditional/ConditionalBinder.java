@@ -4,12 +4,12 @@ import java.lang.annotation.Annotation;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import javax.inject.Inject;
 import javax.inject.Provider;
 
 import com.google.inject.Binder;
 import com.google.inject.Injector;
 import com.google.inject.Key;
+import com.google.inject.ProvisionException;
 import com.google.inject.TypeLiteral;
 import com.google.inject.multibindings.Multibinder;
 import com.google.inject.util.Types;
@@ -47,9 +47,6 @@ public class ConditionalBinder<T> {
         };
     }
     
-    @Inject
-    private Injector injector;
-    
     private final IdQualifier       id;
     private final Key<T>            idKey;
     private final List<Annotation>  conditionals;
@@ -74,21 +71,32 @@ public class ConditionalBinder<T> {
         mapBinder.addBinding().toInstance(this);
     }
 
-    boolean matches() {
+    boolean matches(Injector injector) {
+        if (injector == null) {
+            throw new ProvisionException("ConditionalBinder has no injector yet");
+        }
+        
         for (Annotation conditional : conditionals) {
-            ConditionalMatcher evaluator = (ConditionalMatcher) injector.getInstance(Key.get(Types.newParameterizedType(ConditionalMatcher.class, conditional.annotationType())));
-            if (!evaluator.evaluate(conditional)) { 
-                return false;
+            Key<ConditionalMatcher<?>> key = (Key<ConditionalMatcher<?>>) Key.get(Types.newParameterizedType(ConditionalMatcher.class, conditional.annotationType()));
+            try {
+                Provider<ConditionalMatcher<?>> foo = (Provider<ConditionalMatcher<?>>) injector.getProvider(key);
+                ConditionalMatcher evaluator = (ConditionalMatcher) injector.getInstance(key);
+                if (!evaluator.evaluate(conditional)) { 
+                    return false;
+                }
+            }
+            catch (Exception e) {
+                throw new ProvisionException("Error evaluating matcher " + key + " for conditional " + conditional, e);
             }
         }
         return true;
     }
     
-    public T get() {
+    public T get(Injector injector) {
         return injector.getInstance(idKey);
     }
     
-    public Provider<T> getProvider() {
+    public Provider<T> getProvider(Injector injector) {
         return injector.getProvider(idKey);
     }
 

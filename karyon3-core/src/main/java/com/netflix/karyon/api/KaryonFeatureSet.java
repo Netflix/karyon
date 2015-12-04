@@ -7,10 +7,7 @@ import com.netflix.karyon.KaryonFeature;
  */
 public interface KaryonFeatureSet {
     /**
-     * Get the value of the feature or the default if none is set
-     * 
-     * @param feature
-     * @return
+     * @return Get the value of the feature or the default if none is set
      */
     <T> T get(KaryonFeature<T> feature);
 }

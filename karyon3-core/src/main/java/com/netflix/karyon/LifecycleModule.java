@@ -24,6 +24,7 @@ import com.google.inject.multibindings.Multibinder;
 import com.google.inject.spi.ProvisionListener;
 import com.netflix.karyon.api.KaryonFeatureSet;
 import com.netflix.karyon.api.ProvisionMetrics;
+import com.netflix.karyon.spi.AbstractLifecycleListener;
 import com.netflix.karyon.spi.LifecycleListener;
 
 /**
@@ -62,7 +63,7 @@ public final class LifecycleModule extends AbstractModule {
     }
     
     @Singleton
-    static class LifecycleProvisionListener extends DefaultLifecycleListener implements ProvisionListener {
+    static class LifecycleProvisionListener extends AbstractLifecycleListener implements ProvisionListener {
         private final ConcurrentLinkedDeque<Runnable> shutdownActions = new ConcurrentLinkedDeque<Runnable>();
         private final ConcurrentMap<Class<?>, TypeLifecycleActions> cache = new ConcurrentHashMap<>();
         private Set<LifecycleFeature> features;

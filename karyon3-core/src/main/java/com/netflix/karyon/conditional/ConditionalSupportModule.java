@@ -46,7 +46,7 @@ public class ConditionalSupportModule extends AbstractModule {
                     }
                 }
                 
-                if (annotations.isEmpty()) {
+                if (annotations.isEmpty() && conditionally.isDefault() != true) {
                     binder.addError("Method " + m.toString() + " must have at least one @Conditional annotated annotation.");
                 }
 
@@ -56,9 +56,9 @@ public class ConditionalSupportModule extends AbstractModule {
         });
         
         // Add one of these to register the evaluator for each Conditional 
-        bind(new TypeLiteral<ConditionalMatcher<ConditionalOnProfile>>() {})
+        bind(Key.get(new TypeLiteral<ConditionalMatcher<ConditionalOnProfile>>() {}))
             .to(ConditionalOnProfileMatcher.class);
-        bind(new TypeLiteral<ConditionalMatcher<ConditionalOnProperty>>() {})
+        bind(Key.get(new TypeLiteral<ConditionalMatcher<ConditionalOnProperty>>() {}))
             .to(ConditionalOnPropertyMatcher.class);
     }
     

@@ -11,9 +11,10 @@ import org.slf4j.LoggerFactory;
 import com.netflix.karyon.api.ProvisionMetrics;
 import com.netflix.karyon.api.ProvisionMetrics.Element;
 import com.netflix.karyon.api.ProvisionMetrics.Visitor;
+import com.netflix.karyon.spi.AbstractLifecycleListener;
 
 @Singleton
-public class LoggingProvisionMetricsLifecycleListener extends DefaultLifecycleListener {
+public class LoggingProvisionMetricsLifecycleListener extends AbstractLifecycleListener {
     private static final Logger LOG = LoggerFactory.getLogger(LoggingProvisionMetricsLifecycleListener.class);
     
     private final ProvisionMetrics metrics;
