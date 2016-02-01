@@ -38,55 +38,34 @@ public class AdminConfigImpl implements AdminContainerConfig {
     public static final String NETFLIX_ADMIN_CTX_FILTERS = "netflix.admin.additional.filters";
     public static final String DEFAULT_CONTEXT_FILTERS = "";
 
-
-    private final String templateResContext;
-    private final String resourceContext;
-    private final String coreJerseyResources;
-    private final String viewableResources;
-    private final int listenPort;
-    private final boolean isEnabled;
-    private final boolean isResourcesIsolated;
-    private final String rootContextFilters;
-
-    public AdminConfigImpl() {
-        isEnabled = ConfigurationManager.getConfigInstance().getBoolean(SERVER_ENABLE_PROP_NAME, SERVER_ENABLE_DEFAULT);
-        templateResContext = ConfigurationManager.getConfigInstance().getString(NETFLIX_ADMIN_TEMPLATE_CONTEXT, TEMPLATE_CONTEXT_DEFAULT);
-        resourceContext = ConfigurationManager.getConfigInstance().getString(NETFLIX_ADMIN_RESOURCE_CONTEXT, RESOURCE_CONTEXT_DEFAULT);
-        coreJerseyResources = ConfigurationManager.getConfigInstance().getString(JERSEY_CORE_RESOURCES, JERSEY_CORE_RESOURCES_DEFAULT);
-        viewableResources = ConfigurationManager.getConfigInstance().getString(JERSEY_VIEWABLE_RESOURCES, JERSEY_VIEWABLE_RESOURCES_DEFAULT);
-        listenPort = ConfigurationManager.getConfigInstance().getInt(CONTAINER_LISTEN_PORT, LISTEN_PORT_DEFAULT);
-        isResourcesIsolated = ConfigurationManager.getConfigInstance().getBoolean(NETFLIX_ADMIN_RESOURCES_ISOLATE, ISOLATE_RESOURCES_DEFAULT);
-        rootContextFilters = ConfigurationManager.getConfigInstance().getString(NETFLIX_ADMIN_CTX_FILTERS, DEFAULT_CONTEXT_FILTERS);
-    }
-
     @Override
     public boolean shouldIsolateResources() {
-        return isResourcesIsolated;
+        return ConfigurationManager.getConfigInstance().getBoolean(NETFLIX_ADMIN_RESOURCES_ISOLATE, ISOLATE_RESOURCES_DEFAULT);
     }
 
     @Override
     public boolean shouldEnable() {
-        return isEnabled;
+        return ConfigurationManager.getConfigInstance().getBoolean(SERVER_ENABLE_PROP_NAME, SERVER_ENABLE_DEFAULT);
     }
 
     @Override
     public String templateResourceContext() {
-        return templateResContext;
+        return ConfigurationManager.getConfigInstance().getString(NETFLIX_ADMIN_TEMPLATE_CONTEXT, TEMPLATE_CONTEXT_DEFAULT);
     }
 
     @Override
     public String ajaxDataResourceContext() {
-        return resourceContext;
+        return ConfigurationManager.getConfigInstance().getString(NETFLIX_ADMIN_RESOURCE_CONTEXT, RESOURCE_CONTEXT_DEFAULT);
     }
 
     @Override
     public String jerseyResourcePkgList() {
-        return coreJerseyResources;
+        return ConfigurationManager.getConfigInstance().getString(JERSEY_CORE_RESOURCES, JERSEY_CORE_RESOURCES_DEFAULT);
     }
 
     @Override
     public String jerseyViewableResourcePkgList() {
-        return viewableResources;
+        return ConfigurationManager.getConfigInstance().getString(JERSEY_VIEWABLE_RESOURCES, JERSEY_VIEWABLE_RESOURCES_DEFAULT);
     }
 
     @Override
@@ -96,11 +75,13 @@ public class AdminConfigImpl implements AdminContainerConfig {
 
     @Override
     public int listenPort() {
-        return listenPort;
+        return ConfigurationManager.getConfigInstance().getInt(CONTAINER_LISTEN_PORT, LISTEN_PORT_DEFAULT);
     }
 
     @Override
     public List<Filter> additionalFilters() {
+        String rootContextFilters = ConfigurationManager.getConfigInstance().getString(NETFLIX_ADMIN_CTX_FILTERS, DEFAULT_CONTEXT_FILTERS);
+
         if (rootContextFilters.isEmpty()) {
             return Collections.emptyList();
         }
