@@ -1,5 +1,5 @@
 =====
-Karyon 2.0 is no longer supported.  Please use https://github.com/Netflix/karyon/tree/3.x
+Karyon 2.0 is no longer supported.  We are in the process of retiring Karyon in favor of using Governator for bootstrapping and OSS components with -guice or -governator subprojects.
 =====
 
 
