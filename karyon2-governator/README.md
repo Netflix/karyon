@@ -24,4 +24,4 @@ _Application_ class name to be passed as the program argument.
 The annotation based model above leverages this basic guice module based bootstrapping model which requires the user to
 explicitly provide the guice modules which are required by the application.
 
-An example of this model can be found under[karyon examples](../karyon2-examples)
+An example of this model can be found under [karyon examples](../karyon2-examples)
