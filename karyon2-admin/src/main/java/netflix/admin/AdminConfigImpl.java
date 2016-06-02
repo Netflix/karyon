@@ -1,14 +1,18 @@
 package netflix.admin;
 
+import com.google.inject.Injector;
 import com.netflix.config.ConfigurationManager;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.inject.Singleton;
-import javax.servlet.Filter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
+import javax.inject.Inject;
+import javax.inject.Singleton;
+import javax.servlet.Filter;
 
 @Singleton
 public class AdminConfigImpl implements AdminContainerConfig {
@@ -38,6 +42,17 @@ public class AdminConfigImpl implements AdminContainerConfig {
     public static final String NETFLIX_ADMIN_CTX_FILTERS = "netflix.admin.additional.filters";
     public static final String DEFAULT_CONTEXT_FILTERS = "";
 
+    private final Injector injector;
+
+    public AdminConfigImpl() {
+        this(null);
+    }
+    
+    @Inject
+    public AdminConfigImpl(Injector injector) {
+        this.injector = injector;
+    }
+    
     @Override
     public boolean shouldIsolateResources() {
         return ConfigurationManager.getConfigInstance().getBoolean(NETFLIX_ADMIN_RESOURCES_ISOLATE, ISOLATE_RESOURCES_DEFAULT);
@@ -90,11 +105,9 @@ public class AdminConfigImpl implements AdminContainerConfig {
         final String[] filterClasses = rootContextFilters.split(",");
         for (String filterClass : filterClasses) {
             try {
-                getClass().getClassLoader();
                 final Class<?> filterCls = Class.forName(filterClass, false, getClass().getClassLoader());
                 if (Filter.class.isAssignableFrom(filterCls)) {
-                    Filter filter = (Filter) filterCls.newInstance();
-                    filters.add(filter);
+                    filters.add((Filter)(injector == null ? filterCls.newInstance() : injector.getInstance(filterCls)));
                 }
             } catch (InstantiationException | IllegalAccessException e) {
                 logger.warn("Filter class can not be instantiated " + filterClass);

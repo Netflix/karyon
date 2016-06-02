@@ -1,8 +1,8 @@
 package netflix.adminresources;
 
-
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
+import com.google.inject.Injector;
 import com.google.inject.Singleton;
 import com.netflix.config.ConfigurationManager;
 import com.netflix.governator.lifecycle.ClasspathScanner;
@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import javax.inject.Inject;
 
 @Singleton
 public class AdminPageRegistry {
@@ -28,12 +29,19 @@ public class AdminPageRegistry {
     public static final String DEFAULT_ADMIN_PAGE_ANNOTATION = "netflix.adminresources.AdminPage";
 
     private Map<String, AdminPageInfo> baseServerPageInfoMap;
-
-
+    private Injector injector;
+    
     public AdminPageRegistry() {
         this.baseServerPageInfoMap = new ConcurrentHashMap<>();
+        this.injector = null;
     }
 
+    @Inject
+    public AdminPageRegistry(Injector injector) {
+        this.baseServerPageInfoMap = new ConcurrentHashMap<>();
+        this.injector = injector;
+    }
+    
     public void add(AdminPageInfo baseServerPageInfo) {
         Preconditions.checkNotNull(baseServerPageInfo);
         baseServerPageInfoMap.put(baseServerPageInfo.getPageId(), baseServerPageInfo);
@@ -72,8 +80,7 @@ public class AdminPageRegistry {
             if (derivedFromAbstractBaseServePageInfo(baseServerAdminPageClass) ||
                     implementsAdminPageInfo(baseServerAdminPageClass)) {
                 try {
-                    AdminPageInfo baseServerPageInfo = (AdminPageInfo) baseServerAdminPageClass.newInstance();
-                    add(baseServerPageInfo);
+                    add((AdminPageInfo) (injector == null ? baseServerAdminPageClass.newInstance() : injector.getInstance(baseServerAdminPageClass)));
                 } catch (Exception e) {
                     LOG.warn(String.format("Exception registering %s admin page", baseServerAdminPageClass.getName()), e);
                 }
