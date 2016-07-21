@@ -8,7 +8,9 @@ import java.util.Arrays;
 
 /**
  * @author Nitesh Kant
+ * @deprecated 2016-07-20 Karyon2 no longer supported.  See https://github.com/Netflix/karyon/issues/347 for more info
  */
+@Deprecated
 abstract class AbstractKaryonServer implements KaryonServer {
 
     protected final BootstrapModule[] bootstrapModules;

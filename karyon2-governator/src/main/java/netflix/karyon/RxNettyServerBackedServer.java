@@ -9,7 +9,9 @@ import org.slf4j.LoggerFactory;
  * An implementation of {@link KaryonServer} which wraps an RxNetty's server.
  *
  * @author Nitesh Kant
+ * @deprecated 2016-07-20 Karyon2 no longer supported.  See https://github.com/Netflix/karyon/issues/347 for more info
  */
+@Deprecated
 class RxNettyServerBackedServer extends MainClassBasedServer {
 
     private static final Logger logger = LoggerFactory.getLogger(RxNettyServerBackedServer.class);

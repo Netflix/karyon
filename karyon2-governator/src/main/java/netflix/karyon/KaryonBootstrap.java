@@ -12,11 +12,13 @@ import java.lang.annotation.Target;
 
 /**
  * @author Nitesh Kant
+ * @deprecated 2016-07-20 Karyon2 no longer supported.  See https://github.com/Netflix/karyon/issues/347 for more info
  */
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
 @Bootstrap(bootstrap = KaryonBootstrapModule.class)
+@Deprecated
 public @interface KaryonBootstrap {
 
     String name();
