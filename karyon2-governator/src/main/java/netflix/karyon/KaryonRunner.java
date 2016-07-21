@@ -22,7 +22,7 @@ import org.slf4j.LoggerFactory;
  * If you are bootstrapping karyon programmatically, it is better to use {@code Karyon} directly.
  *
  * @author Nitesh Kant
- * @deprecated 2016-07-20 Karyon2 no longer supported.  Use governator or other DI framework directly
+ * @deprecated 2016-07-20 Karyon2 no longer supported.  See https://github.com/Netflix/karyon/issues/347 for more info
  */
 @Deprecated
 public class KaryonRunner {
