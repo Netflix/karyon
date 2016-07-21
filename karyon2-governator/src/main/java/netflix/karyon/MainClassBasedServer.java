@@ -10,7 +10,9 @@ import java.util.concurrent.CountDownLatch;
 
 /**
  * @author Nitesh Kant
+ * @deprecated 2016-07-20 Karyon2 no longer supported.  Use governator or other DI framework directly
  */
+@Deprecated
 class MainClassBasedServer extends AbstractKaryonServer {
 
     private static final Logger logger = LoggerFactory.getLogger(MainClassBasedServer.class);

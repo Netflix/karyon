@@ -15,7 +15,9 @@ import javax.inject.Inject;
  * A guice module that defines all bindings required by karyon. Applications must use this to bootstrap karyon.
  *
  * @author Nitesh Kant
+ * @deprecated 2016-07-20 Karyon2 no longer supported.  Use governator or other DI framework directly
  */
+@Deprecated
 public class KaryonBootstrapModule implements BootstrapModule {
 
     private final Class<? extends HealthCheckHandler> healthcheckHandlerClass;

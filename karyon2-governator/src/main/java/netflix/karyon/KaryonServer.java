@@ -4,7 +4,9 @@ package netflix.karyon;
  * A logical abstraction to manage the lifecycle of a karyon based application.
  * This does not define any contracts of handling and processing requests, those should all be defined by means of
  * modules.
+ * @deprecated 2016-07-20 Karyon2 no longer supported.  Use governator or other DI framework directly
  */
+@Deprecated
 public interface KaryonServer {
 
     /**

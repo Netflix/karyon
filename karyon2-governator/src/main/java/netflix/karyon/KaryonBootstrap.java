@@ -12,11 +12,13 @@ import java.lang.annotation.Target;
 
 /**
  * @author Nitesh Kant
+ * @deprecated 2016-07-20 Karyon2 no longer supported.  Use governator or other DI framework directly
  */
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
 @Bootstrap(bootstrap = KaryonBootstrapModule.class)
+@Deprecated
 public @interface KaryonBootstrap {
 
     String name();

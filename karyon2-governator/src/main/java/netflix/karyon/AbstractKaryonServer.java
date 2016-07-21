@@ -8,7 +8,9 @@ import java.util.Arrays;
 
 /**
  * @author Nitesh Kant
+ * @deprecated 2016-07-20 Karyon2 no longer supported.  Use governator or other DI framework directly
  */
+@Deprecated
 abstract class AbstractKaryonServer implements KaryonServer {
 
     protected final BootstrapModule[] bootstrapModules;

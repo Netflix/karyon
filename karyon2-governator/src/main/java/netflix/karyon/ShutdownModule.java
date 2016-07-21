@@ -20,7 +20,9 @@ import javax.annotation.PostConstruct;
  * either before or after the container shutdown.
  *
  * @author Tomasz Bak
+ * @deprecated 2016-07-20 Karyon2 no longer supported.  Use governator or other DI framework directly
  */
+@Deprecated
 public class ShutdownModule extends AbstractModule {
 
     public static final int DEFAULT_PORT = 7002;
