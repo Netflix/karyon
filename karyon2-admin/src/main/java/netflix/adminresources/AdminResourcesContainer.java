@@ -16,27 +16,41 @@
 
 package netflix.adminresources;
 
-import com.google.inject.*;
+import com.google.inject.AbstractModule;
+import com.google.inject.Inject;
+import com.google.inject.Injector;
+import com.google.inject.Module;
+import com.google.inject.Singleton;
+import com.google.inject.Stage;
+import com.netflix.explorers.providers.FreemarkerTemplateProvider;
+import com.netflix.explorers.providers.JsonMessageBodyWriter;
 import com.netflix.governator.guice.LifecycleInjector;
 import com.netflix.governator.lifecycle.LifecycleManager;
-import netflix.admin.AdminConfigImpl;
-import netflix.admin.AdminContainerConfig;
+
 import org.mortbay.jetty.Connector;
 import org.mortbay.jetty.Handler;
 import org.mortbay.jetty.Server;
 import org.mortbay.jetty.handler.HandlerCollection;
-import org.mortbay.jetty.servlet.*;
+import org.mortbay.jetty.servlet.Context;
+import org.mortbay.jetty.servlet.DefaultServlet;
+import org.mortbay.jetty.servlet.FilterHolder;
+import org.mortbay.jetty.servlet.ServletHolder;
+import org.mortbay.jetty.servlet.SessionHandler;
 import org.mortbay.thread.QueuedThreadPool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
-import javax.servlet.Filter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
+
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
+import javax.servlet.Filter;
+
+import netflix.admin.AdminConfigImpl;
+import netflix.admin.AdminContainerConfig;
 
 /**
  * This class starts an embedded jetty server, listening at port specified by property
@@ -212,6 +226,10 @@ public class AdminResourcesContainer {
         if (adminPageRegistry != null) {
             final Collection<AdminPageInfo> allPages = adminPageRegistry.getAllPages();
             for (AdminPageInfo adminPlugin : allPages) {
+                logger.info("Adding admin page {}: jersey={} modules{}", 
+                        adminPlugin.getName(),
+                        adminPlugin.getJerseyResourcePackageList(),
+                        adminPlugin.getGuiceModules());
                 final List<Module> guiceModuleList = adminPlugin.getGuiceModules();
                 if (guiceModuleList != null && !guiceModuleList.isEmpty()) {
                     guiceModules.addAll(adminPlugin.getGuiceModules());
