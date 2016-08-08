@@ -20,11 +20,15 @@ dependencies {
         compile 'javax.ws.rs:jsr311-api:1.1.1'
         compile 'javax.servlet:javax.servlet-api:3.0.1'
         compile 'org.mortbay.jetty:jetty:6.1.26'
+        compile 'com.google.inject.extensions:guice-servlet:4.1.0'
         compile 'com.sun.jersey.contribs:jersey-guice:${jersey_version}'
         compile "com.sun.jersey:jersey-servlet:${jersey_version}"
         compile "com.sun.jersey:jersey-server:${jersey_version}"
         compile "com.netflix.pytheas:pytheas-core:${pytheas_version}"
         compile "com.sun.jersey:jersey-core:${jersey_version}"
+        compile "com.sun.jersey:jersey-servlet:${jersey_version}"
+        compile "com.sun.jersey:jersey-server:${jersey_version}"
+        compile "com.sun.jersey:jersey-json:${jersey_version}"
         runtime 'org.codehaus.jackson:jackson-mapper-asl:1.9.11'
 
         testCompile "org.apache.httpcomponents:httpclient:${apache_httpclient_version}"
