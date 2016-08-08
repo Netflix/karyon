@@ -6,21 +6,22 @@ import com.google.inject.Injector;
 import com.netflix.config.ConfigurationManager;
 import com.netflix.karyon.server.eureka.HealthCheckInvocationStrategy;
 import com.netflix.karyon.server.eureka.SyncHealthCheckInvocationStrategy;
-import netflix.admin.AdminConfigImpl;
 import com.netflix.karyon.spi.HealthCheckHandler;
+
 import org.apache.commons.configuration.AbstractConfiguration;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
 import javax.ws.rs.core.Response;
-import java.lang.reflect.Field;
 
 import static org.junit.Assert.assertEquals;
+import netflix.admin.AdminConfigImpl;
 
 public class HealthCheckResourceTest {
     private AdminResourcesContainer container;
@@ -67,8 +68,6 @@ public class HealthCheckResourceTest {
 
 
     private AdminResourcesContainer buildAdminResourcesContainer(final HealthCheckHandler healthCheckHandler) throws Exception {
-        AdminResourcesContainer container = new AdminResourcesContainer();
-        final Field injectorField = AdminResourcesContainer.class.getDeclaredField("appInjector");
         final Injector appInjector = Guice.createInjector(new AbstractModule() {
             @Override
             protected void configure() {
@@ -76,9 +75,7 @@ public class HealthCheckResourceTest {
                 bind(HealthCheckInvocationStrategy.class).to(SyncHealthCheckInvocationStrategy.class);
             }
         });
-        injectorField.setAccessible(true);
-        injectorField.set(container, appInjector);
-        return container;
+        return appInjector.getInstance(AdminResourcesContainer.class);
     }
 
     private HealthCheckHandler goodHealthHandler() {

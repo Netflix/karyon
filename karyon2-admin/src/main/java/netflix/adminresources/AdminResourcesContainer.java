@@ -22,10 +22,9 @@ import com.google.inject.Injector;
 import com.google.inject.Module;
 import com.google.inject.Singleton;
 import com.google.inject.Stage;
-import com.netflix.explorers.providers.FreemarkerTemplateProvider;
-import com.netflix.explorers.providers.JsonMessageBodyWriter;
 import com.netflix.governator.guice.LifecycleInjector;
 import com.netflix.governator.lifecycle.LifecycleManager;
+import com.sun.jersey.guice.JerseyServletModule;
 
 import org.mortbay.jetty.Connector;
 import org.mortbay.jetty.Handler;
@@ -140,6 +139,7 @@ public class AdminResourcesContainer {
                 AdminResourcesFilter arfTemplatesResources = adminResourceInjector.getInstance(AdminResourcesFilter.class);
                 arfTemplatesResources.setPackages(adminContainerConfig.jerseyViewableResourcePkgList());
 
+                logger.info("Admin templates context : {}", adminContainerConfig.templateResourceContext());
                 final Context adminTemplatesResHandler = new Context();
                 adminTemplatesResHandler.setContextPath(adminContainerConfig.templateResourceContext());
                 adminTemplatesResHandler.setSessionHandler(new SessionHandler());
@@ -154,8 +154,10 @@ public class AdminResourcesContainer {
                 AdminResourcesFilter arfDataResources = adminResourceInjector.getInstance(AdminResourcesFilter.class);
                 arfDataResources.setPackages(jerseyPkgListForAjaxResources);
 
+                logger.info("Admin resources context : {}", adminContainerConfig.ajaxDataResourceContext());
                 final Context adminDataResHandler = new Context();
                 adminDataResHandler.setContextPath(adminContainerConfig.ajaxDataResourceContext());
+                adminDataResHandler.addFilter(LoggingFilter.class, "/*", Handler.DEFAULT);
                 adminDataResHandler.addFilter(new FilterHolder(adminResourceInjector.getInstance(RedirectFilter.class)), "/*", Handler.DEFAULT);
                 applyAdditionalFilters(adminDataResHandler, additionaFilters);
                 adminDataResHandler.addFilter(new FilterHolder(arfDataResources), "/*", Handler.DEFAULT);
@@ -173,6 +175,8 @@ public class AdminResourcesContainer {
 
                 final Connector connector = server.getConnectors()[0];
                 serverPort = connector.getLocalPort();
+                
+                logger.info("jetty started on port {}", serverPort);
             }
         } catch (Exception e) {
             logger.error("Exception in building AdminResourcesContainer ", e);
@@ -204,6 +208,7 @@ public class AdminResourcesContainer {
             @Override
             protected void configure() {
                 bind(AdminResourcesFilter.class);
+
                 if (! shouldShareResourcesWithParentInjector()) {
                     bind(AdminPageRegistry.class).toInstance(adminPageRegistry);
                     bind(AdminContainerConfig.class).toInstance(adminContainerConfig);
