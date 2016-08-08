@@ -4,6 +4,7 @@ jdk:
 sudo: false
 install: ./installViaTravis.sh
 script: ./buildViaTravis.sh
+after_failure: print_junit_reports.sh
 cache:
   directories:
   - $HOME/.gradle/caches/
