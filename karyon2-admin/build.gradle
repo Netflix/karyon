@@ -32,6 +32,8 @@ dependencies {
         runtime 'org.codehaus.jackson:jackson-mapper-asl:1.9.11'
 
         testCompile "org.apache.httpcomponents:httpclient:${apache_httpclient_version}"
+        testCompile 'log4j:log4j:1.2.17'
+        testCompile 'org.slf4j:slf4j-log4j12:1.7.2'
     }
 }
 
