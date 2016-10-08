@@ -20,6 +20,6 @@ public class GuiceGraphPage extends AbstractAdminPageInfo {
     
     @Override
     public List<Module> getGuiceModules() {
-        return Arrays.asList(new KaryonGrapherModule());
+        return Arrays.<Module>asList(new KaryonGrapherModule());
     }
 }
