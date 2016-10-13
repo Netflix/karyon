@@ -24,21 +24,23 @@ import com.google.inject.Singleton;
 import com.google.inject.Stage;
 import com.netflix.governator.guice.LifecycleInjector;
 import com.netflix.governator.lifecycle.LifecycleManager;
-import com.sun.jersey.guice.JerseyServletModule;
 
 import org.mortbay.jetty.Connector;
 import org.mortbay.jetty.Handler;
 import org.mortbay.jetty.Server;
 import org.mortbay.jetty.handler.HandlerCollection;
+import org.mortbay.jetty.handler.ResourceHandler;
 import org.mortbay.jetty.servlet.Context;
 import org.mortbay.jetty.servlet.DefaultServlet;
 import org.mortbay.jetty.servlet.FilterHolder;
 import org.mortbay.jetty.servlet.ServletHolder;
 import org.mortbay.jetty.servlet.SessionHandler;
+import org.mortbay.resource.Resource;
 import org.mortbay.thread.QueuedThreadPool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -148,7 +150,7 @@ public class AdminResourcesContainer {
                 applyAdditionalFilters(adminTemplatesResHandler, additionaFilters);
                 adminTemplatesResHandler.addFilter(new FilterHolder(arfTemplatesResources), "/*", Handler.DEFAULT);
                 adminTemplatesResHandler.addServlet(new ServletHolder(new DefaultServlet()), "/*");
-
+                
                 // admin page data resources
                 final String jerseyPkgListForAjaxResources = appendCoreJerseyPackages(adminPageRegistry.buildJerseyResourcePkgListForAdminPages());
                 AdminResourcesFilter arfDataResources = adminResourceInjector.getInstance(AdminResourcesFilter.class);
@@ -167,8 +169,23 @@ public class AdminResourcesContainer {
                 threadPool.setDaemon(true);
                 server.setThreadPool(threadPool);
 
+                ResourceHandler resource_handler = new ResourceHandler() {
+                    @Override
+                    public Resource getResource(String path) throws MalformedURLException {
+                        Resource resource = Resource.newClassPathResource(path);
+                        if (resource == null || !resource.exists()) {
+                            resource = Resource.newClassPathResource("META-INF/resources" + path);
+                        }
+                        if (resource != null && resource.isDirectory()) {
+                            return null;
+                        }
+                        return resource;
+                    }                    
+                };
+                resource_handler.setResourceBase("/");
+
                 HandlerCollection handlers = new HandlerCollection();
-                handlers.setHandlers(new Handler[]{adminTemplatesResHandler, adminDataResHandler, rootHandler});
+                handlers.setHandlers(new Handler[]{resource_handler, adminTemplatesResHandler, adminDataResHandler, rootHandler});
                 server.setHandler(handlers);
 
                 server.start();
