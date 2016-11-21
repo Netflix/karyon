@@ -40,9 +40,11 @@ public class EnvironmentResource {
 
     public static class EnvResponse {
         private Map<String, String> env;
+
         public EnvResponse(Map<String, String> env) {
             this.env = env;
         }
+
         public Map<String, String> getEnv() {
             return env;
         }
@@ -50,23 +52,23 @@ public class EnvironmentResource {
 
     @GET
     public Response getEnvironmentVars() {
-    	// make a writable copy of the immutable System.getenv() map
-        Map<String,String> envVarsMap = new HashMap<String,String>(System.getenv());
-        
+        // make a writable copy of the immutable System.getenv() map
+        Map<String, String> envVarsMap = new HashMap<String, String>(System.getenv());
+
         // mask the specified properties if they're in the envVarsMap
         Set<String> maskedProperties = MaskedResourceHelper.getMaskedPropertiesSet();
-    	Iterator<String> maskedResourcesIter = maskedProperties.iterator();
-    	while (maskedResourcesIter.hasNext()) {			
-    		String maskedResource = maskedResourcesIter.next();
-        	if (envVarsMap.containsKey(maskedResource)) {
-        		envVarsMap.put(maskedResource, MaskedResourceHelper.MASKED_PROPERTY_VALUE);
-        	}
+        Iterator<String> maskedResourcesIter = maskedProperties.iterator();
+        while (maskedResourcesIter.hasNext()) {
+            String maskedResource = maskedResourcesIter.next();
+            if (envVarsMap.containsKey(maskedResource)) {
+                envVarsMap.put(maskedResource, MaskedResourceHelper.MASKED_PROPERTY_VALUE);
+            }
         }
 
         GsonBuilder gsonBuilder = new GsonBuilder().serializeNulls();
-        Gson gson = gsonBuilder.create();                
+        Gson gson = gsonBuilder.create();
         String envJson = gson.toJson(new EnvResponse(envVarsMap));
-        
+
         return Response.ok(envJson).build();
     }
 }
