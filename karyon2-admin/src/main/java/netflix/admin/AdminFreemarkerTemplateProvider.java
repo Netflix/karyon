@@ -32,6 +32,7 @@ import java.io.OutputStreamWriter;
 import java.io.StringWriter;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
+import java.net.URL;
 import java.security.Principal;
 import java.util.HashMap;
 import java.util.Map;
@@ -48,6 +49,7 @@ import javax.ws.rs.ext.MessageBodyWriter;
 import freemarker.cache.ClassTemplateLoader;
 import freemarker.cache.MultiTemplateLoader;
 import freemarker.cache.TemplateLoader;
+import freemarker.cache.URLTemplateLoader;
 import freemarker.template.Configuration;
 import freemarker.template.TemplateModelException;
 
@@ -60,6 +62,21 @@ public class AdminFreemarkerTemplateProvider implements MessageBodyWriter<Viewab
 
     @Context
     private ThreadLocal<HttpServletRequest> requestInvoker;
+    
+    class ViewableResourceTemplateLoader extends URLTemplateLoader {
+		static final String KEY_NETFLIX_ADMIN_REQUEST_VIEWABLE = "netflix.admin.request.viewable";
+
+		@Override
+		protected URL getURL(String name) {
+			URL viewResource = null;
+			Viewable viewable = (Viewable)requestInvoker.get().getAttribute(ViewableResourceTemplateLoader.KEY_NETFLIX_ADMIN_REQUEST_VIEWABLE);
+			if (viewable != null && viewable.getResolvingClass() != null) {
+				viewResource = viewable.getResolvingClass().getResource(name);				
+			}
+			return viewResource;
+		}
+    	
+    }
 
     @Inject
     public AdminFreemarkerTemplateProvider(AdminExplorerManager adminExplorerManager) {
@@ -69,7 +86,10 @@ public class AdminFreemarkerTemplateProvider implements MessageBodyWriter<Viewab
     @PostConstruct
     public void commonConstruct() {
         // Just look for files in the class path
-        fmConfig.setTemplateLoader(new MultiTemplateLoader(new TemplateLoader[]{new ClassTemplateLoader(getClass(), "/")}));
+        fmConfig.setTemplateLoader(new MultiTemplateLoader(new TemplateLoader[]{
+        		new ViewableResourceTemplateLoader(),
+        		new ClassTemplateLoader(getClass(), "/"),
+        		}));
         fmConfig.setNumberFormat("0");
         fmConfig.setLocalizedLookup(false);
         fmConfig.setTemplateUpdateDelay(0);
@@ -134,15 +154,19 @@ public class AdminFreemarkerTemplateProvider implements MessageBodyWriter<Viewab
         }
 
         RequestContext requestContext = new RequestContext();
-        requestContext.setHttpServletRequest(requestInvoker != null ? requestInvoker.get() : null);
+        HttpServletRequest httpServletRequest = requestInvoker != null ? requestInvoker.get() : null;
+		requestContext.setHttpServletRequest(httpServletRequest );
         vars.put("RequestContext", requestContext);
-        vars.put("Request", requestInvoker != null ? requestInvoker.get() : null);
-
+        vars.put("Request", httpServletRequest);
+        if (httpServletRequest != null && viewable.getResolvingClass() != null) {
+        	httpServletRequest.setAttribute(ViewableResourceTemplateLoader.KEY_NETFLIX_ADMIN_REQUEST_VIEWABLE, viewable);
+        }
+        
         Principal ctx = null;
-        if (requestInvoker.get() != null) {
-            ctx = requestInvoker.get().getUserPrincipal();
-            if (ctx == null && requestInvoker.get().getSession(false) != null) {
-                final String username = (String) requestInvoker.get().getSession().getAttribute("SSO_UserName");
+        if (httpServletRequest != null) {
+            ctx = httpServletRequest.getUserPrincipal();
+            if (ctx == null && httpServletRequest.getSession(false) != null) {
+                final String username = (String) httpServletRequest.getSession().getAttribute("SSO_UserName");
                 if (username != null) {
                     ctx = new Principal() {
                         @Override
