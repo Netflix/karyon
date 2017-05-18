@@ -1,27 +1,32 @@
 package netflix.admin;
 
-import com.google.inject.Injector;
-import com.netflix.config.ConfigurationManager;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.servlet.Filter;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.google.inject.Injector;
+import com.netflix.config.ConfigurationManager;
+import com.netflix.config.util.ConfigurationUtils;
+
 @Singleton
 public class AdminConfigImpl implements AdminContainerConfig {
     private static final Logger logger = LoggerFactory.getLogger(AdminConfigImpl.class);
 
-    public static final String NETFLIX_ADMIN_TEMPLATE_CONTEXT = "netflix.admin.template.context";
+    public static final String ADMIN_PREFIX = "netflix.admin.";
+    
+    public static final String NETFLIX_ADMIN_TEMPLATE_CONTEXT = ADMIN_PREFIX + "template.context";
     public static final String TEMPLATE_CONTEXT_DEFAULT = "/admin";
 
-    public static final String NETFLIX_ADMIN_RESOURCE_CONTEXT = "netflix.admin.resource.context";
+    public static final String NETFLIX_ADMIN_RESOURCE_CONTEXT = ADMIN_PREFIX + "resource.context";
     public static final String RESOURCE_CONTEXT_DEFAULT = "/webadmin";
 
     private static final String JERSEY_CORE_RESOURCES = "netflix.platform.admin.resources.core.packages";
@@ -36,12 +41,15 @@ public class AdminConfigImpl implements AdminContainerConfig {
     public static final String SERVER_ENABLE_PROP_NAME = "netflix.platform.admin.resources.enable";
     public static final boolean SERVER_ENABLE_DEFAULT = true;
 
-    public static final String NETFLIX_ADMIN_RESOURCES_ISOLATE = "netflix.admin.resources.isolate";
+    public static final String NETFLIX_ADMIN_RESOURCES_ISOLATE = ADMIN_PREFIX + "resources.isolate";
     public static final boolean ISOLATE_RESOURCES_DEFAULT = false;
 
-    public static final String NETFLIX_ADMIN_CTX_FILTERS = "netflix.admin.additional.filters";
+    public static final String NETFLIX_ADMIN_CTX_FILTERS = ADMIN_PREFIX + "additional.filters";
     public static final String DEFAULT_CONTEXT_FILTERS = "";
 
+    private static final String JERSEY_PROPERTY_PREFIX = "com.sun.jersey.config";
+    private static final String ADMIN_JERSEY_PROPERTY_PREFIX = ADMIN_PREFIX + JERSEY_PROPERTY_PREFIX;
+    
     private final Injector injector;
 
     public AdminConfigImpl() {
@@ -93,6 +101,18 @@ public class AdminConfigImpl implements AdminContainerConfig {
         return ConfigurationManager.getConfigInstance().getInt(CONTAINER_LISTEN_PORT, LISTEN_PORT_DEFAULT);
     }
 
+    @Override
+    public Map<String, String> getJerseyConfigProperties() {
+        return ConfigurationUtils.getProperties(ConfigurationManager.getConfigInstance().subset(ADMIN_JERSEY_PROPERTY_PREFIX))
+                .entrySet()
+                .stream()
+                .peek(entry -> logger.info("Using admin jersey config: " + entry))
+                .collect(Collectors.toMap(
+                    entry -> JERSEY_PROPERTY_PREFIX + "." + entry.getKey().toString(),
+                    entry -> entry.getValue().toString()
+                    ));
+    }
+    
     @Override
     public List<Filter> additionalFilters() {
         String rootContextFilters = ConfigurationManager.getConfigInstance().getString(NETFLIX_ADMIN_CTX_FILTERS, DEFAULT_CONTEXT_FILTERS);

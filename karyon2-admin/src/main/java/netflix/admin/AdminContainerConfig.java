@@ -1,9 +1,11 @@
 package netflix.admin;
 
-import com.google.inject.ImplementedBy;
+import java.util.List;
+import java.util.Map;
 
 import javax.servlet.Filter;
-import java.util.List;
+
+import com.google.inject.ImplementedBy;
 
 @ImplementedBy(AdminConfigImpl.class)
 public interface AdminContainerConfig {
@@ -16,5 +18,6 @@ public interface AdminContainerConfig {
     boolean shouldScanClassPathForPluginDiscovery();
     int listenPort();
     List<Filter> additionalFilters();
+    Map<String, String> getJerseyConfigProperties();
 
 }
