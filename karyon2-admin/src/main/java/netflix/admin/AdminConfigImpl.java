@@ -2,9 +2,11 @@ package netflix.admin;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
+import java.util.Map.Entry;
+import java.util.Properties;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -103,14 +105,12 @@ public class AdminConfigImpl implements AdminContainerConfig {
 
     @Override
     public Map<String, String> getJerseyConfigProperties() {
-        return ConfigurationUtils.getProperties(ConfigurationManager.getConfigInstance().subset(ADMIN_JERSEY_PROPERTY_PREFIX))
-                .entrySet()
-                .stream()
-                .peek(entry -> logger.info("Using admin jersey config: " + entry))
-                .collect(Collectors.toMap(
-                    entry -> JERSEY_PROPERTY_PREFIX + "." + entry.getKey().toString(),
-                    entry -> entry.getValue().toString()
-                    ));
+        Map<String, String> result = new HashMap<>();
+        Properties props = ConfigurationUtils.getProperties(ConfigurationManager.getConfigInstance().subset(ADMIN_JERSEY_PROPERTY_PREFIX));
+        for (Entry<Object, Object> prop : props.entrySet()) {
+            result.put(JERSEY_PROPERTY_PREFIX + "." + prop.getKey().toString(), prop.getValue().toString());
+        }
+        return result;
     }
     
     @Override
