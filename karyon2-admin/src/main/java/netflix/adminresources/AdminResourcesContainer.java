@@ -16,14 +16,18 @@
 
 package netflix.adminresources;
 
-import com.google.inject.AbstractModule;
-import com.google.inject.Inject;
-import com.google.inject.Injector;
-import com.google.inject.Module;
-import com.google.inject.Singleton;
-import com.google.inject.Stage;
-import com.netflix.governator.guice.LifecycleInjector;
-import com.netflix.governator.lifecycle.LifecycleManager;
+import java.net.MalformedURLException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.concurrent.atomic.AtomicBoolean;
+
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
+import javax.servlet.Filter;
 
 import org.mortbay.jetty.Connector;
 import org.mortbay.jetty.Handler;
@@ -40,15 +44,15 @@ import org.mortbay.thread.QueuedThreadPool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.net.MalformedURLException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
-
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
-import javax.servlet.Filter;
+import com.google.inject.AbstractModule;
+import com.google.inject.Inject;
+import com.google.inject.Injector;
+import com.google.inject.Module;
+import com.google.inject.Singleton;
+import com.google.inject.Stage;
+import com.netflix.governator.guice.LifecycleInjector;
+import com.netflix.governator.lifecycle.LifecycleManager;
+import com.sun.jersey.api.core.PackagesResourceConfig;
 
 import netflix.admin.AdminConfigImpl;
 import netflix.admin.AdminContainerConfig;
@@ -139,7 +143,11 @@ public class AdminResourcesContainer {
 
                 // admin page template resources
                 AdminResourcesFilter arfTemplatesResources = adminResourceInjector.getInstance(AdminResourcesFilter.class);
-                arfTemplatesResources.setPackages(adminContainerConfig.jerseyViewableResourcePkgList());
+                Map<String, Object> props = new HashMap<>(adminContainerConfig.getJerseyConfigProperties());
+                props.put(PackagesResourceConfig.PROPERTY_PACKAGES, 
+                        adminContainerConfig.jerseyViewableResourcePkgList() + ";" + 
+                        Objects.toString(props.get(PackagesResourceConfig.PROPERTY_PACKAGES)));
+                arfTemplatesResources.setProperties(props);
 
                 logger.info("Admin templates context : {}", adminContainerConfig.templateResourceContext());
                 final Context adminTemplatesResHandler = new Context();
@@ -152,9 +160,12 @@ public class AdminResourcesContainer {
                 adminTemplatesResHandler.addServlet(new ServletHolder(new DefaultServlet()), "/*");
                 
                 // admin page data resources
-                final String jerseyPkgListForAjaxResources = appendCoreJerseyPackages(adminPageRegistry.buildJerseyResourcePkgListForAdminPages());
                 AdminResourcesFilter arfDataResources = adminResourceInjector.getInstance(AdminResourcesFilter.class);
-                arfDataResources.setPackages(jerseyPkgListForAjaxResources);
+                props = new HashMap<>(adminContainerConfig.getJerseyConfigProperties());
+                props.put(PackagesResourceConfig.PROPERTY_PACKAGES, 
+                        appendCoreJerseyPackages(adminPageRegistry.buildJerseyResourcePkgListForAdminPages()) + ";" + 
+                        Objects.toString(props.get(PackagesResourceConfig.PROPERTY_PACKAGES)));
+                arfDataResources.setProperties(props);
 
                 logger.info("Admin resources context : {}", adminContainerConfig.ajaxDataResourceContext());
                 final Context adminDataResHandler = new Context();
