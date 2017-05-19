@@ -144,9 +144,9 @@ public class AdminResourcesContainer {
                 // admin page template resources
                 AdminResourcesFilter arfTemplatesResources = adminResourceInjector.getInstance(AdminResourcesFilter.class);
                 Map<String, Object> props = new HashMap<>(adminContainerConfig.getJerseyConfigProperties());
-                props.compute(
-                        PackagesResourceConfig.PROPERTY_PACKAGES, 
-                        (key, current) -> adminContainerConfig.jerseyViewableResourcePkgList() + ";" + Objects.toString(current, ""));
+                props.put(PackagesResourceConfig.PROPERTY_PACKAGES, 
+                        adminContainerConfig.jerseyViewableResourcePkgList() + ";" + 
+                        Objects.toString(props.get(PackagesResourceConfig.PROPERTY_PACKAGES)));
                 arfTemplatesResources.setProperties(props);
 
                 logger.info("Admin templates context : {}", adminContainerConfig.templateResourceContext());
@@ -162,9 +162,9 @@ public class AdminResourcesContainer {
                 // admin page data resources
                 AdminResourcesFilter arfDataResources = adminResourceInjector.getInstance(AdminResourcesFilter.class);
                 props = new HashMap<>(adminContainerConfig.getJerseyConfigProperties());
-                props.compute(
-                        PackagesResourceConfig.PROPERTY_PACKAGES, 
-                        (key, current) -> appendCoreJerseyPackages(adminPageRegistry.buildJerseyResourcePkgListForAdminPages() + ";" + Objects.toString(current, "")));
+                props.put(PackagesResourceConfig.PROPERTY_PACKAGES, 
+                        appendCoreJerseyPackages(adminPageRegistry.buildJerseyResourcePkgListForAdminPages()) + ";" + 
+                        Objects.toString(props.get(PackagesResourceConfig.PROPERTY_PACKAGES)));
                 arfDataResources.setProperties(props);
 
                 logger.info("Admin resources context : {}", adminContainerConfig.ajaxDataResourceContext());
