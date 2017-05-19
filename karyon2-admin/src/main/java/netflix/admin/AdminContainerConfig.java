@@ -18,6 +18,6 @@ public interface AdminContainerConfig {
     boolean shouldScanClassPathForPluginDiscovery();
     int listenPort();
     List<Filter> additionalFilters();
-    Map<String, String> getJerseyConfigProperties();
+    Map<String, Object> getJerseyConfigProperties();
 
 }

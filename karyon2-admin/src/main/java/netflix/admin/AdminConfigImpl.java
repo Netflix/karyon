@@ -104,8 +104,8 @@ public class AdminConfigImpl implements AdminContainerConfig {
     }
 
     @Override
-    public Map<String, String> getJerseyConfigProperties() {
-        Map<String, String> result = new HashMap<>();
+    public Map<String, Object> getJerseyConfigProperties() {
+        Map<String, Object> result = new HashMap<>();
         Properties props = ConfigurationUtils.getProperties(ConfigurationManager.getConfigInstance().subset(ADMIN_JERSEY_PROPERTY_PREFIX));
         for (Entry<Object, Object> prop : props.entrySet()) {
             result.put(JERSEY_PROPERTY_PREFIX + "." + prop.getKey().toString(), prop.getValue().toString());
