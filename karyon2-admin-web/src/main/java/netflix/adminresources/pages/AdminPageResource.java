@@ -51,7 +51,7 @@ public class AdminPageResource {
             model.put("adminPages", adminPages);
         }
 
-        return new Viewable("/webadmin/home.ftl", model);
+        return new Viewable("/webadmin/home.ftl", model, adminContainerConfig.getClass());
     }
 
     @GET
@@ -66,12 +66,13 @@ public class AdminPageResource {
         model.put("ajax_base", adminContainerConfig.ajaxDataResourceContext());
         model.put("template_base", adminContainerConfig.templateResourceContext());
 
-        if (adminPageRegistry != null && adminPageRegistry.getPageInfo(view) != null) {
-            final Map<String, Object> pageDataModel = adminPageRegistry.getPageInfo(view).getDataModel();
+		if (adminPageRegistry != null && adminPageRegistry.getPageInfo(view) != null) {
+	        AdminPageInfo pageInfo = adminPageRegistry.getPageInfo(view);
+            final Map<String, Object> pageDataModel = pageInfo.getDataModel();
             if (pageDataModel != null) {
                 model.putAll(pageDataModel);
             }
-            return new Viewable(adminPageRegistry.getPageInfo(view).getPageTemplate(), model);
+            return new Viewable(pageInfo.getPageTemplate(), model, pageInfo.getClass());
         }
         throw new WebApplicationException(Response.Status.NOT_FOUND);
     }
@@ -85,7 +86,7 @@ public class AdminPageResource {
         LOG.info(view);
         Map<String, Object> model = new HashMap<String, Object>();
         model.put("id", id);
-        return new Viewable("/webadmin/" + view + "/create.ftl", model);
+        return new Viewable("/webadmin/" + view + "/create.ftl", model, adminContainerConfig.getClass());
     }
 
     @GET
@@ -97,6 +98,6 @@ public class AdminPageResource {
         model.put("key", key);
         model.put("ajax_base", adminContainerConfig.ajaxDataResourceContext());
 
-        return new Viewable("/webadmin/jmx/view.ftl", model);
+        return new Viewable("/webadmin/jmx/view.ftl", model, adminContainerConfig.getClass());
     }
 }
