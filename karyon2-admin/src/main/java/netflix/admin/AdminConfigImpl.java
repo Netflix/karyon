@@ -1,24 +1,17 @@
 package netflix.admin;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Properties;
-
-import javax.inject.Inject;
-import javax.inject.Singleton;
-import javax.servlet.Filter;
-
+import com.google.inject.Injector;
+import com.netflix.config.ConfigurationManager;
+import com.netflix.config.util.ConfigurationUtils;
 import org.mortbay.jetty.Connector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.inject.Injector;
-import com.netflix.config.ConfigurationManager;
-import com.netflix.config.util.ConfigurationUtils;
+import javax.inject.Inject;
+import javax.inject.Singleton;
+import javax.servlet.Filter;
+import java.util.*;
+import java.util.Map.Entry;
 
 @Singleton
 public class AdminConfigImpl implements AdminContainerConfig {
@@ -119,51 +112,37 @@ public class AdminConfigImpl implements AdminContainerConfig {
     
     @Override
     public List<Filter> additionalFilters() {
-        String rootContextFilters = ConfigurationManager.getConfigInstance().getString(NETFLIX_ADMIN_CTX_FILTERS, DEFAULT_CONTEXT_FILTERS);
-
-        if (rootContextFilters.isEmpty()) {
-            return Collections.emptyList();
-        }
-
-        List<Filter> filters = new ArrayList<>();
-        final String[] filterClasses = rootContextFilters.split(",");
-        for (String filterClass : filterClasses) {
-            try {
-                final Class<?> filterCls = Class.forName(filterClass, false, getClass().getClassLoader());
-                if (Filter.class.isAssignableFrom(filterCls)) {
-                    filters.add((Filter)(injector == null ? filterCls.newInstance() : injector.getInstance(filterCls)));
-                }
-            } catch (InstantiationException | IllegalAccessException e) {
-                logger.warn("Filter class can not be instantiated " + filterClass);
-            } catch (ClassNotFoundException e) {
-                logger.warn("Filter class not found " + filterClass);
-            }
-        }
-        return filters;
+        return getInstancesFromClassList(
+                ConfigurationManager.getConfigInstance().getString(NETFLIX_ADMIN_CTX_FILTERS, DEFAULT_CONTEXT_FILTERS),
+                Filter.class);
     }
 
     @Override
     public List<Connector> additionalConnectors() {
-        String rootContextConnectors = ConfigurationManager.getConfigInstance().getString(NETFLIX_ADMIN_CTX_CONNECTORS, DEFAULT_CONTEXT_CONNECTORS);
+        return getInstancesFromClassList(
+                ConfigurationManager.getConfigInstance().getString(NETFLIX_ADMIN_CTX_CONNECTORS, DEFAULT_CONTEXT_CONNECTORS),
+                Connector.class);
+    }
 
-        if (rootContextConnectors.isEmpty()) {
+    private <T> List<T> getInstancesFromClassList(String classList, Class<T> clazz) {
+        if (classList.isEmpty()) {
             return Collections.emptyList();
         }
 
-        List<Connector> connectors = new ArrayList<>();
-        final String[] connectorClasses = rootContextConnectors.split(",");
-        for (String connectorClass : connectorClasses) {
+        List<T> instances = new ArrayList<>();
+        final String[] classNames = classList.split(",");
+        for (String className : classNames) {
             try {
-                final Class<?> connectorCls = Class.forName(connectorClass, false, getClass().getClassLoader());
-                if (Connector.class.isAssignableFrom(connectorCls)) {
-                    connectors.add((Connector)(injector == null ? connectorCls.newInstance() : injector.getInstance(connectorCls)));
+                final Class<?> implClass = Class.forName(className, false, getClass().getClassLoader());
+                if (clazz.isAssignableFrom(implClass)) {
+                    instances.add(clazz.cast(injector == null ? implClass.newInstance() : injector.getInstance(implClass)));
                 }
             } catch (InstantiationException | IllegalAccessException e) {
-                logger.warn("Connector class can not be instantiated " + connectorClass);
+                logger.warn("Class can not be instantiated " + className);
             } catch (ClassNotFoundException e) {
-                logger.warn("Connector class not found " + connectorClass);
+                logger.warn("Class not found " + className);
             }
         }
-        return connectors;
+        return instances;
     }
 }
