@@ -12,6 +12,7 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.servlet.Filter;
 
+import org.mortbay.jetty.Connector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,6 +49,9 @@ public class AdminConfigImpl implements AdminContainerConfig {
 
     public static final String NETFLIX_ADMIN_CTX_FILTERS = ADMIN_PREFIX + "additional.filters";
     public static final String DEFAULT_CONTEXT_FILTERS = "";
+
+    public static final String NETFLIX_ADMIN_CTX_CONNECTORS = ADMIN_PREFIX + "additional.connectors";
+    public static final String DEFAULT_CONTEXT_CONNECTORS = "";
 
     private static final String JERSEY_PROPERTY_PREFIX = "com.sun.jersey.config";
     private static final String ADMIN_JERSEY_PROPERTY_PREFIX = ADMIN_PREFIX + JERSEY_PROPERTY_PREFIX;
@@ -136,5 +140,30 @@ public class AdminConfigImpl implements AdminContainerConfig {
             }
         }
         return filters;
+    }
+
+    @Override
+    public List<Connector> additionalConnectors() {
+        String rootContextConnectors = ConfigurationManager.getConfigInstance().getString(NETFLIX_ADMIN_CTX_CONNECTORS, DEFAULT_CONTEXT_CONNECTORS);
+
+        if (rootContextConnectors.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        List<Connector> connectors = new ArrayList<>();
+        final String[] connectorClasses = rootContextConnectors.split(",");
+        for (String connectorClass : connectorClasses) {
+            try {
+                final Class<?> connectorCls = Class.forName(connectorClass, false, getClass().getClassLoader());
+                if (Connector.class.isAssignableFrom(connectorCls)) {
+                    connectors.add((Connector)(injector == null ? connectorCls.newInstance() : injector.getInstance(connectorCls)));
+                }
+            } catch (InstantiationException | IllegalAccessException e) {
+                logger.warn("Connector class can not be instantiated " + connectorClass);
+            } catch (ClassNotFoundException e) {
+                logger.warn("Connector class not found " + connectorClass);
+            }
+        }
+        return connectors;
     }
 }
