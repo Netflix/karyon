@@ -6,6 +6,7 @@ import java.util.Map;
 import javax.servlet.Filter;
 
 import com.google.inject.ImplementedBy;
+import org.mortbay.jetty.Connector;
 
 @ImplementedBy(AdminConfigImpl.class)
 public interface AdminContainerConfig {
@@ -18,6 +19,7 @@ public interface AdminContainerConfig {
     boolean shouldScanClassPathForPluginDiscovery();
     int listenPort();
     List<Filter> additionalFilters();
+    List<Connector> additionalConnectors();
     Map<String, Object> getJerseyConfigProperties();
 
 }

@@ -1,23 +1,17 @@
 package netflix.admin;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Properties;
+import com.google.inject.Injector;
+import com.netflix.config.ConfigurationManager;
+import com.netflix.config.util.ConfigurationUtils;
+import org.mortbay.jetty.Connector;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.servlet.Filter;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.google.inject.Injector;
-import com.netflix.config.ConfigurationManager;
-import com.netflix.config.util.ConfigurationUtils;
+import java.util.*;
+import java.util.Map.Entry;
 
 @Singleton
 public class AdminConfigImpl implements AdminContainerConfig {
@@ -48,6 +42,9 @@ public class AdminConfigImpl implements AdminContainerConfig {
 
     public static final String NETFLIX_ADMIN_CTX_FILTERS = ADMIN_PREFIX + "additional.filters";
     public static final String DEFAULT_CONTEXT_FILTERS = "";
+
+    public static final String NETFLIX_ADMIN_CTX_CONNECTORS = ADMIN_PREFIX + "additional.connectors";
+    public static final String DEFAULT_CONTEXT_CONNECTORS = "";
 
     private static final String JERSEY_PROPERTY_PREFIX = "com.sun.jersey.config";
     private static final String ADMIN_JERSEY_PROPERTY_PREFIX = ADMIN_PREFIX + JERSEY_PROPERTY_PREFIX;
@@ -115,26 +112,37 @@ public class AdminConfigImpl implements AdminContainerConfig {
     
     @Override
     public List<Filter> additionalFilters() {
-        String rootContextFilters = ConfigurationManager.getConfigInstance().getString(NETFLIX_ADMIN_CTX_FILTERS, DEFAULT_CONTEXT_FILTERS);
+        return getInstancesFromClassList(
+                ConfigurationManager.getConfigInstance().getString(NETFLIX_ADMIN_CTX_FILTERS, DEFAULT_CONTEXT_FILTERS),
+                Filter.class);
+    }
 
-        if (rootContextFilters.isEmpty()) {
+    @Override
+    public List<Connector> additionalConnectors() {
+        return getInstancesFromClassList(
+                ConfigurationManager.getConfigInstance().getString(NETFLIX_ADMIN_CTX_CONNECTORS, DEFAULT_CONTEXT_CONNECTORS),
+                Connector.class);
+    }
+
+    private <T> List<T> getInstancesFromClassList(String classList, Class<T> clazz) {
+        if (classList.isEmpty()) {
             return Collections.emptyList();
         }
 
-        List<Filter> filters = new ArrayList<>();
-        final String[] filterClasses = rootContextFilters.split(",");
-        for (String filterClass : filterClasses) {
+        List<T> instances = new ArrayList<>();
+        final String[] classNames = classList.split(",");
+        for (String className : classNames) {
             try {
-                final Class<?> filterCls = Class.forName(filterClass, false, getClass().getClassLoader());
-                if (Filter.class.isAssignableFrom(filterCls)) {
-                    filters.add((Filter)(injector == null ? filterCls.newInstance() : injector.getInstance(filterCls)));
+                final Class<?> implClass = Class.forName(className, false, getClass().getClassLoader());
+                if (clazz.isAssignableFrom(implClass)) {
+                    instances.add(clazz.cast(injector == null ? implClass.newInstance() : injector.getInstance(implClass)));
                 }
             } catch (InstantiationException | IllegalAccessException e) {
-                logger.warn("Filter class can not be instantiated " + filterClass);
+                logger.warn("Class can not be instantiated " + className);
             } catch (ClassNotFoundException e) {
-                logger.warn("Filter class not found " + filterClass);
+                logger.warn("Class not found " + className);
             }
         }
-        return filters;
+        return instances;
     }
 }
