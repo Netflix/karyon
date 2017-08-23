@@ -109,6 +109,11 @@ public class AdminConfigImpl implements AdminContainerConfig {
         }
         return result;
     }
+
+    @Override
+    public List<String> homeScriptResources() {
+        return Collections.emptyList();
+    }
     
     @Override
     public List<Filter> additionalFilters() {

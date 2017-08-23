@@ -50,6 +50,9 @@ public class AdminPageResource {
             final Collection<AdminPageInfo> adminPages = adminPageRegistry.getAllPages();
             model.put("adminPages", adminPages);
         }
+        if (adminContainerConfig != null) {
+            model.put("homeScriptResources", adminContainerConfig.homeScriptResources());
+        }
 
         return new Viewable("/webadmin/home.ftl", model, adminContainerConfig.getClass());
     }
