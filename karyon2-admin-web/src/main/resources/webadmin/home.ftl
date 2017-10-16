@@ -3,6 +3,11 @@
 <#macro body>
 <script type="text/javascript">
 <#include "home.js"/>
+<#if homeScriptResources??>
+    <#list homeScriptResources as resource>
+        <#include resource />
+    </#list>
+</#if>
 </script>
 
     <#import "/layout/bootstrap/macros.ftl" as nf/>

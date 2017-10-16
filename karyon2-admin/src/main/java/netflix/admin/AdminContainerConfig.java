@@ -21,5 +21,5 @@ public interface AdminContainerConfig {
     List<Filter> additionalFilters();
     List<Connector> additionalConnectors();
     Map<String, Object> getJerseyConfigProperties();
-
+    List<String> homeScriptResources();
 }
