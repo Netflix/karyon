@@ -99,6 +99,16 @@ public class AdminResourcesContainer {
     private AtomicBoolean alreadyInited = new AtomicBoolean(false);
     private int serverPort; // actual server listen port (apart from what's in Config)
 
+    @Inject
+    public AdminResourcesContainer() {}
+    
+    public AdminResourcesContainer(Injector appInjector, AdminContainerConfig adminContainerConfig,
+			AdminPageRegistry adminPageRegistry) {
+		this.appInjector = appInjector;
+		this.adminContainerConfig = adminContainerConfig;
+		this.adminPageRegistry = adminPageRegistry;
+	}
+    
     /**
      * Starts the container and hence the embedded jetty server.
      *
